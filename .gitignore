@@ -1,0 +1,14 @@
+# Lingkungan Virtual Python
+venv/
+env/
+.venv/
+
+# Cache dan file sistem
+__pycache__/
+*.pyc
+.vscode/
+
+# Dataset atau output (opsional, jika ukurannya besar)
+*.csv
+*.xlsx
+*.pdf

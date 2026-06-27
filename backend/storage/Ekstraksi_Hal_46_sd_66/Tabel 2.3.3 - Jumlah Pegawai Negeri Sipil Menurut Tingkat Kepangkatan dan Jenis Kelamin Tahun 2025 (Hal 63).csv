@@ -1,0 +1,24 @@
+Nomor,Pangkat Hierarchy,Laki-laki,Perempuan,Jumlah
+,(1),(2),(3),(4)
+1,I/A (Juru Muda),-,-,-
+2,I/B (Juru Muda Tingkat I),-,-,-
+3,I/C (Juru),-,-,-
+4,I/D (Juru Tingkat I),1,-,1
+,Golongan I/Range I,1,-,1
+5,II/A (Pengatur Muda),8,-,8
+6,II/B (Pengatur Muda Tingkat I),16,-,16
+7,II/C (Pengatur),46,17,63
+8,II/D (Pengatur Tingkat I),128,195,323
+,Golongan II/Range II,198,212,410
+9,III/A (Penata Muda),159,190,349
+10,III/B (Penata Muda Tingkat I),497,1.017,1.514
+11,III/C (Penata),352,413,765
+12,III/D (Penata Tingkat I),839,1.204,2.043
+,Golongan III/Range III,1.847,2.824,4.671
+13,IV/A (Pembina),486,629,1.115
+14,IV/B (Pembina Tingkat I),807,1260,2.067
+15,IV/C (Pembina Utama Muda),112,100,212
+16,IV/D (Pembina Utama Madya),2,-,2
+17,IV/E (Pembina Utama),-,-,-
+,Golongan IV/Range IV,993,1.375,2.368
+,Kabupaten Tasikmalaya,3.039,4.411,14.900

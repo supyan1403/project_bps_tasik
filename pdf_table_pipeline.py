@@ -1,0 +1,1528 @@
+import os
+import re
+import logging
+import pandas as pd
+import pdfplumber
+from typing import List, Dict, Optional
+
+def get_safe_windows_path(path: str) -> str:
+    if os.name == 'nt':
+        abs_path = os.path.abspath(path)
+        if not abs_path.startswith("\\\\?\\"):
+            return "\\\\?\\" + abs_path.replace("/", "\\")
+    return path
+
+def fix_doubled_text(text):
+    if not text: return text
+    text = str(text)
+    pairs = 0
+    i = 0
+    while i < len(text) - 1:
+        if text[i] == text[i+1]:
+            pairs += 1
+            i += 2
+        else:
+            i += 1
+    
+    if (pairs * 2) >= len(text) * 0.7:
+        return re.sub(r'(.)\1', r'\1', text)
+    return text
+
+def parse_indonesian_number(val_str):
+    if not val_str:
+        return None
+    val_str = str(val_str).strip()
+    # Hapus spasi dan simbol aneh kecuali digit, koma, titik, minus
+    val_str = re.sub(r'[^\d,\.-]', '', val_str)
+    if not val_str:
+        return None
+    
+    # Case 1: Both dot and comma present
+    if '.' in val_str and ',' in val_str:
+        if val_str.find('.') < val_str.find(','):
+            # dot is thousands, comma is decimal (standard Indo: 1.234,56)
+            val_str = val_str.replace('.', '').replace(',', '.')
+        else:
+            # comma is thousands, dot is decimal (standard Eng: 1,234.56)
+            val_str = val_str.replace(',', '').replace('.', '.')
+    # Case 2: Only comma present
+    elif ',' in val_str:
+        val_str = val_str.replace(',', '.')
+    # Case 3: Only dot present
+    elif '.' in val_str:
+        if val_str.count('.') > 1:
+            val_str = val_str.replace('.', '')
+        else:
+            parts = val_str.split('.')
+            if len(parts) == 2 and len(parts[1]) == 3:
+                # Thousands separator (e.g. 74.433)
+                val_str = val_str.replace('.', '')
+            elif len(parts) == 2 and len(parts[1]) != 3:
+                # Decimal separator (e.g. 1.17)
+                pass
+            else:
+                val_str = val_str.replace('.', '')
+    
+    try:
+        return float(val_str)
+    except ValueError:
+        return None
+
+ENGLISH_ONLY_WORDS = {
+    'district', 'subdistrict', 'population', 'growth', 'rate', 'percentage', 'density',
+    'sex', 'ratio', 'age', 'groups', 'male', 'female', 'area', 'month',
+    'value', 'amount', 'source', 'continued', 'regency', 'figures',
+    'sq', 'people', 'annual', 'number', 'province', 'village', 'sub',
+    'and', 'of', 'by', 'in', 'the', 'for', 'to', 'distribution', 'total',
+    'regency', 'municipal', 'city', 'level', 'altitude', 'distance', 'capital',
+    'activity', 'main', 'jan', 'january', 'feb', 'february', 'mar', 'march',
+    'apr', 'april', 'may', 'jun', 'june', 'jul', 'july', 'aug', 'august',
+    'sep', 'september', 'oct', 'october', 'nov', 'november', 'dec', 'december',
+    'status', 'employment', 'unemployment', 'labor', 'force', 'participation',
+    'work', 'working', 'job', 'industry', 'occupation', 'agriculture',
+    'forestry', 'fishing', 'mining', 'quarrying', 'manufacturing',
+    'electricity', 'gas', 'water', 'construction', 'trade', 'hotel',
+    'restaurant', 'transport', 'communication', 'finance', 'services',
+    # Pertanian / Irigasi / Lahan
+    'irrigation', 'irrigated', 'harvested', 'harvest', 'planted',
+    'paddy', 'field', 'fields', 'land', 'dryland', 'wetland', 'rice', 'crop', 'crops',
+    'production', 'productivity', 'yield', 'ton', 'hectare', 'ha',
+    'food', 'estate', 'plantation', 'livestock', 'cattle', 'poultry',
+    'fishery', 'aquaculture', 'capture', 'pond', 'sea', 'river',
+    # Sosial / Kesejahteraan
+    'school', 'education', 'health', 'poverty', 'household', 'family',
+    'birth', 'death', 'marriage', 'divorce', 'infant', 'mortality',
+    'expenditure', 'income', 'wage', 'salary', 'price', 'index',
+    'consumer', 'goods', 'import', 'export', 'balance', 'account',
+    # Infrastruktur / Transportasi
+    'road', 'bridge', 'vehicle', 'car', 'motorcycle', 'bus', 'train',
+    'airport', 'port', 'ship', 'passenger', 'cargo', 'unit',
+    # Generik
+    'not', 'average', 'gross', 'net', 'urban', 'rural',
+    'public', 'private', 'government', 'region', 'national', 'local',
+    'type', 'category', 'classification', 'description', 'item', 'code',
+}
+
+INDO_SAFE_WORDS = {
+    'kecamatan', 'kabupaten', 'kelurahan', 'penduduk', 'laju', 'jenis',
+    'rasio', 'persentase', 'distribusi', 'kepadatan', 'menurut', 'jumlah',
+    'desa', 'tahun', 'pertumbuhan', 'jiwa', 'dan', 'di', 'atau',
+    'menurut', 'dalam', 'angka', 'banyaknya', 'tabel', 'klasifikasi',
+    'tinggi', 'wilayah', 'jarak', 'ibukota', 'luas', 'daerah', 'pulau',
+    'laki', 'perempuan', 'kegiatan', 'utama', 'pekerjaan', 'pengangguran',
+    'angkatan', 'kerja', 'partisipasi', 'tpt', 'tpak', 'uraian',
+    'jan', 'januari', 'peb', 'pebruari', 'feb', 'februari', 'mar', 'maret',
+    'apr', 'april', 'mei', 'jun', 'juni', 'jul', 'juli', 'agt', 'agustus',
+    'sep', 'september', 'okt', 'oktober', 'nov', 'nopember', 'des', 'desember'
+}
+
+def clean_text_cell(val: str) -> str:
+    """
+    Remove English translations from table cells/values, handling both newlines and slashes.
+    """
+    if not val:
+        return val
+    
+    val = str(val).strip()
+    
+    # Split by newline first, as BPS often puts English translations on new lines
+    lines = val.split('\n')
+    clean_lines = []
+    
+    for line in lines:
+        line_clean = line.strip()
+        if not line_clean:
+            continue
+            
+        # Pisahkan jika ada format "Indonesia / English" (dengan atau tanpa spasi)
+        parts = [p.strip() for p in re.split(r'\s*/\s*', line_clean) if p.strip()]
+        if len(parts) > 1:
+            if parts[0].lower() == parts[1].lower():
+                line_clean = parts[0]
+            else:
+                # Check if the second part is English
+                words_part2 = set(re.findall(r'[a-zA-Z]+', parts[1].lower()))
+                has_english_part2 = bool(words_part2 & ENGLISH_ONLY_WORDS)
+                has_indo_part2 = bool(words_part2 & INDO_SAFE_WORDS)
+                if has_english_part2 and not has_indo_part2:
+                    line_clean = parts[0]
+        else:
+            line_clean = parts[0] if parts else ""
+            
+        # Bersihkan trailing English words di akhir baris
+        words_list = line_clean.split()
+        while words_list:
+            last_word = words_list[-1].lower()
+            clean_word = re.sub(r'[^a-z]', '', last_word)
+            if clean_word in ENGLISH_ONLY_WORDS and clean_word not in INDO_SAFE_WORDS:
+                words_list.pop()
+            else:
+                break
+        line_clean = " ".join(words_list)
+        
+        # Bersihkan kata duplikat berturut-turut
+        words_list = line_clean.split()
+        unique_words = []
+        for w in words_list:
+            if not unique_words or w.lower() != unique_words[-1].lower():
+                unique_words.append(w)
+        line_clean = " ".join(unique_words)
+        
+        # Periksa apakah line_clean adalah bahasa Inggris murni
+        words = set(re.findall(r'[a-zA-Z]+', line_clean.lower()))
+        has_english = bool(words & ENGLISH_ONLY_WORDS)
+        has_indo = bool(words & INDO_SAFE_WORDS)
+        
+        # Hitung jumlah kata masing-masing bahasa
+        english_count = len(words & ENGLISH_ONLY_WORDS)
+        indo_count = len(words & INDO_SAFE_WORDS)
+        
+        if has_english and (english_count > indo_count or not has_indo):
+            # English line, stop reading further
+            break
+            
+        if line_clean:
+            clean_lines.append(line_clean)
+            
+    joined = " ".join(clean_lines).strip()
+    
+    # Final consecutive duplicate word cleanup
+    words_list = joined.split()
+    unique_words = []
+    for w in words_list:
+        if not unique_words or w.lower() != unique_words[-1].lower():
+            unique_words.append(w)
+    return " ".join(unique_words)
+
+def make_table_number_pattern(table_number: str) -> str:
+    if not table_number:
+        return ""
+    # Split by dots, escape each part, and join with optional whitespace around dots
+    parts = table_number.split('.')
+    return r'\s*\.\s*'.join(re.escape(p) for p in parts)
+
+def extract_table_number(page_text: str) -> Optional[str]:
+    if not page_text:
+        return None
+    # 1. Look for "Tabel/Table <number>"
+    # Allow spaces inside the number (e.g. 3. 1. 2 or 3 . 1 . 2)
+    match = re.search(r'(?:Tabel|Table)[\s\S]{0,150}?(\d+(?:\s*\.\s*\d+)+[a-zA-Z]?)', page_text, re.IGNORECASE)
+    if match:
+        return re.sub(r'\s+', '', match.group(1))
+    
+    # 2. Fallback: look for a standalone number like 3.1.2 or 3.1
+    match = re.search(r'\b(\d+(?:\s*\.\s*\d+){1,3}[a-zA-Z]?)\b', page_text)
+    if match:
+        # Check if the number has at least one dot
+        num = re.sub(r'\s+', '', match.group(1))
+        if '.' in num:
+            return num
+    return None
+
+def is_dimension_column(header: str) -> bool:
+    if not header:
+        return True
+    header_lower = header.strip().lower()
+    if header_lower in ["", "-"]:
+        return True
+
+    if re.search(r"\bno\.?\b", header_lower) and header_lower.startswith("no"):
+        return True
+
+    prefix_keywords = [
+        "kecamatan", "kabupaten", "desa", "kelurahan", "nomor",
+        "rincian", "uraian", "kategori", "bulan", "hari", "provinsi",
+        "jenis kelamin", "jenis pendapatan", "dimensi", "nama",
+    ]
+    for kw in prefix_keywords:
+        if header_lower == kw or header_lower.startswith(kw + " ") or header_lower.startswith(kw + "/"):
+            return True
+    return False
+
+
+_PAGE_REF_KEYWORDS = ("hal", "page", "lanjut", "continued")
+
+# Alias satuan BPS: urutan dari yang paling spesifik ke umum
+UNIT_ALIASES = [
+    ("km2/sq.km", "Km²"),
+    ("km²/sq.km", "Km²"),
+    ("jiwa/km²", "Jiwa/Km²"),
+    ("jiwa/km2", "Jiwa/Km²"),
+    ("ribu rupiah", "Ribu Rupiah"),
+    ("juta rupiah", "Juta Rupiah"),
+    ("miliar rupiah", "Miliar Rupiah"),
+    ("m a.s.l", "mdpl"),
+    ("persentase", "%"),
+    ("kilogram", "Kg"),
+    ("kilometer", "Km"),
+    ("hektar", "Hektar"),
+    ("kuintal", "Kuintal"),
+    ("kelurahan", "Desa"),
+    ("tangkai", "Tangkai"),
+    ("rupiahs", "Rupiah"),
+    ("persen", "%"),
+    ("percent", "%"),
+    ("mdpl", "mdpl"),
+    ("kwh", "KWH"),
+    ("sq.km", "Km²"),
+    ("rupiah", "Rupiah"),
+    ("sekolah", "Sekolah"),
+    ("orang", "Jiwa"),
+    ("meter", "Meter"),
+    ("lembar", "Lembar"),
+    ("murid", "Siswa"),
+    ("siswa", "Siswa"),
+    ("jiwa", "Jiwa"),
+    ("guru", "Guru"),
+    ("desa", "Desa"),
+    ("km²", "Km²"),
+    ("km2", "Km²"),
+    ("buah", "Buah"),
+    ("unit", "Unit"),
+    ("ton", "Ton"),
+    ("ha", "ha"),
+    ("km", "Km"),
+    ("kg", "Kg"),
+    ("%", "%"),
+]
+
+COLUMN_UNIT_RULES = [
+    (r"jumlah\s+sekolah|\bsekolah\b", "Sekolah"),
+    (r"jumlah\s+guru|\bguru\b", "Guru"),
+    (r"jumlah\s+murid|jumlah\s+siswa|\bmurid\b|\bsiswa\b", "Siswa"),
+    (r"kepadatan", "Jiwa/Km²"),
+    (r"jumlah\s+penduduk|\bpenduduk\b", "Jiwa"),
+    (r"laju\s+pertumbuhan|pertumbuhan\s+penduduk", "%"),
+    (r"distribusi\s+persentase|persentase\s+terhadap|\bpersentase\b", "%"),
+    (r"\brasio\b", "-"),
+    (r"jumlah\s+pulau|\bpulau\b", "Buah"),
+    (r"tinggi\s+wilayah|\bmdpl\b|altitude", "mdpl"),
+    (r"jarak\s+ke\s+ibukota|\bjarak\b", "Km"),
+    (r"listrik\s+terjual|\bkwh\b", "KWH"),
+    (r"daya\s+terpasang", "KVA"),
+    (r"\bluas\b|\barea\b", None),
+]
+
+
+def _is_non_unit_paren(content: str) -> bool:
+    c = content.strip().lower()
+    if any(x in c for x in _PAGE_REF_KEYWORDS):
+        return True
+    if re.search(r"\b20\d{2}\b", c):
+        return True
+    return False
+
+
+def normalize_unit_text(raw: str) -> Optional[str]:
+    if not raw or not str(raw).strip():
+        return None
+    text = str(raw).strip().lower()
+    text = text.replace("²", "2").replace("³", "3")
+    text = re.sub(r"\s+", " ", text)
+
+    for alias, normalized in UNIT_ALIASES:
+        if len(alias) <= 3:
+            tokens = re.split(r"[/\s,]+", text)
+            if text == alias or alias in tokens:
+                return normalized
+        elif alias in text:
+            return normalized
+
+    if len(text) <= 25 and not re.search(r"\b20\d{2}\b", text):
+        return str(raw).strip()
+    return None
+
+
+def extract_units_from_parentheses(text: str) -> List[tuple]:
+    results = []
+    for match in re.finditer(r"\(([^)]+)\)", text):
+        content = match.group(1).strip()
+        if _is_non_unit_paren(content):
+            continue
+        unit = normalize_unit_text(content)
+        if unit:
+            results.append((content, unit))
+
+    broken = re.search(r"\(([^)]+)$", text.strip())
+    if broken:
+        content = broken.group(1).strip()
+        if not _is_non_unit_paren(content):
+            unit = normalize_unit_text(content)
+            if unit and not any(u[1] == unit for u in results):
+                results.append((content, unit))
+    return results
+
+
+def extract_title_table_unit(table_name: str) -> Optional[str]:
+    candidates = []
+    for match in re.finditer(r"\(([^)]+)\)", table_name):
+        content = match.group(1).strip()
+        if _is_non_unit_paren(content):
+            continue
+        unit = normalize_unit_text(content)
+        if unit:
+            candidates.append(unit)
+    return candidates[-1] if candidates else None
+
+
+def extract_title_unit_keyword_hints(table_name: str) -> Dict[str, str]:
+    hints = {}
+    title = table_name.lower()
+    phrase_patterns = [
+        (r"tinggi\s+wilayah\s*\(([^)]+)\)", "tinggi"),
+        (r"jarak[^)]*\(([^)]+)\)", "jarak"),
+        (r"luas\s+(?:daerah|lahan|panen)?[^)]*\(([^)]+)\)", "luas"),
+    ]
+    for pattern, keyword in phrase_patterns:
+        m = re.search(pattern, title, re.IGNORECASE)
+        if m and not _is_non_unit_paren(m.group(1)):
+            unit = normalize_unit_text(m.group(1))
+            if unit:
+                hints[keyword] = unit
+    return hints
+
+
+def detect_column_unit(header: str, table_name: str, table_unit: Optional[str]) -> Optional[str]:
+    header_lower = header.lower()
+
+    paren_units = extract_units_from_parentheses(header)
+    if paren_units:
+        return paren_units[-1][1]
+
+    for keyword, unit in extract_title_unit_keyword_hints(table_name).items():
+        if keyword in header_lower:
+            return unit
+
+    for pattern, unit in COLUMN_UNIT_RULES:
+        if re.search(pattern, header_lower, re.IGNORECASE):
+            if unit is None:
+                return table_unit
+            return unit
+
+    return None
+
+
+def clean_header_remove_units(header: str) -> str:
+    header_clean = header.strip()
+    if not header_clean:
+        return header_clean
+
+    cleaned = header_clean
+    for match in re.finditer(r"\(([^)]+)\)", cleaned):
+        if normalize_unit_text(match.group(1)):
+            cleaned = cleaned.replace(match.group(0), " ")
+    cleaned = re.sub(r"\([^)]+$", "", cleaned)
+    cleaned = re.sub(r"\s*-\s*$", "", cleaned).strip()
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned or header_clean
+
+
+def extract_and_clean_header_unit(header: str, default_unit: str = "-") -> tuple:
+    if not header:
+        return "", default_unit
+
+    header_clean = header.strip()
+    col_unit = detect_column_unit(header_clean, "", None) or default_unit
+    cleaned = clean_header_remove_units(header_clean)
+    return cleaned, col_unit
+
+def deduplicate_columns(columns: List[str]) -> List[str]:
+    seen = {}
+    new_cols = []
+    for col in columns:
+        col_str = str(col).strip()
+        if not col_str:
+            col_str = "Kolom_Kosong"
+        if col_str in seen:
+            seen[col_str] += 1
+            new_cols.append(f"{col_str}.{seen[col_str]}")
+        else:
+            seen[col_str] = 0
+            new_cols.append(col_str)
+    return new_cols
+
+def detect_and_clean_metadata(table_name: str, doc_year: int, headers: List[str]) -> tuple:
+    units = [""] * len(headers)
+    years = [""] * len(headers)
+    cleaned_headers = []
+    table_unit = extract_title_table_unit(table_name)
+
+    range_match = re.search(r'\b(20\d{2})\s*[-–]\s*(20\d{2})\b', table_name)
+    school_year_matches = re.findall(r'\b(20\d{2}/20\d{2})\b', table_name)
+    years_in_title = re.findall(r'\b(20\d{2})\b', table_name)
+
+    clean_years_in_title = []
+    for y in years_in_title:
+        in_range = False
+        if range_match and (range_match.group(1) == y or range_match.group(2) == y):
+            in_range = True
+        for sy in school_year_matches:
+            if y in sy:
+                in_range = True
+        if not in_range:
+            clean_years_in_title.append(y)
+
+    for idx, header in enumerate(headers):
+        header_clean = header.strip()
+
+        if idx == 0 or is_dimension_column(header_clean):
+            cleaned_headers.append(header_clean)
+            units[idx] = "-"
+            years[idx] = "-"
+            continue
+
+        col_unit = detect_column_unit(header_clean, table_name, table_unit)
+        if col_unit is None:
+            col_unit = table_unit if table_unit else "-"
+
+        cleaned_h = clean_header_remove_units(header_clean)
+        cleaned_headers.append(cleaned_h)
+
+        col_year = "-"
+        year_in_header = re.search(r'\b(20\d{2}(?:\s*[-–/]\s*(?:20)?\d{2})?)\b', cleaned_h)
+        if year_in_header:
+            col_year = year_in_header.group(1)
+        elif range_match:
+            start_yr = int(range_match.group(1))
+            end_yr = int(range_match.group(2))
+            try:
+                val_int = int(cleaned_h)
+                if start_yr <= val_int <= end_yr:
+                    col_year = str(val_int)
+            except ValueError:
+                for yr in range(start_yr, end_yr + 1):
+                    if str(yr) in cleaned_h:
+                        col_year = str(yr)
+                        break
+        elif len(school_year_matches) > 1:
+            for sy in school_year_matches:
+                if sy in cleaned_h:
+                    col_year = sy
+                    break
+
+        if col_year == "-":
+            if len(school_year_matches) == 1:
+                col_year = school_year_matches[0]
+            elif len(clean_years_in_title) == 1:
+                col_year = clean_years_in_title[0]
+            else:
+                col_year = str(doc_year)
+
+        years[idx] = col_year
+        units[idx] = col_unit
+
+    deduplicated_headers = deduplicate_columns(cleaned_headers)
+
+    if len(units) > 0:
+        units[0] = "satuan"
+    if len(years) > 0:
+        years[0] = "tahun"
+
+    return deduplicated_headers, units, years
+
+def clean_title_description(raw_lines: List[str], table_number: Optional[str] = None) -> str:
+    clean_lines = []
+    tnum_escaped = make_table_number_pattern(table_number) if table_number else ""
+    
+    for line in raw_lines:
+        line_clean = line.strip()
+        if not line_clean:
+            continue
+        
+        # Remove "Tabel", "Table", "Lanjutan" prefix if present at start of line, optionally followed by table number
+        pattern = r'^(?:Lanjutan\s+|Continued\s+)?(?:Tabel|Table)(?:\s+' + tnum_escaped + r')?\s*' if tnum_escaped else r'^(?:Tabel|Table|Lanjutan)\s+'
+        line_clean = re.sub(pattern, '', line_clean, flags=re.IGNORECASE)
+        
+        # Handle generic table number cleanup if it's on a line by itself
+        if table_number and (line_clean.strip() == table_number or re.sub(r'\s+', '', line_clean.strip()) == table_number):
+            continue
+            
+        # Clean up leading/trailing slash or spaces
+        line_clean = line_clean.strip('/ \t\n\r')
+        
+        if not line_clean:
+            continue
+            
+        # Pisahkan jika ada format "Indonesia / English" (dengan atau tanpa spasi)
+        parts = [p.strip() for p in re.split(r'\s*/\s*', line_clean) if p.strip()]
+        if len(parts) > 1:
+            if parts[0].lower() == parts[1].lower():
+                line_clean = parts[0]
+            else:
+                # Check if the second part is English
+                words_part2 = set(re.findall(r'[a-zA-Z]+', parts[1].lower()))
+                has_english_part2 = bool(words_part2 & ENGLISH_ONLY_WORDS)
+                has_indo_part2 = bool(words_part2 & INDO_SAFE_WORDS)
+                if has_english_part2 and not has_indo_part2:
+                    line_clean = parts[0]
+        else:
+            line_clean = parts[0] if parts else ""
+            
+        # Bersihkan trailing English words di akhir baris
+        words_list = line_clean.split()
+        while words_list:
+            last_word = words_list[-1].lower()
+            clean_word = re.sub(r'[^a-z]', '', last_word)
+            if clean_word in ENGLISH_ONLY_WORDS and clean_word not in INDO_SAFE_WORDS:
+                words_list.pop()
+            else:
+                break
+        line_clean = " ".join(words_list)
+        
+        # Bersihkan kata duplikat berturut-turut
+        words_list = line_clean.split()
+        unique_words = []
+        for w in words_list:
+            if not unique_words or w.lower() != unique_words[-1].lower():
+                unique_words.append(w)
+        line_clean = " ".join(unique_words)
+            
+        # Periksa apakah line_clean adalah bahasa Inggris
+        words = set(re.findall(r'[a-zA-Z]+', line_clean.lower()))
+        has_english = bool(words & ENGLISH_ONLY_WORDS)
+        has_indo = bool(words & INDO_SAFE_WORDS)
+        
+        # Hitung jumlah kata masing-masing bahasa
+        english_count = len(words & ENGLISH_ONLY_WORDS)
+        indo_count = len(words & INDO_SAFE_WORDS)
+        
+        if has_english and (english_count > indo_count or not has_indo):
+            # English line, stop reading further
+            break
+            
+        if line_clean:
+            clean_lines.append(line_clean)
+        
+    joined_title = " ".join(clean_lines).strip()
+    words_list = joined_title.split()
+    unique_words = []
+    for w in words_list:
+        if not unique_words or w.lower() != unique_words[-1].lower():
+            unique_words.append(w)
+    return " ".join(unique_words)
+
+def apply_modifications(df: pd.DataFrame, mods: Dict) -> pd.DataFrame:
+    """
+    Applies row and column modifications to a DataFrame based on a configuration.
+    Supports both integer-based and data-aware positioning.
+    """
+    if not isinstance(df, pd.DataFrame):
+        return df
+
+    # --- Apply Column Additions ---
+    if "add_columns" in mods:
+        cols_to_insert = []
+        
+        # 1. Resolve all column positions into a list of (index, name, values)
+        for col_mod in mods["add_columns"]:
+            name = col_mod.get("name")
+            if not name or name in df.columns:
+                logging.warning(f"Skipping adding column '{name}' (name missing or already exists).")
+                continue
+
+            pos_config = col_mod.get("position", "end")
+            idx = -1
+
+            if pos_config == "start":
+                idx = 0
+            elif pos_config == "end":
+                idx = len(df.columns)
+            elif isinstance(pos_config, int):
+                idx = pos_config
+            elif isinstance(pos_config, dict):
+                try:
+                    col_list = list(df.columns)
+                    if "after_column" in pos_config:
+                        target_col = pos_config["after_column"]
+                        target_idx = col_list.index(target_col)
+                        idx = target_idx + 1
+                    elif "before_column" in pos_config:
+                        target_col = pos_config["before_column"]
+                        idx = col_list.index(target_col)
+                    else:
+                        logging.warning(f"Invalid column position config for '{name}': {pos_config}")
+                except (ValueError, KeyError) as e:
+                    logging.error(f"Could not find target column for '{name}': {e}. Skipping.")
+            else:
+                logging.warning(f"Unknown position type '{pos_config}' for column '{name}'. Skipping.")
+
+            if idx != -1:
+                # Prepare column data
+                num_rows = len(df)
+                values_config = col_mod.get("values", "")
+                if isinstance(values_config, list) and len(values_config) == num_rows:
+                    col_data = values_config
+                elif values_config == "range":
+                    col_data = range(1, num_rows + 1)
+                else:  # Broadcast a single value
+                    col_data = [values_config] * num_rows
+                
+                cols_to_insert.append((idx, name, col_data))
+
+        # 2. Sort by index descending and insert
+        cols_to_insert.sort(key=lambda x: x[0], reverse=True)
+        for idx, name, values in cols_to_insert:
+            # Clamp index to be within bounds
+            final_idx = min(idx, len(df.columns))
+            df.insert(final_idx, name, values)
+            logging.info(f"Inserted column '{name}' at index {final_idx}.")
+
+    # Short-circuit if DataFrame becomes empty (e.g. via modifications)
+    if df.empty:
+        return df
+
+    # --- Apply Row Additions ---
+    if "add_rows" in mods:
+        rows_to_insert = []
+
+        # 1. Resolve all row positions into a list of (index, data)
+        for row_mod in mods["add_rows"]:
+            data = row_mod.get("data", {})
+            pos_config = row_mod.get("position", "end")
+            idx = -1
+
+            if pos_config == "start":
+                idx = 0
+            elif pos_config == "end":
+                idx = len(df)
+            elif isinstance(pos_config, int):
+                idx = pos_config
+            elif isinstance(pos_config, dict):
+                try:
+                    if "after_row" in pos_config:
+                        target_spec = pos_config["after_row"]
+                        target_col, target_val = target_spec["column"], target_spec["value"]
+                        # Find first match, convert both to string for safe comparison
+                        matches = df.index[df[target_col].astype(str) == str(target_val)].tolist()
+                        if matches:
+                            idx = matches[0] + 1
+                        else:
+                            logging.warning(f"Could not find row where '{target_col}' is '{target_val}'. Appending to end.")
+                            idx = len(df)
+                    elif "before_row" in pos_config:
+                        target_spec = pos_config["before_row"]
+                        target_col, target_val = target_spec["column"], target_spec["value"]
+                        matches = df.index[df[target_col].astype(str) == str(target_val)].tolist()
+                        if matches:
+                            idx = matches[0]
+                        else:
+                            logging.warning(f"Could not find row where '{target_col}' is '{target_val}'. Appending to end.")
+                            idx = len(df)
+                    else:
+                        logging.warning(f"Invalid row position config: {pos_config}. Appending to end.")
+                        idx = len(df)
+                except KeyError as e:
+                    logging.error(f"Invalid key in row position config: {e}. Appending to end.")
+                    idx = len(df)
+            else:
+                logging.warning(f"Unknown position type '{pos_config}' for row. Appending to end.")
+                idx = len(df)
+
+            if idx != -1:
+                rows_to_insert.append((idx, data))
+
+        # 2. Sort by index descending and insert
+        rows_to_insert.sort(key=lambda x: x[0], reverse=True)
+        for idx, data in rows_to_insert:
+            row_df = pd.DataFrame([data])
+            # Clamp index
+            final_idx = min(idx, len(df))
+            df = pd.concat([df.iloc[:final_idx], row_df, df.iloc[final_idx:]]).reset_index(drop=True)
+            logging.info(f"Inserted row at index {final_idx}.")
+            
+    # Final cleanup of NaNs that may have been introduced
+    df.fillna("", inplace=True)
+
+    return df
+
+# Konfigurasi logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+class PDFOfflineTableExtractor:
+    def __init__(self):
+        """
+        Inisialisasi ekstraktor tabel murni offline/lokal menggunakan pdfplumber.
+        """
+        logging.info("Sistem Ekstraksi Offline diaktifkan (Tanpa API/Internet).")
+
+    def _is_valid_statistic_table(self, table: List[List[str]]) -> bool:
+        """
+        Filter Logika: Mengecek apakah ini benar-benar tabel statistik, bukan sekadar sampah/teks.
+        Syarat:
+        1. Minimal 2 baris & 2 kolom.
+        2. Setidaknya 30% dari isi tabel (selain header) harus berupa angka.
+        """
+        if not table or len(table) < 2 or len(table[0]) < 2:
+            return False
+            
+        total_cells = 0
+        numeric_cells = 0
+        
+        # Sesuai instruksi baru: JIKA TABEL FULL KOSONG GAUSAH DIAMBIL
+        # Tabel kosong artinya hanya berisi strip (-) atau elipsis (...) tanpa ada angka sama sekali.
+        has_digit = False
+        
+        # Mulai dari baris 1 (mengabaikan header di baris 0)
+        for row in table[1:]:
+            for cell in row:
+                if cell:
+                    total_cells += 1
+                    val = str(cell).strip()
+                    # Cek apakah cell mengandung angka
+                    if re.search(r'\d', val):
+                        has_digit = True
+                        numeric_cells += 1
+                    elif val == '-' or set(val.replace(' ', '')) == {'.'}:
+                        numeric_cells += 1
+                        
+        if total_cells == 0:
+            return False
+
+        # Aturan dilonggarkan: Ambil semua tabel asalkan tidak sepenuhnya kosong
+        return True
+
+    def _clean_table(self, table: List[List[str]]) -> pd.DataFrame:
+        """
+        Pembersihan data kustom khusus format tabel BPS:
+        1. Deteksi baris index seperti (1), (2), (3) untuk memisah header dan data.
+        2. Ambil hanya teks bahasa Indonesia pada header (potong bagian bahasa inggris).
+        3. Bersihkan sisa watermark yang berwujud huruf acak di kolom angka.
+        """
+        if not table:
+            return pd.DataFrame()
+            
+        index_row_idx = -1
+        # Cari baris index e.g. (1), (2), (3) dst.
+        for i, row in enumerate(table):
+            if row and row[0]:
+                cell_val = str(row[0]).strip()
+                if re.match(r'^\(\d+\)$', cell_val):
+                    index_row_idx = i
+                    break
+                
+        if index_row_idx != -1 and index_row_idx > 0:
+            # Format BPS Terdeteksi!
+            
+            # Simpan baris indeks aslinya dari PDF
+            extracted_index_row = [str(x).replace('\n', ' ').strip() if x else "" for x in table[index_row_idx]]
+            
+            # --- Proses Hierarchical Headers ---
+            # Gabungkan semua baris di atas index_row menjadi satu header gabungan
+            header_rows = table[:index_row_idx]
+            header_df = pd.DataFrame(header_rows)
+            # Forward fill secara horizontal (berguna untuk merged cells di atas)
+            header_df = header_df.ffill(axis=1)
+            
+            clean_headers = []
+            for col in header_df.columns:
+                parts = []
+                for val in header_df[col]:
+                    if val is not None and str(val).strip() and str(val).lower() not in ["none", "nan"]:
+                        val = fix_doubled_text(str(val))
+                        # 1. Bersihkan Header (Ambil Bahasa Indonesia Saja)
+                        lines = str(val).split('\n')
+                        indo_lines = []
+                        for line in lines:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            
+                            # Pisahkan jika ada format "Indonesia / English" (dengan atau tanpa spasi)
+                            sub_parts = [p.strip() for p in re.split(r'\s*/\s*', line) if p.strip()]
+                            if len(sub_parts) > 1:
+                                if sub_parts[0].lower() == sub_parts[1].lower():
+                                    line = sub_parts[0]
+                                else:
+                                    # Cek apakah part kedua adalah bahasa Inggris
+                                    words_part2 = set(re.findall(r'[a-zA-Z]+', sub_parts[1].lower()))
+                                    has_english_part2 = bool(words_part2 & ENGLISH_ONLY_WORDS)
+                                    has_indo_part2 = bool(words_part2 & INDO_SAFE_WORDS)
+                                    if has_english_part2 and not has_indo_part2:
+                                        line = sub_parts[0]
+                            else:
+                                line = sub_parts[0] if sub_parts else ""
+                                
+                            # Bersihkan trailing English words di akhir baris
+                            words_list = line.split()
+                            while words_list:
+                                last_word = words_list[-1].lower()
+                                clean_word = re.sub(r'[^a-z]', '', last_word)
+                                if clean_word in ENGLISH_ONLY_WORDS and clean_word not in INDO_SAFE_WORDS:
+                                    words_list.pop()
+                                else:
+                                    break
+                            line = " ".join(words_list)
+                            
+                            # Bersihkan kata duplikat berturut-turut
+                            words_list = line.split()
+                            unique_words = []
+                            for w in words_list:
+                                if not unique_words or w.lower() != unique_words[-1].lower():
+                                    unique_words.append(w)
+                            line = " ".join(unique_words)
+                            
+                            # Cek apakah baris ini adalah terjemahan Inggris murni
+                            words_lower = set(re.findall(r'[a-zA-Z]+', line.lower()))
+                            has_english = bool(words_lower & ENGLISH_ONLY_WORDS)
+                            has_indo = bool(words_lower & INDO_SAFE_WORDS)
+                            
+                            if has_english and not has_indo:
+                                # Ini terjemahan Inggris — hentikan pengambilan
+                                break
+                            
+                            if line:
+                                indo_lines.append(line)
+                        indo_val = " ".join(indo_lines).strip()
+                        # Bersihkan kata duplikat berturut-turut setelah digabungkan (misal: "Feb Feb" -> "Feb")
+                        words_list = indo_val.split()
+                        unique_words = []
+                        for w in words_list:
+                            if not unique_words or w.lower() != unique_words[-1].lower():
+                                unique_words.append(w)
+                        indo_val = " ".join(unique_words)
+                        
+                        if not indo_val and lines:
+                            fallback = lines[0].strip()
+                            fallback_parts = [p.strip() for p in re.split(r'\s*/\s*', fallback) if p.strip()]
+                            fallback = fallback_parts[0] if fallback_parts else fallback
+                            indo_val = fallback
+                        
+                        if indo_val and indo_val not in parts:
+                            parts.append(indo_val)
+                combined = " - ".join(parts)
+                if not combined:
+                    combined = "Kolom_Kosong"
+                # Bersihkan angka footnote pada tahun, misal "20212" -> "2021"
+                if re.match(r'^20\d{3}$', combined):
+                    combined = combined[:4]
+                clean_headers.append(combined)
+            
+            # Pastikan panjang kolom sesuai
+            while len(clean_headers) < len(table[index_row_idx]):
+                clean_headers.append(f"Kolom_{len(clean_headers)+1}")
+                
+            # 2. Ambil Data Inti
+            data_rows = table[index_row_idx + 1:]
+            
+            cleaned_data = []
+            for row in data_rows:
+                clean_row = []
+                for j, cell in enumerate(row):
+                    val = str(cell) if cell is not None else ""
+                    val = fix_doubled_text(val)
+                    # 3. Bersihkan Watermark BPS tanpa merusak data teks valid
+                    
+                    # Hapus kata-kata watermark BPS
+                    for w in ['tasikmalayakab', 'bps', 'go', 'id']:
+                        val = re.sub(rf'\b{w}\b', '', val, flags=re.IGNORECASE)
+                        
+                    # Hapus huruf kecil tunggal (sisa watermark vertikal) di mana pun
+                    val = re.sub(r'\b[a-z]\b', '', val)
+                    
+                    # Bersihkan sisa titik anomali akibat watermark
+                    val = val.replace('. -', '-').replace('- .', '-')
+                    val = re.sub(r'\s+\.\s+', ' ', val)  # titik nyasar di tengah spasi
+                    val = re.sub(r'\s+\.$', '', val)     # titik nyasar di akhir
+                    val = re.sub(r'^\.\s+', '', val)     # titik nyasar di awal
+                    val = re.sub(r'(?:\s*[\/\:\.])+$', '', val) # simbol nyasar di akhir
+                    
+                    # Bersihkan teks footer nyasar yang menempel di data (sering terjadi jika PDF tidak ada garis bawah tabel)
+                    garbage_footers = [
+                        r"Catatan/Note:\s*\.\.\.",
+                        r"Catatan/Note\s*:\s*\.\.\.",
+                        r"Catatan\s*:\s*\.\.\.",
+                        r"Sumber/Source:.*?Menengah, Perindustrian dan Perdagangan Kab\. Tasikmalaya",
+                        r"Sumber/Source:.*?Menengah, Perindustrian dan Perdagangan",
+                        r"Sumber/Source:.*?Menengah, Perindustrian dan P",
+                        r"Sumber/Source:.*?Usaha Kecil dan Men",
+                        r"engah, Perindustrian dan P",
+                        r"\berdagangan\b",
+                        r"Kab\. Tasikmalaya"
+                    ]
+                    for gf in garbage_footers:
+                        val = re.sub(gf, '', val, flags=re.IGNORECASE)
+                        
+                    val = val.strip()
+                    
+                    if re.search(r'[a-zA-Z]', val):
+                        val = clean_text_cell(val)
+                    else:
+                        val = val.replace('\n', ' ').strip()
+                    
+                    if j == 0:
+                        # Khusus kolom pertama (Kecamatan): Pastikan angka urut aman
+                        val = re.sub(r'^[a-z\s\:\/]+(\d+\.)', r'\1', val)
+                        
+                    clean_row.append(val)
+                cleaned_data.append(clean_row)
+                
+            # Deteksi apakah kolom pertama berisi Nomor dan Teks yang tergabung (misal: "1. Tasikmalaya" atau "1 Tasikmalaya")
+            needs_split = False
+            for row in cleaned_data:
+                if len(row) > 0 and re.match(r'^(\d+)[\.\s]+([A-Za-z].*)', row[0]):
+                    needs_split = True
+                    break
+                    
+            if needs_split:
+                new_cleaned_data = []
+                for row in cleaned_data:
+                    if len(row) > 0:
+                        # Pisahkan angka di awal string dari teks huruf
+                        m = re.match(r'^(\d+)[\.\s]+(.*)', row[0])
+                        if m:
+                            new_cleaned_data.append([m.group(1).strip(), m.group(2).strip()] + row[1:])
+                        else:
+                            new_cleaned_data.append(["", row[0]] + row[1:])
+                    else:
+                        new_cleaned_data.append(row)
+                cleaned_data = new_cleaned_data
+                clean_headers = ["Nomor"] + clean_headers
+                
+            df = pd.DataFrame(cleaned_data, columns=clean_headers)
+        else:
+            # Fallback jika tidak menemukan baris (1)
+            cleaned_table = []
+            for row in table:
+                cleaned_row = []
+                for cell in row:
+                    val = str(cell) if cell is not None else ""
+                    cleaned_row.append(fix_doubled_text(val.replace('\n', ' ').strip()))
+                cleaned_table.append(cleaned_row)
+            
+            if len(cleaned_table) > 1:
+                df = pd.DataFrame(cleaned_table[1:], columns=cleaned_table[0])
+            else:
+                df = pd.DataFrame(cleaned_table)
+                
+        # Deduplikasi nama kolom agar pd.concat tidak error jika ada kolom artifact dengan nama kembar
+        def deduplicate_columns(columns):
+            seen = {}
+            new_cols = []
+            for col in columns:
+                # pandas akan membaca string None sebagai string 'None' kadang, tapi aman
+                col_str = str(col)
+                if col_str in seen:
+                    seen[col_str] += 1
+                    new_cols.append(f"{col_str}.{seen[col_str]}")
+                else:
+                    seen[col_str] = 0
+                    new_cols.append(col_str)
+            return new_cols
+            
+        df.columns = deduplicate_columns(df.columns)
+                
+        # Menghapus baris kosong (kolom kosong tetap dipertahankan)
+        df.replace("", pd.NA, inplace=True)
+        df.dropna(how='all', inplace=True)
+        
+        # Sesuai permintaan user, JANGAN MENGHAPUS KOLOM KOSONG APAPUN
+        df.fillna("", inplace=True)
+        
+        # Total row recalculation removed from here because it will be processed on the fully merged table instead.
+        
+        df.attrs['extracted_index_row'] = extracted_index_row if 'extracted_index_row' in locals() else []
+        
+        return df
+
+    def process_document(self, pdf_path: str, start_page: int = 1, end_page: Optional[int] = None) -> List[Dict]:
+        """
+        Mengekstrak tabel dari dokumen PDF dari start_page ke end_page.
+        """
+        final_dataframes = []
+        
+        with pdfplumber.open(pdf_path) as pdf:
+            total_pages = len(pdf.pages)
+            end_page = end_page if end_page is not None else total_pages
+            
+            # Memastikan range halaman valid
+            start_idx = max(0, start_page - 1)
+            end_idx = min(total_pages, end_page)
+            
+            for page_num in range(start_idx, end_idx):
+                actual_page = page_num + 1
+                logging.info(f"\n{'='*40}\nMemproses Halaman {actual_page}\n{'='*40}")
+                
+                page = pdf.pages[page_num]
+                
+                # Cek apakah ini halaman Gambar/Grafik (seringkali grid pada grafik dideteksi sebagai tabel)
+                text = page.extract_text()
+                if text and re.search(r'\b(?:Gambar|Figure|Grafik|Chart)\b', text[:500], re.IGNORECASE) and not re.search(r'\b(?:Tabel|Table)\b', text[:500], re.IGNORECASE):
+                    logging.info(f"-> Halaman {actual_page} DIABAIKAN. Alasan: Terdeteksi sebagai halaman Gambar/Grafik.")
+                    continue
+                
+                # MAGIC FILTER: Watermark BPS menggunakan ukuran font besar (> 15pt)
+                # Sedangkan teks tabel normal berukuran 7-10pt.
+                # Kita hapus karakter watermark secara fisik dari PDF sebelum diekstrak!
+                page = page.filter(lambda obj: obj.get("object_type") != "char" or obj.get("size", 0) < 15)
+                
+                # Ekstrak nomor tabel dari halaman ini untuk identifikasi
+                table_num = extract_table_number(text[:400])
+
+                # --- MANUAL OVERRIDE UNTUK TYPO BPS (BERDASARKAN HALAMAN PDF) ---
+                if actual_page in [293, 294]:
+                    table_num = "6.1.1"
+                elif actual_page == 296:
+                    table_num = "6.1.2"
+                elif actual_page == 299:
+                    table_num = "6.2.1"
+                elif actual_page in [303, 304]:
+                    table_num = "6.3.1_Bagian_1"
+                elif actual_page in [305, 306]:
+                    table_num = "6.3.1_Bagian_2"
+                # -----------------------------------------------------------------
+
+                # Menggunakan strategi ekstraksi tabel pdfplumber default (deteksi garis vertikal/horizontal)
+                tables = page.extract_tables()
+                
+                if not tables:
+                    logging.info(f"-> Halaman {actual_page} DIABAIKAN. Alasan: Tidak ada kerangka tabel yang terdeteksi.")
+                    continue
+                
+                valid_table_count = 0
+                for idx, table in enumerate(tables):
+                    if self._is_valid_statistic_table(table):
+                        try:
+                            df = self._clean_table(table)
+                            # Simpan
+                            final_dataframes.append({
+                                "page": actual_page,
+                                "title": f"Tabel_Halaman_{actual_page}_No_{idx+1}",
+                                "dataframe": df,
+                                "index_row": df.attrs.get('extracted_index_row', []),
+                                "table_number": table_num
+                            })
+                            valid_table_count += 1
+                        except Exception as e:
+                            logging.error(f"-> Gagal membersihkan tabel {idx+1} di halaman {actual_page}: {e}")
+                    else:
+                        logging.info(f"-> Tabel {idx+1} di Halaman {actual_page} difilter (Tebakan: Bukan tabel statistik / Sampah).")
+                
+                if valid_table_count > 0:
+                    logging.info(f"-> SUKSES: {valid_table_count} tabel divalidasi dan diekstrak dari halaman {actual_page}.")
+                else:
+                    logging.info(f"-> Halaman {actual_page} DIABAIKAN. Alasan: Ada tabel, tetapi bukan statistik.")
+                    
+        return final_dataframes
+
+# --- Entry Point ---
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Offline PDF Table Extraction Pipeline (No API)")
+    parser.add_argument("--pdf", type=str, help="Path absolute ke file PDF", required=False)
+    parser.add_argument("--output", type=str, help="Prefix nama file untuk output CSV/Excel", default="hasil_ekstraksi_offline")
+    parser.add_argument("--output_dir", type=str, help="Folder utama penyimpanan output", default="")
+    parser.add_argument("--start_page", type=int, help="Halaman PDF awal untuk diproses (1-indexed)", default=1)
+    parser.add_argument("--end_page", type=int, help="Halaman PDF akhir untuk diproses (opsional)", default=None)
+    parser.add_argument("--filter_file", type=str, help="Path ke file JSON berisi daftar filter judul tabel")
+    parser.add_argument("--modifications", type=str, help="Path to JSON file with table modifications")
+    
+    args = parser.parse_args()
+
+    # Load filter
+    table_filters = None
+    if args.filter_file and os.path.exists(args.filter_file):
+        import json
+        with open(args.filter_file, "r") as f:
+            table_filters = json.load(f).get("filters", [])
+
+    # Load modifications
+    modifications_data = None
+    if args.modifications and os.path.exists(args.modifications):
+        import json
+        with open(args.modifications, "r", encoding='utf-8') as f:
+            modifications_data = json.load(f)
+            logging.info(f"Loaded table modifications from {args.modifications}")
+            
+    # Setup logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+    
+    if args.pdf:
+        if not os.path.exists(args.pdf):
+            print(f"ERROR: File {args.pdf} tidak ditemukan!")
+        else:
+            pipeline = PDFOfflineTableExtractor()
+            # Inject filter ke dalam pipeline instance
+            pipeline.table_filters = table_filters
+            print(f"\nMemulai ekstraksi OFFLINE untuk: {args.pdf}")
+            if args.end_page:
+                print(f"Halaman: {args.start_page} s/d {args.end_page}\n")
+            else:
+                print(f"Halaman: {args.start_page} s/d Selesai\n")
+            
+            results = pipeline.process_document(args.pdf, args.start_page, args.end_page)
+            
+            if results:
+                print(f"\n>>> Berhasil mengekstrak {len(results)} potongan tabel. Sedang menggabungkan per kategori... <<<")
+                
+                merged_categories = []
+
+                for res in results:
+                    df = res['dataframe']
+
+                    is_same = False
+                    is_horizontal = False
+                    target_idx = -1
+
+                    for i in range(len(merged_categories)-1, -1, -1):
+                        prev_cat = merged_categories[i]
+                        
+                        # Aturan Pertama: Jika ada nomor tabel, dan BERBEDA, maka PASTIKAN dipisah!
+                        if res.get("table_number") and prev_cat.get("table_number") and res["table_number"] != prev_cat["table_number"]:
+                            continue
+                        
+                        prev_df = prev_cat['dataframe']
+                        
+                        # --- Cek Penggabungan VERTIKAL ---
+                        # Kriteria: 2 kolom pertama memiliki prefix yang sama (nama kolom sama)
+                        cols_to_check = min(2, len(df.columns), len(prev_df.columns))
+                        if cols_to_check > 0:
+                            match_found = True
+                            for k in range(cols_to_check):
+                                c1 = df.columns[k]
+                                c2 = prev_df.columns[k]
+                                if str(c1).strip().lower()[:15] != str(c2).strip().lower()[:15]:
+                                    match_found = False
+                                    break
+                            if match_found:
+                                is_same = True
+                                target_idx = i
+                                break
+                        
+                        # --- Cek Penggabungan HORIZONTAL (JOIN) ---
+                        # DINONAKTIFKAN: User menginginkan tabel tetap terpisah per grup halaman
+                        # if not is_same and ...:
+                        #     is_horizontal = True
+                        pass
+
+                    if is_same:
+                        target_cat = merged_categories[target_idx]
+                        if len(df.columns) == len(target_cat['dataframe'].columns):
+                            df.columns = target_cat['dataframe'].columns
+                        target_cat['dataframe'] = pd.concat([target_cat['dataframe'], df], ignore_index=True)
+                        if res['page'] not in target_cat['pages']:
+                            target_cat['pages'].append(res['page'])
+                    else:
+                        new_cat = {
+                            "category_id": len(merged_categories) + 1,
+                            "pages": [res['page']],
+                            "dataframe": df,
+                            "index_row": res.get("index_row", []),
+                            "table_number": res.get("table_number")
+                        }
+                        merged_categories.append(new_cat)
+                    
+                print(f"\n>>> SELESAI: Berhasil MENGGABUNGKAN tabel menjadi {len(merged_categories)} Kategori utuh! <<<")
+                
+                # MEMBUAT FOLDER OUTPUT
+                end_p = args.end_page if args.end_page else "akhir"
+                folder_name = f"Ekstraksi_Hal_{args.start_page}_sd_{end_p}"
+                if args.output_dir:
+                    folder_name = os.path.join(args.output_dir, folder_name)
+                os.makedirs(get_safe_windows_path(folder_name), exist_ok=True)
+                print(f"\n[+] Membuat folder penyimpanan: {folder_name}/")
+                
+                with pdfplumber.open(args.pdf) as pdf_ref:
+                    import re
+                    file_counts = {}
+                    # Cache judul tabel yang sudah berhasil diekstrak, agar halaman lanjutan memakai judul yang sama
+                    table_titles_cache = {}
+                    for cat in merged_categories:
+                        pages_str = ", ".join(map(str, cat['pages']))
+                        
+                        # Coba cari nomor tabel dari halaman pertama kategori ini
+                        first_page_idx = cat['pages'][0] - 1
+                        try:
+                            # Ambil seluruh teks halaman untuk memastikan judul tabel tidak terpotong (misal karena ada paragraf pengantar)
+                            page_text = pdf_ref.pages[first_page_idx].extract_text()
+                            
+                            # Ekstrak nomor tabel terlebih dahulu
+                            table_number = cat.get('table_number')
+                            if not table_number:
+                                table_number = extract_table_number(page_text)
+                                match = bool(table_number) # Untuk kompatibilitas ke bawah
+                            else:
+                                match = True
+                            
+                            # FILTERING BERDASARKAN RULES USER
+                            if pipeline.table_filters and "Semua" not in pipeline.table_filters:
+                                passed_filter = False
+                                for f in pipeline.table_filters:
+                                    if f.lower() in page_text.lower():
+                                        passed_filter = True
+                                        break
+                                        
+                                # JIKA INI ADALAH TABEL LANJUTAN, BERI KELONGGARAN JIKA NOMOR TABEL SAMA DENGAN SEBELUMNYA YANG LOLOS
+                                if not passed_filter and table_number and 'passed_table_numbers' in locals() and table_number in passed_table_numbers:
+                                    passed_filter = True
+                                    
+                                if not passed_filter:
+                                    print(f"[-] Kategori {cat['category_id']} (Hal {pages_str}) diabaikan karena tidak ada kata kunci: {pipeline.table_filters}")
+                                    continue
+                                    
+                            # Simpan nomor tabel yang berhasil lolos filter agar bagian selanjutannya (Lanjutan Tabel) ikut lolos
+                            if table_number:
+                                if 'passed_table_numbers' not in locals():
+                                    passed_table_numbers = set()
+                                passed_table_numbers.add(table_number)
+                                
+                            if match:
+                                title = f"Tabel_{table_number}_(Hal_{pages_str})"
+                                file_prefix = f"Tabel_{table_number}"
+                                
+                                # Jika judul tabel ini sudah pernah diekstrak sebelumnya (halaman lanjutan),
+                                # gunakan judul yang sudah ada dari cache
+                                if table_number in table_titles_cache:
+                                    cached_desc = table_titles_cache[table_number]
+                                    title = f"Tabel {table_number} - {cached_desc} (Hal {pages_str})"
+                                    title_safe = title.replace("/", " __SLASH__ ")
+                                    title_safe = re.sub(r'[\\*?:\"<>|]', '', title_safe)
+                                    title_safe = re.sub(r'\s+', ' ', title_safe).strip()
+                                    file_prefix = title_safe
+                                else:
+                                    # Attempt to extract descriptive title
+                                    try:
+                                        desc = None
+                                        
+                                        # Robust line-by-line extraction
+                                        lines = page_text.split('\n')
+                                        start_idx = -1
+                                        
+                                        # 1. Find the starting line of the title
+                                        # We look for "Tabel" or "Table" close to the table_number
+                                        tnum_pattern = make_table_number_pattern(table_number)
+                                        for i, line in enumerate(lines):
+                                            # Case A: "Tabel 3.1.2" or "Table 3.1.2" with optional spaces
+                                            if tnum_pattern and re.search(r'(?:Tabel|Table)\s+' + tnum_pattern, line, re.IGNORECASE):
+                                                start_idx = i
+                                                break
+                                            # Case B: "Tabel" and the next line or line after has table_number
+                                            elif re.search(r'\b(?:Tabel|Table)\b', line, re.IGNORECASE):
+                                                # Check next 3 lines for the table number
+                                                found = False
+                                                for offset in range(1, 4):
+                                                    if i + offset < len(lines):
+                                                        next_line_clean = lines[i+offset].strip()
+                                                        next_line_no_spaces = re.sub(r'\s+', '', next_line_clean)
+                                                        if table_number and (next_line_no_spaces == table_number or next_line_no_spaces.startswith(table_number)):
+                                                            start_idx = i
+                                                            found = True
+                                                            break
+                                                if found:
+                                                    break
+                                                    
+                                        if start_idx == -1 and table_number:
+                                            # Fallback: just look for the table number
+                                            for i, line in enumerate(lines):
+                                                line_no_spaces = re.sub(r'\s+', '', line)
+                                                if table_number in line_no_spaces:
+                                                    start_idx = max(0, i - 1) # start from previous line
+                                                    break
+                                                    
+                                        if start_idx != -1:
+                                            # 2. Extract a window of lines from start_idx
+                                            # We take up to 10 lines, but stop early if we hit column indexes like (1), (2), etc.
+                                            candidate_lines = []
+                                            for i in range(start_idx, min(start_idx + 10, len(lines))):
+                                                line = lines[i]
+                                                # Stop if we hit index row like (1) (2) or (2) (3)
+                                                if re.search(r'\(\s*\d+\s*\)', line):
+                                                    break
+                                                candidate_lines.append(line)
+                                                
+                                            # 3. Clean and parse using improved signature passing table_number
+                                            desc = clean_title_description(candidate_lines, table_number)
+                                            
+                                        if desc:
+                                            # Hapus angka footnote yang menempel pada kata (misal: Desa1 -> Desa)
+                                            desc = re.sub(r'([a-zA-Z])[1-9](?![0-9])', r'\1', desc)
+                                            desc = re.sub(r'\s+', ' ', desc).strip()
+                                            
+                                        if desc:
+                                            title = f"Tabel {table_number} - {desc} (Hal {pages_str})"
+                                            # Ganti slash dengan placeholder agar tidak dihapus sanitasi filename
+                                            title_safe = title.replace("/", " __SLASH__ ")
+                                            title_safe = re.sub(r'[\\*?:\"<>|]', '', title_safe)
+                                            title_safe = re.sub(r'\s+', ' ', title_safe).strip()
+                                            file_prefix = title_safe
+                                            # Simpan ke cache agar halaman lanjutan memakai judul yang sama
+                                            if table_number and table_number not in table_titles_cache:
+                                                table_titles_cache[table_number] = desc
+                                    except Exception as e:
+                                        print(f"DEBUG Exception saat ekstrak judul: {e}")
+                                        pass
+
+                            else:
+                                print(f"DEBUG Regex gagal match di halaman {first_page_idx+1}. Text: {repr(page_text)}")
+                                title = f"Tabel_Kategori_{cat['category_id']}_(Hal_{pages_str})"
+                                file_prefix = f"Kategori_{cat['category_id']}"
+                        except Exception as e:
+                            print(f"DEBUG Exception saat ekstrak judul di halaman {first_page_idx+1}: {e}")
+                            title = f"Tabel_Kategori_{cat['category_id']}_(Hal_{pages_str})"
+                            file_prefix = f"Kategori_{cat['category_id']}"
+                            
+                        actual_title = title
+                        base_prefix = file_prefix
+                        if base_prefix not in file_counts:
+                            file_counts[base_prefix] = 1
+                            actual_title = title
+                        else:
+                            file_counts[base_prefix] += 1
+                            actual_title = f"{title}_Bagian_{file_counts[base_prefix]}"
+                            file_prefix = f"{file_prefix}_Bagian_{file_counts[base_prefix]}"
+
+                        csv_filename = os.path.join(folder_name, f"{file_prefix}.csv")
+                        
+
+                            
+                        print(f"\n--- {actual_title} ---")
+                        
+                        df_to_save = cat['dataframe'].copy()
+
+                        # Apply custom modifications if any
+                        table_number = cat.get("table_number")
+                        if modifications_data and table_number:
+                            # Find modifications for this table
+                            table_mods = next((m for m in modifications_data.get("modifications", []) if m.get("table_number") == table_number), None)
+                            if table_mods:
+                                logging.info(f"Applying custom modifications for table {table_number}...")
+                                df_to_save = apply_modifications(df_to_save, table_mods)
+                        
+                        first_col = df_to_save.columns[0] if not df_to_save.empty else None
+                        
+                        # Konversi data anomali (-) di kolom numerik menjadi 0
+                        for col in df_to_save.columns:
+                            is_numeric = True
+                            has_any_val = False
+                            for x in df_to_save[col]:
+                                val_str = str(x).strip()
+                                if val_str in ["", "nan", "None"]:
+                                    continue
+                                has_any_val = True
+                                if not re.match(r'^[\d.,\- ]+$', val_str):
+                                    is_numeric = False
+                                    break
+                                    
+                            if is_numeric and has_any_val:
+                                df_to_save[col] = df_to_save[col].apply(lambda x: "0" if str(x).strip() == "-" else x)
+                        
+                        
+                        # ============================================================
+                        # POST-PROCESSING: Auto-kalkulasi baris TOTAL pada tabel gabungan
+                        # Menggunakan parse_indonesian_number untuk akurasi tinggi.
+                        # ============================================================
+                        TOTAL_ROW_KEYWORDS = re.compile(
+                            r'^\s*(?:jumlah|total|kabupaten\s+tasikmalaya|kab\.?\s+tasikmalaya|tasikmalaya)\s*$',
+                            re.IGNORECASE
+                        )
+                        
+                        if not df_to_save.empty and len(df_to_save.columns) > 1:
+                            # Identifikasi indeks baris total
+                            total_row_indices = df_to_save.index[
+                                df_to_save[first_col].astype(str).str.strip().str.match(TOTAL_ROW_KEYWORDS)
+                            ].tolist()
+                            
+                            if total_row_indices:
+                                # Baris non-total = semua baris kecuali baris total dan baris index (1),(2)..
+                                non_total_mask = ~df_to_save.index.isin(total_row_indices)
+                                # Juga abaikan baris header/index seperti '(1)', '(2)'
+                                non_total_mask &= ~df_to_save[first_col].astype(str).str.strip().str.match(r'^\(\d+\)$')
+                                df_data = df_to_save[non_total_mask]
+                                
+                                for tidx in total_row_indices:
+                                    for col in df_to_save.columns[1:]:  # Skip kolom pertama
+                                        try:
+                                            # Konversi semua nilai di kolom ke numerik menggunakan helper
+                                            parsed_series = df_data[col].apply(parse_indonesian_number)
+                                            if parsed_series.notna().sum() > 0:
+                                                calculated_total = parsed_series.sum()
+                                                
+                                                orig_val = str(df_to_save.at[tidx, col]).strip()
+                                                
+                                                # Tentukan format keluaran: jika aslinya pakai koma (decimal), format dengan koma
+                                                # Jika integer atau tidak terdeteksi koma desimal, simpan sebagai integer/format ribuan titik
+                                                if ',' in orig_val and '.' not in orig_val:
+                                                    if calculated_total == int(calculated_total):
+                                                        df_to_save.at[tidx, col] = f"{int(calculated_total):,}".replace(',', '.')
+                                                    else:
+                                                        df_to_save.at[tidx, col] = f"{calculated_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                else:
+                                                    # Cek apakah kolom ini bertipe float atau integer berdasarkan data asli
+                                                    has_comma_decimals = df_data[col].astype(str).str.contains(',').any()
+                                                    if has_comma_decimals:
+                                                        df_to_save.at[tidx, col] = f"{calculated_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                                                    else:
+                                                        if calculated_total == int(calculated_total):
+                                                            # Format ribuan Indonesia
+                                                            df_to_save.at[tidx, col] = f"{int(calculated_total):,}".replace(',', '.')
+                                                        else:
+                                                            df_to_save.at[tidx, col] = f"{calculated_total:.2f}".replace('.', ',')
+                                        except Exception as te:
+                                            pass
+                                            
+                        
+                        # Pisahkan nomor hierarki (1.1), angka (1.), alfabet (A.), dan romawi (I.) menjadi kolom "Nomor"
+                        if df_to_save[first_col].dtype == 'object':
+                            # Regex mengabaikan prefix "1. " jika diikuti oleh penomoran sejati seperti I/A, A., dll.
+                            regex_pattern = r'^(?:\d+\.\s+)?([IVXivx]+\/[A-Za-z]|[IVXLCDMivxlcdm]+\.|[A-Za-z]\.|(?:\d+(?:\.\d+)+)|\d+\.)\s+(.*)'
+                            extracted = df_to_save[first_col].astype(str).str.extract(regex_pattern)
+                            if extracted[0].notna().mean() > 0.05: # Jika ada baris yang mengandung nomor
+                                df_to_save.insert(0, 'Nomor', extracted[0])
+                                df_to_save[first_col] = extracted[1].fillna(df_to_save[first_col])
+                        
+                        # Sisipkan baris indeks asli dari PDF HANYA JIKA ADA
+                        orig_index_row = cat.get("index_row", [])
+                        
+                        if orig_index_row:  # Jika di tabel PDF ada, samakan. Jika tidak, jangan dibuat-buat.
+                            index_row = []
+                            if 'Nomor' in df_to_save.columns and df_to_save.columns[0] == 'Nomor':
+                                index_row.append("")  # Kolom Nomor dikosongkan
+                                for i in range(len(df_to_save.columns) - 1):
+                                    if i < len(orig_index_row):
+                                        index_row.append(orig_index_row[i])
+                                    else:
+                                        index_row.append("") # Jangan dibuat-buat jika kurang
+                            else:
+                                for i in range(len(df_to_save.columns)):
+                                    if i < len(orig_index_row):
+                                        index_row.append(orig_index_row[i])
+                                    else:
+                                        index_row.append("") # Jangan dibuat-buat jika kurang
+                                    
+                            df_to_save.loc[-1] = index_row
+                            df_to_save.index = df_to_save.index + 1
+                            df_to_save = df_to_save.sort_index()
+                        
+                        # Simpan ke CSV di dalam folder menggunakan csv_filename yang sudah lolos uji anti-overwrite
+                        try:
+                            import re
+                            pdf_year_match = re.search(r'(\d{4})', os.path.basename(args.pdf))
+                            doc_year = int(pdf_year_match.group(1)) if pdf_year_match else 2026
+                            
+                            # Clean headers and extract metadata (units, years)
+                            raw_headers = list(df_to_save.columns)
+                            cleaned_headers, units, years = detect_and_clean_metadata(actual_title, doc_year, raw_headers)
+                            df_to_save.columns = cleaned_headers
+                            
+                            print(df_to_save.head())
+                            print(f"... (Total {len(df_to_save)} baris data)")
+                            
+                            import csv
+                            with open(get_safe_windows_path(csv_filename), 'w', encoding='utf-8', newline='') as f:
+                                writer = csv.writer(f)
+                                writer.writerow(cleaned_headers)
+                                writer.writerow(units)
+                                writer.writerow(years)
+                                # Write DataFrame values
+                                for row_vals in df_to_save.values:
+                                    writer.writerow(list(row_vals))
+                                    
+                            print(f"[+] Disimpan ke: {csv_filename} dengan metadata satuan dan tahun.")
+                        except PermissionError:
+                            print(f"[-] GAGAL DISIMPAN: File {csv_filename} sedang dibuka di program lain (misal Excel). Silakan tutup file tersebut.")
+                        except Exception as e:
+                            print(f"[-] ERROR saat menyimpan {csv_filename}: {e}")
+            else:
+                print("\nTidak ada tabel statistik yang berhasil diekstrak.")
+    else:
+        print("Sistem Ekstraksi Offline Siap. Gunakan argumen --pdf untuk memproses file.")

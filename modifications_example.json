@@ -1,0 +1,44 @@
+{
+  "modifications": [
+    {
+      "table_number": "3.1.1",
+      "add_columns": [
+        {
+          "position": {
+            "after_column": "Kecamatan"
+          },
+          "name": "Status Kecamatan",
+          "values": "Definitif"
+        },
+        {
+          "position": {
+            "before_column": "Laju Pertumbuhan Penduduk"
+          },
+          "name": "Peringkat Penduduk",
+          "values": ""
+        }
+      ],
+      "add_rows": [
+        {
+          "position": {
+            "after_row": {
+              "column": "Kecamatan",
+              "value": "Cihideung"
+            }
+          },
+          "data": {
+            "Kecamatan": "KECAMATAN BARU",
+            "Penduduk": "12345",
+            "Status Kecamatan": "Uji Coba"
+          }
+        },
+        {
+            "position": "end",
+            "data": {
+              "Kecamatan": "TOTAL KESELURUHAN"
+            }
+        }
+      ]
+    }
+  ]
+}

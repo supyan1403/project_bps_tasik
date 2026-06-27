@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPS Extraction Hub</title>
+    <meta name="description" content="Dashboard ekstraksi dan manajemen data tabel PDF BPS Kabupaten Tasikmalaya">
+    <link rel="stylesheet" href="/static/style.css?v=20260627_3">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-title">BPS Hub</div>
+        <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard', this)">Dashboard</div>
+        <div class="nav-item" id="nav-publikasi" onclick="navigate('publikasi', this)">Ekstraksi PDF</div>
+        <div class="nav-item" id="nav-tabel" onclick="navigate('tabel', this)">Data Tabel</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- PAGE 1: Dashboard -->
+        <div id="page-dashboard" class="page-section active">
+            <h2>Dashboard Analytics</h2>
+            <div class="widget-grid">
+                <div class="widget">
+                    <div class="widget-title">Total Publikasi (PDF)</div>
+                    <div class="widget-value" id="stat-docs">-</div>
+                </div>
+                <div class="widget">
+                    <div class="widget-title">Total Tabel Terekstrak</div>
+                    <div class="widget-value" id="stat-tables">-</div>
+                </div>
+                <div class="widget">
+                    <div class="widget-title">Total Baris Data</div>
+                    <div class="widget-value" id="stat-rows">-</div>
+                </div>
+                <div class="widget danger">
+                    <div class="widget-title">Data Anomali (Perlu Dicek)</div>
+                    <div class="widget-value" style="color: var(--danger)" id="stat-anomalies">-</div>
+                </div>
+            </div>
+            <button onclick="loadDashboardStats()" class="btn btn-small btn-primary">Refresh Data</button>
+        </div>
+
+        <!-- PAGE 2: Publikasi (Upload & Status) -->
+        <div id="page-publikasi" class="page-section">
+            <div style="display:flex; gap: 2rem; flex-wrap: wrap;">
+                <div class="glass-panel" style="flex:1; min-width:280px;">
+                    <h2>Upload Publikasi Baru</h2>
+                    <form id="upload-form">
+                        <div class="form-group">
+                            <label>Tahun Publikasi</label>
+                            <input type="number" id="pdf-year" name="year" placeholder="e.g. 2026" required>
+                        </div>
+                        <div class="form-group">
+                            <label>File PDF</label>
+                            <input type="file" id="pdf-file" name="file" accept="application/pdf" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload & Proses</button>
+                    </form>
+                </div>
+                
+                <div class="glass-panel" style="flex: 2; min-width:320px;">
+                    <h2>Daftar Publikasi</h2>
+                    <button onclick="loadDocuments()" class="btn btn-small btn-primary" style="margin-bottom:1rem">Refresh</button>
+                    <div style="overflow-x:auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Tahun</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docs-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Browser Dokumen & Tabel -->
+        <div id="page-tabel" class="page-section">
+            <div class="glass-panel">
+                <h2>Daftar Dokumen & Tabel</h2>
+                <div id="document-list-container" style="margin-top: 1rem;">
+                    <!-- Filled by JS: Level 1 (docs) → Level 2 (babs) → Level 3 (tables) -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: Editor Tabel (CRUD - Full Page) -->
+        <div id="page-editor" class="page-section">
+
+            <!-- Header Bar -->
+            <div class="editor-header">
+                <div class="editor-header-info" style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                        <div class="editable-input-container" style="display: flex; align-items: center; border: 1px dashed #cbd5e1; background: #fafafa; border-radius: 6px; padding: 2px 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='#4F46E5'; this.style.background='#ffffff';" onmouseleave="this.style.borderColor='#cbd5e1'; this.style.background='#fafafa';">
+                            <input id="editor-table-number" type="text" placeholder="No. Tabel" style="font-weight: 700; color: var(--primary); font-size: 1.1rem; border: none; background: transparent; outline: none; width: 110px;" onblur="saveTableIdentityInline();" onkeydown="if(event.key === 'Enter') { this.blur(); }">
+                            <span style="font-size: 0.8rem; color: #a1a1aa; pointer-events: none; margin-left: 2px;">✏️</span>
+                        </div>
+                        <span style="color: #cbd5e1; font-size: 1.1rem;">|</span>
+                        <div class="editable-input-container" style="display: flex; align-items: center; border: 1px dashed #cbd5e1; background: #fafafa; border-radius: 6px; padding: 2px 8px; flex: 1; transition: all 0.2s;" onmouseenter="this.style.borderColor='#4F46E5'; this.style.background='#ffffff';" onmouseleave="this.style.borderColor='#cbd5e1'; this.style.background='#fafafa';">
+                            <input id="editor-title" type="text" placeholder="Judul Tabel" style="font-weight: 600; color: #1e293b; font-size: 1.05rem; border: none; background: transparent; outline: none; width: 100%;" onblur="saveTableIdentityInline();" onkeydown="if(event.key === 'Enter') { this.blur(); }">
+                            <span style="font-size: 0.8rem; color: #a1a1aa; pointer-events: none; margin-left: 4px;">✏️</span>
+                        </div>
+                    </div>
+                    <span id="editor-page-tag" class="editor-page-tag" style="display:none; font-size: 0.8rem; color: #64748b; margin-left: 6px;"></span>
+                </div>
+                <span id="editor-mode-badge" class="editor-mode-badge badge-csv">Mode CSV</span>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="editor-toolbar" id="editor-toolbar">
+                <!-- Filled by JS based on mode -->
+            </div>
+
+            <!-- Data Table (full scrollable) -->
+            <div class="editor-table-wrapper">
+                <table id="data-grid">
+                    <thead id="data-grid-head">
+                        <tr><th style="color:#94a3b8; font-style:italic;">Pilih tabel untuk mulai mengedit</th></tr>
+                    </thead>
+                    <tbody id="data-grid-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Section Ringkasan (Jumlah/Kabupaten) - hanya tampil di View Mode -->
+            <div id="summary-rows-section" style="display:none; margin-top: 1.5rem;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
+                    <div style="height:2px; flex:1; background: linear-gradient(to right, #e2e8f0, transparent);"></div>
+                    <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap;">📊 Ringkasan / Agregat</span>
+                    <div style="height:2px; flex:1; background: linear-gradient(to left, #e2e8f0, transparent);"></div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table id="summary-grid" style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                        <thead id="summary-grid-head"></thead>
+                        <tbody id="summary-grid-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- end page-editor -->
+
+    </div><!-- end main-content -->
+
+    <script src="/static/app.js?v=20260627_5" defer></script>
+</body>
+</html>

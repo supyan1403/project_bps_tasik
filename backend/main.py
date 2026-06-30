@@ -14,10 +14,11 @@ from sqlalchemy.orm import Session
 import models
 import schemas
 from database import engine, get_db
-from fastapi.responses import FileResponse
+# ... [imports and utility functions] ...
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from pdf_table_pipeline import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS
+from extract_toc import get_toc
 
 def clean_bilingual_header(header: str) -> str:
     """
@@ -79,6 +80,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="BPS Extraction Dashboard API")
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -88,10 +90,11 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIR = "../uploads"
-EXTRACT_DIR = "../hasil_ekstraksi_web"
+UPLOAD_DIR = "uploads"
+EXTRACT_DIR = "hasil_ekstraksi_web"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
@@ -159,55 +162,56 @@ async def upload_document(
     
     return db_doc
 
-@app.get("/api/documents/{doc_id}/suggest_pages")
-def suggest_pages(doc_id: int, db: Session = Depends(get_db)):
-    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
-    if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
-        
-    toc_path = os.path.join(EXTRACT_DIR, f"doc_{doc.id}", "toc.json")
-    safe_path = get_safe_windows_path(toc_path)
-    
-    if not os.path.exists(safe_path):
-        # Fallback default untuk Kabupaten Tasikmalaya Dalam Angka
-        return [
-            {"title": "Bab 1 - Geografi dan Iklim", "start_page": 42, "end_page": 54},
-            {"title": "Bab 2 - Pemerintahan", "start_page": 54, "end_page": 75},
-            {"title": "Bab 3 - Kependudukan", "start_page": 75, "end_page": 93},
-            {"title": "Bab 4 - Ketenagakerjaan", "start_page": 93, "end_page": 179},
-            {"title": "Bab 5 - Sosial dan Kesejahteraan Rakyat", "start_page": 179, "end_page": 288},
-            {"title": "Bab 6 - Pertanian", "start_page": 288, "end_page": 310},
-            {"title": "Bab 7 - Industri, Pertambangan, Energi, dan Konstruksi", "start_page": 310, "end_page": 325},
-            {"title": "Bab 8 - Pariwisata, Transportasi, dan Komunikasi", "start_page": 325, "end_page": 336},
-            {"title": "Bab 9 - Perbankan, Koperasi, dan Perdagangan", "start_page": 336, "end_page": 348},
-            {"title": "Bab 10 - Pengeluaran Penduduk", "start_page": 348, "end_page": 356},
-            {"title": "Bab 11 - Pendapatan Regional", "start_page": 356, "end_page": 368}
-        ]
-        
-    try:
-        with open(safe_path, 'r', encoding='utf-8') as f:
-            import json
-            return json.load(f)
-    except Exception as e:
-        # Fallback default jika terjadi error load file
-        return [
-            {"title": "Bab 1 - Geografi dan Iklim", "start_page": 42, "end_page": 54},
-            {"title": "Bab 2 - Pemerintahan", "start_page": 54, "end_page": 75},
-            {"title": "Bab 3 - Kependudukan", "start_page": 75, "end_page": 93},
-            {"title": "Bab 4 - Ketenagakerjaan", "start_page": 93, "end_page": 179},
-            {"title": "Bab 5 - Sosial dan Kesejahteraan Rakyat", "start_page": 179, "end_page": 288},
-            {"title": "Bab 6 - Pertanian", "start_page": 288, "end_page": 310},
-            {"title": "Bab 7 - Industri, Pertambangan, Energi, dan Konstruksi", "start_page": 310, "end_page": 325},
-            {"title": "Bab 8 - Pariwisata, Transportasi, dan Komunikasi", "start_page": 325, "end_page": 336},
-            {"title": "Bab 9 - Perbankan, Koperasi, dan Perdagangan", "start_page": 336, "end_page": 348},
-            {"title": "Bab 10 - Pengeluaran Penduduk", "start_page": 348, "end_page": 356},
-            {"title": "Bab 11 - Pendapatan Regional", "start_page": 356, "end_page": 368}
-        ]
 
 
 @app.get("/api/documents", response_model=List[schemas.DocumentOut])
 def get_documents(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(models.Document).offset(skip).limit(limit).all()
+
+@app.get("/api/documents/{doc_id}/toc")
+def get_document_toc(doc_id: int, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    toc_path = os.path.join(EXTRACT_DIR, f"doc_{doc_id}", "toc.json")
+    if os.path.exists(toc_path):
+        try:
+            import json
+            with open(toc_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data:
+                    return data
+        except Exception:
+            pass
+            
+    return []
+
+class TOCItem(BaseModel):
+    title: str
+    start_page: int
+    end_page: int
+
+@app.post("/api/documents/{doc_id}/toc")
+def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    doc_dir = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
+    os.makedirs(doc_dir, exist_ok=True)
+    toc_path = os.path.join(doc_dir, "toc.json")
+    
+    try:
+        import json
+        dict_data = [item.dict() for item in toc_data]
+        with open(toc_path, "w", encoding="utf-8") as f:
+            json.dump(dict_data, f, indent=4)
+        return {"status": "success", "message": "TOC updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save TOC: {str(e)}")
+
+
 
 @app.delete("/api/documents/{doc_id}")
 def delete_document(doc_id: int, db: Session = Depends(get_db)):
@@ -288,11 +292,28 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
         specific_output_dir = os.path.join(output_path, f"Ekstraksi_Hal_{start_page}_sd_{end_page}")
         
         if os.path.exists(specific_output_dir):
+            # Load metadata.json mapping safe filenames to original full titles
+            title_mapping = {}
+            metadata_path = os.path.join(specific_output_dir, "metadata.json")
+            if os.path.exists(metadata_path):
+                try:
+                    import json
+                    with open(metadata_path, "r", encoding="utf-8") as f:
+                        title_mapping = json.load(f).get("title_mapping", {})
+                except Exception:
+                    pass
+
             for root, _, files in os.walk(specific_output_dir):
                 for file in files:
                     if file.endswith(".csv"):
                         csv_full_path = os.path.join(root, file)
-                        table_name = file.replace(".csv", "").replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+                        
+                        # Ambil judul lengkap asli dari metadata jika ada, jika tidak pakai nama file
+                        table_name = title_mapping.get(file)
+                        if not table_name:
+                            table_name = file.replace(".csv", "").replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+                        else:
+                            table_name = table_name.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
                         
                         # Cek apakah tabel ini sudah pernah diekstrak (timpa jika ya)
                         existing_table = db.query(models.ExtractedTable).filter_by(document_id=doc.id, table_name=table_name).first()
@@ -505,6 +526,7 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
             headers = raw_rows[0]
             
             has_metadata = False
+            # Memastikan metadata terdeteksi dengan benar
             if len(raw_rows) >= 3:
                 col0_row1 = str(raw_rows[1][0]).strip().lower() if len(raw_rows[1]) > 0 else ""
                 col0_row2 = str(raw_rows[2][0]).strip().lower() if len(raw_rows[2]) > 0 else ""
@@ -514,6 +536,7 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
             if has_metadata:
                 units = raw_rows[1]
                 years = raw_rows[2]
+                # Mengambil semua baris setelah header dan metadata, termasuk section total
                 data_rows = raw_rows[3:]
                 
                 # Normalize units mapping "Persen" to "%"
@@ -521,13 +544,14 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
                     if units[idx].lower() in ["persen", "persentase", "percent"]:
                         units[idx] = "%"
                 
-                # Bersihkan nama kolom bilingual (misal "Irigasi Irrigation" -> "Irigasi")
+                # Bersihkan nama kolom bilingual
                 headers = [clean_bilingual_header(h) for h in headers]
             else:
                 doc_year = 2026
                 if table.document:
                     doc_year = table.document.year
                 headers, units, years = detect_and_clean_metadata(table.table_name, doc_year, headers)
+                # Mengambil semua baris setelah header, termasuk section total
                 data_rows = raw_rows[1:]
                 
         return {

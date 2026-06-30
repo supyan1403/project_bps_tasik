@@ -1,7 +1,29 @@
 
 // --- SWEETALERT2 MODALS ---
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "http://127.0.0.1:8000/api";
+
+function romanToInt(roman) {
+    if (!roman) return null;
+    const map = {
+        'i': 1, 'v': 5, 'x': 10, 'l': 50, 'c': 100, 'd': 500, 'm': 1000
+    };
+    let total = 0;
+    let prev = 0;
+    const str = roman.toLowerCase();
+    for (let i = str.length - 1; i >= 0; i--) {
+        const current = map[str[i]];
+        if (!current) return null;
+        if (current < prev) {
+            total -= current;
+        } else {
+            total += current;
+        }
+        prev = current;
+    }
+    return total;
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
     loadDashboardStats();
@@ -50,6 +72,26 @@ let editorState = {
 
 // ===================== NAVIGATION =====================
 function navigate(pageId, element) {
+    // Jika sedang dalam mode edit dan mencoba keluar dari editor, minta konfirmasi
+    if (editorState && editorState.mode === 'csv-edit' && pageId !== 'editor') {
+        Swal.fire({
+            title: 'Batalkan Pengeditan?',
+            text: "Semua perubahan data yang belum disimpan akan hilang.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#cbd5e1',
+            confirmButtonText: 'Ya, Batalkan',
+            cancelButtonText: 'Kembali Edit'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                editorState.mode = 'csv-view'; // Reset mode agar bisa berpindah
+                navigate(pageId, element);
+            }
+        });
+        return;
+    }
+
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
@@ -57,13 +99,15 @@ function navigate(pageId, element) {
     if (page) page.classList.add('active');
     if (element) element.classList.add('active');
 
-    // Hide editor nav when leaving editor
+    // Sembunyikan nav editor jika keluar dari editor
     if (pageId !== 'editor') {
         const editorNav = document.getElementById('nav-editor');
         if (editorNav) editorNav.classList.remove('active');
+        // Reset editor state
+        editorState.mode = 'csv-view';
     }
 
-    // Scroll to top
+    // Scroll ke atas
     const mc = document.querySelector('.main-content');
     if (mc) mc.scrollTop = 0;
 
@@ -179,9 +223,13 @@ async function saveTableIdentityInline() {
         });
         if (res.ok) {
             editorState.tableName = fullNewName;
+        } else {
+            const errData = await res.json();
+            Swal.fire("Gagal", `Gagal menyimpan nama tabel: ${errData.detail || 'Terjadi kesalahan'}`, "error");
         }
     } catch(e) {
         console.error("Gagal menyimpan identitas tabel", e);
+        Swal.fire("Error", "Terjadi kesalahan jaringan saat menyimpan nama tabel.", "error");
     }
 }
 
@@ -322,13 +370,20 @@ async function loadDocuments() {
         if (doc.status === "ready" || doc.status.startsWith("error") || doc.status === "pending") {
             actionsHtml = `
                 <div style="display:flex; flex-direction:column; gap: 0.3rem; margin-top: 0.5rem; align-items: stretch; max-width: 320px;">
-                    <select id="select-bab-${doc.id}" onchange="handleBabChange(${doc.id}, this.value)" style="width: 100%; padding: 0.3rem; font-size: 0.8rem; border-radius: 4px; border: 1px solid #cbd5e1; outline:none;">
-                        <option value="">-- Pilih Bab (Otomatis) --</option>
-                    </select>
+                    <div style="margin-bottom: 2px;">
+                        <select id="select-bab-${doc.id}" style="width: 100%; padding: 0.3rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+                            <option value="">Memuat daftar bab...</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap: 0.5rem; align-items:center; margin-bottom: 2px;">
+                        <button onclick="openTocEditor(${doc.id}, '${doc.filename}')" class="btn btn-small" style="flex: 1; font-size: 0.8rem; background-color: #6366f1; color: white; padding: 0.35rem 0.5rem; border-radius: 4px; border: none; cursor: pointer;">✏️ Edit Bab Manual</button>
+                    </div>
                     <div style="display:flex; gap: 0.5rem; align-items:center;">
                         <input type="number" id="start-${doc.id}" placeholder="Hal Awal" style="width: 80px; padding: 0.3rem; border-radius: 4px; border: 1px solid #cbd5e1;">
                         <input type="number" id="end-${doc.id}" placeholder="Hal Akhir" style="width: 80px; padding: 0.3rem; border-radius: 4px; border: 1px solid #cbd5e1;">
-                        <button onclick="extractPages(${doc.id})" class="btn btn-small btn-primary">Ekstrak</button>
+                    </div>
+                    <div style="display:flex; gap: 0.5rem; align-items:center; margin-top: 5px;">
+                        <button onclick="extractPages(${doc.id})" class="btn btn-small btn-primary" style="flex: 1;">Ekstrak</button>
                         <button onclick="deleteDocument(${doc.id})" class="btn btn-small btn-danger" style="background-color: #ef4444;">Hapus</button>
                     </div>
                 </div>
@@ -353,14 +408,155 @@ async function loadDocuments() {
         if (inp) inp.value = val;
     }
 
-    // Panggil loadBabSuggestions setelah HTML di-set di DOM
+    // Panggil fungsi pembuat dropdown bab dinamis
     docs.forEach(doc => {
         if (doc.status === "ready" || doc.status.startsWith("error") || doc.status === "pending") {
-            const prevVal = savedInputs[`select-bab-${doc.id}`] || "";
-            loadBabSuggestions(doc.id, prevVal);
+            populateBabDropdown(doc.id);
         }
     });
 }
+
+async function populateBabDropdown(docId) {
+    const select = document.getElementById(`select-bab-${docId}`);
+    if (!select) return;
+    try {
+        const res = await fetch(`${API_BASE}/documents/${docId}/toc`);
+        if (res.ok) {
+            const toc = await res.json();
+            if (toc && toc.length > 0) {
+                select.innerHTML = '<option value="">-- Pilih Bab (Otomatis) --</option>';
+                toc.forEach((item, index) => {
+                    select.innerHTML += `<option value="${index}" data-start="${item.start_page}" data-end="${item.end_page}">${item.title} (Hal ${item.start_page}-${item.end_page})</option>`;
+                });
+                
+                select.onchange = () => {
+                    const selectedOpt = select.options[select.selectedIndex];
+                    const startVal = selectedOpt.getAttribute('data-start');
+                    const endVal = selectedOpt.getAttribute('data-end');
+                    if (startVal && endVal) {
+                        document.getElementById(`start-${docId}`).value = startVal;
+                        document.getElementById(`end-${docId}`).value = endVal;
+                    } else {
+                        document.getElementById(`start-${docId}`).value = '';
+                        document.getElementById(`end-${docId}`).value = '';
+                    }
+                };
+            } else {
+                select.innerHTML = '<option value="">Daftar Bab belum terdeteksi</option>';
+            }
+        }
+    } catch (err) {
+        console.error("Gagal memuat daftar bab:", err);
+        select.innerHTML = '<option value="">Gagal memuat bab</option>';
+    }
+}
+
+async function openTocEditor(docId, filename) {
+    try {
+        const res = await fetch(`${API_BASE}/documents/${docId}/toc`);
+        if (!res.ok) throw new Error("Gagal mengambil TOC");
+        let toc = await res.json() || [];
+
+        // Buat editor HTML
+        let editorHtml = `
+            <div style="max-height: 400px; overflow-y: auto; text-align: left; padding: 0.5rem;" id="toc-editor-rows">
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">
+                    Edit atau tambahkan bab dan halaman jangkauannya secara manual. Klik Simpan jika sudah selesai.
+                </p>
+        `;
+
+        function renderRow(title, start, end, index) {
+            return `
+                <div class="toc-row" data-index="${index}" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                    <input type="text" class="toc-title" value="${title}" placeholder="Judul Bab (e.g. Bab 1 - Geografi)" style="flex: 2; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                    <input type="number" class="toc-start" value="${start}" placeholder="Mulai" style="width: 70px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                    <input type="number" class="toc-end" value="${end}" placeholder="Akhir" style="width: 70px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                    <button onclick="this.parentElement.remove()" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem;">✕</button>
+                </div>
+            `;
+        }
+
+        toc.forEach((item, idx) => {
+            editorHtml += renderRow(item.title, item.start_page, item.end_page, idx);
+        });
+
+        editorHtml += `</div>
+            <div style="text-align: left; margin-top: 10px; padding-left: 0.5rem;">
+                <button id="add-toc-row-btn" class="btn btn-small" style="background-color: #10b981; color: white; padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.85rem;">+ Tambah Bab</button>
+            </div>
+        `;
+
+        Swal.fire({
+            title: `Edit Bab - ${filename}`,
+            html: editorHtml,
+            width: '600px',
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#4F46E5',
+            didOpen: () => {
+                const addBtn = document.getElementById('add-toc-row-btn');
+                const container = document.getElementById('toc-editor-rows');
+                addBtn.addEventListener('click', () => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = renderRow('', '', '', Date.now());
+                    container.appendChild(tempDiv.firstElementChild);
+                });
+            },
+            preConfirm: () => {
+                const rows = document.querySelectorAll('#toc-editor-rows .toc-row');
+                const updatedToc = [];
+                for (const row of rows) {
+                    const title = row.querySelector('.toc-title').value.trim();
+                    const start = parseInt(row.querySelector('.toc-start').value);
+                    const end = parseInt(row.querySelector('.toc-end').value);
+
+                    if (!title) {
+                        Swal.showValidationMessage("Judul Bab tidak boleh kosong!");
+                        return false;
+                    }
+                    if (isNaN(start) || isNaN(end)) {
+                        Swal.showValidationMessage("Halaman awal dan akhir harus berupa angka!");
+                        return false;
+                    }
+                    updatedToc.push({
+                        title: title,
+                        start_page: start,
+                        end_page: end
+                    });
+                }
+                return updatedToc;
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Menyimpan...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const saveRes = await fetch(`${API_BASE}/documents/${docId}/toc`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(result.value)
+                });
+
+                if (saveRes.ok) {
+                    Swal.fire('Tersimpan!', 'Daftar bab berhasil diperbarui secara manual.', 'success');
+                    populateBabDropdown(docId);
+                    populateDocumentList();
+                } else {
+                    const errData = await saveRes.json();
+                    Swal.fire('Gagal!', `Gagal menyimpan: ${errData.detail || 'Terjadi kesalahan'}`, 'error');
+                }
+            }
+        });
+
+    } catch (err) {
+        Swal.fire("Error", `Gagal memuat editor bab: ${err.message}`, "error");
+    }
+}
+
 
 async function extractPages(docId) {
     const startInput = document.getElementById(`start-${docId}`).value;
@@ -474,22 +670,39 @@ async function populateDocumentList() {
     const container = document.getElementById("document-list-container");
     container.innerHTML = "";
     
-    const BPS_CHAPTERS = {
-        "1": "Geografi dan Iklim",
-        "2": "Pemerintahan",
-        "3": "Penduduk dan Ketenagakerjaan",
-        "4": "Sosial dan Kesejahteraan Rakyat",
-        "5": "Pertanian, Kehutanan, Peternakan dan Perikanan",
-        "6": "Industri, Pertambangan, Energi dan Konstruksi",
-        "7": "Perdagangan",
-        "8": "Hotel dan Pariwisata",
-        "9": "Transportasi dan Komunikasi",
-        "10": "Perbankan, Koperasi dan Harga",
-        "11": "Pengeluaran Penduduk",
-        "12": "Perdagangan Luar Negeri",
-        "13": "Sistem Neraca Regional",
-        "14": "Perbandingan Regional"
-    };
+    let docChapters = {};
+    if (viewState.selectedDocId) {
+        try {
+            const tocRes = await fetch(`${API_BASE}/documents/${viewState.selectedDocId}/toc`);
+            if (tocRes.ok) {
+                const tocData = await tocRes.json();
+                tocData.forEach(item => {
+                    // Cari pola "Bab" diikuti angka biasa atau romawi
+                    const match = item.title.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\–\—\.\:]\s*(.*))?/i);
+                    if (match) {
+                        const rawNum = match[1];
+                        let num = parseInt(rawNum, 10);
+                        if (isNaN(num)) {
+                            num = romanToInt(rawNum) || rawNum;
+                        }
+                        let name = match[2] ? match[2].trim() : "";
+                        
+                        // Jika match[2] kosong tetapi ada tanda "-" di string asli, coba pecah manual
+                        if (!name && item.title.includes("-")) {
+                            const parts = item.title.split("-");
+                            if (parts.length > 1) {
+                                name = parts.slice(1).join("-").trim();
+                            }
+                        }
+                        
+                        docChapters[num] = name;
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("Gagal memuat TOC dinamis:", err);
+        }
+    }
 
     // Breadcrumb (Jalur Navigasi)
     const breadcrumb = document.createElement("div");
@@ -509,7 +722,7 @@ async function populateDocumentList() {
         if (doc) {
             bcHTML += `<span style="color:#94a3b8;">/</span><span style="cursor:pointer; color:#2563eb; font-weight:600; padding:4px 8px; border-radius:6px; transition:background 0.2s;" onmouseenter="this.style.background='#e2e8f0'" onmouseleave="this.style.background='transparent'" onclick="viewState.selectedBabNum=null; populateDocumentList();">📁 ${doc.filename}</span>`;
             if (viewState.selectedBabNum !== null) {
-                const chapterName = BPS_CHAPTERS[viewState.selectedBabNum] ? ` - ${BPS_CHAPTERS[viewState.selectedBabNum]}` : "";
+                const chapterName = docChapters[viewState.selectedBabNum] ? ` - ${docChapters[viewState.selectedBabNum]}` : "";
                 bcHTML += `<span style="color:#94a3b8;">/</span><span style="color:#334155; font-weight:600; padding:4px 8px;">📂 Bab ${viewState.selectedBabNum}${chapterName}</span>`;
             }
         }
@@ -623,7 +836,7 @@ async function populateDocumentList() {
             let babNum = 999;
             if (match && match[1]) {
                 babNum = parseInt(match[1], 10);
-                const chapterName = BPS_CHAPTERS[babNum] ? ` - ${BPS_CHAPTERS[babNum]}` : "";
+                const chapterName = docChapters[babNum] ? ` - ${docChapters[babNum]}` : "";
                 babName = `Bab ${babNum}${chapterName}`;
             }
             if (!grouped[babNum]) grouped[babNum] = { name: babName, num: babNum, tables: [] };
@@ -1085,28 +1298,8 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false) {
         }
 
         if (data.rows && data.rows.length > 0) {
-            // Reset summary section
-            const summarySection = document.getElementById('summary-rows-section');
-            const summaryHead = document.getElementById('summary-grid-head');
-            const summaryBody = document.getElementById('summary-grid-body');
-
-            if (summarySection) { summarySection.style.display = 'none'; }
-            if (summaryHead) summaryHead.innerHTML = '';
-            if (summaryBody) summaryBody.innerHTML = '';
-
-            const dataRows = [];
-            const summaryRows = [];
-
-            data.rows.forEach(row => {
-                if (!isEditable && isSummaryRow(row)) {
-                    summaryRows.push(row);
-                } else {
-                    dataRows.push(row);
-                }
-            });
-
-            // Render baris data ke tabel utama
-            dataRows.forEach((row, rowIndex) => {
+            // Render semua baris langsung ke tabel utama (tidak ada pemisahan summary)
+            data.rows.forEach((row, rowIndex) => {
                 const tr = document.createElement("tr");
                 tr.id = isEditable ? `csv-row-${rowIndex}` : `csv-view-row-${rowIndex}`;
 
@@ -1130,51 +1323,9 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false) {
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
-
-            // Render baris ringkasan ke section terpisah (hanya view mode)
-            if (!isEditable && summaryRows.length > 0 && summarySection && summaryHead && summaryBody) {
-                summarySection.style.display = 'block';
-
-                // Buat header ringkasan (salin dari header utama)
-                const headerCols = data.headers ? data.headers.map((h, idx) => {
-                    const unit = data.units && data.units[idx] ? data.units[idx].trim() : "";
-                    const year = data.years && data.years[idx] ? data.years[idx].trim() : "";
-                    const skipUnit = !unit || unit === "-" || unit.toLowerCase() === "satuan";
-                    const skipYear = !year || year === "-" || year.toLowerCase() === "tahun";
-                    let label = h;
-                    if (!skipUnit || !skipYear) {
-                        let suffix = "";
-                        if (!skipUnit) suffix += unit;
-                        if (!skipYear) suffix += suffix ? `, ${year}` : year;
-                        if (suffix) label += ` (${suffix})`;
-                    }
-                    return `<th style="padding:0.5rem 0.75rem; background:#eff6ff; color:#1e40af; font-size:0.8rem; font-weight:700; border-bottom:2px solid #bfdbfe; text-align:left; white-space:nowrap;">${label}</th>`;
-                }).join('') : '<th>—</th>';
-                summaryHead.innerHTML = `<tr>${headerCols}</tr>`;
-
-                // Render baris ringkasan
-                summaryRows.forEach((row, idx) => {
-                    const tr = document.createElement('tr');
-                    tr.style.background = idx % 2 === 0 ? '#f0f9ff' : '#e0f2fe';
-                    tr.style.transition = 'background 0.15s';
-                    tr.onmouseenter = () => tr.style.background = '#bae6fd';
-                    tr.onmouseleave = () => tr.style.background = idx % 2 === 0 ? '#f0f9ff' : '#e0f2fe';
-
-                    let html = '';
-                    row.forEach((cell, ci) => {
-                        const isFirst = ci === 0;
-                        html += `<td style="padding:0.5rem 0.75rem; border-bottom:1px solid #bfdbfe; font-weight:${isFirst ? '700' : '500'}; color:${isFirst ? '#1e40af' : '#1e293b'}; font-size:0.88rem;">${cell !== null ? cell : ""}</td>`;
-                    });
-                    tr.innerHTML = html;
-                    summaryBody.appendChild(tr);
-                });
-            }
         } else {
             const colSpan = data.headers ? (isEditable ? data.headers.length + 1 : data.headers.length) : 1;
             tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center;color:#64748b;padding:2rem;">Tidak ada baris data.</td></tr>`;
-            // Sembunyikan summary section jika tidak ada data
-            const summarySection = document.getElementById('summary-rows-section');
-            if (summarySection) summarySection.style.display = 'none';
         }
     } catch (err) {
         thead.innerHTML = `<tr><th style="color:red">Error: ${err.message}</th></tr>`;
@@ -1779,43 +1930,4 @@ function cancelCsvEditMode(tableId, tableName) {
     });
 }
 
-async function loadBabSuggestions(docId, selectedValue = "") {
-    try {
-        const res = await fetch(`${API_BASE}/documents/${docId}/suggest_pages`);
-        if (!res.ok) return;
-        
-        const babs = await res.json();
-        const select = document.getElementById(`select-bab-${docId}`);
-        if (!select) return;
-        
-        select.innerHTML = '<option value="">-- Pilih Bab (Otomatis) --</option>';
-        babs.forEach(b => {
-            const option = document.createElement('option');
-            const valStr = JSON.stringify({ start: b.start_page, end: b.end_page });
-            option.value = valStr;
-            option.innerText = `${b.title} (Hal ${b.start_page}-${b.end_page})`;
-            select.appendChild(option);
-        });
-        
-        if (selectedValue) {
-            select.value = selectedValue;
-        }
-    } catch (err) {
-        console.error("Gagal memuat rekomendasi bab:", err);
-    }
-}
-
-function handleBabChange(docId, val) {
-    if (val) {
-        try {
-            const bounds = JSON.parse(val);
-            const startInput = document.getElementById(`start-${docId}`);
-            const endInput = document.getElementById(`end-${docId}`);
-            if (startInput) startInput.value = bounds.start;
-            if (endInput) endInput.value = bounds.end;
-        } catch (e) {
-            console.error("Gagal parse value bab:", e);
-        }
-    }
-}
 

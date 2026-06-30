@@ -65,22 +65,52 @@ def main():
                 if pilihan < 1 or pilihan > 11:
                     print("Error: Harap masukkan angka antara 1 sampai 11.")
                     continue
+                
+                # Dynamic page range detection using extract_toc
+                start_p, end_p = None, None
+                try:
+                    from extract_toc import get_toc
+                    import re
                     
-                start_p, end_p = BAB_RANGES[pilihan]
+                    def roman_to_int(roman):
+                        roman = roman.lower()
+                        val = {'i': 1, 'v': 5, 'x': 10, 'l': 50, 'c': 100, 'd': 500, 'm': 1000}
+                        total = 0
+                        prev = 0
+                        for char in reversed(roman):
+                            curr = val.get(char, 0)
+                            if curr < prev:
+                                total -= curr
+                            else:
+                                total += curr
+                            prev = curr
+                        return total
+
+                    print("Menganalisis PDF secara dinamis untuk mendeteksi halaman bab...")
+                    babs = get_toc(pdf_file)
+                    for b in babs:
+                        m = re.match(r'^(bab|chapter)\s+(\d+|[ivxlcdm]+)', b["title"], re.IGNORECASE)
+                        if m:
+                            raw_num = m.group(2)
+                            try:
+                                num = int(raw_num)
+                            except ValueError:
+                                num = roman_to_int(raw_num)
+                            
+                            if num == pilihan:
+                                start_p = b.get("start_page")
+                                end_p = b.get("end_page")
+                                print(f"[!] SUKSES: Ditemukan {b['title']} di halaman {start_p}-{end_p} secara dinamis.")
+                                break
+                except Exception as e:
+                    print(f"[!] Gagal mendeteksi halaman secara dinamis: {e}")
+
+                if start_p is None or end_p is None:
+                    start_p, end_p = BAB_RANGES[pilihan]
+                    print(f"\n[!] INFO: Menggunakan range halaman default untuk Bab {pilihan} (versi 2026): {start_p}-{end_p}.")
+                
                 filters = BAB_FILTERS[pilihan]
                 
-                print(f"\n[!] INFO: Range halaman default untuk Bab {pilihan} (versi 2026) adalah {start_p}-{end_p}.")
-                
-                override = input(f"Apakah Anda ingin mengatur range halamannya secara manual? (y/n) [n]: ").strip().lower()
-                if override == 'y':
-                    try:
-                        start_p = int(input("Masukkan halaman awal (start_page): "))
-                        end_p = int(input("Masukkan halaman akhir (end_page): "))
-                    except ValueError:
-                        print("Input harus berupa angka! Kembali ke menu.")
-                        continue
-                
-                print(f"\nMenyiapkan filter untuk BAB {pilihan}...")
                 print(f"Filter aktif: {filters}")
                 
                 # Save filters to a temporary JSON file to be read by the pipeline

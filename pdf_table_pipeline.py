@@ -707,6 +707,16 @@ def clean_title_description(raw_lines: List[str], table_number: Optional[str] = 
         if not line_clean:
             continue
             
+        # Hapus kata-kata watermark BPS
+        for w in ['tasikmalayakab', 'bps', 'go', 'id', 'tasikmalayakabbpsgoid']:
+            line_clean = re.sub(rf'\b{w}\b', '', line_clean, flags=re.IGNORECASE)
+            
+        # Hapus huruf-huruf aneh tunggal yang tersisa dari watermark
+        line_clean = re.sub(r'\b[a-z]\b', '', line_clean)
+        line_clean = re.sub(r'\s+', ' ', line_clean).strip()
+        
+        if not line_clean:
+            continue            
         # Pisahkan jika ada format "Indonesia / English" (dengan atau tanpa spasi)
         parts = [p.strip() for p in re.split(r'\s*/\s*', line_clean) if p.strip()]
         if len(parts) > 1:
@@ -769,8 +779,8 @@ def clean_title_description(raw_lines: List[str], table_number: Optional[str] = 
     joined_title = re.sub(r'\.+\s*\d+\b', ' ', joined_title)
     # Bersihkan sisa titik ganda yang tidak terhapus
     joined_title = re.sub(r'\s*\.{2,}\s*', ' ', joined_title)
-    # Hapus kata "Tabel" atau "Table" yang mungkin tertinggal di tengah
-    joined_title = re.sub(r'\b(?:Tabel|Table)\b', '', joined_title, flags=re.IGNORECASE)
+    # Hapus kata "Tabel" atau "Table" yang mungkin tertinggal di tengah, termasuk yang terpisah spasi
+    joined_title = re.sub(r'\b(?:Tabel|Table|T\s*a\s*b\s*e\s*l|T\s*a\s*b\s*l\s*e)\b', '', joined_title, flags=re.IGNORECASE)
     
     words_list = joined_title.split()
     unique_words = []
@@ -969,16 +979,53 @@ class PDFOfflineTableExtractor:
         if not table:
             return pd.DataFrame()
             
+        # --- PRE-PROCESSING KHUSUS 2019: Buang baris-baris awal yang isinya judul tabel ---
+        # Karena di PDF 2019 strategi 'text' menggabungkan judul ke dalam tabel, kita buang.
+        header_keywords = ['kecamatan', 'gol/', 'golongan', 'umur', 'lapangan', 'pendidikan', 'status', 'jenis', 'bulan', 'kabupaten/kota', 'kota/city', 'kabupaten/regency', 'pengguna', 'uraian', 'rincian', 'nama', 'tahun', 'wilayah', 'sektor']
+        start_idx = 0
+        for i in range(min(15, len(table))):
+            row_text = " ".join([str(c) for c in table[i] if c]).lower()
+            row_text = re.sub(r'\s+', ' ', row_text)
+            
+            # Jika baris ini mengandung keyword header dan BUKAN murni judul tabel
+            if any(kw in row_text for kw in header_keywords) and not ("tabel " in row_text or "table " in row_text or re.search(r'\b\d+\.\d+\.\d+\b', row_text)):
+                non_empty = [c for c in table[i] if str(c).strip()]
+                # Pastikan baris header terdistribusi ke beberapa kolom, tidak mengumpul
+                if len(non_empty) > 1:
+                    start_idx = i
+                    break
+                    
+        # Cari mundur sedikit jika ada baris yang tampaknya bagian dari header atas (seperti spanner)
+        # Asalkan bukan judul tabel
+        if start_idx > 0:
+            while start_idx > 0:
+                prev_text = " ".join([str(c) for c in table[start_idx-1] if c]).lower()
+                if "tabel " in prev_text or "table " in prev_text or "angka 201" in prev_text or "figures 201" in prev_text:
+                    break
+                if not any(str(c).strip() for c in table[start_idx-1]):
+                    break
+                start_idx -= 1
+            table = table[start_idx:]
+            
+        if not table:
+            return pd.DataFrame()
+
         index_row_idx = -1
         # Cari baris index e.g. (1), (2), (3) dst.
         for i, row in enumerate(table):
+            row_str_clean = "".join([str(c) for c in row if c])
+            row_str_clean = re.sub(r'\s+', '', row_str_clean)
+            if "(1)" in row_str_clean and ("(2)" in row_str_clean or "(3)" in row_str_clean or "(4)" in row_str_clean or "(5)" in row_str_clean):
+                index_row_idx = i
+                break
+            
+            # Coba deteksi pola lama juga jika hanya ada 1 kolom
             if row and row[0]:
                 cell_val = str(row[0]).strip()
                 cell_val = fix_doubled_text(cell_val)
                 if re.match(r'^\(\d+\)$', cell_val):
                     index_row_idx = i
                     break
-                
         if index_row_idx != -1 and index_row_idx > 0:
             # Format BPS Terdeteksi!
             
@@ -1235,9 +1282,19 @@ class PDFOfflineTableExtractor:
                         table_num = "6.3.1_Bagian_2"
                 # -----------------------------------------------------------------
 
-                # Menggunakan strategi ekstraksi tabel pdfplumber default (deteksi garis vertikal/horizontal)
-                tables = page.extract_tables()
-                
+                # KHUSUS 2019: Menggunakan strategi ekstraksi text karena tabel tidak memiliki grid line yang utuh
+                if pdf_path and "2019" in os.path.basename(pdf_path):
+                    # Potong bagian atas halaman (y0 < 90) yang sering berisi judul tabel & watermark
+                    # agar tidak terdeteksi sebagai bagian dari kolom-kolom tabel.
+                    crop_box = (0, 90, page.width, page.height)
+                    cropped_page = page.crop(crop_box)
+                    tables = cropped_page.extract_tables({
+                        "vertical_strategy": "text",
+                        "horizontal_strategy": "text"
+                    })
+                else:
+                    # Menggunakan strategi ekstraksi tabel pdfplumber default (deteksi garis vertikal/horizontal)
+                    tables = page.extract_tables()                
                 if not tables:
                     logging.info(f"-> Halaman {actual_page} DIABAIKAN. Alasan: Tidak ada kerangka tabel yang terdeteksi.")
                     continue
@@ -1381,31 +1438,48 @@ if __name__ == "__main__":
                     is_merged = False
                     
                     for prev in merged_categories:
-                        if table_num and prev.get('table_number') and table_num != prev['table_number']:
-                            continue
+                        # --- AUTO-MERGE: Paksa gabung jika nomor tabel sama ---
+                        forced_merge = False
+                        if table_num and prev.get('table_number') and table_num == prev.get('table_number'):
+                            forced_merge = True
+
+                        if forced_merge or (table_num and prev.get('table_number') and table_num != prev['table_number']):
+                            if not forced_merge:
+                                continue
                             
                         prev_df = prev['dataframe']
                         
                         # Gabung vertikal jika kolomnya cocok (jumlah kolom sama dan nama mirip) atau jika nomor tabel sama dan jumlah kolom sama
-                        if len(df.columns) == len(prev_df.columns):
-                            match_found = False
-                            if table_num and prev.get('table_number') and table_num == prev['table_number']:
-                                match_found = True
-                            else:
-                                match_found = True
-                                for k in range(min(2, len(df.columns))):
-                                    c1 = str(df.columns[k]).strip().lower()
-                                    c2 = str(prev_df.columns[k]).strip().lower()
-                                    if c1[:15] != c2[:15]:
-                                        match_found = False
-                                        break
-                            if match_found:
-                                df.columns = prev_df.columns
-                                prev['dataframe'] = pd.concat([prev_df, df], ignore_index=True)
-                                prev['pages'].extend(pages)
-                                # Lanjutkan status has_horizontal_join dari parent
-                                is_merged = True
-                                break
+                        match_found = False
+                        if forced_merge:
+                            match_found = True
+                        elif len(df.columns) == len(prev_df.columns):
+                            match_found = True
+                            for k in range(min(2, len(df.columns))):
+                                c1 = str(df.columns[k]).strip().lower()
+                                c2 = str(prev_df.columns[k]).strip().lower()
+                                if c1[:15] != c2[:15]:
+                                    match_found = False
+                                    break
+                            
+                        if match_found:
+                            # Jika jumlah kolom berbeda saat dipaksa merge, lakukan alignment agar concat tidak gagal/eror
+                            if len(df.columns) != len(prev_df.columns):
+                                logging.info(f"Forced Merge: Aligning columns from {len(df.columns)} to {len(prev_df.columns)}")
+                                if len(df.columns) < len(prev_df.columns):
+                                    # Tambahkan kolom kosong
+                                    for i in range(len(prev_df.columns) - len(df.columns)):
+                                        df[f"_temp_col_{i}"] = ""
+                                else:
+                                    # Pangkas kolom lebih
+                                    df = df.iloc[:, :len(prev_df.columns)]
+                            
+                            df.columns = prev_df.columns
+                            prev['dataframe'] = pd.concat([prev_df, df], ignore_index=True)
+                            prev['pages'].extend(pages)
+                            # Lanjutkan status has_horizontal_join dari parent
+                            is_merged = True
+                            break
                                 
                     if not is_merged:
                         merged_categories.append({
@@ -1613,22 +1687,6 @@ if __name__ == "__main__":
                                 df_to_save = apply_modifications(df_to_save, table_mods)
                         
                         first_col = df_to_save.columns[0] if not df_to_save.empty else None
-                        
-                        # Konversi data anomali (-) di kolom numerik menjadi 0
-                        for col in df_to_save.columns:
-                            is_numeric = True
-                            has_any_val = False
-                            for x in df_to_save[col]:
-                                val_str = str(x).strip()
-                                if val_str in ["", "nan", "None"]:
-                                    continue
-                                has_any_val = True
-                                if not re.match(r'^[\d.,\- ]+$', val_str):
-                                    is_numeric = False
-                                    break
-                                    
-                            if is_numeric and has_any_val:
-                                df_to_save[col] = df_to_save[col].apply(lambda x: "0" if str(x).strip() == "-" else x)
                         
                         
                         # ============================================================

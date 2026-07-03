@@ -120,7 +120,7 @@ def main():
                 import re
                 year_match = re.search(r'(\d{4})', pdf_file)
                 year_str = year_match.group(1) if year_match else "unknown"
-                output_dir = f"Hasil_Ekstraksi_{year_str}"
+                output_dir = os.path.join("outputs", f"Hasil_Ekstraksi_{year_str}")
                 
                 print(f"Menjalankan ekstraksi untuk halaman {start_p} hingga {end_p} (Tahun {year_str})...")
                 cmd = f'python pdf_table_pipeline.py --pdf "{pdf_file}" --start_page {start_p} --end_page {end_p} --filter_file current_filter.json --output_dir "{output_dir}"'
@@ -139,7 +139,7 @@ def main():
                 import re
                 year_match = re.search(r'(\d{4})', pdf_file)
                 year_str = year_match.group(1) if year_match else "unknown"
-                output_dir = f"Hasil_Ekstraksi_{year_str}"
+                output_dir = os.path.join("outputs", f"Hasil_Ekstraksi_{year_str}")
                 
                 print(f"Menjalankan ekstraksi untuk halaman {start_p} hingga {end_p} (Tanpa Filter Bab)...")
                 # Jika manual range, tidak perlu pakai --filter_file agar semua tabel di-extract

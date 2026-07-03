@@ -12,3 +12,9 @@ __pycache__/
 *.csv
 *.xlsx
 *.pdf
+
+# Folder data lokal lama (jika masih ada, abaikan)
+backend/uploads/
+backend/hasil_ekstraksi_web/
+uploads/
+hasil_ekstraksi_web/

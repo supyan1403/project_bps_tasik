@@ -17,7 +17,7 @@ from database import engine, get_db
 # ... [imports and utility functions] ...
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from pdf_table_pipeline import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS
+from pipeline_utils import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS
 from extract_toc import get_toc
 
 def clean_bilingual_header(header: str) -> str:
@@ -80,6 +80,17 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="BPS Extraction Dashboard API")
 
+@app.on_event("startup")
+def reset_stuck_extractions():
+    db = next(get_db())
+    try:
+        stuck_docs = db.query(models.Document).filter(models.Document.status.like("extracting%")).all()
+        for doc in stuck_docs:
+            doc.status = "ready"
+        db.commit()
+        print(f"Reset {len(stuck_docs)} stuck document extraction status(es) to ready.")
+    except Exception as e:
+        print(f"Gagal me-reset status ekstraksi terhenti: {e}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -90,14 +101,23 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIR = "uploads"
-EXTRACT_DIR = "hasil_ekstraksi_web"
+# =====================================================================
+# DIREKTORI PENYIMPANAN
+# CSV hasil ekstraksi dan PDF upload disimpan di luar folder project
+# agar tidak mengotori direktori kode sumber.
+# Lokasi: ~/BPS_Data/ (Linux/Mac) atau C:\Users\[user]\BPS_Data\ (Windows)
+# =====================================================================
+_BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
+UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
+EXTRACT_DIR = os.path.join(_BPS_DATA_ROOT, "hasil_ekstraksi_web")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
+
+# Mount folder uploads dari lokasi baru (luar project)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.get("/")
 def read_root(request: Request):
@@ -115,6 +135,39 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "total_tables": total_tables,
         "total_rows": total_rows,
         "total_anomalies": total_anomalies
+    }
+
+@app.get("/api/stats/chart")
+def get_chart_stats(db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    # Hitung jumlah tabel per tahun publikasi
+    results = db.query(
+        models.Document.year,
+        func.count(models.ExtractedTable.id)
+    ).join(
+        models.ExtractedTable, 
+        models.Document.id == models.ExtractedTable.document_id
+    ).group_by(
+        models.Document.year
+    ).order_by(
+        models.Document.year.asc()
+    ).all()
+    
+    years = [str(r[0]) for r in results]
+    table_counts = [r[1] for r in results]
+    
+    return {
+        "labels": years,
+        "datasets": [
+            {
+                "label": "Jumlah Tabel Terintegrasi",
+                "data": table_counts,
+                "backgroundColor": "rgba(59, 130, 246, 0.65)",
+                "borderColor": "rgba(59, 130, 246, 1)",
+                "borderWidth": 2,
+                "borderRadius": 6
+            }
+        ]
     }
 
 def run_extract_toc(doc_id: int, file_path: str, output_path: str):
@@ -186,6 +239,29 @@ def get_document_toc(doc_id: int, db: Session = Depends(get_db)):
             pass
             
     return []
+
+@app.post("/api/documents/{doc_id}/detect_toc")
+def detect_document_toc(doc_id: int, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    file_path = os.path.join(UPLOAD_DIR, doc.filename)
+    output_path = os.path.join(EXTRACT_DIR, f"doc_{doc.id}")
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=400, detail="File PDF tidak ditemukan di server.")
+        
+    try:
+        import json
+        os.makedirs(output_path, exist_ok=True)
+        toc_data = get_toc(file_path)
+        toc_path = os.path.join(output_path, "toc.json")
+        with open(toc_path, "w", encoding="utf-8") as f:
+            json.dump(toc_data, f, indent=4)
+        return {"status": "success", "message": f"Deteksi Bab selesai. Menemukan {len(toc_data)} bab.", "data": toc_data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal melakukan deteksi bab: {str(e)}")
 
 class TOCItem(BaseModel):
     title: str
@@ -277,6 +353,10 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
             "--end_page", str(end_page)
         ]
         
+        mods_path = os.path.abspath("../table_mods.json")
+        if os.path.exists(mods_path):
+            cmd.extend(["--modifications", mods_path])
+            
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
@@ -389,6 +469,45 @@ def delete_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)):
     return {"message": f"{deleted_count} tabel pada Bab {bab_num} berhasil dihapus"}
 
 
+@app.delete("/api/documents/{doc_id}/tables")
+def delete_all_tables(doc_id: int, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    deleted_count = len(tables)
+    
+    # 1. Hapus semua record tabel dari database
+    for table in tables:
+        db.delete(table)
+    db.commit()
+    
+    # 2. Hapus semua subfolder hasil ekstraksi (Ekstraksi_Hal_...) di folder doc
+    output_path = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
+    safe_output_path = get_safe_windows_path(output_path)
+    
+    if os.path.exists(safe_output_path):
+        import shutil
+        import stat
+        def remove_readonly(func, path, excinfo):
+            try:
+                os.chmod(path, stat.S_IWRITE)
+                func(path)
+            except Exception:
+                pass
+        
+        for item in os.listdir(safe_output_path):
+            item_path = os.path.join(safe_output_path, item)
+            if os.path.isdir(item_path) and item.startswith("Ekstraksi_Hal_"):
+                try:
+                    shutil.rmtree(item_path, onerror=remove_readonly)
+                except Exception:
+                    pass
+                    
+    return {"message": f"Berhasil menghapus seluruh ({deleted_count}) tabel hasil ekstraksi untuk dokumen ini"}
+
+
 def parse_csv_for_db(safe_path: str) -> tuple:
     raw_rows = []
     with open(safe_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -438,10 +557,10 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db)):
         anomaly_count = 0
         for record in records:
             is_anomaly = False
-            # Deteksi anomali: cek apakah ada sel kosong, "-", "?", atau karakter aneh "" (unicode replacement)
+            # Deteksi anomali: hanya tandai jika mengandung "?" atau kosong
             for key, val in record.items():
                 str_val = str(val).strip()
-                if str_val in ["", "-", "?", ""]:
+                if "?" in str_val or str_val == "":
                     is_anomaly = True
                     break
             
@@ -482,6 +601,21 @@ def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Updated successfully"}
 
+@app.put("/api/data/{row_id}/safe")
+def mark_row_safe(row_id: int, db: Session = Depends(get_db)):
+    row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Row not found")
+    row.is_anomaly = False
+    db.commit()
+    return {"message": "Row marked as safe"}
+
+@app.put("/api/tables/{table_id}/safe-all")
+def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db)):
+    db.query(models.TableRow).filter(models.TableRow.table_id == table_id).update({"is_anomaly": False})
+    db.commit()
+    return {"message": "All rows marked as safe"}
+
 @app.delete("/api/data/{row_id}")
 def delete_row(row_id: int, db: Session = Depends(get_db)):
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
@@ -490,6 +624,196 @@ def delete_row(row_id: int, db: Session = Depends(get_db)):
     db.delete(row)
     db.commit()
     return {"message": "Deleted successfully"}
+
+# ==========================================================
+# TIME SERIES SEARCH ENDPOINT
+# ==========================================================
+@app.get("/api/search/timeseries")
+def search_timeseries(keyword: str, start_year: int = None, end_year: int = None, db: Session = Depends(get_db)):
+    if not keyword or len(keyword.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Keyword minimal 3 karakter")
+    
+    keyword_lower = keyword.lower().strip()
+    
+    # List kecamatan untuk dieksklusi dari pencarian judul/kolom tabel
+    kecamatan_list = [
+        "kadipaten", "pagerageung", "ciawi", "sukaresik", "cisayong", "sukahening", 
+        "rajapolah", "jamanis", "cikatomas", "pancatengah", "karangnunggal", 
+        "cipatujah", "cikalong", "culamega", "bantarkalong", "bojongasih", 
+        "parungponteng", "karangjaya", "cineam", "manonjaya", "gunungtanjung", 
+        "salopa", "jatiwaras", "sukaraja", "tanjungjaya", "sukarame", "singaparna", 
+        "mangunreja", "leuwisari", "padakembang", "sariwangi", "cigalontang", 
+        "taraju", "bojonggambir", "sodonghilir", "puspahiang", "salawu"
+    ]
+    
+    words = [w.strip() for w in keyword_lower.split() if len(w.strip()) >= 2]
+    table_search_words = [w for w in words if w not in kecamatan_list]
+    if not table_search_words:
+        table_search_words = words
+        
+    # 1. Filter Document berdasarkan rentang tahun publikasi
+    # (Dokumen tahun t+1 berisi data tahun t, jadi batas atas dinaikkan +1)
+    doc_query = db.query(models.Document)
+    if start_year:
+        doc_query = doc_query.filter(models.Document.year >= start_year)
+    if end_year:
+        doc_query = doc_query.filter(models.Document.year <= (end_year + 1))
+    
+    docs = doc_query.all()
+    if not docs:
+        return {"status": "success", "data": [], "message": "Tidak ada publikasi di rentang tahun tersebut."}
+        
+    doc_ids = [d.id for d in docs]
+    doc_year_map = {d.id: d.year for d in docs}
+    
+    # Ambil semua tabel dalam dokumen terfilter
+    all_tables = db.query(models.ExtractedTable).filter(
+        models.ExtractedTable.document_id.in_(doc_ids)
+    ).all()
+    
+    results = []
+    
+    def is_numeric_value(val: str) -> bool:
+        cleaned = val.strip().replace('.', '').replace(',', '').replace('-', '').replace(' ', '')
+        return cleaned.isdigit() or (cleaned.replace('.','',1).isdigit() if cleaned else False)
+        
+    import re
+    
+    for table in all_tables:
+        # Ambil baris pertama untuk membaca header
+        all_rows = db.query(models.TableRow).filter(
+            models.TableRow.table_id == table.id
+        ).all()
+        
+        if not all_rows:
+            continue
+            
+        first_record = all_rows[0].data
+        all_headers = list(first_record.keys())
+        if not all_headers:
+            continue
+            
+        # Cari entity_key (kolom kecamatan/nama)
+        sample_rows = [r.data for r in all_rows[:5]]
+        entity_key = all_headers[0]
+        best_text_score = -1
+        for col in all_headers:
+            text_count = 0
+            for sample in sample_rows:
+                val = str(sample.get(col, "")).strip()
+                if val and not is_numeric_value(val) and val not in ["-", "...", ""]:
+                    text_count += 1
+            if text_count > best_text_score:
+                best_text_score = text_count
+                entity_key = col
+                
+        value_cols = [col for col in all_headers if col != entity_key]
+        
+        # Validasi kecocokan tabel secara ketat (Strict Multi-Word Matching)
+        table_name_lower = table.table_name.lower()
+        
+        matched_words = []
+        for w in table_search_words:
+            if w in table_name_lower:
+                matched_words.append(w)
+                continue
+            col_match = False
+            for col in value_cols:
+                if w in col.lower():
+                    col_match = True
+                    break
+            if col_match:
+                matched_words.append(w)
+                
+        # Jika tidak semua kata pencarian cocok, lewati tabel ini
+        if len(matched_words) < len(table_search_words):
+            continue
+            
+        # Tentukan kolom mana yang benar-benar relevan
+        table_contains_all = all(w in table_name_lower for w in table_search_words)
+        
+        relevant_value_cols = []
+        if table_contains_all:
+            relevant_value_cols = value_cols
+        else:
+            missing_words = [w for w in table_search_words if w not in table_name_lower]
+            for col in value_cols:
+                col_lower = col.lower()
+                if any(mw in col_lower for mw in missing_words):
+                    relevant_value_cols.append(col)
+            
+            if not relevant_value_cols:
+                relevant_value_cols = value_cols
+                
+        # Filter kolom berdasarkan tahun (start_year s/d end_year) secara ketat
+        filtered_by_year_cols = []
+        doc_year = doc_year_map[table.document_id] # Tahun publikasi dokumen
+        
+        for col in relevant_value_cols:
+            # Cari tahun 4-digit di header kolom (misal: 2023, 2024*, 2022)
+            year_match = re.search(r'\b(19\d{2}|20\d{2})\*?\b', col)
+            if year_match:
+                col_year = int(year_match.group(1))
+            else:
+                # Jika tidak ada tahun di header, asumsikan data tahun = tahun publikasi - 1
+                col_year = doc_year - 1
+                
+            # Filter berdasarkan input rentang tahun user
+            is_valid_year = True
+            if start_year and col_year < start_year:
+                is_valid_year = False
+            if end_year and col_year > end_year:
+                is_valid_year = False
+                
+            if is_valid_year:
+                filtered_by_year_cols.append(col)
+                
+        relevant_value_cols = filtered_by_year_cols
+                
+        # Filter entitas (Kecamatan) secara cerdas jika keyword mengandung nama kecamatan
+        entity_matches = []
+        for r in all_rows:
+            record = r.data
+            entity_name = str(record.get(entity_key, "")).strip()
+            if not entity_name or entity_name.lower() in ["-", "...", "jumlah", "total"]:
+                continue
+            entity_lower = entity_name.lower().strip()
+            entity_clean = re.sub(r'^\d+[\s\.]*', '', entity_lower)
+            if entity_clean and (entity_clean in keyword_lower or keyword_lower in entity_clean):
+                entity_matches.append(entity_name)
+                
+        filter_by_entity = len(entity_matches) > 0
+        
+        data_rows = []
+        for r in all_rows:
+            record = r.data
+            entity_name = str(record.get(entity_key, "")).strip()
+            if not entity_name or entity_name in ["-", "..."]:
+                continue
+            if filter_by_entity and entity_name not in entity_matches:
+                continue
+                
+            values = {}
+            for col_name in relevant_value_cols:
+                values[col_name] = str(record.get(col_name, "")).strip()
+                
+            data_rows.append({
+                "entitas": entity_name,
+                "nilai": values
+            })
+            
+        if data_rows:
+            results.append({
+                "table_id": table.id,
+                "table_name": table.table_name,
+                "year": doc_year_map[table.document_id],
+                "entity_key": entity_key,
+                "headers": relevant_value_cols,
+                "data": data_rows
+            })
+            
+    return {"status": "success", "keyword": keyword_lower, "data": results}
+
 
 @app.get("/api/tables/{table_id}/csv")
 def download_table_csv(table_id: int, db: Session = Depends(get_db)):
@@ -854,13 +1178,13 @@ def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Dep
         # Sync dengan DB jika table ini sudah pernah di-load ke database
         db_has_rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).first()
         if db_has_rows:
-            # Re-load data ke TableRow DB agar tersinkronisasi
             db.query(models.TableRow).filter(models.TableRow.table_id == table_id).delete()
             headers, records = parse_csv_for_db(safe_path)
             for record in records:
                 is_anomaly = False
                 for key, val in record.items():
-                    if str(val).strip() in ["", "-", "?", ""]:
+                    str_val = str(val).strip()
+                    if "?" in str_val or str_val == "":
                         is_anomaly = True
                         break
                 db_row = models.TableRow(table_id=table.id, data=record, is_anomaly=is_anomaly)
@@ -871,4 +1195,140 @@ def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Dep
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ==========================================================
+# ADMIN DATABASE ENDPOINTS
+# ==========================================================
 
+@app.get("/api/admin/tables")
+def admin_get_tables(db: Session = Depends(get_db)):
+    # Ambil semua tabel beserta info tahun dari dokumennya
+    tables = db.query(
+        models.ExtractedTable.id, 
+        models.ExtractedTable.table_name, 
+        models.ExtractedTable.csv_path,
+        models.Document.year
+    ).join(models.Document, models.ExtractedTable.document_id == models.Document.id).all()
+    
+    result = []
+    for t in tables:
+        # Hitung jumlah baris data yang SUDAH di-load ke database (TableRow)
+        row_count = db.query(models.TableRow).filter(models.TableRow.table_id == t.id).count()
+        if row_count > 0:
+            result.append({
+                "id": t.id,
+                "table_name": t.table_name,
+                "csv_path": t.csv_path,
+                "year": t.year,
+                "db_rows": row_count
+            })
+    
+    return result
+
+@app.post("/api/admin/reset")
+def admin_reset_database(db: Session = Depends(get_db)):
+    try:
+        # Hapus semua TableRow
+        db.query(models.TableRow).delete()
+        # Hapus semua ExtractedTable
+        db.query(models.ExtractedTable).delete()
+        # Hapus semua Document
+        db.query(models.Document).delete()
+        
+        db.commit()
+        return {"message": "Semua data di database berhasil direset."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/documents/{doc_id}/load-all")
+def load_all_document_tables(doc_id: int, db: Session = Depends(get_db)):
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    loaded_count = 0
+    errors = 0
+    for t in tables:
+        try:
+            db.query(models.TableRow).filter(models.TableRow.table_id == t.id).delete()
+            safe_path = get_safe_windows_path(t.csv_path)
+            headers, records = parse_csv_for_db(safe_path)
+            for record in records:
+                is_anomaly = False
+                for key, val in record.items():
+                    str_val = str(val).strip()
+                    if "?" in str_val or str_val == "":
+                        is_anomaly = True
+                        break
+                db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly)
+                db.add(db_row)
+            loaded_count += 1
+        except Exception:
+            errors += 1
+    db.commit()
+    return {"message": f"Berhasil me-load {loaded_count} tabel ke database. Gagal: {errors} tabel."}
+
+@app.post("/api/documents/{doc_id}/bab/{bab_num}/load-all")
+def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get_db)):
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    loaded_count = 0
+    errors = 0
+    import re
+    for t in tables:
+        match = re.search(r'Tabel[\s_]*(\d+)', t.table_name, re.IGNORECASE)
+        if match and int(match.group(1)) == bab_num:
+            try:
+                db.query(models.TableRow).filter(models.TableRow.table_id == t.id).delete()
+                safe_path = get_safe_windows_path(t.csv_path)
+                headers, records = parse_csv_for_db(safe_path)
+                for record in records:
+                    is_anomaly = False
+                    for key, val in record.items():
+                        str_val = str(val).strip()
+                        if "?" in str_val or str_val == "":
+                            is_anomaly = True
+                            break
+                    db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly)
+                    db.add(db_row)
+                loaded_count += 1
+            except Exception:
+                errors += 1
+    db.commit()
+    return {"message": f"Berhasil me-load {loaded_count} tabel Bab {bab_num} ke database. Gagal: {errors} tabel."}
+
+@app.put("/api/admin/safe-all")
+def mark_all_database_anomalies_safe(db: Session = Depends(get_db)):
+    db.query(models.TableRow).filter(models.TableRow.is_anomaly == True).update({"is_anomaly": False})
+    db.commit()
+    return {"message": "Semua data anomali di database berhasil ditandai aman."}
+
+@app.get("/api/admin/anomalies")
+def get_tables_with_anomalies(db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    results = db.query(
+        models.ExtractedTable.id,
+        models.ExtractedTable.table_name,
+        models.Document.year,
+        func.count(models.TableRow.id)
+    ).join(
+        models.TableRow, models.ExtractedTable.id == models.TableRow.table_id
+    ).join(
+        models.Document, models.ExtractedTable.document_id == models.Document.id
+    ).filter(
+        models.TableRow.is_anomaly == True
+    ).group_by(
+        models.ExtractedTable.id,
+        models.ExtractedTable.table_name,
+        models.Document.year
+    ).all()
+    
+    return [
+        {
+            "table_id": r[0],
+            "table_name": r[1],
+            "year": r[2],
+            "anomaly_count": r[3]
+        }
+        for r in results
+    ]
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

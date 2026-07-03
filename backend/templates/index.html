@@ -6,16 +6,29 @@
     <title>BPS Extraction Hub</title>
     <meta name="description" content="Dashboard ekstraksi dan manajemen data tabel PDF BPS Kabupaten Tasikmalaya">
     <link rel="stylesheet" href="/static/style.css?v=20260629_1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-title">BPS Hub</div>
+        
+        <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+            <label style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 5px;">Akses Role Sistem</label>
+            <select id="role-selector" onchange="changeRole(this.value)" style="width: 100%; padding: 8px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; font-weight: 500; outline: none;">
+                <option value="pegawai" style="color: black;">Pegawai BPS</option>
+                <option value="admin" style="color: black;">Admin System</option>
+            </select>
+        </div>
+
         <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard', this)">Dashboard</div>
-        <div class="nav-item" id="nav-publikasi" onclick="navigate('publikasi', this)">Ekstraksi PDF</div>
-        <div class="nav-item" id="nav-tabel" onclick="navigate('tabel', this)">Data Tabel</div>
+        <div class="nav-item admin-only" id="nav-publikasi" onclick="navigate('publikasi', this)" style="display: none;">Ekstraksi PDF</div>
+        <div class="nav-item admin-only" id="nav-tabel" onclick="navigate('tabel', this)" style="display: none;">Data Tabel</div>
+        <div class="nav-item" id="nav-timeseries" onclick="navigate('timeseries', this)">Analisis Deret Waktu</div>
+        <div class="nav-item admin-only" id="nav-admin" onclick="navigate('admin', this)" style="display: none; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 15px;">Manajemen Database</div>
     </div>
 
     <!-- Main Content -->
@@ -23,26 +36,116 @@
         
         <!-- PAGE 1: Dashboard -->
         <div id="page-dashboard" class="page-section active">
-            <h2>Dashboard Analytics</h2>
-            <div class="widget-grid">
-                <div class="widget">
-                    <div class="widget-title">Total Publikasi (PDF)</div>
-                    <div class="widget-value" id="stat-docs">-</div>
+            <!-- Welcome Banner -->
+            <div class="welcome-banner" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; padding: 1.5rem 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); text-align: left;">
+                <h1 style="margin: 0 0 0.5rem 0; font-size: 1.75rem; font-weight: 700; color: white;">Selamat Datang di Portal Data BPS Kabupaten Tasikmalaya!</h1>
+                <p id="welcome-role-text" style="margin: 0; opacity: 0.9; font-size: 1rem;">Anda masuk sebagai Pegawai BPS Tasikmalaya.</p>
+            </div>
+
+            <!-- ADMIN ONLY VIEW -->
+            <div id="dashboard-admin-view" style="display: none; margin-bottom: 2rem; text-align: left;">
+                <h3 style="margin-bottom: 1rem; color: #1e293b; font-weight: 600;">Statistik Kontrol Administrator</h3>
+                <div class="widget-grid" style="margin-bottom: 2rem;">
+                    <div class="widget">
+                        <div class="widget-title">Total Publikasi (PDF)</div>
+                        <div class="widget-value" id="stat-docs">-</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-title">Total Tabel Terekstrak</div>
+                        <div class="widget-value" id="stat-tables">-</div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-title">Total Baris Data</div>
+                        <div class="widget-value" id="stat-rows">-</div>
+                    </div>
+                    <div class="widget danger">
+                        <div class="widget-title">Data Anomali (Perlu Dicek)</div>
+                        <div class="widget-value" style="color: var(--danger)" id="stat-anomalies">-</div>
+                    </div>
                 </div>
-                <div class="widget">
-                    <div class="widget-title">Total Tabel Terekstrak</div>
-                    <div class="widget-value" id="stat-tables">-</div>
+
+                <!-- Status DB Bersih Banner -->
+                <div id="admin-db-clean-banner" style="display: none; padding: 1.25rem 1.5rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; font-weight: 600; margin-top: 1.5rem; text-align: left; align-items: center; gap: 10px; box-shadow: 0 2px 4px rgba(6, 95, 70, 0.05);">
+                    <span style="font-size: 1.2rem;">🎉</span>
+                    <span>Database Bersih! Seluruh data terekstrak dalam kondisi prima tanpa data anomali.</span>
                 </div>
-                <div class="widget">
-                    <div class="widget-title">Total Baris Data</div>
-                    <div class="widget-value" id="stat-rows">-</div>
+
+                <!-- Admin Anomalies List Panel -->
+                <div id="admin-anomalies-panel" class="glass-panel" style="display: none; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white; margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">⚠️ Daftar Tabel dengan Data Anomali</h3>
+                        <button onclick="markAllDbAnomaliesSafe()" class="btn btn-small" style="background:#ef4444; border: 1px solid #dc2626; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 6px 14px; border-radius: 8px;">
+                            ✔️ Tandai Semua Aman di Database
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #cbd5e1; background: #f8fafc;">
+                                    <th style="padding: 10px; color: #475569; font-weight: 600;">Nama Tabel</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 80px; text-align: center;">Tahun</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Jumlah Anomali</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 110px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-anomalies-tbody">
+                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">Memuat data anomali...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="widget danger">
-                    <div class="widget-title">Data Anomali (Perlu Dicek)</div>
-                    <div class="widget-value" style="color: var(--danger)" id="stat-anomalies">-</div>
+
+                <!-- Admin Recent Extraction Activities Panel -->
+                <div class="glass-panel" style="padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white; margin-top: 1.5rem;">
+                    <h3 style="margin: 0 0 1.25rem 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">📋 Log Aktivitas Ekstraksi Terbaru</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #cbd5e1; background: #f8fafc;">
+                                    <th style="padding: 10px; color: #475569; font-weight: 600;">Nama Publikasi PDF</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 80px; text-align: center;">Tahun</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 180px; text-align: center;">Status Ekstraksi</th>
+                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 140px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-recent-tbody">
+                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">Memuat log aktivitas...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <button onclick="loadDashboardStats()" class="btn btn-small btn-primary">Refresh Data</button>
+
+            <!-- PEGAWAI / GENERAL VIEW -->
+            <div id="dashboard-pegawai-view" style="margin-bottom: 2rem; text-align: left;">
+                <h3 style="margin-bottom: 1rem; color: #1e293b; font-weight: 600;">Ringkasan Data Publikasi</h3>
+                <div class="widget-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 2rem;">
+                    <div class="widget" style="border-left: 4px solid #3b82f6;">
+                        <div class="widget-title">Dokumen Terdaftar</div>
+                        <div class="widget-value" id="user-stat-docs">-</div>
+                    </div>
+                    <div class="widget" style="border-left: 4px solid #10b981;">
+                        <div class="widget-title">Tabel Siap Konsumsi</div>
+                        <div class="widget-value" id="user-stat-tables">-</div>
+                    </div>
+                    <div class="widget" style="border-left: 4px solid #f59e0b;">
+                        <div class="widget-title">Baris Record Terintegrasi</div>
+                        <div class="widget-value" id="user-stat-rows">-</div>
+                    </div>
+                </div>
+
+                <!-- Visualization Panel -->
+                <div class="glass-panel" style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white;">
+                    <h3 style="margin: 0 0 1.25rem 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">Visualisasi Sebaran Data Publikasi per Tahun</h3>
+                    <div style="position: relative; height: 320px; width: 100%;">
+                        <canvas id="dashboardChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: left; margin-top: 1rem;">
+                <button onclick="loadDashboardStats()" class="btn btn-small btn-primary">Refresh Data</button>
+            </div>
         </div>
 
         <!-- PAGE 2: Publikasi (Upload & Status) -->
@@ -147,8 +250,97 @@
 
         </div><!-- end page-editor -->
 
+        <!-- PAGE 5: Analisis Deret Waktu -->
+        <div id="page-timeseries" class="page-section">
+            <div class="glass-panel">
+                <h2>Sinkronisasi Deret Waktu (Time Series)</h2>
+                <p style="color: #64748b; margin-bottom: 1.5rem;">Cari metrik statistik tertentu dan lihat perkembangannya dari tahun ke tahun.</p>
+                
+                <form id="ts-search-form" onsubmit="searchTimeSeries(event)" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 2; min-width: 250px;">
+                        <label>Kata Kunci (Misal: Cabai, Penduduk, Padi)</label>
+                        <input type="text" id="ts-keyword" placeholder="Masukkan metrik yang ingin dicari..." required>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label>Tahun Awal</label>
+                        <input type="number" id="ts-start" placeholder="Contoh: 2020">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label>Tahun Akhir</label>
+                        <input type="number" id="ts-end" placeholder="Contoh: 2026">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" id="btn-ts-search">Cari Data</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 1.5rem;" id="ts-results-container">
+                <div id="ts-results-loading" style="display: none; padding: 2rem; text-align: center; color: #64748b;">
+                    <i>Mencari data ke database...</i>
+                </div>
+                
+                <div id="ts-results-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="ts-result-title">Hasil Pencarian: -</h3>
+                        <button class="btn btn-small btn-primary" onclick="exportTimeSeriesCSV()" style="background: #10b981; border-color: #10b981;">Export ke CSV</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="ts-grid">
+                            <thead id="ts-grid-head">
+                                <!-- Dynamic headers based on year -->
+                            </thead>
+                            <tbody id="ts-grid-body">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="ts-results-empty" style="display: none; padding: 2rem; text-align: center; color: #ef4444;">
+                    Data tidak ditemukan untuk kata kunci tersebut.
+                </div>
+                
+                <!-- Pilih tabel jika ada beberapa yang cocok -->
+                <div id="ts-table-picker" style="display: none;"></div>
+            </div>
+        </div><!-- end page-timeseries -->
+
+        <!-- PAGE 6: Manajemen Database (Admin Only) -->
+        <div id="page-admin" class="page-section">
+            <h2>Manajemen Database (Supabase)</h2>
+            <div class="glass-panel" style="margin-bottom: 1.5rem; background: #fef2f2; border: 1px solid #fca5a5;">
+                <h3 style="color: #ef4444; margin-bottom: 10px;">DANGER ZONE (Zona Berbahaya)</h3>
+                <p style="color: #7f1d1d; font-size: 0.9rem; margin-bottom: 1rem;">Tindakan di bawah ini akan menghapus data secara permanen dari database cloud Supabase Anda.</p>
+                <button class="btn btn-primary" style="background: #ef4444; border-color: #ef4444;" onclick="resetDatabase()">Kosongkan Seluruh Database</button>
+            </div>
+            
+            <div class="glass-panel">
+                <h3>Daftar Tabel Tersimpan di Database</h3>
+                <button onclick="loadAdminTables()" class="btn btn-small btn-primary" style="margin-bottom:1rem">Refresh Data</button>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama Tabel</th>
+                                <th>Tahun Dokumen</th>
+                                <th>Lokasi File CSV</th>
+                                <th>Status Database (Rows)</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tables-tbody">
+                            <tr><td colspan="6" style="text-align:center;">Memuat data database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div><!-- end main-content -->
 
+    <script src="/static/auth_role_logic.js" defer></script>
     <script src="/static/app.js?v=20260629_1" defer></script>
 </body>
 </html>

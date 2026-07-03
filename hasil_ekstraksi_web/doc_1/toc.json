@@ -1,67 +1,80 @@
 [
     {
-        "title": "Bab 1 - Geografi",
-        "start_page": 40,
-        "end_page": 52
+        "num": 1,
+        "title": "Bab 1 - Geografi Dan Iklim",
+        "start_page": 44,
+        "end_page": 50
     },
     {
+        "num": 2,
         "title": "Bab 2 - Pemerintahan",
-        "start_page": 52,
-        "end_page": 68
+        "start_page": 51,
+        "end_page": 60
     },
     {
+        "num": 3,
         "title": "Bab 3 - Penduduk Dan Ketenagakerjaan",
-        "start_page": 68,
-        "end_page": 90
+        "start_page": 61,
+        "end_page": 88
     },
     {
-        "title": "Bab 4 - Sosial Dan Kesejahteraan Rakyat",
-        "start_page": 90,
-        "end_page": 170
+        "num": 4,
+        "title": "Bab 4 - Sosial Dan Kesejahteraasn Rakyat",
+        "start_page": 89,
+        "end_page": 155
     },
     {
-        "title": "Bab 5 - Pertanian, Kehutanan, Peternakan, Dan Perikanan",
-        "start_page": 170,
-        "end_page": 286
+        "num": 5,
+        "title": "Bab 5 - Pertanian, Kehutana",
+        "start_page": 156,
+        "end_page": 198
     },
     {
-        "title": "Bab 6 - Industri, Pertambangan, Dan Energi",
-        "start_page": 286,
-        "end_page": 308
+        "num": 6,
+        "title": "Bab 6 - Industri, Pertatmbangan, Dan Energi",
+        "start_page": 199,
+        "end_page": 209
     },
     {
+        "num": 7,
         "title": "Bab 7 - Pariwisata",
-        "start_page": 308,
-        "end_page": 322
+        "start_page": 210,
+        "end_page": 220
     },
     {
+        "num": 8,
         "title": "Bab 8 - Transportasi Dan Komunikasi",
-        "start_page": 322,
-        "end_page": 334
+        "start_page": 221,
+        "end_page": 231
     },
     {
+        "num": 9,
         "title": "Bab 9 - Perbankan, Koperasi, Dan Harga-Harga",
-        "start_page": 334,
-        "end_page": 344
+        "start_page": 232,
+        "end_page": 242
     },
     {
+        "num": 10,
         "title": "Bab 10 - Pengeluaran Penduduk",
-        "start_page": 344,
-        "end_page": 354
+        "start_page": 243,
+        "end_page": 253
     },
     {
+        "num": 11,
         "title": "Bab 11 - Perdagangan",
-        "start_page": 354,
-        "end_page": 364
+        "start_page": 254,
+        "end_page": 264
     },
     {
-        "title": "Bab 12 - System Of Regional Account",
-        "start_page": 364,
-        "end_page": 384
+        "num": 12,
+        "title": "Bab 12 - Sistem Neraca Regional",
+        "start_page": 265,
+        "end_page": 381
     },
     {
+        "num": 13,
         "title": "Bab 13 - Perbandingan Antar Kabupaten",
-        "start_page": 384,
+        "start_page": 382,
         "end_page": 397
     }
 ]

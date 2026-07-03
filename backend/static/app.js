@@ -302,6 +302,7 @@ function buildEditorToolbar(tableId, tableName, mode) {
     } else {
         toolbar.innerHTML = `
             <button onclick="backToTableList()" class="editor-tool-btn btn-slate" style="background:#475569; color:white; border: 1px solid #334155;">← Kembali</button>
+            <button onclick="markAllSafeInTable(${tableId}, '${tn}')" class="editor-tool-btn btn-green" style="background:#10b981; color:white; border: 1px solid #059669; font-weight:600; cursor:pointer;">✔️ Tandai Semua Aman</button>
             <span style="margin-left:auto; font-size:0.8rem; color:#94a3b8;">Baris <span style='color:#ef4444;font-weight:700;'>merah</span> = data anomali. Auto-save aktif.</span>
         `;
     }
@@ -335,16 +336,184 @@ function switchToCsvEdit(tableId, tableName) {
     _loadCsvIntoEditor(tableId, tableName, true);
 }
 
+let dashboardChartInstance = null;
+
 // Page 1: Dashboard Stats
 async function loadDashboardStats() {
-    const res = await fetch(`${API_BASE}/stats`);
-    if(res.ok) {
-        const stats = await res.json();
-        document.getElementById('stat-docs').textContent = stats.total_docs;
-        document.getElementById('stat-tables').textContent = stats.total_tables;
-        document.getElementById('stat-rows').textContent = stats.total_rows;
-        document.getElementById('stat-anomalies').textContent = stats.total_anomalies;
+    const adminView = document.getElementById('dashboard-admin-view');
+    const pegawaiView = document.getElementById('dashboard-pegawai-view');
+    const welcomeRoleText = document.getElementById('welcome-role-text');
+    
+    if (currentUserRole === 'admin') {
+        if (adminView) adminView.style.display = 'block';
+        if (pegawaiView) pegawaiView.style.display = 'none';
+        if (welcomeRoleText) welcomeRoleText.textContent = '🔒 Anda masuk sebagai Admin System (Kontrol Penuh).';
+    } else {
+        if (adminView) adminView.style.display = 'none';
+        if (pegawaiView) pegawaiView.style.display = 'block';
+        if (welcomeRoleText) welcomeRoleText.textContent = '🏠 Anda masuk sebagai Pegawai BPS Tasikmalaya.';
     }
+
+    try {
+        const res = await fetch(`${API_BASE}/stats`);
+        if(res.ok) {
+            const stats = await res.json();
+            if (currentUserRole === 'admin') {
+                const docEl = document.getElementById('stat-docs');
+                const tabEl = document.getElementById('stat-tables');
+                const rowEl = document.getElementById('stat-rows');
+                const anoEl = document.getElementById('stat-anomalies');
+                if (docEl) docEl.textContent = stats.total_docs;
+                if (tabEl) tabEl.textContent = stats.total_tables;
+                if (rowEl) rowEl.textContent = stats.total_rows;
+                if (anoEl) anoEl.textContent = stats.total_anomalies;
+            } else {
+                const uDocEl = document.getElementById('user-stat-docs');
+                const uTabEl = document.getElementById('user-stat-tables');
+                const uRowEl = document.getElementById('user-stat-rows');
+                if (uDocEl) uDocEl.textContent = stats.total_docs;
+                if (uTabEl) uTabEl.textContent = stats.total_tables;
+                if (uRowEl) uRowEl.textContent = stats.total_rows;
+            }
+        }
+        
+        // Load anomalies list untuk admin
+        if (currentUserRole === 'admin') {
+            const anomaliesRes = await fetch(`${API_BASE}/admin/anomalies`);
+            const cleanBanner = document.getElementById('admin-db-clean-banner');
+            const anomaliesPanel = document.getElementById('admin-anomalies-panel');
+            
+            if (anomaliesRes.ok) {
+                const anomalies = await anomaliesRes.json();
+                const tbody = document.getElementById('admin-anomalies-tbody');
+                if (tbody) {
+                    if (anomalies.length === 0) {
+                        if (cleanBanner) cleanBanner.style.display = 'flex';
+                        if (anomaliesPanel) anomaliesPanel.style.display = 'none';
+                        tbody.innerHTML = '';
+                    } else {
+                        if (cleanBanner) cleanBanner.style.display = 'none';
+                        if (anomaliesPanel) anomaliesPanel.style.display = 'block';
+                        tbody.innerHTML = anomalies.map(a => `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 10px; font-weight: 500; color: #334155; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${a.table_name}">
+                                    <span style="cursor: pointer; color: #4f46e5; text-decoration: underline;" onclick="viewDataEditor(${a.table_id}, '${a.table_name.replace(/'/g, "\\'")}')">
+                                        ${a.table_name}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px; text-align: center; color: #64748b;">${a.year}</td>
+                                <td style="padding: 10px; text-align: center; color: #ef4444; font-weight: 600;">${a.anomaly_count} baris</td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <button class="btn btn-small btn-primary" style="background:#6366f1; padding:4px 10px; font-size:0.8rem; cursor:pointer;" onclick="viewDataEditor(${a.table_id}, '${a.table_name.replace(/'/g, "\\'")}')">
+                                        Perbaiki
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            }
+            
+            // Load recent extraction activities (ambil 5 dokumen teratas)
+            const docsRes = await fetch(`${API_BASE}/documents`);
+            if (docsRes.ok) {
+                const docs = await docsRes.json();
+                const recentTbody = document.getElementById('admin-recent-tbody');
+                if (recentTbody) {
+                    if (docs.length === 0) {
+                        recentTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">Belum ada publikasi yang di-upload.</td></tr>`;
+                    } else {
+                        const sortedDocs = [...docs].sort((a,b) => b.id - a.id).slice(0, 5);
+                        recentTbody.innerHTML = sortedDocs.map(d => {
+                            let statusBadge = '';
+                            if (d.status === 'ready') statusBadge = '<span style="background:#dcfce7;color:#15803d;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">✔ Siap</span>';
+                            else if (d.status.startsWith('extracting')) statusBadge = '<span style="background:#fef3c7;color:#b45309;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">⏳ Ekstraksi...</span>';
+                            else if (d.status.startsWith('error')) statusBadge = `<span style="background:#fee2e2;color:#b91c1c;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;" title="${d.status}">⚠ Gagal</span>`;
+                            else statusBadge = `<span style="background:#f1f5f9;color:#475569;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">${d.status}</span>`;
+
+                            return `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-weight: 500; color: #334155; max-width: 450px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.filename}">
+                                        📁 ${d.filename}
+                                    </td>
+                                    <td style="padding: 10px; text-align: center; color: #64748b;">${d.year}</td>
+                                    <td style="padding: 10px; text-align: center;">${statusBadge}</td>
+                                    <td style="padding: 10px; text-align: center;">
+                                        <button class="btn btn-small" style="background:#4f46e5; border-color:#4f46e5; color:white; padding:4px 10px; font-size:0.8rem; cursor:pointer;" onclick="openDocFromDashboard(${d.id})">
+                                            Buka Publikasi
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            }
+        }
+        
+        // Render Chart.js untuk Pegawai
+        if (currentUserRole !== 'admin') {
+            const chartRes = await fetch(`${API_BASE}/stats/chart`);
+            if (chartRes.ok) {
+                const chartData = await chartRes.json();
+                const canvas = document.getElementById('dashboardChart');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    if (dashboardChartInstance) {
+                        dashboardChartInstance.destroy();
+                    }
+                    dashboardChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: { font: { family: "'Inter', sans-serif", size: 11 } }
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { font: { family: "'Inter', sans-serif", size: 10 } } },
+                                x: { ticks: { font: { family: "'Inter', sans-serif", size: 10 } } }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Gagal memuat statistik dashboard:", err);
+    }
+}
+
+async function markAllDbAnomaliesSafe() {
+    Swal.fire({
+        title: 'Tandai Semua Aman?',
+        text: "Seluruh baris berstatus anomali di SELURUH DATABASE akan ditandai aman sekaligus.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Tandai Semua Aman',
+        cancelButtonText: 'Batal'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/safe-all`, { method: "PUT" });
+                if (res.ok) {
+                    Swal.fire('Berhasil!', 'Seluruh database telah bersih dari anomali.', 'success');
+                    loadDashboardStats();
+                } else {
+                    Swal.fire('Gagal', 'Gagal memproses permintaan.', 'error');
+                }
+            } catch(e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+    });
 }
 
 // Page 2: Publikasi List
@@ -375,7 +544,8 @@ async function loadDocuments() {
                             <option value="">Memuat daftar bab...</option>
                         </select>
                     </div>
-                    <div style="display:flex; gap: 0.5rem; align-items:center; margin-bottom: 2px;">
+                    <div style="display:flex; gap: 0.3rem; align-items:center; margin-bottom: 2px;">
+                        <button onclick="detectToc(${doc.id})" class="btn btn-small" style="flex: 1; font-size: 0.8rem; background-color: #10b981; color: white; padding: 0.35rem 0.5rem; border-radius: 4px; border: none; cursor: pointer;">🔍 Deteksi Bab Otomatis</button>
                         <button onclick="openTocEditor(${doc.id}, '${doc.filename}')" class="btn btn-small" style="flex: 1; font-size: 0.8rem; background-color: #6366f1; color: white; padding: 0.35rem 0.5rem; border-radius: 4px; border: none; cursor: pointer;">✏️ Edit Bab Manual</button>
                     </div>
                     <div style="display:flex; gap: 0.5rem; align-items:center;">
@@ -414,6 +584,40 @@ async function loadDocuments() {
             populateBabDropdown(doc.id);
         }
     });
+}
+
+async function detectToc(docId) {
+    Swal.fire({
+        title: 'Mendeteksi Bab Otomatis',
+        text: 'Membaca daftar isi dokumen PDF (TOC)...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        const res = await fetch(`${API_BASE}/documents/${docId}/detect_toc`, {
+            method: "POST"
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            Swal.fire({
+                title: 'Berhasil!',
+                text: data.message || 'Deteksi bab otomatis selesai.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            await populateBabDropdown(docId);
+        } else {
+            const err = await res.json();
+            Swal.fire('Gagal', err.detail || 'Gagal mendeteksi bab secara otomatis.', 'error');
+        }
+    } catch (e) {
+        Swal.fire('Error', e.message, 'error');
+    }
 }
 
 async function populateBabDropdown(docId) {
@@ -711,23 +915,57 @@ async function populateDocumentList() {
     breadcrumb.style.padding = "0.75rem 1.25rem";
     breadcrumb.style.background = "#f1f5f9";
     breadcrumb.style.borderRadius = "8px";
-    breadcrumb.style.display = "inline-flex";
+    breadcrumb.style.display = "flex";
+    breadcrumb.style.justifyContent = "space-between";
     breadcrumb.style.alignItems = "center";
     breadcrumb.style.gap = "8px";
     
+    const bcLeft = document.createElement("div");
+    bcLeft.style.display = "flex";
+    bcLeft.style.alignItems = "center";
+    bcLeft.style.gap = "8px";
+    bcLeft.style.flexWrap = "wrap";
+    
     let bcHTML = `<span style="cursor:pointer; color:#2563eb; font-weight:600; padding:4px 8px; border-radius:6px; transition:background 0.2s;" onmouseenter="this.style.background='#e2e8f0'" onmouseleave="this.style.background='transparent'" onclick="viewState.selectedDocId=null; viewState.selectedBabNum=null; populateDocumentList();">🏠 Semua Dokumen</span>`;
     
-    if (viewState.selectedDocId) {
-        const doc = docs.find(d => d.id === viewState.selectedDocId);
-        if (doc) {
-            bcHTML += `<span style="color:#94a3b8;">/</span><span style="cursor:pointer; color:#2563eb; font-weight:600; padding:4px 8px; border-radius:6px; transition:background 0.2s;" onmouseenter="this.style.background='#e2e8f0'" onmouseleave="this.style.background='transparent'" onclick="viewState.selectedBabNum=null; populateDocumentList();">📁 ${doc.filename}</span>`;
-            if (viewState.selectedBabNum !== null) {
-                const chapterName = docChapters[viewState.selectedBabNum] ? ` - ${docChapters[viewState.selectedBabNum]}` : "";
-                bcHTML += `<span style="color:#94a3b8;">/</span><span style="color:#334155; font-weight:600; padding:4px 8px;">📂 Bab ${viewState.selectedBabNum}${chapterName}</span>`;
-            }
+    const doc = docs.find(d => d.id === viewState.selectedDocId);
+    if (viewState.selectedDocId && doc) {
+        bcHTML += `<span style="color:#94a3b8;">/</span><span style="cursor:pointer; color:#2563eb; font-weight:600; padding:4px 8px; border-radius:6px; transition:background 0.2s;" onmouseenter="this.style.background='#e2e8f0'" onmouseleave="this.style.background='transparent'" onclick="viewState.selectedBabNum=null; populateDocumentList();">📁 ${doc.filename}</span>`;
+        if (viewState.selectedBabNum !== null) {
+            const chapterName = docChapters[viewState.selectedBabNum] ? ` - ${docChapters[viewState.selectedBabNum]}` : "";
+            bcHTML += `<span style="color:#94a3b8;">/</span><span style="color:#334155; font-weight:600; padding:4px 8px;">📂 Bab ${viewState.selectedBabNum}${chapterName}</span>`;
         }
     }
-    breadcrumb.innerHTML = bcHTML;
+    bcLeft.innerHTML = bcHTML;
+    breadcrumb.appendChild(bcLeft);
+
+    const bcRight = document.createElement("div");
+    bcRight.style.display = "flex";
+    bcRight.style.gap = "0.5rem";
+    bcRight.style.flexWrap = "wrap";
+    
+    if (viewState.selectedDocId && doc) {
+        if (viewState.selectedBabNum === null) {
+            bcRight.innerHTML = `
+                <button onclick="loadAllCsvForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-small btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                    ⚡ Load Semua Tabel ke Database
+                </button>
+                <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-small btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                    🗑️ Hapus Semua Hasil
+                </button>
+            `;
+        } else {
+            bcRight.innerHTML = `
+                <button onclick="loadAllCsvForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-small btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                    ⚡ Load Semua Tabel ke Database
+                </button>
+                <button onclick="deleteAllTablesForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-small btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                    🗑️ Hapus Semua Tabel Bab
+                </button>
+            `;
+        }
+    }
+    breadcrumb.appendChild(bcRight);
     container.appendChild(breadcrumb);
     
     if (!viewState.selectedDocId) {
@@ -1064,7 +1302,10 @@ async function _loadDbIntoEditor(tableId, tableName) {
             tr.id = `row-${row.id}`;
             if(row.is_anomaly) tr.classList.add("row-anomaly");
 
-            let html = `<td><div class="row-action-cell"><button onclick="deleteRow(${row.id})" class="btn-row-del">Hapus</button></div></td>`;
+            const safeBtn = row.is_anomaly 
+                ? `<button onclick="markRowSafe(${row.id}, ${tableId}, '${tableName.replace(/'/g, "\\'")}')" class="btn-row-safe" style="background:#10b981; border:1px solid #10b981; color:white; padding:3px 6px; border-radius:4px; font-size:0.75rem; cursor:pointer; margin-left:4px; font-weight:600;">Aman</button>`
+                : '';
+            let html = `<td><div class="row-action-cell"><button onclick="deleteRow(${row.id})" class="btn-row-del">Hapus</button>${safeBtn}</div></td>`;
             headers.forEach(h => {
                 const val = row.data[h] !== null ? row.data[h] : "";
                 html += `<td class="editable-cell" contenteditable="true" onblur="updateCell(${row.id}, '${h}', this.innerText)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${val}</td>`;
@@ -1140,6 +1381,63 @@ function deleteRow(rowId) {
             }
         },
         allowOutsideClick: () => !Swal.isLoading()
+    });
+}
+
+async function markRowSafe(rowId, tableId, tableName) {
+    try {
+        const res = await fetch(`${API_BASE}/data/${rowId}/safe`, { method: "PUT" });
+        if (res.ok) {
+            const tr = document.getElementById(`row-${rowId}`);
+            if (tr) {
+                tr.classList.remove("row-anomaly");
+                // Hapus tombol Aman dari kolom Aksi
+                const safeBtn = tr.querySelector(".btn-row-safe");
+                if (safeBtn) safeBtn.remove();
+            }
+            await loadDashboardStats();
+            Swal.fire({
+                title: 'Tandai Aman',
+                text: 'Baris ini sudah ditandai aman (bukan anomali) dan disimpan.',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        } else {
+            Swal.fire("Gagal", "Gagal menandai baris aman", "error");
+        }
+    } catch (e) {
+        Swal.fire("Error", e.message, "error");
+    }
+}
+
+async function markAllSafeInTable(tableId, tableName) {
+    Swal.fire({
+        title: 'Tandai Semua Aman?',
+        text: "Seluruh baris berstatus anomali pada tabel ini akan ditandai aman.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Tandai Semua Aman',
+        cancelButtonText: 'Batal'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE}/tables/${tableId}/safe-all`, { method: "PUT" });
+                if (res.ok) {
+                    Swal.fire('Berhasil!', 'Semua data tabel telah ditandai aman.', 'success');
+                    _loadDbIntoEditor(tableId, tableName);
+                    loadDashboardStats();
+                } else {
+                    Swal.fire('Gagal', 'Gagal memproses permintaan.', 'error');
+                }
+            } catch(e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
     });
 }
 
@@ -1930,4 +2228,478 @@ function cancelCsvEditMode(tableId, tableName) {
     });
 }
 
+// ==========================================
+// TIME SERIES LOGIC
+// ==========================================
+
+let currentTimeSeriesData = null;
+let currentMatchedTables = []; // Simpan daftar tabel yang cocok untuk dipilih user
+
+// Normalisasi nama entitas: perbaiki kesalahan ekstraksi OCR yang umum
+function normalizeEntityName(name) {
+    if (!name) return "";
+    let n = name.trim();
+    // Hilangkan karakter berulang berlebihan (Karangnungggal -> Karangnunggal)
+    n = n.replace(/(.)\1{2,}/g, '$1$1');
+    // Koreksi case: CIkalong -> Cikalong
+    n = n.replace(/\b([A-Z])([A-Z])([a-z])/g, (m, a, b, c) => a + b.toLowerCase() + c);
+    return n;
+}
+
+// Cek apakah dua nama entitas dianggap sama setelah normalisasi
+function isSameEntity(name1, name2) {
+    const n1 = normalizeEntityName(name1).toLowerCase();
+    const n2 = normalizeEntityName(name2).toLowerCase();
+    if (n1 === n2) return true;
+    
+    if (Math.abs(n1.length - n2.length) > 2) return false;
+    let diffCount = 0;
+    const shorter = n1.length <= n2.length ? n1 : n2;
+    const longer = n1.length <= n2.length ? n2 : n1;
+    for (let i = 0; i < shorter.length; i++) {
+        if (shorter[i] !== longer[i]) diffCount++;
+        if (diffCount > 2) return false;
+    }
+    diffCount += (longer.length - shorter.length);
+    return diffCount <= 2;
+}
+
+// Fungsi untuk mencari canonical name dari entity map
+function getCanonicalName(entityMap, rawName) {
+    const existing = Object.keys(entityMap);
+    for (const ent of existing) {
+        if (isSameEntity(ent, rawName)) return ent;
+    }
+    return normalizeEntityName(rawName);
+}
+
+async function searchTimeSeries(e) {
+    e.preventDefault();
+    
+    const keyword = document.getElementById("ts-keyword").value;
+    const startYear = document.getElementById("ts-start").value;
+    const endYear = document.getElementById("ts-end").value;
+    
+    document.getElementById("ts-results-loading").style.display = "block";
+    document.getElementById("ts-results-content").style.display = "none";
+    document.getElementById("ts-results-empty").style.display = "none";
+    document.getElementById("ts-table-picker").style.display = "none";
+    
+    try {
+        let url = `${API_BASE}/search/timeseries?keyword=${encodeURIComponent(keyword)}`;
+        if (startYear) url += `&start_year=${startYear}`;
+        if (endYear) url += `&end_year=${endYear}`;
+        
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        document.getElementById("ts-results-loading").style.display = "none";
+        
+        if (!data.data || data.data.length === 0) {
+            document.getElementById("ts-results-empty").style.display = "block";
+            return;
+        }
+        
+        currentMatchedTables = data.data;
+        
+        showTablePicker(data.data, keyword);
+        
+    } catch (err) {
+        document.getElementById("ts-results-loading").style.display = "none";
+        Swal.fire('Error', 'Gagal memuat data deret waktu: ' + err.message, 'error');
+    }
+}
+
+function getTableNumberOrCleanName(tableName) {
+    const numMatch = tableName.match(/^(Tabel[\s_]*\d+(?:\.\d+)*\s*|^\d+(?:\.\d+)+\s*)/i);
+    if (numMatch) {
+        return numMatch[1].trim();
+    }
+    let clean = tableName.replace(/\d{4}/g, '').replace(/\(Hal.*?\)/g, '').replace(/-\s*$/, '').trim();
+    return clean;
+}
+
+function showTablePicker(tablesData, keyword) {
+    const tableGroups = {};
+    tablesData.forEach(t => {
+        const groupKey = getTableNumberOrCleanName(t.table_name);
+        if (!tableGroups[groupKey]) {
+            tableGroups[groupKey] = {
+                displayName: t.table_name,
+                tables: []
+            };
+        }
+        tableGroups[groupKey].tables.push(t);
+    });
+    
+    const groupKeys = Object.keys(tableGroups);
+    if (groupKeys.length === 1) {
+        renderTimeSeriesTable(tableGroups[groupKeys[0]].tables, keyword);
+        return;
+    }
+    
+    let pickerHtml = `
+    <div style="margin: 1rem 0; padding: 1rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+        <p style="margin-bottom: 0.75rem; font-weight: 600; color: #0369a1;">
+            🔍 Ditemukan <strong>${groupKeys.length}</strong> jenis tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
+            <br><span style="font-weight: 400; font-size: 0.9rem;">Pilih tabel yang ingin ditampilkan dalam analisis deret waktu:</span>
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+    `;
+    
+    groupKeys.forEach(groupKey => {
+        const group = tableGroups[groupKey];
+        const years = group.tables.map(t => t.year).sort((a,b)=>a-b);
+        const yearsStr = years.join(", ");
+        const tableIdsStr = group.tables.map(t => t.table_id).join(",");
+        
+        pickerHtml += `
+        <button class="btn btn-small btn-primary" style="text-align:left; padding: 8px 12px; font-size: 0.9rem;"
+            onclick="selectTableGroupForTimeSeries('${tableIdsStr}', '${keyword}')">
+            <strong>${groupKey}</strong> - ${group.displayName.replace(/^(Tabel[\s_]*\d+(?:\.\d+)*\s*|^\d+(?:\.\d+)+\s*)(?:-\s*|:\s*|)/i, '')}
+            <span style="opacity: 0.8; font-size: 0.8rem; display: block;">Tersedia: Tahun ${yearsStr}</span>
+        </button>`;
+    });
+    
+    pickerHtml += `</div></div>`;
+    
+    const pickerEl = document.getElementById("ts-table-picker");
+    pickerEl.innerHTML = pickerHtml;
+    pickerEl.style.display = "block";
+}
+
+function selectTableGroupForTimeSeries(tableIdsStr, keyword) {
+    document.getElementById("ts-table-picker").style.display = "none";
+    const ids = tableIdsStr.split(",").map(Number);
+    const filteredTables = currentMatchedTables.filter(t => ids.includes(t.table_id));
+    renderTimeSeriesTable(filteredTables, keyword);
+}
+
+function renderTimeSeriesTable(tablesData, keyword) {
+    document.getElementById("ts-result-title").innerText = `Hasil: "${keyword.toUpperCase()}"`;
+    document.getElementById("ts-results-content").style.display = "block";
+    
+    const entityMap = {};
+    const yearsSet = new Set();
+    const valueKeysSet = new Set();
+    
+    tablesData.forEach(table => {
+        yearsSet.add(table.year);
+        
+        table.data.forEach(row => {
+            const rawEnt = row.entitas;
+            const canonEnt = getCanonicalName(entityMap, rawEnt);
+            
+            if (!entityMap[canonEnt]) entityMap[canonEnt] = {};
+            if (!entityMap[canonEnt][table.year]) entityMap[canonEnt][table.year] = {};
+            
+            for (const [k, v] of Object.entries(row.nilai)) {
+                entityMap[canonEnt][table.year][k] = v;
+                valueKeysSet.add(k);
+            }
+        });
+    });
+    
+    const years = Array.from(yearsSet).sort((a, b) => a - b);
+    const valueKeys = Array.from(valueKeysSet);
+    
+    currentTimeSeriesData = { years, valueKeys, entityMap };
+    
+    // Render thead
+    const thead = document.getElementById("ts-grid-head");
+    let headHtml = `<tr><th rowspan="2" style="min-width: 200px">Entitas / Wilayah</th>`;
+    years.forEach(y => {
+        headHtml += `<th colspan="${valueKeys.length}" style="text-align: center; border-left: 2px solid #e2e8f0; background: #f8fafc;">${y}</th>`;
+    });
+    headHtml += `</tr><tr>`;
+    years.forEach(() => {
+        valueKeys.forEach(vk => {
+            headHtml += `<th style="border-left: 1px dashed #e2e8f0; font-size: 0.85rem; font-weight: 500;">${vk}</th>`;
+        });
+    });
+    headHtml += `</tr>`;
+    thead.innerHTML = headHtml;
+    
+    // Render tbody
+    const tbody = document.getElementById("ts-grid-body");
+    let bodyHtml = "";
+    
+    Object.keys(entityMap).sort().forEach(ent => {
+        bodyHtml += `<tr><td style="font-weight: 500; color: #1e293b;">${ent}</td>`;
+        years.forEach(y => {
+            const yearData = entityMap[ent][y] || {};
+            valueKeys.forEach((vk, idx) => {
+                const val = yearData[vk] || "-";
+                const borderStyle = idx === 0 ? "border-left: 2px solid #e2e8f0;" : "border-left: 1px dashed #e2e8f0;";
+                bodyHtml += `<td style="${borderStyle} text-align: right; color: ${val === '-' || val === '...' ? '#94a3b8' : '#334155'};">${val}</td>`;
+            });
+        });
+        bodyHtml += `</tr>`;
+    });
+    
+    tbody.innerHTML = bodyHtml;
+}
+
+function exportTimeSeriesCSV() {
+    if (!currentTimeSeriesData) return;
+    
+    const { years, valueKeys, entityMap } = currentTimeSeriesData;
+    const sortedEntities = Object.keys(entityMap).sort();
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    let row1 = ["Entitas / Wilayah"];
+    years.forEach(y => {
+        row1.push(y);
+        for (let i = 1; i < valueKeys.length; i++) row1.push("");
+    });
+    csvContent += row1.join(",") + "\n";
+    
+    let row2 = [""];
+    years.forEach(() => {
+        valueKeys.forEach(vk => row2.push(`"${vk.replace(/"/g, '""')}"`));
+    });
+    csvContent += row2.join(",") + "\n";
+    
+    sortedEntities.forEach(ent => {
+        let r = [`"${ent.replace(/"/g, '""')}"`];
+        years.forEach(y => {
+            const yearData = entityMap[ent][y] || {};
+            valueKeys.forEach(vk => {
+                const val = yearData[vk] || "-";
+                r.push(`"${String(val).replace(/"/g, '""')}"`);
+            });
+        });
+        csvContent += r.join(",") + "\n";
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Deret_Waktu_BPS.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ==========================================
+// ROLE & ADMIN LOGIC
+// ==========================================
+
+let currentUserRole = "pegawai";
+const ADMIN_PASSWORD = "bps2025";
+
+function changeRole(role) {
+    if (role === "admin") {
+        Swal.fire({
+            title: 'Masuk sebagai Admin',
+            text: 'Masukkan password untuk akses Admin:',
+            input: 'password',
+            inputPlaceholder: 'Password Admin...',
+            inputAttributes: { autocomplete: 'current-password' },
+            showCancelButton: true,
+            confirmButtonText: 'Masuk',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#2563eb',
+            preConfirm: (pw) => {
+                if (pw !== ADMIN_PASSWORD) {
+                    Swal.showValidationMessage('Password salah! Akses ditolak.');
+                    return false;
+                }
+                return true;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                currentUserRole = "admin";
+                document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+                loadDashboardStats();
+                Swal.fire({ title: 'Selamat Datang, Admin!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            } else {
+                document.getElementById("role-selector").value = "pegawai";
+            }
+        });
+    } else {
+        currentUserRole = "pegawai";
+        document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+        navigate('dashboard', document.getElementById('nav-dashboard'));
+        loadDashboardStats();
+        Swal.fire({ title: 'Mode Pegawai BPS', icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    }
+}
+
+async function loadAdminTables() {
+    const tbody = document.getElementById("admin-tables-tbody");
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>`;
+    try {
+        const res = await fetch(`${API_BASE}/admin/tables`);
+        if (!res.ok) throw new Error("Gagal mengambil data admin");
+        const tables = await res.json();
+        if (tables.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Database kosong.</td></tr>`; return; }
+        let html = "";
+        tables.forEach(t => {
+            const isLoaded = t.db_rows > 0;
+            const badge = isLoaded
+                ? `<span style="background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;">✔ DB (${t.db_rows} baris)</span>`
+                : `<span style="background:#f59e0b;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;">⚠ Hanya CSV</span>`;
+            html += `<tr><td>${t.id}</td><td>${t.table_name}</td><td>${t.year}</td><td style="font-size:0.8rem;color:gray;">${t.csv_path||'-'}</td><td>${badge}</td><td><button class="btn btn-small" style="background:#ef4444;border-color:#ef4444;padding:4px 8px;" onclick="deleteTableAdmin(${t.id})">Hapus</button></td></tr>`;
+        });
+        tbody.innerHTML = html;
+    } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Error: ${e.message}</td></tr>`; }
+}
+
+async function deleteTableAdmin(id) {
+    if (!confirm("Yakin ingin menghapus tabel ini dari Supabase?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/tables/${id}`, { method: 'DELETE' });
+        if (res.ok) { Swal.fire('Terhapus', 'Tabel berhasil dihapus', 'success'); loadAdminTables(); loadDashboardStats(); }
+        else Swal.fire('Gagal', 'Gagal menghapus', 'error');
+    } catch(e) { Swal.fire('Error', e.message, 'error'); }
+}
+
+async function resetDatabase() {
+    Swal.fire({
+        title: 'PERINGATAN KRITIKAL',
+        text: "Anda akan MENGHAPUS SEMUA DATA dari Supabase secara permanen!",
+        icon: 'error', showCancelButton: true,
+        confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Kosongkan!', cancelButtonText: 'Batal'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/reset`, { method: 'POST' });
+                if (res.ok) { Swal.fire('Direset!', 'Semua data telah dibersihkan.', 'success'); loadAdminTables(); loadDashboardStats(); populateDocumentList(); }
+                else { const d = await res.json(); Swal.fire('Gagal', d.detail || 'Error di server', 'error'); }
+            } catch(e) { Swal.fire('Error', e.message, 'error'); }
+        }
+    });
+}
+
+async function loadAllCsvForDoc(docId, filename) {
+    Swal.fire({
+        title: 'Load Semua CSV?',
+        text: `Apakah Anda yakin ingin memasukkan seluruh tabel dari publikasi "${filename}" ke database? Ini akan menimpa data yang lama.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Load Semua',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+            try {
+                const res = await fetch(`${API_BASE}/documents/${docId}/load-all`, { method: "POST" });
+                if (!res.ok) throw new Error("Gagal me-load data");
+                return await res.json();
+            } catch (err) {
+                Swal.showValidationMessage(`Gagal: ${err.message}`);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Berhasil!', result.value.message, 'success');
+            populateDocumentList();
+            loadDashboardStats();
+        }
+    });
+}
+
+async function loadAllCsvForBab(docId, babNum) {
+    Swal.fire({
+        title: `Load Semua CSV Bab ${babNum}?`,
+        text: `Apakah Anda yakin ingin memasukkan seluruh tabel dari Bab ${babNum} ke database? Ini akan menimpa data yang lama.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Load Semua',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+            try {
+                const res = await fetch(`${API_BASE}/documents/${docId}/bab/${babNum}/load-all`, { method: "POST" });
+                if (!res.ok) throw new Error("Gagal me-load data");
+                return await res.json();
+            } catch (err) {
+                Swal.showValidationMessage(`Gagal: ${err.message}`);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Berhasil!', result.value.message, 'success');
+            populateDocumentList();
+            loadDashboardStats();
+        }
+    });
+}
+
+async function deleteAllTablesForDoc(docId, filename) {
+    Swal.fire({
+        title: 'Hapus Semua Hasil Ekstraksi?',
+        text: `Apakah Anda yakin ingin menghapus seluruh tabel hasil ekstraksi untuk "${filename}"? Tindakan ini akan menghapus semua file CSV lokal dan data di database Supabase untuk publikasi ini.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Hapus Semua',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+            try {
+                const res = await fetch(`${API_BASE}/documents/${docId}/tables`, { method: "DELETE" });
+                if (!res.ok) throw new Error("Gagal menghapus");
+                return await res.json();
+            } catch (err) {
+                Swal.showValidationMessage(`Gagal: ${err.message}`);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Berhasil!', result.value.message || 'Semua hasil ekstraksi berhasil dihapus.', 'success');
+            viewState.selectedBabNum = null;
+            populateDocumentList();
+            loadDashboardStats();
+        }
+    });
+}
+
+async function deleteAllTablesForBab(docId, babNum) {
+    Swal.fire({
+        title: `Hapus Semua Tabel Bab ${babNum}?`,
+        text: `Apakah Anda yakin ingin menghapus seluruh tabel hasil ekstraksi untuk Bab ${babNum}? Tindakan ini akan menghapus file CSV lokal dan data di database Supabase.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#cbd5e1',
+        confirmButtonText: 'Ya, Hapus Semua',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+            try {
+                const res = await fetch(`${API_BASE}/documents/${docId}/bab/${babNum}`, { method: "DELETE" });
+                if (!res.ok) throw new Error("Gagal menghapus");
+                return await res.json();
+            } catch (err) {
+                Swal.showValidationMessage(`Gagal: ${err.message}`);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Berhasil!', result.value.message || 'Semua tabel bab berhasil dihapus.', 'success');
+            viewState.selectedBabNum = null;
+            populateDocumentList();
+            loadDashboardStats();
+        }
+    });
+}
+
+function openDocFromDashboard(docId) {
+    viewState.selectedDocId = docId;
+    viewState.selectedBabNum = null;
+    navigate('publikasi', document.getElementById('nav-publikasi'));
+    populateDocumentList();
+}
 

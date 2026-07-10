@@ -1,0 +1,1823 @@
+{
+  "version": "2025",
+  "document_id": 85,
+  "document_name": "kabupaten-tasikmalaya-dalam-angka-2026.pdf",
+  "columns": [
+    {
+      "id": 1,
+      "standard": "Kecamatan",
+      "count": 47
+    },
+    {
+      "id": 2,
+      "standard": "Laju Pertumbuhan Produk Domestik Regional Bruto Atas Dasar Harga Konstan",
+      "count": 15
+    },
+    {
+      "id": 3,
+      "standard": "Produk Domestik Regional Bruto Atas Dasar Harga Konstan",
+      "count": 10
+    },
+    {
+      "id": 4,
+      "standard": "Distribusi Persentase Produk Domestik Regional Bruto Atas Dasar Harga Berlaku",
+      "count": 10
+    },
+    {
+      "id": 5,
+      "standard": "Jenis Tanaman",
+      "count": 9
+    },
+    {
+      "id": 6,
+      "standard": "Menurut Kabupaten/Kota Di Provinsi",
+      "count": 5
+    },
+    {
+      "id": 7,
+      "standard": "Luas Areal Tanaman Perkebunan",
+      "count": 5
+    },
+    {
+      "id": 8,
+      "standard": "Produksi Perkebunan",
+      "count": 5
+    },
+    {
+      "id": 9,
+      "standard": "Jumlah Pelanggan Listrik",
+      "count": 5
+    },
+    {
+      "id": 10,
+      "standard": "Produk Domestik Regional Bruto Dasar Harga Berlaku",
+      "count": 5
+    },
+    {
+      "id": 11,
+      "standard": "Produk Domestik Regional Bruto Atas Dasar Harga Berlaku",
+      "count": 5
+    },
+    {
+      "id": 12,
+      "standard": "Hasil Produksi Peternakan",
+      "count": 4
+    },
+    {
+      "id": 13,
+      "standard": "Kabupaten/Kota",
+      "count": 4
+    },
+    {
+      "id": 14,
+      "standard": "Jumlah Penduduk Menurut Kabupaten/Kota Di Provinsi",
+      "count": 4
+    },
+    {
+      "id": 15,
+      "standard": "Luas Panen Tanaman Hias",
+      "count": 4
+    },
+    {
+      "id": 16,
+      "standard": "Produksi Tanaman Hias",
+      "count": 4
+    },
+    {
+      "id": 17,
+      "standard": "Luas Panen Tanaman Sayuran dan Buah-buahan Semusim",
+      "count": 4
+    },
+    {
+      "id": 18,
+      "standard": "Luas Panen Tanaman Biofarmaka",
+      "count": 4
+    },
+    {
+      "id": 19,
+      "standard": "Produksi Tanaman Biofarmaka",
+      "count": 4
+    },
+    {
+      "id": 20,
+      "standard": "Lapangan Usaha",
+      "count": 4
+    },
+    {
+      "id": 21,
+      "standard": "Jenis Pengeluaran",
+      "count": 4
+    },
+    {
+      "id": 22,
+      "standard": "Indeks Pembangunan Manusia",
+      "count": 4
+    },
+    {
+      "id": 23,
+      "standard": "Panjang Jalan Menurut Kondisi Jalan",
+      "count": 3
+    },
+    {
+      "id": 24,
+      "standard": "Jumlah Koperasi Aktif",
+      "count": 3
+    },
+    {
+      "id": 25,
+      "standard": "Jumlah Pegawai Negeri Sipil (PNS) Laki-laki",
+      "count": 3
+    },
+    {
+      "id": 26,
+      "standard": "Jumlah Pegawai Negeri Sipil (PNS) Perempuan",
+      "count": 3
+    },
+    {
+      "id": 27,
+      "standard": "Jumlah Pegawai Negeri Sipil (PNS)",
+      "count": 3
+    },
+    {
+      "id": 28,
+      "standard": "Jumlah UMKM  yang Memiliki Ijin Usaha (IUMK)",
+      "count": 3
+    },
+    {
+      "id": 29,
+      "standard": "Produksi Tanaman Sayuran dan Buah-buahan Semusim",
+      "count": 3
+    },
+    {
+      "id": 30,
+      "standard": "Jumlah Pelanggan",
+      "count": 3
+    },
+    {
+      "id": 31,
+      "standard": "Panjang Jalan Menurut Tingkat Kewenangan Pemerintahan",
+      "count": 3
+    },
+    {
+      "id": 32,
+      "standard": "Panjang Jalan Menurut Jenis Permukaan Jalan",
+      "count": 3
+    },
+    {
+      "id": 33,
+      "standard": "Jumlah Kantor Pos Pembantu",
+      "count": 3
+    },
+    {
+      "id": 34,
+      "standard": "Jumlah Sarana Perdagangan",
+      "count": 3
+    },
+    {
+      "id": 35,
+      "standard": "Jumlah Desa/Kelurahan Mengalami Bencana Alam - Tanah Longsor",
+      "count": 3
+    },
+    {
+      "id": 36,
+      "standard": "Jenis Koperasi",
+      "count": 2
+    },
+    {
+      "id": 37,
+      "standard": "Populasi Ternak Sapi Perah/Dairy",
+      "count": 2
+    },
+    {
+      "id": 38,
+      "standard": "Populasi Ternak Sapi Potong/Beef",
+      "count": 2
+    },
+    {
+      "id": 39,
+      "standard": "Populasi Ternak Kerbau/Buffalo",
+      "count": 2
+    },
+    {
+      "id": 40,
+      "standard": "Populasi Ternak Kuda/Horse",
+      "count": 2
+    },
+    {
+      "id": 41,
+      "standard": "Populasi Ternak Kambing/Goat",
+      "count": 2
+    },
+    {
+      "id": 42,
+      "standard": "Populasi Ternak Domba/Sheep",
+      "count": 2
+    },
+    {
+      "id": 43,
+      "standard": "Kelompok Umur",
+      "count": 2
+    },
+    {
+      "id": 44,
+      "standard": "Jumlah Taman Kanak-Kanak (TK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 45,
+      "standard": "Jumlah Taman Kanak-Kanak (TK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 46,
+      "standard": "Jumlah Guru Non ASN Taman Kanak-Kanak (TK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 47,
+      "standard": "Jumlah Guru Non ASN Taman Kanak-Kanak (TK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 48,
+      "standard": "Jumlah Guru Taman Kanak-Kanak (TK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 49,
+      "standard": "Jumlah Guru Taman Kanak-Kanak (TK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 50,
+      "standard": "Jumlah Murid Taman Kanak-Kanak (TK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 51,
+      "standard": "Jumlah Murid Taman Kanak-Kanak (TK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 52,
+      "standard": "Luas Panen Bawang Merah/Shallot",
+      "count": 2
+    },
+    {
+      "id": 53,
+      "standard": "Luas Panen Cabai Besar/TW/Teropong/Chili/Big Chili",
+      "count": 2
+    },
+    {
+      "id": 54,
+      "standard": "Luas Panen Cabai Keriting/Curly Chili",
+      "count": 2
+    },
+    {
+      "id": 55,
+      "standard": "Luas Panen Cabai Rawit/Chili/Cayenne Pepper",
+      "count": 2
+    },
+    {
+      "id": 56,
+      "standard": "Luas Panen Kentang",
+      "count": 2
+    },
+    {
+      "id": 57,
+      "standard": "Luas Panen Kubis/Cabbage",
+      "count": 2
+    },
+    {
+      "id": 58,
+      "standard": "Luas Panen Tomat/Tomato",
+      "count": 2
+    },
+    {
+      "id": 59,
+      "standard": "Luas Panen Bawang Putih/Garlic",
+      "count": 2
+    },
+    {
+      "id": 60,
+      "standard": "Luas Panen Buncis/String Bean",
+      "count": 2
+    },
+    {
+      "id": 61,
+      "standard": "Luas Panen Kacang Panjang/Long Bean",
+      "count": 2
+    },
+    {
+      "id": 62,
+      "standard": "Produksi Anggrek Pot/Orchid",
+      "count": 2
+    },
+    {
+      "id": 63,
+      "standard": "Produksi Anggrek Potong/Orchid",
+      "count": 2
+    },
+    {
+      "id": 64,
+      "standard": "Produksi Krisan/Chrysantemum",
+      "count": 2
+    },
+    {
+      "id": 65,
+      "standard": "Produksi Mawar/Rose",
+      "count": 2
+    },
+    {
+      "id": 66,
+      "standard": "Produksi Sedap Malam/Tuberose",
+      "count": 2
+    },
+    {
+      "id": 67,
+      "standard": "Produksi Melati/Jasmine",
+      "count": 2
+    },
+    {
+      "id": 68,
+      "standard": "Produksi Bugenvil/Bougainvillea",
+      "count": 2
+    },
+    {
+      "id": 69,
+      "standard": "Produksi Mangga/Mango",
+      "count": 2
+    },
+    {
+      "id": 70,
+      "standard": "Produksi Durian",
+      "count": 2
+    },
+    {
+      "id": 71,
+      "standard": "Produksi Jeruk Siam/Orange/Tangerine",
+      "count": 2
+    },
+    {
+      "id": 72,
+      "standard": "Produksi Pisang/Banana",
+      "count": 2
+    },
+    {
+      "id": 73,
+      "standard": "Produksi Pepaya/Papaya",
+      "count": 2
+    },
+    {
+      "id": 74,
+      "standard": "Produksi Salak/Snakefruit",
+      "count": 2
+    },
+    {
+      "id": 75,
+      "standard": "Produksi Manggis/Mangosteen",
+      "count": 2
+    },
+    {
+      "id": 76,
+      "standard": "Produksi Alpukat/Avocado",
+      "count": 2
+    },
+    {
+      "id": 77,
+      "standard": "Produksi Buah-Buahan dan Sayuran Tahunan",
+      "count": 2
+    },
+    {
+      "id": 78,
+      "standard": "Produksi Bawang Merah/Shallot",
+      "count": 2
+    },
+    {
+      "id": 79,
+      "standard": "Produksi Cabai Besar/TW/Teropong/Chili/Big Chili",
+      "count": 2
+    },
+    {
+      "id": 80,
+      "standard": "Produksi Cabai Keriting/Curly Chili",
+      "count": 2
+    },
+    {
+      "id": 81,
+      "standard": "Produksi Cabai Rawit/Chili/Cayenne Pepper",
+      "count": 2
+    },
+    {
+      "id": 82,
+      "standard": "Produksi Kentang",
+      "count": 2
+    },
+    {
+      "id": 83,
+      "standard": "Produksi Kubis/Cabbage",
+      "count": 2
+    },
+    {
+      "id": 84,
+      "standard": "Produksi Tomat/Tomato",
+      "count": 2
+    },
+    {
+      "id": 85,
+      "standard": "Produksi Bawang Putih/Garlic",
+      "count": 2
+    },
+    {
+      "id": 86,
+      "standard": "Produksi Buncis",
+      "count": 2
+    },
+    {
+      "id": 87,
+      "standard": "Produksi Kacang Panjang",
+      "count": 2
+    },
+    {
+      "id": 88,
+      "standard": "Luas Panen Jahe/Ginger",
+      "count": 2
+    },
+    {
+      "id": 89,
+      "standard": "Luas Panen Laos/Lengkuas/Galanga",
+      "count": 2
+    },
+    {
+      "id": 90,
+      "standard": "Luas Panen Kencur/East Indian Galangal",
+      "count": 2
+    },
+    {
+      "id": 91,
+      "standard": "Luas Panen Kunyit/Turmeric",
+      "count": 2
+    },
+    {
+      "id": 92,
+      "standard": "Luas Panen Kapulaga/Java Cardamon",
+      "count": 2
+    },
+    {
+      "id": 93,
+      "standard": "Luas Panen Serai/Lemongrass",
+      "count": 2
+    },
+    {
+      "id": 94,
+      "standard": "Produksi Jahe/Ginger",
+      "count": 2
+    },
+    {
+      "id": 95,
+      "standard": "Produksi Laos/Lengkuas/Galanga",
+      "count": 2
+    },
+    {
+      "id": 96,
+      "standard": "Produksi Kencur/East Indian Galangal",
+      "count": 2
+    },
+    {
+      "id": 97,
+      "standard": "Produksi Kunyit/Turmeric",
+      "count": 2
+    },
+    {
+      "id": 98,
+      "standard": "Produksi Kapulaga/Java Cardamon",
+      "count": 2
+    },
+    {
+      "id": 99,
+      "standard": "Produksi Serai/Lemongrass",
+      "count": 2
+    },
+    {
+      "id": 100,
+      "standard": "Luas Panen Anggrek Pot/Orchid",
+      "count": 2
+    },
+    {
+      "id": 101,
+      "standard": "Luas Panen Anggrek Potong/Orchid",
+      "count": 2
+    },
+    {
+      "id": 102,
+      "standard": "Luas Panen Krisan/Chrysantemum",
+      "count": 2
+    },
+    {
+      "id": 103,
+      "standard": "Luas Panen Mawar/Rose",
+      "count": 2
+    },
+    {
+      "id": 104,
+      "standard": "Luas Panen Sedap Malam/Tuberose",
+      "count": 2
+    },
+    {
+      "id": 105,
+      "standard": "Luas Panen Komoditas daerah",
+      "count": 2
+    },
+    {
+      "id": 106,
+      "standard": "Luas Areal Kelapa Sawit/Oil Palm",
+      "count": 2
+    },
+    {
+      "id": 107,
+      "standard": "Luas Areal Kelapa/Coconut",
+      "count": 2
+    },
+    {
+      "id": 108,
+      "standard": "Luas Areal Karet/Rubber",
+      "count": 2
+    },
+    {
+      "id": 109,
+      "standard": "Luas Areal Kopi/Coffee",
+      "count": 2
+    },
+    {
+      "id": 110,
+      "standard": "Luas Areal Kakao/Cocoa",
+      "count": 2
+    },
+    {
+      "id": 111,
+      "standard": "Luas Areal Lada/Pepper",
+      "count": 2
+    },
+    {
+      "id": 112,
+      "standard": "Luas Areal Teh/Tea",
+      "count": 2
+    },
+    {
+      "id": 113,
+      "standard": "Luas Areal Tembakau/Tobacco",
+      "count": 2
+    },
+    {
+      "id": 114,
+      "standard": "Produksi Kelapa Sawit/Oil Palm",
+      "count": 2
+    },
+    {
+      "id": 115,
+      "standard": "Produksi Kelapa/Coconut",
+      "count": 2
+    },
+    {
+      "id": 116,
+      "standard": "Produksi Karet/Rubber",
+      "count": 2
+    },
+    {
+      "id": 117,
+      "standard": "Produksi Kopi/Coffee",
+      "count": 2
+    },
+    {
+      "id": 118,
+      "standard": "Produksi Kakao/Cocoa",
+      "count": 2
+    },
+    {
+      "id": 119,
+      "standard": "Produksi Tebu/Sugar cane",
+      "count": 2
+    },
+    {
+      "id": 120,
+      "standard": "Produksi Teh/Tea",
+      "count": 2
+    },
+    {
+      "id": 121,
+      "standard": "Produksi Lada/Pepper",
+      "count": 2
+    },
+    {
+      "id": 122,
+      "standard": "Populasi Unggas Ayam Kampung/Native Chicken",
+      "count": 2
+    },
+    {
+      "id": 123,
+      "standard": "Populasi Unggas Ayam Petelur/Layer",
+      "count": 2
+    },
+    {
+      "id": 124,
+      "standard": "Populasi Unggas Ayam Pedaging/Broiler",
+      "count": 2
+    },
+    {
+      "id": 125,
+      "standard": "Populasi Unggas Itik/Manila Duck/Muscovy Duck",
+      "count": 2
+    },
+    {
+      "id": 126,
+      "standard": "Produksi Perikanan Laut",
+      "count": 2
+    },
+    {
+      "id": 127,
+      "standard": "Produksi Benih Ikan",
+      "count": 2
+    },
+    {
+      "id": 128,
+      "standard": "Listrik Terjual/Sold",
+      "count": 2
+    },
+    {
+      "id": 129,
+      "standard": "Golongan Tarip/Tariff Group",
+      "count": 2
+    },
+    {
+      "id": 130,
+      "standard": "Jenis Pelanggan/Customers",
+      "count": 2
+    },
+    {
+      "id": 131,
+      "standard": "Jumlah Pelanggan Air Minum",
+      "count": 2
+    },
+    {
+      "id": 132,
+      "standard": "Jumlah Air yang Disalurkan",
+      "count": 2
+    },
+    {
+      "id": 133,
+      "standard": "Jumlah Rumah Makan/Restoran",
+      "count": 2
+    },
+    {
+      "id": 134,
+      "standard": "Kelompok Komoditas/Commodity Group",
+      "count": 2
+    },
+    {
+      "id": 135,
+      "standard": "Rata-rata Pengeluaran per Kapita Sebulan",
+      "count": 2
+    },
+    {
+      "id": 136,
+      "standard": "Persentase Pengeluaran per Kapita Sebulan",
+      "count": 2
+    },
+    {
+      "id": 137,
+      "standard": "Angka Partisipasi Murni (APM)",
+      "count": 2
+    },
+    {
+      "id": 138,
+      "standard": "Angka Partisipasi Kasar (APK)",
+      "count": 2
+    },
+    {
+      "id": 139,
+      "standard": "Jumlah Raudatul Athfal (RA)",
+      "count": 2
+    },
+    {
+      "id": 140,
+      "standard": "Jumlah Guru Raudatul Athfal (RA)",
+      "count": 2
+    },
+    {
+      "id": 141,
+      "standard": "Jumlah Murid Raudatul Athfal (RA)",
+      "count": 2
+    },
+    {
+      "id": 142,
+      "standard": "Jumlah Sekolah Dasar (SD) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 143,
+      "standard": "Jumlah Sekolah Dasar (SD) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 144,
+      "standard": "Jumlah Guru Sekolah Dasar (SD) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 145,
+      "standard": "Jumlah Guru Sekolah Dasar (SD) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 146,
+      "standard": "Jumlah Murid Sekolah Dasar (SD) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 147,
+      "standard": "Jumlah Murid Sekolah Dasar (SD) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 148,
+      "standard": "Jumlah Madrasah Ibtidaiyah (MI)",
+      "count": 2
+    },
+    {
+      "id": 149,
+      "standard": "Jumlah Guru Madrasah Ibtidaiyah (MI)",
+      "count": 2
+    },
+    {
+      "id": 150,
+      "standard": "Jumlah Murid Madrasah Ibtidaiyah (MI)",
+      "count": 2
+    },
+    {
+      "id": 151,
+      "standard": "Jumlah Sekolah Menengah Pertama (SMP) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 152,
+      "standard": "Jumlah Sekolah Menengah Pertama (SMP) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 153,
+      "standard": "Jumlah Guru Sekolah Menengah Pertama (SMP) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 154,
+      "standard": "Jumlah Guru Sekolah Menengah Pertama (SMP) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 155,
+      "standard": "Jumlah Murid Sekolah Menengah Pertama (SMP) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 156,
+      "standard": "Jumlah Murid Sekolah Menengah Pertama (SMP) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 157,
+      "standard": "Jumlah Madrasah Tsanawiyah (MTs)",
+      "count": 2
+    },
+    {
+      "id": 158,
+      "standard": "Jumlah Guru Madrasah Tsanawiyah (MTs)",
+      "count": 2
+    },
+    {
+      "id": 159,
+      "standard": "Jumlah Murid Madrasah Tsanawiyah (MTs)",
+      "count": 2
+    },
+    {
+      "id": 160,
+      "standard": "Jumlah Sekolah Menengah Atas (SMA) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 161,
+      "standard": "Jumlah Sekolah Menengah Atas (SMA) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 162,
+      "standard": "Jumlah Guru Sekolah Menengah Atas (SMA) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 163,
+      "standard": "Jumlah Guru Sekolah Menengah Atas (SMA) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 164,
+      "standard": "Jumlah Guru Sekolah Menengah Atas (SMA) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 165,
+      "standard": "Jumlah Murid Sekolah Menengah Atas (SMA) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 166,
+      "standard": "Jumlah Murid Sekolah Menengah Atas (SMA) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 167,
+      "standard": "Jumlah Murid Sekolah Menengah Atas (SMA) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 168,
+      "standard": "Jumlah Sekolah Menengah Kejuruan (SMK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 169,
+      "standard": "Jumlah Sekolah Menengah Kejuruan (SMK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 170,
+      "standard": "Jumlah Sekolah Menengah Kejuruan (SMK) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 171,
+      "standard": "Jumlah Guru Sekolah Menengah Kejuruan (SMK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 172,
+      "standard": "Jumlah Guru Sekolah Menengah Kejuruan (SMK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 173,
+      "standard": "Jumlah Guru Sekolah Menengah Kejuruan (SMK) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 174,
+      "standard": "Jumlah Murid Sekolah Menengah Kejuruan (SMK) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 175,
+      "standard": "Jumlah Murid Sekolah Menengah Kejuruan (SMK) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 176,
+      "standard": "Jumlah Murid Sekolah Menengah Kejuruan (SMK) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 177,
+      "standard": "Jumlah Madrasah Aliyah (MA)",
+      "count": 2
+    },
+    {
+      "id": 178,
+      "standard": "Jumlah Guru Madrasah Aliyah (MA)",
+      "count": 2
+    },
+    {
+      "id": 179,
+      "standard": "Jumlah Murid Madrasah Aliyah (MA)",
+      "count": 2
+    },
+    {
+      "id": 180,
+      "standard": "Jumlah Guru Madrasah Aliyah (MA) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 181,
+      "standard": "Jumlah Guru Madrasah Aliyah (MA) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 182,
+      "standard": "Jumlah Guru Madrasah Aliyah (MA) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 183,
+      "standard": "Jumlah Murid Madrasah Aliyah (MA) - Negeri",
+      "count": 2
+    },
+    {
+      "id": 184,
+      "standard": "Jumlah Murid Madrasah Aliyah (MA) - Swasta",
+      "count": 2
+    },
+    {
+      "id": 185,
+      "standard": "Jumlah Murid Madrasah Aliyah (MA) - Jumlah",
+      "count": 2
+    },
+    {
+      "id": 186,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Rumah Sakit Umum/General Hospital",
+      "count": 2
+    },
+    {
+      "id": 187,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Rumah Sakit Khusus/Specialized Hospital",
+      "count": 2
+    },
+    {
+      "id": 188,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Puskesmas",
+      "count": 2
+    },
+    {
+      "id": 189,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Puskesmas Pembantu",
+      "count": 2
+    },
+    {
+      "id": 190,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Apotek/Pharmacy",
+      "count": 2
+    },
+    {
+      "id": 191,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Klinik Utama/Principal Clinic",
+      "count": 2
+    },
+    {
+      "id": 192,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Balai Kesehatan",
+      "count": 2
+    },
+    {
+      "id": 193,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Klinik Pratama/Primary Clinic",
+      "count": 2
+    },
+    {
+      "id": 194,
+      "standard": "Jumlah Rumah Sakit Umum/General Hospital",
+      "count": 2
+    },
+    {
+      "id": 195,
+      "standard": "Jumlah Rumah Sakit Khusus/Specialized Hospital",
+      "count": 2
+    },
+    {
+      "id": 196,
+      "standard": "Jumlah Puskesmas Rawat Inap",
+      "count": 2
+    },
+    {
+      "id": 197,
+      "standard": "Jumlah Desa/Kelurahan Mengalami Bencana Alam - Banjir",
+      "count": 2
+    },
+    {
+      "id": 198,
+      "standard": "Luas Lahan Sawah Irigasi",
+      "count": 1
+    },
+    {
+      "id": 199,
+      "standard": "Luas Lahan Sawah Non Irigasi",
+      "count": 1
+    },
+    {
+      "id": 200,
+      "standard": "Jumlah Luas Lahan Sawah",
+      "count": 1
+    },
+    {
+      "id": 201,
+      "standard": "Luas Panen Padi Sawah",
+      "count": 1
+    },
+    {
+      "id": 202,
+      "standard": "Luas Panen Padi Ladang",
+      "count": 1
+    },
+    {
+      "id": 203,
+      "standard": "Produksi Padi Sawah",
+      "count": 1
+    },
+    {
+      "id": 204,
+      "standard": "Produksi Padi Ladang",
+      "count": 1
+    },
+    {
+      "id": 205,
+      "standard": "Produksi Peternakan",
+      "count": 1
+    },
+    {
+      "id": 206,
+      "standard": "Objek Wisata/Tourist attraction",
+      "count": 1
+    },
+    {
+      "id": 207,
+      "standard": "Jumlah Wisatawan Mancanegara/International",
+      "count": 1
+    },
+    {
+      "id": 208,
+      "standard": "Jumlah Wisatawan Domestic",
+      "count": 1
+    },
+    {
+      "id": 209,
+      "standard": "Jumlah Wisatawan",
+      "count": 1
+    },
+    {
+      "id": 210,
+      "standard": "Kondisi Jalan",
+      "count": 1
+    },
+    {
+      "id": 211,
+      "standard": "Luas Daerah",
+      "count": 1
+    },
+    {
+      "id": 212,
+      "standard": "Jumlah Pulau",
+      "count": 1
+    },
+    {
+      "id": 213,
+      "standard": "Tinggi Wilayah",
+      "count": 1
+    },
+    {
+      "id": 214,
+      "standard": "Jarak ke Ibukota",
+      "count": 1
+    },
+    {
+      "id": 215,
+      "standard": "Jabatan",
+      "count": 1
+    },
+    {
+      "id": 216,
+      "standard": "Jumlah Tenaga Kesehatan - Dokter/Doctor",
+      "count": 1
+    },
+    {
+      "id": 217,
+      "standard": "Jumlah Tenaga Kesehatan - Dokter Gigi/Dentist",
+      "count": 1
+    },
+    {
+      "id": 218,
+      "standard": "Jumlah Tenaga Kesehatan - Perawat/Nurse",
+      "count": 1
+    },
+    {
+      "id": 219,
+      "standard": "Jumlah Tenaga Kesehatan - Bidan/Midwife",
+      "count": 1
+    },
+    {
+      "id": 220,
+      "standard": "Jumlah Tenaga Kesehatan - Kefarmasian/Pharmacist",
+      "count": 1
+    },
+    {
+      "id": 221,
+      "standard": "Jumlah Penduduk Jenis Kelamin - Laki-Laki",
+      "count": 1
+    },
+    {
+      "id": 222,
+      "standard": "Jumlah Penduduk  Jenis Kelamin - Perempuan",
+      "count": 1
+    },
+    {
+      "id": 223,
+      "standard": "Jumlah Penduduk Menurut Kelompok Umur",
+      "count": 1
+    },
+    {
+      "id": 224,
+      "standard": "Kegiatan Utama",
+      "count": 1
+    },
+    {
+      "id": 225,
+      "standard": "Jumlah Penduduk Berumur 15 Tahun Keatas Menurut Jenis Kegiatan Selama Seminggu Terakhir Jenis Kelamin - Laki-Laki",
+      "count": 1
+    },
+    {
+      "id": 226,
+      "standard": "Jumlah Penduduk Berumur 15 Tahun Keatas Menurut Jenis Kegiatan Selama Seminggu Terakhir Jenis Kelamin - Perempuan",
+      "count": 1
+    },
+    {
+      "id": 227,
+      "standard": "Jumlah Penduduk Berumur 15 Tahun Keatas Menurut Jenis Kegiatan Selama Seminggu Terakhir Jenis Kelamin - Laki-Laki + Perempuan",
+      "count": 1
+    },
+    {
+      "id": 228,
+      "standard": "Jumlah Taman Kanak-Kanak (TK)",
+      "count": 1
+    },
+    {
+      "id": 229,
+      "standard": "Jumlah Taman Kanak-Kanak (TK) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 230,
+      "standard": "Jumlah Guru Non ASN Taman Kanak-Kanak (TK)",
+      "count": 1
+    },
+    {
+      "id": 231,
+      "standard": "Jumlah Guru Non ASN Taman Kanak-Kanak (TK) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 232,
+      "standard": "Jumlah Guru Taman Kanak-Kanak (TK)",
+      "count": 1
+    },
+    {
+      "id": 233,
+      "standard": "Jumlah Guru Taman Kanak-Kanak (TK) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 234,
+      "standard": "Jumlah Murid Taman Kanak-Kanak (TK)",
+      "count": 1
+    },
+    {
+      "id": 235,
+      "standard": "Jumlah Murid Taman Kanak-Kanak (TK) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 236,
+      "standard": "Jumlah Desa/Kelurahan",
+      "count": 1
+    },
+    {
+      "id": 237,
+      "standard": "Jumlah Desa/Kelurahan",
+      "count": 1
+    },
+    {
+      "id": 238,
+      "standard": "Jumlah Desa/Kelurahan",
+      "count": 1
+    },
+    {
+      "id": 239,
+      "standard": "Jumlah Desa/Kelurahan",
+      "count": 1
+    },
+    {
+      "id": 240,
+      "standard": "Jumlah Desa/Kelurahan",
+      "count": 1
+    },
+    {
+      "id": 241,
+      "standard": "Luas Lahan Tegal/Kebun",
+      "count": 1
+    },
+    {
+      "id": 242,
+      "standard": "Luas Lahan Ladang/Huma Shifting Cultivation",
+      "count": 1
+    },
+    {
+      "id": 243,
+      "standard": "Luas Lahan Perkebunan",
+      "count": 1
+    },
+    {
+      "id": 244,
+      "standard": "Luas Lahan Ditanami Pohon/Hutan Rakyat",
+      "count": 1
+    },
+    {
+      "id": 245,
+      "standard": "Luas Lahan Padang Penggem- balaan Rumput",
+      "count": 1
+    },
+    {
+      "id": 246,
+      "standard": "Luas Lahan Hutan Negara",
+      "count": 1
+    },
+    {
+      "id": 247,
+      "standard": "Luas Lahan Sementara tidak Diusahakan/Temporary Non Cultivated",
+      "count": 1
+    },
+    {
+      "id": 248,
+      "standard": "Luas Lahan Lainnya",
+      "count": 1
+    },
+    {
+      "id": 249,
+      "standard": "Luas Panen Jagung",
+      "count": 1
+    },
+    {
+      "id": 250,
+      "standard": "Luas Panen Kedelai/Soybean",
+      "count": 1
+    },
+    {
+      "id": 251,
+      "standard": "Luas Panen Kacang Tanah/Peanut",
+      "count": 1
+    },
+    {
+      "id": 252,
+      "standard": "Luas Panen Kacang Hijau/Mungbean",
+      "count": 1
+    },
+    {
+      "id": 253,
+      "standard": "Luas Panen Ubi Kayu",
+      "count": 1
+    },
+    {
+      "id": 254,
+      "standard": "Luas Panen Ubi Jalar",
+      "count": 1
+    },
+    {
+      "id": 255,
+      "standard": "Produksi Jagung",
+      "count": 1
+    },
+    {
+      "id": 256,
+      "standard": "Produksi Kedelai/Soybean",
+      "count": 1
+    },
+    {
+      "id": 257,
+      "standard": "Produksi Kacang Tanah/Peanut",
+      "count": 1
+    },
+    {
+      "id": 258,
+      "standard": "Produksi Kacang Hijau/Mungbean",
+      "count": 1
+    },
+    {
+      "id": 259,
+      "standard": "Produksi Ubi Kayu",
+      "count": 1
+    },
+    {
+      "id": 260,
+      "standard": "Produksi Ubi Jalar",
+      "count": 1
+    },
+    {
+      "id": 261,
+      "standard": "Produksi Tanaman Sayuran dan Buah-buahan  Semusim",
+      "count": 1
+    },
+    {
+      "id": 262,
+      "standard": "Jenis Ikan",
+      "count": 1
+    },
+    {
+      "id": 263,
+      "standard": "Produksi Ikan Gurame Giant Gouramy",
+      "count": 1
+    },
+    {
+      "id": 264,
+      "standard": "Produksi Ikan Nilem",
+      "count": 1
+    },
+    {
+      "id": 265,
+      "standard": "Produksi Ikan Lele Torpedo/Shaped Catfish",
+      "count": 1
+    },
+    {
+      "id": 266,
+      "standard": "Produksi Ikan Nila",
+      "count": 1
+    },
+    {
+      "id": 267,
+      "standard": "Produksi Ikan Mas",
+      "count": 1
+    },
+    {
+      "id": 268,
+      "standard": "Produksi Ikan Udang/Vannamei/Whiteleg Shrimp",
+      "count": 1
+    },
+    {
+      "id": 269,
+      "standard": "Jenis Ikan/Fish",
+      "count": 1
+    },
+    {
+      "id": 270,
+      "standard": "Daya Terpasang/Installed Power",
+      "count": 1
+    },
+    {
+      "id": 271,
+      "standard": "Produksi Listrik",
+      "count": 1
+    },
+    {
+      "id": 272,
+      "standard": "Dipakai Sendiri/Own Used",
+      "count": 1
+    },
+    {
+      "id": 273,
+      "standard": "Susut Hilang/Shrinkage Lost",
+      "count": 1
+    },
+    {
+      "id": 274,
+      "standard": "Jumlah Air Disalurkan/Distributed",
+      "count": 1
+    },
+    {
+      "id": 275,
+      "standard": "Jumlah Nilai",
+      "count": 1
+    },
+    {
+      "id": 276,
+      "standard": "Jumlah Industri Pengolahan Pangan",
+      "count": 1
+    },
+    {
+      "id": 277,
+      "standard": "Jumlah Industri Kerajinan Anyaman",
+      "count": 1
+    },
+    {
+      "id": 278,
+      "standard": "Jumlah Industri Tekstil",
+      "count": 1
+    },
+    {
+      "id": 279,
+      "standard": "Jenis Industri",
+      "count": 1
+    },
+    {
+      "id": 280,
+      "standard": "Jumlah Industri Kecil - Unit Usaha",
+      "count": 1
+    },
+    {
+      "id": 281,
+      "standard": "Jumlah Industri Kecil - Tenaga Kerja",
+      "count": 1
+    },
+    {
+      "id": 282,
+      "standard": "Jumlah Hotel",
+      "count": 1
+    },
+    {
+      "id": 283,
+      "standard": "Jumlah Kamar/Rooms",
+      "count": 1
+    },
+    {
+      "id": 284,
+      "standard": "Jumlah Tempat Tidur/Beds",
+      "count": 1
+    },
+    {
+      "id": 285,
+      "standard": "Triw/Tri Month",
+      "count": 1
+    },
+    {
+      "id": 286,
+      "standard": "Jumlah Pengunjung/Visitors",
+      "count": 1
+    },
+    {
+      "id": 287,
+      "standard": "Jumlah Tiket/Tickets",
+      "count": 1
+    },
+    {
+      "id": 288,
+      "standard": "Tingkat Kewenangan Pemerintahan",
+      "count": 1
+    },
+    {
+      "id": 289,
+      "standard": "Jenis Permukaan Jalan",
+      "count": 1
+    },
+    {
+      "id": 290,
+      "standard": "Jumlah Koperasi - Aktif",
+      "count": 1
+    },
+    {
+      "id": 291,
+      "standard": "Jumlah Koperasi - Tidak Aktif",
+      "count": 1
+    },
+    {
+      "id": 292,
+      "standard": "Jumlah Koperasi - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 293,
+      "standard": "Jumlah - Anggota Koperasi",
+      "count": 1
+    },
+    {
+      "id": 294,
+      "standard": "Jumlah - Karyawan Koperasi",
+      "count": 1
+    },
+    {
+      "id": 295,
+      "standard": "Jenis Sarana Perdagangan",
+      "count": 1
+    },
+    {
+      "id": 296,
+      "standard": "Pasar Tradisional - Bangunan Permanen",
+      "count": 1
+    },
+    {
+      "id": 297,
+      "standard": "Pasar Tradisional - Bangunan Semi Permanen",
+      "count": 1
+    },
+    {
+      "id": 298,
+      "standard": "Pasar Tradisional - Pasar Tanpa Bangunan",
+      "count": 1
+    },
+    {
+      "id": 299,
+      "standard": "Ibukota Kecamatan",
+      "count": 1
+    },
+    {
+      "id": 300,
+      "standard": "Persentase terhadap Luas Kabupaten",
+      "count": 1
+    },
+    {
+      "id": 301,
+      "standard": "Partai Politik/Political Parties",
+      "count": 1
+    },
+    {
+      "id": 302,
+      "standard": "Jumlah Anggota Dewan Perwakilan Rakyat Daerah (DPRD) Laki-laki",
+      "count": 1
+    },
+    {
+      "id": 303,
+      "standard": "Jumlah Anggota Dewan Perwakilan Rakyat Daerah (DPRD) Perempuan",
+      "count": 1
+    },
+    {
+      "id": 304,
+      "standard": "Jumlah Anggota Dewan Perwakilan Rakyat Daerah (DPRD)",
+      "count": 1
+    },
+    {
+      "id": 305,
+      "standard": "Tingkat Pendidikan Educational",
+      "count": 1
+    },
+    {
+      "id": 306,
+      "standard": "Pangkat/Golongan/Ruang Hierarchy",
+      "count": 1
+    },
+    {
+      "id": 307,
+      "standard": "Jenis Pendapatan",
+      "count": 1
+    },
+    {
+      "id": 308,
+      "standard": "Realisasi Pendapatan Pemerintah Kabupaten Tasikmalaya",
+      "count": 1
+    },
+    {
+      "id": 309,
+      "standard": "Realisasi Pendapatan Pemerintah Kabupaten Tasikmalaya.1",
+      "count": 1
+    },
+    {
+      "id": 310,
+      "standard": "Jumlah Penduduk Menurut Kecamatan",
+      "count": 1
+    },
+    {
+      "id": 311,
+      "standard": "Laju Pertumbuhan Penduduk per Tahun",
+      "count": 1
+    },
+    {
+      "id": 312,
+      "standard": "Persentase Penduduk",
+      "count": 1
+    },
+    {
+      "id": 313,
+      "standard": "Kepadatan Penduduk per km2",
+      "count": 1
+    },
+    {
+      "id": 314,
+      "standard": "Rasio Jenis Kelamin Penduduk",
+      "count": 1
+    },
+    {
+      "id": 315,
+      "standard": "Uraian",
+      "count": 1
+    },
+    {
+      "id": 316,
+      "standard": "Tingkat Partisipasi Angkatan Kerja (TPAK) - 2024 - Feb",
+      "count": 1
+    },
+    {
+      "id": 317,
+      "standard": "Tingkat Partisipasi Angkatan Kerja (TPAK) 2024 - Agt",
+      "count": 1
+    },
+    {
+      "id": 318,
+      "standard": "Tingkat Pengangguran Terbuka (TPT) - 2025 - Feb",
+      "count": 1
+    },
+    {
+      "id": 319,
+      "standard": "Tingkat Pengangguran Terbuka (TPT)",
+      "count": 1
+    },
+    {
+      "id": 320,
+      "standard": "Lapangan Pekerjaan Utama¹",
+      "count": 1
+    },
+    {
+      "id": 321,
+      "standard": "Laki-Laki",
+      "count": 1
+    },
+    {
+      "id": 322,
+      "standard": "Perempuan",
+      "count": 1
+    },
+    {
+      "id": 323,
+      "standard": "Jumlah",
+      "count": 1
+    },
+    {
+      "id": 324,
+      "standard": "Jenjang Pendidikan/Educational",
+      "count": 1
+    },
+    {
+      "id": 325,
+      "standard": "Persentase Penduduk Berumur 15 Tahun ke Atas yang Melek Huruf 2024/2025",
+      "count": 1
+    },
+    {
+      "id": 326,
+      "standard": "Jumlah Sekolah Dasar (SD)",
+      "count": 1
+    },
+    {
+      "id": 327,
+      "standard": "Jumlah Sekolah Dasar (SD) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 328,
+      "standard": "Jumlah Guru Sekolah Dasar (SD)",
+      "count": 1
+    },
+    {
+      "id": 329,
+      "standard": "Jumlah Guru Sekolah Dasar (SD) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 330,
+      "standard": "Jumlah Murid Sekolah Dasar (SD)",
+      "count": 1
+    },
+    {
+      "id": 331,
+      "standard": "Jumlah Murid Sekolah Dasar (SD) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 332,
+      "standard": "Jumlah Sekolah Menengah Pertama (SMP)",
+      "count": 1
+    },
+    {
+      "id": 333,
+      "standard": "Jumlah Sekolah Menengah Pertama (SMP) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 334,
+      "standard": "Jumlah Guru Sekolah Menengah Pertama (SMP)",
+      "count": 1
+    },
+    {
+      "id": 335,
+      "standard": "Jumlah Guru Sekolah Menengah Pertama (SMP) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 336,
+      "standard": "Jumlah Murid Sekolah Menengah Pertama (SMP)",
+      "count": 1
+    },
+    {
+      "id": 337,
+      "standard": "Jumlah Murid Sekolah Menengah Pertama (SMP) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 338,
+      "standard": "Jumlah Sekolah Menengah Atas (SMA)",
+      "count": 1
+    },
+    {
+      "id": 339,
+      "standard": "Jumlah Sekolah Menengah Atas (SMA) - Jumlah",
+      "count": 1
+    },
+    {
+      "id": 340,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan  - Poliklinik/Polyclinic",
+      "count": 1
+    },
+    {
+      "id": 341,
+      "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Poliklinik/Polyclinic",
+      "count": 1
+    },
+    {
+      "id": 342,
+      "standard": "Jumlah Puskesmas Non Rawat Inap",
+      "count": 1
+    },
+    {
+      "id": 343,
+      "standard": "Jumlah  Puskesmas Non Rawat Inap",
+      "count": 1
+    },
+    {
+      "id": 344,
+      "standard": "Jumlah Penduduk Islam",
+      "count": 1
+    },
+    {
+      "id": 345,
+      "standard": "Jumlah Penduduk Protestan/Protestant",
+      "count": 1
+    },
+    {
+      "id": 346,
+      "standard": "Jumlah Penduduk Katolik/Catholic",
+      "count": 1
+    },
+    {
+      "id": 347,
+      "standard": "Jumlah Penduduk Hindu",
+      "count": 1
+    },
+    {
+      "id": 348,
+      "standard": "Jumlah Penduduk Budha/Buddha",
+      "count": 1
+    },
+    {
+      "id": 349,
+      "standard": "Jumlah Penduduk Lainnya/Others",
+      "count": 1
+    },
+    {
+      "id": 350,
+      "standard": "Jumlah Masjid",
+      "count": 1
+    },
+    {
+      "id": 351,
+      "standard": "Jumlah Mushola/Pray Room",
+      "count": 1
+    },
+    {
+      "id": 352,
+      "standard": "Jumlah Gereja Protestan/Protestant",
+      "count": 1
+    },
+    {
+      "id": 353,
+      "standard": "Jumlah Gereja Katholik/Catholic",
+      "count": 1
+    },
+    {
+      "id": 354,
+      "standard": "Jumlah Pura",
+      "count": 1
+    },
+    {
+      "id": 355,
+      "standard": "Jumlah Vihara",
+      "count": 1
+    },
+    {
+      "id": 356,
+      "standard": "Jumlah Desa/Kelurahan - Banjir",
+      "count": 1
+    },
+    {
+      "id": 357,
+      "standard": "Tahun/Year",
+      "count": 1
+    },
+    {
+      "id": 358,
+      "standard": "Garis Kemiskinan",
+      "count": 1
+    },
+    {
+      "id": 359,
+      "standard": "Jumlah Penduduk Miskin",
+      "count": 1
+    },
+    {
+      "id": 360,
+      "standard": "Persentase Penduduk Miskin",
+      "count": 1
+    },
+    {
+      "id": 361,
+      "standard": "Indeks Kedalaman Kemiskinan dan Indeks Keparahan Kemiskinan di Kabupaten Tasikma - Tahun/Year",
+      "count": 1
+    },
+    {
+      "id": 362,
+      "standard": "Indeks Kedalaman Kemiskinan",
+      "count": 1
+    },
+    {
+      "id": 363,
+      "standard": "Indeks Keparahan Kemiskinan",
+      "count": 1
+    }
+  ],
+  "next_id": 364
+}

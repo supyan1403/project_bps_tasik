@@ -605,6 +605,54 @@ def deduplicate_columns(columns: List[str]) -> List[str]:
             new_cols.append(col_str)
     return new_cols
 
+def deduplicate_columns_with_years(columns: List[str], years: List[str]) -> List[str]:
+    cleaned_headers = []
+    for h in columns:
+        h_str = str(h).strip()
+        h_clean = re.sub(r'\.\d+$', '', h_str)
+        cleaned_headers.append(h_clean)
+        
+    from collections import Counter
+    counts = Counter(cleaned_headers)
+    
+    new_cols = []
+    seen = {}
+    for idx, col in enumerate(cleaned_headers):
+        col_lower = col.lower()
+        if col_lower in ["kecamatan", "tahun", "satuan", "desa", "kelurahan", "desa/kelurahan"]:
+            new_cols.append(col)
+            continue
+            
+        if counts[col] > 1:
+            yr = str(years[idx]).strip() if idx < len(years) else "-"
+            is_valid_year = re.match(r'^(19|20)\d{2}(/\d{2,4})?$', yr)
+            if is_valid_year:
+                new_cols.append(yr)
+            else:
+                if col in seen:
+                    seen[col] += 1
+                    new_cols.append(f"{col}.{seen[col]}")
+                else:
+                    seen[col] = 0
+                    new_cols.append(col)
+        else:
+            new_cols.append(col)
+            
+    final_cols = []
+    final_seen = {}
+    for col in new_cols:
+        col_str = str(col).strip()
+        if not col_str:
+            col_str = "Kolom_Kosong"
+        if col_str in final_seen:
+            final_seen[col_str] += 1
+            final_cols.append(f"{col_str}.{final_seen[col_str]}")
+        else:
+            final_seen[col_str] = 0
+            final_cols.append(col_str)
+    return final_cols
+
+
 def detect_and_clean_metadata(table_name: str, doc_year: int, headers: List[str]) -> tuple:
     units = [""] * len(headers)
     years = [""] * len(headers)
@@ -675,7 +723,7 @@ def detect_and_clean_metadata(table_name: str, doc_year: int, headers: List[str]
         years[idx] = col_year
         units[idx] = col_unit
 
-    deduplicated_headers = deduplicate_columns(cleaned_headers)
+    deduplicated_headers = deduplicate_columns_with_years(cleaned_headers, years)
 
     if len(units) > 0:
         units[0] = "satuan"
@@ -1265,8 +1313,7 @@ class PDFOfflineTableExtractor:
                 table_num = extract_table_number(text[:400], actual_page, pdf_path)
 
                 if not table_num:
-                    logging.info(f"-> Halaman {actual_page} DIABAIKAN. Alasan: Tidak terdeteksi nomor tabel (Cover/Halaman penjelasan/Bukan tabel statistik).")
-                    continue
+                    logging.info(f"-> Halaman {actual_page}: Tidak terdeteksi nomor tabel, diproses sebagai tabel lanjutan (continuation).")
 
                 # --- MANUAL OVERRIDE UNTUK TYPO BPS (BERDASARKAN HALAMAN PDF 2026) ---
                 if pdf_path and "2026" in os.path.basename(pdf_path):
@@ -1631,11 +1678,11 @@ if __name__ == "__main__":
                                         title_safe = re.sub(r'[\\*?:\"<>|]', '', title_safe)
                                         title_safe = re.sub(r'\s+', ' ', title_safe).strip()
                                         # Batasi panjang nama file agar tidak menabrak batas Windows MAX_PATH
-                                        if len(title_safe) > 100:
+                                        if len(title_safe) > 200:
                                             import re
                                             hal_match = re.search(r'\s*\(Hal\s+[\d,\s]+\)$', title_safe)
                                             hal_suffix = hal_match.group(0) if hal_match else ''
-                                            allowed_desc_len = 100 - len(f'Tabel {table_number} - ') - len(hal_suffix) - 5
+                                            allowed_desc_len = 200 - len(f'Tabel {table_number} - ') - len(hal_suffix) - 5
                                             if allowed_desc_len > 10:
                                                 truncated_desc = desc[:allowed_desc_len].strip() + '...'
                                                 truncated_desc = truncated_desc.replace("/", " __SLASH__ ")

@@ -17,6 +17,18 @@ def is_actual_page_number(s):
     except:
         return False
 
+INDO_LOWER_WORDS = {'dan', 'di', 'ke', 'atau', 'dan/atau', 'per', 'antar', 'antara', 'dalam', 'dengan', 'bagi', 'untuk', 'pada', 'dari', 'serta', 'yang', 'oleh', 'sebagai', 'secara', 'tentang', 'sampai', 'melalui', 'berdasarkan', 'menurut', 'setiap', 'seperti', 'karena', 'akan', 'setelah', 'sebelum', 'saat', 'bagi', 'tanpa', 'hingga', 'beserta', 'maupun', 'sama'}
+
+def title_case_indonesian(title):
+    words = title.split()
+    result = []
+    for i, w in enumerate(words):
+        if w and w[0].islower():
+            if i == 0 or w.lower() not in INDO_LOWER_WORDS:
+                w = w[0].upper() + w[1:] if len(w) > 1 else w.upper()
+        result.append(w)
+    return ' '.join(result)
+
 def parse_bps_toc(pdf_path):
     with pdfplumber.open(pdf_path) as pdf:
         total_pages = len(pdf.pages)
@@ -74,8 +86,7 @@ def parse_bps_toc(pdf_path):
                 printed_start = int(m_ch.group(3))
                 if "/" in title:
                     title = title.split("/")[0].strip()
-                title = title.title()
-                title = re.sub(r'\bAnd\b', 'dan', title, flags=re.IGNORECASE)
+                title = title_case_indonesian(title)
                 if 1 <= num <= 20 and not any(c['num'] == num for c in chapters):
                     chapters.append({
                         "num": num,
@@ -124,6 +135,9 @@ def parse_bps_toc(pdf_path):
         # Parse table printed pages
         raw_tables = []
         for line in combined_table_lines:
+            # Skip lines containing "Halaman" or "Page" noise
+            if re.search(r'\b(?:Halaman|Page|Hal\.?)\s*\d+', line[:20], re.IGNORECASE):
+                continue
             m_t = re.search(r'^([1-9]|1[0-9])\.(\d+)(?:\.(\d+))?\s+.*?\.+\s*(\d+)$', line)
             if m_t and is_actual_page_number(m_t.group(4)):
                 raw_tables.append({
@@ -131,30 +145,37 @@ def parse_bps_toc(pdf_path):
                     "printed_page": int(m_t.group(4))
                 })
                 
-        # Calculate dynamic offset using footer scanning
+        # Calculate dynamic offset using BPS footer pattern "{n} TASIKMALAYA REGENCY IN FIGURES"
         offsets = []
-        for p in range(40, min(80, total_pages)):
+        for p in range(40, min(100, total_pages)):
             text = pdf.pages[p - 1].extract_text()
             if not text:
                 continue
             lines = [l.strip() for l in text.split('\n') if l.strip()]
             if not lines:
                 continue
-            last_line = lines[-1]
             
-            printed_page = None
-            m_start = re.match(r'^(\d+)\b', last_line)
-            if m_start:
-                printed_page = int(m_start.group(1))
-            else:
+            # BPS footer pattern: starts with digit, ends with "TASIKMALAYA REGENCY IN FIGURES" or "SECTION"
+            for line in lines[-5:]:
+                m_num = re.match(r'^(\d+)', line)
+                if m_num:
+                    printed = int(m_num.group(1))
+                    if 1 <= printed <= 600:
+                        upper_line = line.upper()
+                        if 'TASIKMALAYA REGENCY IN FIGURES' in upper_line or 'TASIKMALAYA DALAM ANGKA' in upper_line or upper_line.strip().endswith('SECTION') or upper_line.strip().endswith('BAB'):
+                            offsets.append(p - printed)
+                            break
+            
+            # Fallback: last line ends with a small number
+            if not offsets or p != offsets[-1]:
+                last_line = lines[-1]
                 m_end = re.search(r'\b(\d+)$', last_line)
                 if m_end:
-                    printed_page = int(m_end.group(1))
-                    
-            if printed_page and 1 <= printed_page < 150:
-                offsets.append(p - printed_page)
+                    printed = int(m_end.group(1))
+                    if 1 <= printed < 150:
+                        offsets.append(p - printed)
                 
-        offset = Counter(offsets).most_common(1)[0][0] if offsets else 38
+        offset = Counter(offsets).most_common(1)[0][0] if offsets else 36
         
         # Group tables by their prefix (raw grouping)
         table_pages = {}
@@ -166,37 +187,30 @@ def parse_bps_toc(pdf_path):
             table_pages[ch].append(page)
             
         # Validate and identify trusted TOC start pages (no typos)
-        # S_C is trusted if F_C - S_C <= 8.
         trusted_starts = {}
         for c in chapters:
             num = c["num"]
             raw_s = c["raw_start"]
             
-            # Find first table printed page for this chapter in raw grouping
             f_c = min(table_pages[num]) if (num in table_pages and table_pages[num]) else raw_s
-            
             if num == 1:
                 trusted_starts[1] = raw_s
             else:
                 if f_c - raw_s <= 8:
                     trusted_starts[num] = raw_s
                     
-        # Now re-group tables by filtering out outliers using trusted_starts
+        # Now re-group tables by filtering out outliers using IQR
         filtered_table_pages = {}
-        for t in raw_tables:
-            ch = t["ch_num"]
-            page = t["printed_page"]
-            
-            is_outlier = False
-            for next_ch in range(ch + 1, 20):
-                if next_ch in trusted_starts:
-                    if page >= trusted_starts[next_ch]:
-                        is_outlier = True
-                        break
-            if not is_outlier:
-                if ch not in filtered_table_pages:
-                    filtered_table_pages[ch] = []
-                filtered_table_pages[ch].append(page)
+        for ch in sorted(table_pages.keys()):
+            pages = sorted(table_pages[ch])
+            if len(pages) >= 4:
+                q1 = pages[len(pages)//4]
+                q3 = pages[3*len(pages)//4]
+                iqr = q3 - q1
+                lower = q1 - 1.5 * iqr
+                upper = q3 + 1.5 * iqr
+                pages = [p for p in pages if lower <= p <= upper]
+            filtered_table_pages[ch] = pages
                 
         # Map chapter boundaries
         babs = []
@@ -227,10 +241,11 @@ def parse_bps_toc(pdf_path):
                 "end_page": cover_end
             })
             
-        # Adjust end pages to eliminate gaps
-        babs.sort(key=lambda x: x["start_page"])
+        # Adjust end pages to eliminate gaps and ensure ordering
+        babs.sort(key=lambda x: x["num"])
         for i in range(len(babs) - 1):
-            babs[i]["end_page"] = babs[i+1]["start_page"] - 1
+            if babs[i]["end_page"] >= babs[i+1]["start_page"]:
+                babs[i]["end_page"] = babs[i+1]["start_page"] - 1
         babs[-1]["end_page"] = total_pages
         
         return babs

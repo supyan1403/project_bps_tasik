@@ -93,7 +93,7 @@ function navigate(pageId, element) {
     }
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
 
     const page = document.getElementById(`page-${pageId}`);
     if (page) page.classList.add('active');
@@ -255,7 +255,7 @@ function backToTableList() {
     }
 
     // Default flow: kembali ke daftar tabel
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const tabelNav = document.getElementById('nav-tabel');
     if (tabelNav) tabelNav.classList.add('active');
     
@@ -296,6 +296,7 @@ function buildEditorToolbar(tableId, tableName, mode) {
         toolbar.innerHTML = `
             <button onclick="backToTableList()" class="editor-tool-btn btn-danger" style="background:#ef4444; color:white; border: 1px solid #dc2626;">← Kembali / Batal</button>
             <button onclick="downloadCsv(${tableId})" class="editor-tool-btn btn-indigo">Download CSV</button>
+            <button onclick="addColFromMaster(${tableId}, '${tn}')" class="editor-tool-btn btn-indigo" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; color:white; margin-right:4px;">➕ Tambah Kolom Master</button>
             <button onclick="saveCsvChangesToServer(${tableId})" class="editor-tool-btn btn-green" style="background:#10b981;">Simpan Perubahan</button>
             <span style="margin-left:auto; font-size:0.8rem; color:#94a3b8;">Klik <b>header kolom</b> untuk rename · Klik <b>sel</b> untuk edit</span>
         `;
@@ -414,6 +415,80 @@ async function loadDashboardStats() {
                 }
             }
             
+            // Load Header Column Anomalies
+            try {
+                const headerAnomRes = await fetch(`${API_BASE}/admin/all-column-anomalies`);
+                const headerPanel = document.getElementById('admin-header-anomalies-panel');
+                const headerTbody = document.getElementById('admin-header-anomalies-tbody');
+                if (headerAnomRes.ok && headerTbody) {
+                    const hData = await headerAnomRes.json();
+                    const anomalies = hData.anomalies || [];
+                    if (anomalies.length === 0) {
+                        if (headerPanel) headerPanel.style.display = 'none';
+                        headerTbody.innerHTML = '';
+                    } else {
+                        if (headerPanel) headerPanel.style.display = 'block';
+                        headerTbody.innerHTML = anomalies.map(a => `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 10px; font-weight: 500; color: #334155; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${a.table_name}">
+                                    <span style="cursor: pointer; color: #4f46e5; text-decoration: underline;" onclick="openTableForEdit(${a.table_id})">
+                                        ${a.table_name}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px; text-align: center; color: #64748b;">${a.document_year}</td>
+                                <td style="padding: 10px; color: #334155; font-weight:600;">${a.header}</td>
+                                <td style="padding: 10px; color: #b45309;"><span style="background:#fffbeb; padding:2px 6px; border-radius:4px; border:1px solid #fcd34d; font-size:0.75rem;">${a.unknown_words.join(', ')}</span></td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <button class="btn btn-small" style="background:#6366f1; border-color:#6366f1; color:white; padding:4px 10px; font-size:0.8rem; cursor:pointer;" onclick="openTableForEdit(${a.table_id})">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch(e) { console.error("Failed to load header anomalies", e); }
+
+            // Load Detailed Data Content Anomalies
+            try {
+                const dataAnomRes = await fetch(`${API_BASE}/admin/all-data-anomalies`);
+                const dataPanel = document.getElementById('admin-data-anomalies-panel');
+                const dataTbody = document.getElementById('admin-data-anomalies-tbody');
+                if (dataAnomRes.ok && dataTbody) {
+                    const dData = await dataAnomRes.json();
+                    const anomalies = dData.anomalies || [];
+                    if (anomalies.length === 0) {
+                        if (dataPanel) dataPanel.style.display = 'none';
+                        dataTbody.innerHTML = '';
+                    } else {
+                        if (dataPanel) dataPanel.style.display = 'block';
+                        dataTbody.innerHTML = anomalies.map(a => {
+                            const details = Object.entries(a.data)
+                                .map(([k, v]) => `<strong>${k}</strong>: <span style="color:${v === "" || v.includes("?") ? '#ef4444' : '#334155'}; font-weight:${v === "" || v.includes("?") ? 'bold' : 'normal'}">${v || '[KOSONG]'}</span>`)
+                                .join(" | ");
+                            return `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-weight: 500; color: #334155; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${a.table_name}">
+                                        <span style="cursor: pointer; color: #4f46e5; text-decoration: underline;" onclick="viewDataEditor(${a.table_id}, '${a.table_name.replace(/'/g, "\\'")}')">
+                                            ${a.table_name}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px; text-align: center; color: #64748b;">${a.document_year}</td>
+                                    <td style="padding: 10px; font-size:0.8rem; color:#475569; max-width:450px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${details.replace(/<[^>]*>/g, '')}">
+                                        ${details}
+                                    </td>
+                                    <td style="padding: 10px; text-align: center;">
+                                        <button class="btn btn-small" style="background:#10b981; border-color:#10b981; color:white; padding:4px 10px; font-size:0.8rem; cursor:pointer;" onclick="viewDataEditor(${a.table_id}, '${a.table_name.replace(/'/g, "\\'")}')">
+                                            Perbaiki
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch(e) { console.error("Failed to load data anomalies", e); }
+
             // Load recent extraction activities (ambil 5 dokumen teratas)
             const docsRes = await fetch(`${API_BASE}/documents`);
             if (docsRes.ok) {
@@ -939,34 +1014,37 @@ async function populateDocumentList() {
     bcLeft.innerHTML = bcHTML;
     breadcrumb.appendChild(bcLeft);
 
-    const bcRight = document.createElement("div");
-    bcRight.style.display = "flex";
-    bcRight.style.gap = "0.5rem";
-    bcRight.style.flexWrap = "wrap";
+    container.appendChild(breadcrumb);
     
+    // Panel Aksi di bawah Breadcrumb
     if (viewState.selectedDocId && doc) {
+        const actionPanel = document.createElement("div");
+        actionPanel.style.marginBottom = "1.5rem";
+        actionPanel.style.display = "flex";
+        actionPanel.style.gap = "0.75rem";
+        actionPanel.style.flexWrap = "wrap";
+        
         if (viewState.selectedBabNum === null) {
-            bcRight.innerHTML = `
-                <button onclick="loadAllCsvForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-small btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+            actionPanel.innerHTML = `
+                <button onclick="loadAllCsvForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
                     ⚡ Load Semua Tabel ke Database
                 </button>
-                <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-small btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
                     🗑️ Hapus Semua Hasil
                 </button>
             `;
         } else {
-            bcRight.innerHTML = `
-                <button onclick="loadAllCsvForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-small btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+            actionPanel.innerHTML = `
+                <button onclick="loadAllCsvForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-primary" style="background:#4f46e5; border-color:#4f46e5; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
                     ⚡ Load Semua Tabel ke Database
                 </button>
-                <button onclick="deleteAllTablesForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-small btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                <button onclick="deleteAllTablesForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-danger" style="background:#ef4444; border-color:#ef4444; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
                     🗑️ Hapus Semua Tabel Bab
                 </button>
             `;
         }
+        container.appendChild(actionPanel);
     }
-    breadcrumb.appendChild(bcRight);
-    container.appendChild(breadcrumb);
     
     if (!viewState.selectedDocId) {
         // LEVEL 1: Tampilkan Grid Dokumen
@@ -2399,6 +2477,85 @@ function renderTimeSeriesTable(tablesData, keyword) {
             }
         });
     });
+    const tableGroups = {};
+    tablesData.forEach(t => {
+        const groupKey = getTableNumberOrCleanName(t.table_name);
+        if (!tableGroups[groupKey]) {
+            tableGroups[groupKey] = {
+                displayName: t.table_name,
+                tables: []
+            };
+        }
+        tableGroups[groupKey].tables.push(t);
+    });
+    
+    const groupKeys = Object.keys(tableGroups);
+    if (groupKeys.length === 1) {
+        renderTimeSeriesTable(tableGroups[groupKeys[0]].tables, keyword);
+        return;
+    }
+    
+    let pickerHtml = `
+    <div style="margin: 1rem 0; padding: 1rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+        <p style="margin-bottom: 0.75rem; font-weight: 600; color: #0369a1;">
+            🔍 Ditemukan <strong>${groupKeys.length}</strong> jenis tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
+            <br><span style="font-weight: 400; font-size: 0.9rem;">Pilih tabel yang ingin ditampilkan dalam analisis deret waktu:</span>
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+    `;
+    
+    groupKeys.forEach(groupKey => {
+        const group = tableGroups[groupKey];
+        const years = group.tables.map(t => t.year).sort((a,b)=>a-b);
+        const yearsStr = years.join(", ");
+        const tableIdsStr = group.tables.map(t => t.table_id).join(",");
+        
+        pickerHtml += `
+        <button class="btn btn-small btn-primary" style="text-align:left; padding: 8px 12px; font-size: 0.9rem;"
+            onclick="selectTableGroupForTimeSeries('${tableIdsStr}', '${keyword}')">
+            <strong>${groupKey}</strong> - ${group.displayName.replace(/^(Tabel[\s_]*\d+(?:\.\d+)*\s*|^\d+(?:\.\d+)+\s*)(?:-\s*|:\s*|)/i, '')}
+            <span style="opacity: 0.8; font-size: 0.8rem; display: block;">Tersedia: Tahun ${yearsStr}</span>
+        </button>`;
+    });
+    
+    pickerHtml += `</div></div>`;
+    
+    const pickerEl = document.getElementById("ts-table-picker");
+    pickerEl.innerHTML = pickerHtml;
+    pickerEl.style.display = "block";
+}
+
+function selectTableGroupForTimeSeries(tableIdsStr, keyword) {
+    document.getElementById("ts-table-picker").style.display = "none";
+    const ids = tableIdsStr.split(",").map(Number);
+    const filteredTables = currentMatchedTables.filter(t => ids.includes(t.table_id));
+    renderTimeSeriesTable(filteredTables, keyword);
+}
+
+function renderTimeSeriesTable(tablesData, keyword) {
+    document.getElementById("ts-result-title").innerText = `Hasil: "${keyword.toUpperCase()}"`;
+    document.getElementById("ts-results-content").style.display = "block";
+    
+    const entityMap = {};
+    const yearsSet = new Set();
+    const valueKeysSet = new Set();
+    
+    tablesData.forEach(table => {
+        yearsSet.add(table.year);
+        
+        table.data.forEach(row => {
+            const rawEnt = row.entitas;
+            const canonEnt = getCanonicalName(entityMap, rawEnt);
+            
+            if (!entityMap[canonEnt]) entityMap[canonEnt] = {};
+            if (!entityMap[canonEnt][table.year]) entityMap[canonEnt][table.year] = {};
+            
+            for (const [k, v] of Object.entries(row.nilai)) {
+                entityMap[canonEnt][table.year][k] = v;
+                valueKeysSet.add(k);
+            }
+        });
+    });
     
     const years = Array.from(yearsSet).sort((a, b) => a - b);
     const valueKeys = Array.from(valueKeysSet);
@@ -2438,6 +2595,24 @@ function renderTimeSeriesTable(tablesData, keyword) {
     });
     
     tbody.innerHTML = bodyHtml;
+    
+    // Render Chart.js visualization
+    try {
+        const chartHeaders = ["Entitas", ...years];
+        const chartRows = Object.keys(entityMap).sort().map(ent => {
+            const rowData = [ent];
+            years.forEach(y => {
+                const yearData = entityMap[ent][y] || {};
+                const vk = valueKeys[0];
+                const val = yearData[vk] || "";
+                rowData.push(val);
+            });
+            return rowData;
+        });
+        renderTimeSeriesChart(chartHeaders, chartRows);
+    } catch(e) {
+        console.error("Failed to render Chart:", e);
+    }
 }
 
 function exportTimeSeriesCSV() {
@@ -2703,3 +2878,582 @@ function openDocFromDashboard(docId) {
     populateDocumentList();
 }
 
+// ===== MASTER DICTIONARY & COLUMN ANOMALY SYSTEM =====
+
+let currentColumnAnomalies = [];
+
+async function checkColumnAnomalies(tableId) {
+    try {
+        const res = await fetch(`${API_BASE}/tables/${tableId}/column-anomalies`);
+        if (res.ok) {
+            const data = await res.json();
+            currentColumnAnomalies = data.anomalies || [];
+            return currentColumnAnomalies;
+        }
+    } catch(e) {
+        console.error("Failed to check column anomalies:", e);
+    }
+    currentColumnAnomalies = [];
+    return [];
+}
+
+function getAnomalyInfo(colIndex) {
+    return currentColumnAnomalies.find(a => a.col_index === colIndex);
+}
+
+function openMasterDictionary() {
+    const modal = new bootstrap.Modal(document.getElementById('masterDictionaryModal'));
+    refreshMasterDictList();
+    modal.show();
+}
+
+async function refreshMasterDictList() {
+    try {
+        const res = await fetch(`${API_BASE}/master-dictionary`);
+        const data = await res.json();
+        const words = data.words || [];
+        const listEl = document.getElementById('master-dict-list');
+        if (words.length === 0) {
+            listEl.innerHTML = '<p style="color: #94a3b8;">Belum ada kata dalam kamus master.</p>';
+        } else {
+            listEl.innerHTML = words.map(w => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #f1f5f9;">
+                    <span>${w}</span>
+                    <button onclick="deleteMasterWord('${w}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem;">✕</button>
+                </div>
+            `).join('');
+        }
+    } catch(e) {
+        document.getElementById('master-dict-list').innerHTML = '<p style="color: #ef4444;">Gagal memuat.</p>';
+    }
+}
+
+async function addMasterWord() {
+    const input = document.getElementById('master-dict-new-word');
+    const word = input ? input.value.trim() : '';
+    if (!word) return;
+    await fetch(`${API_BASE}/master-dictionary/words`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ words: [word] })
+    });
+    if (input) input.value = '';
+    await refreshMasterDictList();
+}
+
+async function deleteMasterWord(word) {
+    await fetch(`${API_BASE}/master-dictionary/words/${encodeURIComponent(word)}`, { method: 'DELETE' });
+    await refreshMasterDictList();
+}
+
+async function dismissColumnAnomaly(colIndex) {
+    const info = getAnomalyInfo(colIndex);
+    if (!info) return;
+    await fetch(`${API_BASE}/dismiss-column-anomaly`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: info.key })
+    });
+    currentColumnAnomalies = currentColumnAnomalies.filter(a => a.col_index !== colIndex);
+}
+
+async function applyColumnSuggestion(tableId, colIndex, suggestionName) {
+    if (!suggestionName) return;
+    await fetch(`${API_BASE}/tables/${tableId}/apply-column-fix`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ col_index: colIndex, new_name: suggestionName })
+    });
+    currentColumnAnomalies = currentColumnAnomalies.filter(a => a.col_index !== colIndex);
+}
+
+// ===== PENCARIAN TABEL =====
+let searchDebounceTimeout = null;
+function onSearchInput() {
+    clearTimeout(searchDebounceTimeout);
+    searchDebounceTimeout = setTimeout(() => {
+        searchTables();
+    }, 250);
+}
+
+async function searchTables() {
+    const q = document.getElementById('search-table-input')?.value?.trim();
+    const container = document.getElementById('search-table-results');
+    if (!q) {
+        container.innerHTML = '';
+        return;
+    }
+    container.innerHTML = '<div class="small text-muted">Mencari...</div>';
+    try {
+        const res = await fetch(`${API_BASE}/tables/search?q=${encodeURIComponent(q)}&limit=20`);
+        if (!res.ok) throw new Error('Gagal mencari');
+        const data = await res.json();
+        const results = data.tables || [];
+        if (results.length === 0) {
+            container.innerHTML = '<div class="small text-muted">Tidak ada tabel ditemukan.</div>';
+            return;
+        }
+        let html = `<div class="fw-semibold small mb-1">Ditemukan ${data.total} tabel:</div>`;
+        results.forEach(t => {
+            const docInfo = t.document_name ? `${t.document_year ? t.document_year : ''} - ${t.document_name}` : '';
+            html += `<div class="d-flex justify-content-between align-items-center p-2 border-bottom search-result-item" style="cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background='transparent'">
+                <div class="small">
+                    <div class="fw-semibold">${t.table_name}</div>
+                    <div class="text-muted" style="font-size:0.75rem;">${docInfo}${t.bab_num ? ` &middot; Bab ${t.bab_num}` : ''}</div>
+                </div>
+                <div class="d-flex gap-1">
+                    <button onclick="openTable(${t.id}); document.getElementById('search-table-results').innerHTML=''; return false;" class="btn btn-sm btn-outline-primary" style="font-size:0.7rem;">Lihat</button>
+                    <button onclick="openTableForEdit(${t.id}); document.getElementById('search-table-results').innerHTML=''; return false;" class="btn btn-sm btn-outline-success" style="font-size:0.7rem;">Edit</button>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    } catch (e) {
+        container.innerHTML = `<div class="small text-danger">Error: ${e.message}</div>`;
+    }
+}
+
+async function navigateBab(direction) {
+    const babs = Object.keys(window.__babGroups || {}).map(Number).sort((a,b) => a-b);
+    if (babs.length === 0) return;
+    const current = viewState.selectedBabNum;
+    let idx = current !== null ? babs.indexOf(current) : -1;
+    if (direction === 'prev') {
+        idx = idx > 0 ? idx - 1 : babs.length - 1;
+    } else {
+        idx = idx < babs.length - 1 ? idx + 1 : 0;
+    }
+    viewState.selectedBabNum = babs[idx];
+    await populateDocumentList();
+}
+
+// ===== MASTER KOLOM =====
+let masterColumnsData = null;
+
+async function loadMasterColumnsPage() {
+    await renderMasterColumns();
+}
+
+async function renderMasterColumns() {
+    try {
+        const res = await fetch(`${API_BASE}/master/columns`);
+        if (!res.ok) throw new Error('Gagal memuat master columns');
+        masterColumnsData = await res.json();
+    } catch (e) {
+        document.getElementById('master-columns-body').innerHTML = `<tr><td colspan="4" class="text-danger text-center">Error: ${e.message}</td></tr>`;
+        return;
+    }
+    
+    const d = masterColumnsData;
+    const tbody = document.getElementById('master-columns-body');
+    const empty = document.getElementById('master-columns-empty');
+    const count = document.getElementById('master-columns-count');
+    
+    if (!d.columns || d.columns.length === 0) {
+        tbody.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        if (count) count.textContent = '0 entri';
+        return;
+    }
+    if (empty) empty.style.display = 'none';
+    if (count) count.textContent = `${d.columns.length} entri dari dokumen ${d.version || ''}`;
+    
+    const filter = (document.getElementById('master-column-search')?.value || '').toLowerCase();
+    const filtered = filter ? d.columns.filter(c => c.standard.toLowerCase().includes(filter)) : d.columns;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center">Tidak ada hasil untuk "${filter}"</td></tr>`;
+        return;
+    }
+    
+    let html = '';
+    filtered.forEach(col => {
+        html += `<tr>
+            <td class="small text-muted">${col.id}</td>
+            <td class="fw-semibold small" id="mc-name-${col.id}">${col.standard}</td>
+            <td class="small text-center">${col.count}</td>
+            <td>
+                <button onclick="editMasterColumn(${col.id})" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.7rem;">Edit</button>
+                <button onclick="deleteMasterColumn(${col.id})" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.7rem;">Hapus</button>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+async function editMasterColumn(id) {
+    const nameEl = document.getElementById(`mc-name-${id}`);
+    if (!nameEl) return;
+    const current = nameEl.textContent;
+    const newName = prompt('Edit header standar:', current);
+    if (!newName || newName === current) return;
+    try {
+        const res = await fetch(`${API_BASE}/master/columns/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ standard: newName })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Gagal update');
+        }
+        await renderMasterColumns();
+        Swal.fire({ icon: 'success', title: 'Berhasil', text: `Header diubah menjadi "${newName}"`, timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+    }
+}
+
+async function deleteMasterColumn(id) {
+    const result = await Swal.fire({
+        title: 'Hapus Header?',
+        text: 'Header ini akan dihapus dari master columns.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    });
+    if (!result.isConfirmed) return;
+    try {
+        const res = await fetch(`${API_BASE}/master/columns/${id}`, { method: 'DELETE' });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Gagal hapus');
+        }
+        await renderMasterColumns();
+        Swal.fire({ icon: 'success', title: 'Dihapus', timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+    }
+}
+
+async function showAddMasterColumn() {
+    const { value: newName } = await Swal.fire({
+        title: 'Tambah Header Baru',
+        input: 'text',
+        inputLabel: 'Nama header standar',
+        inputPlaceholder: 'Masukkan nama header...',
+        showCancelButton: true,
+        confirmButtonText: 'Tambah',
+        cancelButtonText: 'Batal',
+        inputValidator: (v) => !v ? 'Nama header wajib diisi' : null
+    });
+    if (!newName) return;
+    try {
+        const res = await fetch(`${API_BASE}/master/columns/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ standard: newName })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Gagal tambah');
+        }
+        await renderMasterColumns();
+        Swal.fire({ icon: 'success', title: 'Ditambahkan', text: `Header "${newName}" berhasil ditambahkan`, timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+    }
+}
+
+async function searchMasterColumn(tableId, colIndex, headerText) {
+    try {
+        const res = await fetch(`${API_BASE}/master/columns`);
+        if (!res.ok) throw new Error('Gagal memuat master columns');
+        const data = await res.json();
+        const cols = data.columns || [];
+        
+        // Cari header yang mirip (contain) dengan headerText atau sebaliknya
+        const q = headerText.toLowerCase();
+        const matches = cols.filter(c => {
+            const s = c.standard.toLowerCase();
+            return s.includes(q) || q.includes(s) || s.split(' ').some(w => q.includes(w)) || q.split(' ').some(w => s.includes(w));
+        }).slice(0, 20);
+        
+        if (matches.length === 0) {
+            Swal.fire({
+                title: 'Tidak Ditemukan',
+                text: `Tidak ada header di Master Kolom yang mirip dengan "${headerText}"`,
+                icon: 'info',
+                confirmButtonText: 'Tutup'
+            });
+            return;
+        }
+        
+        let html = '<div class="small text-muted mb-2">Pilih header standar sebagai pengganti:</div>';
+        html += '<div style="max-height:300px; overflow-y:auto;">';
+        matches.forEach(c => {
+            const isExact = c.standard.toLowerCase() === q;
+            html += `<div style="padding:6px 8px; cursor:pointer; border-bottom:1px solid #f1f5f9; border-radius:4px; ${isExact ? 'background:#dbeafe;' : ''}" 
+                onmouseenter="this.style.background='${isExact ? '#bfdbfe' : '#f1f5f9'}'" 
+                onmouseleave="this.style.background='${isExact ? '#dbeafe' : 'transparent'}'"
+                onclick="applyColumnSuggestion(${tableId}, ${colIndex}, '${c.standard.replace(/'/g, "\\'")}')">${c.standard}</div>`;
+        });
+        html += '</div>';
+        
+        Swal.fire({
+            title: `🔍 Master Kolom untuk "${headerText}"`,
+            html: html,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Tutup',
+            width: 500
+        });
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+    }
+}
+
+async function regenerateMasterColumns() {
+    const result = await Swal.fire({
+        title: 'Regenerate dari 2025?',
+        text: 'Akan membuat ulang daftar master columns dari header tabel publikasi 2025. Data yang sudah diedit akan ditimpa.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Generate Ulang',
+        cancelButtonText: 'Batal'
+    });
+    if (!result.isConfirmed) return;
+    Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+        const res = await fetch(`${API_BASE}/master/regenerate-columns?document_id=85`, { method: 'POST' });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Gagal regenerate');
+        }
+        Swal.close();
+        await renderMasterColumns();
+        Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Master columns diperbarui dari publikasi 2025.', timer: 2000, showConfirmButton: false });
+    } catch (e) {
+        Swal.close();
+        Swal.fire({ icon: 'error', title: 'Gagal', text: e.message });
+    }
+}
+
+
+
+// ===== TIME SERIES ADVANCED FEATURES (CHART & MASTER COLUMNS) =====
+let timeSeriesChartInstance = null;
+
+async function populateTsMasterIndicators() {
+    try {
+        const res = await fetch(`${API_BASE}/master/columns`);
+        if (!res.ok) throw new Error("Gagal mengambil master kolom");
+        const data = await res.json();
+        const columns = data.columns || [];
+        const select = document.getElementById("ts-master-indicator");
+        if (select) {
+            select.innerHTML = '<option value="">-- Pilih Indikator Master --</option>' + 
+                columns.map(c => `<option value="${c.standard}">${c.standard}</option>`).join('');
+        }
+    } catch (e) {
+        console.error("Failed to load Master Indicators for Time Series:", e);
+    }
+}
+
+function renderTimeSeriesChart(headers, rows) {
+    const container = document.getElementById('ts-chart-container');
+    const ctx = document.getElementById('timeSeriesChart');
+    if (!container || !ctx) return;
+
+    const yearIndices = [];
+    const years = [];
+    headers.forEach((h, idx) => {
+        if (idx > 0 && /^\d{4}$/.test(h)) {
+            yearIndices.push(idx);
+            years.push(h);
+        }
+    });
+
+    if (years.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = 'block';
+
+    const datasets = rows.map((r, index) => {
+        const label = r[0] || `Baris ${index + 1}`;
+        const dataPoints = yearIndices.map(idx => {
+            const val = r[idx];
+            if (val === null || val === undefined || val === '' || val === '-' || val === '...') return null;
+            const cleanedVal = String(val).replace(/\./g, '').replace(/,/g, '.');
+            const num = parseFloat(cleanedVal);
+            return isNaN(num) ? null : num;
+        });
+
+        const hue = (index * 137.5) % 360;
+        const color = `hsl(${hue}, 70%, 50%)`;
+
+        return {
+            label: label,
+            data: dataPoints,
+            borderColor: color,
+            backgroundColor: `hsl(${hue}, 70%, 90%, 0.1)`,
+            borderWidth: 2.5,
+            tension: 0.15,
+            spanGaps: true
+        };
+    });
+
+    if (timeSeriesChartInstance) {
+        timeSeriesChartInstance.destroy();
+    }
+
+    timeSeriesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        font: { size: 11, family: 'Outfit, sans-serif' }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: { color: '#e2e8f0' },
+                    ticks: {
+                        font: { family: 'Outfit, sans-serif' }
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { family: 'Outfit, sans-serif' }
+                    }
+                }
+            }
+        }
+    });
+}
+
+async function addColFromMaster(tableId, tableName) {
+    try {
+        const res = await fetch(`${API_BASE}/master/columns`);
+        if (!res.ok) throw new Error('Gagal memuat master columns');
+        const data = await res.json();
+        const columns = data.columns || [];
+        if (columns.length === 0) {
+            Swal.fire("Kamus Kosong", "Belum ada master columns yang terdaftar. Hubungi Administrator.", "warning");
+            return;
+        }
+
+        const selectOptions = columns.map(c => `<option value="${c.standard}">${c.standard}</option>`).join('');
+
+        const { value: colName } = await Swal.fire({
+            title: 'Pilih Kolom dari Master',
+            html: `
+                <p style="margin-bottom:12px; color:#475569; font-size:0.95rem;">
+                    Pilih kolom standar yang ingin ditambahkan ke tabel:
+                </p>
+                <select id="swal-master-col-select" style="
+                    width:100%; padding:10px 14px; border-radius:8px;
+                    border:1.5px solid #cbd5e1; font-size:0.95rem;
+                    background:#f8fafc; color:#1e293b; cursor:pointer;
+                    outline:none;
+                ">
+                    ${selectOptions}
+                </select>
+            `,
+            showCancelButton: true,
+            cancelButtonText: 'Batal',
+            confirmButtonText: 'Pilih',
+            preConfirm: () => {
+                return document.getElementById('swal-master-col-select').value;
+            }
+        });
+
+        if (!colName) return;
+
+        let currentHeaders = [];
+        try {
+            const hRes = await fetch(`${API_BASE}/tables/${tableId}/csv_preview`);
+            if (hRes.ok) {
+                const hData = await hRes.json();
+                currentHeaders = hData.headers || [];
+            }
+        } catch(e) { /* ignore */ }
+
+        let optionsHtml = `
+            <option value="start">Paling Awal</option>
+            ${currentHeaders.map((h, i) => `<option value="after_${i}">Sesudah kolom: "${h}"</option>`).join('')}
+            <option value="end" selected>Paling Akhir</option>
+            ${currentHeaders.map((h, i) => `<option value="before_${i}">Sebelum kolom: "${h}"</option>`).join('')}
+        `;
+
+        const { value: posValue } = await Swal.fire({
+            title: 'Pilih Posisi Kolom',
+            html: `
+                <p style="margin-bottom:12px; color:#475569; font-size:0.95rem;">
+                    Kolom <strong>"${colName}"</strong> akan disisipkan di mana?
+                </p>
+                <select id="swal-col-position" style="
+                    width:100%; padding:10px 14px; border-radius:8px;
+                    border:1.5px solid #cbd5e1; font-size:0.95rem;
+                    background:#f8fafc; color:#1e293b; cursor:pointer;
+                    outline:none;
+                ">
+                    ${optionsHtml}
+                </select>
+            `,
+            showCancelButton: true,
+            cancelButtonText: 'Batal',
+            confirmButtonText: 'Sisipkan',
+            preConfirm: () => {
+                return document.getElementById('swal-col-position').value;
+            }
+        });
+        if (!posValue) return;
+
+        let positionPayload;
+        if (posValue === 'start') {
+            positionPayload = 'start';
+        } else if (posValue === 'end') {
+            positionPayload = 'end';
+        } else if (posValue.startsWith('after_')) {
+            const idx = parseInt(posValue.replace('after_', ''));
+            const targetCol = currentHeaders[idx];
+            positionPayload = { after_column: targetCol };
+        } else if (posValue.startsWith('before_')) {
+            const idx = parseInt(posValue.replace('before_', ''));
+            const targetCol = currentHeaders[idx];
+            positionPayload = { before_column: targetCol };
+        } else {
+            positionPayload = 'end';
+        }
+
+        const addRes = await fetch(`${API_BASE}/tables/${tableId}/csv/column`, { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ column_name: colName, position: positionPayload })
+        });
+        if (addRes.ok) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: `Kolom "${colName}" berhasil disisipkan dari Master Kolom.`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+            await _loadCsvIntoEditor(tableId, tableName, true);
+        } else {
+            const err = await addRes.json();
+            Swal.fire("Gagal", err.detail || "Gagal menambah kolom", "error");
+        }
+    } catch(e) {
+        Swal.fire("Error", e.message, "error");
+    }
+}

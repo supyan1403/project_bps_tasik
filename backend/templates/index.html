@@ -5,342 +5,510 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPS Extraction Hub</title>
     <meta name="description" content="Dashboard ekstraksi dan manajemen data tabel PDF BPS Kabupaten Tasikmalaya">
-    <link rel="stylesheet" href="/static/style.css?v=20260629_1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=20260710_2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-title">BPS Hub</div>
-        
-        <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
-            <label style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 5px;">Akses Role Sistem</label>
-            <select id="role-selector" onchange="changeRole(this.value)" style="width: 100%; padding: 8px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; font-weight: 500; outline: none;">
-                <option value="pegawai" style="color: black;">Pegawai BPS</option>
-                <option value="admin" style="color: black;">Admin System</option>
-            </select>
-        </div>
+    <div class="d-flex vh-100 w-100">
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3 border-end bg-white" style="width: 250px;">
+            <div class="sidebar-title text-center mb-4 fs-5 fw-bold">BPS Hub</div>
 
-        <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard', this)">Dashboard</div>
-        <div class="nav-item admin-only" id="nav-publikasi" onclick="navigate('publikasi', this)" style="display: none;">Ekstraksi PDF</div>
-        <div class="nav-item admin-only" id="nav-tabel" onclick="navigate('tabel', this)" style="display: none;">Data Tabel</div>
-        <div class="nav-item" id="nav-timeseries" onclick="navigate('timeseries', this)">Analisis Deret Waktu</div>
-        <div class="nav-item admin-only" id="nav-admin" onclick="navigate('admin', this)" style="display: none; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 15px;">Manajemen Database</div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        
-        <!-- PAGE 1: Dashboard -->
-        <div id="page-dashboard" class="page-section active">
-            <!-- Welcome Banner -->
-            <div class="welcome-banner" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; padding: 1.5rem 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); text-align: left;">
-                <h1 style="margin: 0 0 0.5rem 0; font-size: 1.75rem; font-weight: 700; color: white;">Selamat Datang di Portal Data BPS Kabupaten Tasikmalaya!</h1>
-                <p id="welcome-role-text" style="margin: 0; opacity: 0.9; font-size: 1rem;">Anda masuk sebagai Pegawai BPS Tasikmalaya.</p>
+            <div class="px-2 pb-3 mb-3 border-bottom border-light">
+                <label class="text-muted small d-block mb-1">Akses Role Sistem</label>
+                <select id="role-selector" onchange="changeRole(this.value)" class="form-select form-select-sm fw-medium">
+                    <option value="pegawai">Pegawai BPS</option>
+                    <option value="admin">Admin System</option>
+                </select>
             </div>
 
-            <!-- ADMIN ONLY VIEW -->
-            <div id="dashboard-admin-view" style="display: none; margin-bottom: 2rem; text-align: left;">
-                <h3 style="margin-bottom: 1rem; color: #1e293b; font-weight: 600;">Statistik Kontrol Administrator</h3>
-                <div class="widget-grid" style="margin-bottom: 2rem;">
-                    <div class="widget">
-                        <div class="widget-title">Total Publikasi (PDF)</div>
-                        <div class="widget-value" id="stat-docs">-</div>
+            <ul class="nav flex-column mb-auto gap-1">
+                <li class="nav-item list-unstyled">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium active" id="nav-dashboard" onclick="navigate('dashboard', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-grid"/></svg> Dashboard
                     </div>
-                    <div class="widget">
-                        <div class="widget-title">Total Tabel Terekstrak</div>
-                        <div class="widget-value" id="stat-tables">-</div>
+                </li>
+                <li class="nav-item list-unstyled admin-only" style="display:none;">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium" id="nav-publikasi" onclick="navigate('publikasi', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-upload"/></svg> Ekstraksi PDF
                     </div>
-                    <div class="widget">
-                        <div class="widget-title">Total Baris Data</div>
-                        <div class="widget-value" id="stat-rows">-</div>
+                </li>
+                <li class="nav-item list-unstyled admin-only" style="display:none;">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel" onclick="navigate('tabel', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-table"/></svg> Data Tabel
                     </div>
-                    <div class="widget danger">
-                        <div class="widget-title">Data Anomali (Perlu Dicek)</div>
-                        <div class="widget-value" style="color: var(--danger)" id="stat-anomalies">-</div>
+                </li>
+                <li class="nav-item list-unstyled">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium" id="nav-timeseries" onclick="navigate('timeseries', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-chart"/></svg> Analisis Deret Waktu
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium" id="nav-master" onclick="navigate('master', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-book"/></svg> Master Kolom
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only" style="display:none;">
+                    <div class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 cursor-pointer text-muted fw-medium border-top pt-3 mt-3" id="nav-admin" onclick="navigate('admin', this)">
+                        <svg width="16" height="16" fill="currentColor"><use href="#icon-shield"/></svg> Manajemen Database
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1 p-4 overflow-auto">
+
+            <!-- PAGE 1: Dashboard -->
+            <div id="page-dashboard" class="page-section active">
+                <div class="welcome-banner text-white p-4 rounded-3 mb-4 shadow-sm" style="background:linear-gradient(135deg,#4f46e5,#3b82f6);">
+                    <h1 class="fs-4 fw-bold mb-2 text-white">Selamat Datang di Portal Data BPS Kabupaten Tasikmalaya!</h1>
+                    <p id="welcome-role-text" class="mb-0 opacity-75">Anda masuk sebagai Pegawai BPS Tasikmalaya.</p>
+                </div>
+
+                <!-- ADMIN ONLY -->
+                <div id="dashboard-admin-view" style="display:none;">
+                    <h5 class="fw-semibold text-dark mb-3">Statistik Kontrol Administrator</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 col-6">
+                            <div class="widget card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="widget-title small text-muted mb-1">Total Publikasi (PDF)</div>
+                                    <div class="widget-value fs-3 fw-bold" id="stat-docs">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="widget card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="widget-title small text-muted mb-1">Total Tabel Terekstrak</div>
+                                    <div class="widget-value fs-3 fw-bold" id="stat-tables">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="widget card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="widget-title small text-muted mb-1">Total Baris Data</div>
+                                    <div class="widget-value fs-3 fw-bold" id="stat-rows">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="widget card border-0 shadow-sm h-100 border-start border-4 border-danger">
+                                <div class="card-body">
+                                    <div class="widget-title small text-muted mb-1">Data Anomali (Perlu Dicek)</div>
+                                    <div class="widget-value fs-3 fw-bold text-danger" id="stat-anomalies">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-db-clean-banner" class="alert alert-success d-none align-items-center gap-2" role="alert">
+                        <span class="fs-5">🎉</span> Database Bersih! Seluruh data terekstrak dalam kondisi prima tanpa data anomali.
+                    </div>
+
+                    <div id="admin-anomalies-panel" class="glass-panel" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h5 class="mb-0 fw-semibold">⚠️ Daftar Tabel dengan Data Anomali</h5>
+                            <button onclick="markAllDbAnomaliesSafe()" class="btn btn-outline-danger btn-sm">
+                                ✔️ Tandai Semua Aman di Database
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold">Nama Tabel</th>
+                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
+                                        <th class="fw-semibold text-center" style="width:120px;">Jumlah Anomali</th>
+                                        <th class="fw-semibold text-center" style="width:110px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-anomalies-tbody">
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Memuat data anomali...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Header Column Anomalies Panel -->
+                    <div id="admin-header-anomalies-panel" class="glass-panel" style="display:none;">
+                        <h5 class="mb-3 fw-semibold">⚠️ Daftar Anomali Header Kolom (Master)</h5>
+                        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th class="fw-semibold">Nama Tabel</th>
+                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
+                                        <th class="fw-semibold">Nama Header</th>
+                                        <th class="fw-semibold">Kata Tidak Dikenal</th>
+                                        <th class="fw-semibold text-center" style="width:110px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-header-anomalies-tbody">
+                                    <tr><td colspan="5" class="text-center text-muted py-3">Memuat anomali header...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Data Content Anomalies Panel -->
+                    <div id="admin-data-anomalies-panel" class="glass-panel" style="display:none;">
+                        <h5 class="mb-3 fw-semibold">⚠️ Rincian Baris Data Anomali (Sel Kosong / "?")</h5>
+                        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th class="fw-semibold">Nama Tabel</th>
+                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
+                                        <th class="fw-semibold">Rincian Data</th>
+                                        <th class="fw-semibold text-center" style="width:110px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-data-anomalies-tbody">
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Memuat rincian anomali data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h5 class="fw-semibold mb-3">📋 Log Aktivitas Ekstraksi Terbaru</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold">Nama Publikasi PDF</th>
+                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
+                                        <th class="fw-semibold text-center" style="width:180px;">Status Ekstraksi</th>
+                                        <th class="fw-semibold text-center" style="width:140px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-recent-tbody">
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Memuat log aktivitas...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Status DB Bersih Banner -->
-                <div id="admin-db-clean-banner" style="display: none; padding: 1.25rem 1.5rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; font-weight: 600; margin-top: 1.5rem; text-align: left; align-items: center; gap: 10px; box-shadow: 0 2px 4px rgba(6, 95, 70, 0.05);">
-                    <span style="font-size: 1.2rem;">🎉</span>
-                    <span>Database Bersih! Seluruh data terekstrak dalam kondisi prima tanpa data anomali.</span>
+                <!-- PEGAWAI VIEW -->
+                <div id="dashboard-pegawai-view">
+                    <h5 class="fw-semibold text-dark mb-3">Ringkasan Data Publikasi</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4 col-6">
+                            <div class="widget card border-0 shadow-sm h-100 border-start border-4 border-primary">
+                                <div class="card-body">
+                                    <div class="small text-muted mb-1">Dokumen Terdaftar</div>
+                                    <div class="fs-3 fw-bold" id="user-stat-docs">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="widget card border-0 shadow-sm h-100 border-start border-4 border-success">
+                                <div class="card-body">
+                                    <div class="small text-muted mb-1">Tabel Siap Konsumsi</div>
+                                    <div class="fs-3 fw-bold" id="user-stat-tables">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="widget card border-0 shadow-sm h-100 border-start border-4 border-warning">
+                                <div class="card-body">
+                                    <div class="small text-muted mb-1">Baris Record Terintegrasi</div>
+                                    <div class="fs-3 fw-bold" id="user-stat-rows">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h5 class="fw-semibold mb-3">Visualisasi Sebaran Data Publikasi per Tahun</h5>
+                        <div style="position:relative; height:320px;">
+                            <canvas id="dashboardChart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Admin Anomalies List Panel -->
-                <div id="admin-anomalies-panel" class="glass-panel" style="display: none; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white; margin-top: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
-                        <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">⚠️ Daftar Tabel dengan Data Anomali</h3>
-                        <button onclick="markAllDbAnomaliesSafe()" class="btn btn-small" style="background:#ef4444; border: 1px solid #dc2626; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 6px 14px; border-radius: 8px;">
-                            ✔️ Tandai Semua Aman di Database
-                        </button>
+                <div class="mt-3">
+                    <button onclick="loadDashboardStats()" class="btn btn-outline-primary btn-sm">Refresh Data</button>
+                </div>
+            </div>
+
+            <!-- PAGE 2: Publikasi -->
+            <div id="page-publikasi" class="page-section">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="glass-panel">
+                            <h5 class="fw-semibold">Upload Publikasi Baru</h5>
+                            <form id="upload-form">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">Tahun Publikasi</label>
+                                    <input type="number" id="pdf-year" name="year" class="form-control" placeholder="e.g. 2026" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">File PDF</label>
+                                    <input type="file" id="pdf-file" name="file" class="form-control" accept="application/pdf" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Upload & Proses</button>
+                            </form>
+                        </div>
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
-                            <thead>
-                                <tr style="border-bottom: 2px solid #cbd5e1; background: #f8fafc;">
-                                    <th style="padding: 10px; color: #475569; font-weight: 600;">Nama Tabel</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 80px; text-align: center;">Tahun</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Jumlah Anomali</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 110px; text-align: center;">Aksi</th>
+                    <div class="col-lg-8">
+                        <div class="glass-panel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-semibold mb-0">Daftar Publikasi</h5>
+                                <button onclick="loadDocuments()" class="btn btn-outline-primary btn-sm">Refresh</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="fw-semibold">File</th>
+                                            <th class="fw-semibold" style="width:80px;">Tahun</th>
+                                            <th class="fw-semibold" style="width:300px;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="docs-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: Browser Dokumen & Tabel -->
+            <div id="page-tabel" class="page-section">
+                <div class="glass-panel">
+                    <h5 class="fw-semibold">Daftar Dokumen & Tabel</h5>
+                    <div class="mt-2 p-3 bg-light rounded-3 border">
+                        <div class="mb-2 small fw-semibold text-muted">🔍 Cari Tabel</div>
+                        <div class="d-flex gap-2">
+                            <input type="text" id="search-table-input" class="form-control" placeholder="Cari tabel... mis: Tabel 1.1 atau Luas Wilayah" oninput="onSearchInput()">
+                            <button onclick="searchTables()" class="btn btn-primary btn-sm px-3">Cari</button>
+                        </div>
+                        <div id="search-table-results" class="mt-2" style="max-height:300px; overflow-y:auto;"></div>
+                    </div>
+                    <div id="document-list-container" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: Master Kolom -->
+            <div id="page-master" class="page-section">
+                <div class="glass-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-semibold mb-1">Master Kolom</h5>
+                            <small class="text-muted">Daftar header kolom standar dari publikasi 2025. Gunakan sebagai patokan untuk deteksi anomali.</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button onclick="regenerateMasterColumns()" class="btn btn-outline-primary btn-sm">🔄 Regenerate dari 2025</button>
+                            <button onclick="showAddMasterColumn()" class="btn btn-primary btn-sm">+ Tambah Header</button>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <input type="text" id="master-column-search" class="form-control form-control-sm" placeholder="Cari header..." onkeyup="renderMasterColumns()">
+                        </div>
+                        <div class="col-md-8 text-end">
+                            <span id="master-columns-count" class="small text-muted"></span>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height:500px; overflow-y:auto;">
+                        <table class="table table-sm table-hover" id="master-columns-table">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width:60px;">No</th>
+                                    <th>Header Standar</th>
+                                    <th style="width:100px;">Jumlah Tabel</th>
+                                    <th style="width:160px;">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-anomalies-tbody">
-                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">Memuat data anomali...</td></tr>
-                            </tbody>
+                            <tbody id="master-columns-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="master-columns-empty" class="text-center text-muted py-4" style="display:none;">
+                        <p class="mb-0">Belum ada data master. Klik "Regenerate dari 2025" untuk membuat.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: Editor Tabel -->
+            <div id="page-editor" class="page-section">
+                <div class="editor-header d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 border">
+                    <div class="d-flex flex-column gap-1 flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 w-100">
+                            <div class="d-flex align-items-center border border-2 border-dashed rounded-1 p-1 bg-light bg-opacity-50 editable-input-container" style="border-style:dashed;border-color:#cbd5e1;">
+                                <input id="editor-table-number" type="text" class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary" placeholder="No. Tabel" style="width:120px;" onblur="saveTableIdentityInline();" onkeydown="if(event.key==='Enter'){this.blur();}">
+                            </div>
+                            <span class="text-muted">|</span>
+                            <div class="d-flex align-items-center flex-grow-1 border border-2 border-dashed rounded-1 p-1 bg-light bg-opacity-50 editable-input-container" style="border-style:dashed;border-color:#cbd5e1;">
+                                <input id="editor-title" type="text" class="form-control form-control-sm border-0 bg-transparent fw-semibold text-dark" placeholder="Judul Tabel" onblur="saveTableIdentityInline();" onkeydown="if(event.key==='Enter'){this.blur();}">
+                            </div>
+                        </div>
+                        <span id="editor-page-tag" class="small text-muted ms-1" style="display:none;"></span>
+                    </div>
+                    <span id="editor-mode-badge" class="badge bg-primary">Mode CSV</span>
+                </div>
+
+                <div class="editor-toolbar d-flex flex-wrap gap-2 p-3 bg-white rounded-3 border mb-2 shadow-sm align-items-center" id="editor-toolbar"></div>
+
+                <div class="editor-table-wrapper flex-grow-1 overflow-auto bg-white rounded-3 border shadow-sm">
+                    <div class="col-delete-bar bg-warning bg-opacity-10 border border-warning rounded-2 px-3 py-2 mb-2" id="col-delete-bar">
+                        <span class="small fw-bold text-warning-emphasis me-2">🗑️ Pilih kolom untuk dihapus:</span>
+                        <span id="col-delete-bar-buttons" class="d-flex flex-wrap gap-1"></span>
+                    </div>
+                    <table class="table table-sm table-hover mb-0" id="data-grid">
+                        <thead id="data-grid-head">
+                            <tr><th class="text-muted fst-italic">Pilih tabel untuk mulai mengedit</th></tr>
+                        </thead>
+                        <tbody id="data-grid-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="summary-rows-section" class="mt-3" style="display:none;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="flex-grow-1" style="height:2px;background:linear-gradient(to right,#e2e8f0,transparent);"></div>
+                        <span class="small fw-bold text-uppercase text-muted text-nowrap">📊 Ringkasan / Agregat</span>
+                        <div class="flex-grow-1" style="height:2px;background:linear-gradient(to left,#e2e8f0,transparent);"></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="summary-grid">
+                            <thead id="summary-grid-head"></thead>
+                            <tbody id="summary-grid-body"></tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- Admin Recent Extraction Activities Panel -->
-                <div class="glass-panel" style="padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white; margin-top: 1.5rem;">
-                    <h3 style="margin: 0 0 1.25rem 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">📋 Log Aktivitas Ekstraksi Terbaru</h3>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
-                            <thead>
-                                <tr style="border-bottom: 2px solid #cbd5e1; background: #f8fafc;">
-                                    <th style="padding: 10px; color: #475569; font-weight: 600;">Nama Publikasi PDF</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 80px; text-align: center;">Tahun</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 180px; text-align: center;">Status Ekstraksi</th>
-                                    <th style="padding: 10px; color: #475569; font-weight: 600; width: 140px; text-align: center;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-recent-tbody">
-                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">Memuat log aktivitas...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
-            <!-- PEGAWAI / GENERAL VIEW -->
-            <div id="dashboard-pegawai-view" style="margin-bottom: 2rem; text-align: left;">
-                <h3 style="margin-bottom: 1rem; color: #1e293b; font-weight: 600;">Ringkasan Data Publikasi</h3>
-                <div class="widget-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 2rem;">
-                    <div class="widget" style="border-left: 4px solid #3b82f6;">
-                        <div class="widget-title">Dokumen Terdaftar</div>
-                        <div class="widget-value" id="user-stat-docs">-</div>
-                    </div>
-                    <div class="widget" style="border-left: 4px solid #10b981;">
-                        <div class="widget-title">Tabel Siap Konsumsi</div>
-                        <div class="widget-value" id="user-stat-tables">-</div>
-                    </div>
-                    <div class="widget" style="border-left: 4px solid #f59e0b;">
-                        <div class="widget-title">Baris Record Terintegrasi</div>
-                        <div class="widget-value" id="user-stat-rows">-</div>
-                    </div>
-                </div>
-
-                <!-- Visualization Panel -->
-                <div class="glass-panel" style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white;">
-                    <h3 style="margin: 0 0 1.25rem 0; color: #1e293b; font-size: 1.1rem; font-weight: 600;">Visualisasi Sebaran Data Publikasi per Tahun</h3>
-                    <div style="position: relative; height: 320px; width: 100%;">
-                        <canvas id="dashboardChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: left; margin-top: 1rem;">
-                <button onclick="loadDashboardStats()" class="btn btn-small btn-primary">Refresh Data</button>
-            </div>
-        </div>
-
-        <!-- PAGE 2: Publikasi (Upload & Status) -->
-        <div id="page-publikasi" class="page-section">
-            <div style="display:flex; gap: 2rem; flex-wrap: wrap;">
-                <div class="glass-panel" style="flex:1; min-width:280px;">
-                    <h2>Upload Publikasi Baru</h2>
-                    <form id="upload-form">
-                        <div class="form-group">
-                            <label>Tahun Publikasi</label>
-                            <input type="number" id="pdf-year" name="year" placeholder="e.g. 2026" required>
+            <!-- PAGE 5: Time Series -->
+            <div id="page-timeseries" class="page-section">
+                <div class="glass-panel">
+                    <h5 class="fw-semibold">Sinkronisasi Deret Waktu (Time Series)</h5>
+                    <p class="text-muted mb-3">Cari metrik statistik tertentu dan lihat perkembangannya dari tahun ke tahun.</p>
+                    <form id="ts-search-form" onsubmit="searchTimeSeries(event)" class="row g-3 align-items-end">
+                        <div class="col-lg-3 col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Indikator Master</label>
+                            <select id="ts-master-indicator" class="form-select" onchange="document.getElementById('ts-keyword').value = this.value; searchTimeSeries(event);">
+                                <option value="">-- Pilih Indikator --</option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label>File PDF</label>
-                            <input type="file" id="pdf-file" name="file" accept="application/pdf" required>
+                        <div class="col-lg-3 col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Kata Kunci</label>
+                            <input type="text" id="ts-keyword" class="form-control" placeholder="Masukkan metrik..." required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Upload & Proses</button>
+                        <div class="col-lg-2 col-md-2 col-6">
+                            <label class="form-label small fw-semibold text-muted">Tahun Awal</label>
+                            <input type="number" id="ts-start" class="form-control" placeholder="Contoh: 2020">
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-6">
+                            <label class="form-label small fw-semibold text-muted">Tahun Akhir</label>
+                            <input type="number" id="ts-end" class="form-control" placeholder="Contoh: 2026">
+                        </div>
+                        <div class="col-lg-2 col-md-2">
+                            <button type="submit" class="btn btn-primary w-100" id="btn-ts-search">Cari Data</button>
+                        </div>
                     </form>
                 </div>
-                
-                <div class="glass-panel" style="flex: 2; min-width:320px;">
-                    <h2>Daftar Publikasi</h2>
-                    <button onclick="loadDocuments()" class="btn btn-small btn-primary" style="margin-bottom:1rem">Refresh</button>
-                    <div style="overflow-x:auto">
-                        <table>
-                            <thead>
+
+                <div class="glass-panel mt-3" id="ts-results-container">
+                    <div id="ts-results-loading" class="text-center text-muted py-4" style="display:none;"><i>Mencari data ke database...</i></div>
+                    <div id="ts-results-content" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h5 id="ts-result-title" class="mb-0 fw-semibold">Hasil Pencarian: -</h5>
+                            <button class="btn btn-success btn-sm" onclick="exportTimeSeriesCSV()">Export ke CSV</button>
+                        </div>
+                        <!-- Time Series Chart Canvas -->
+                        <div id="ts-chart-container" style="position:relative; height:320px; width:100%; margin-bottom: 2rem; background:#fff; padding:15px; border-radius:12px; border:1px solid #e2e8f0; display:none;">
+                            <canvas id="timeSeriesChart"></canvas>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover" id="ts-grid">
+                                <thead id="ts-grid-head"></thead>
+                                <tbody id="ts-grid-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="ts-results-empty" class="text-center text-danger py-4" style="display:none;">Data tidak ditemukan untuk kata kunci tersebut.</div>
+                    <div id="ts-table-picker" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- PAGE 6: Admin -->
+            <div id="page-admin" class="page-section">
+                <h5 class="fw-semibold">Manajemen Database (Supabase)</h5>
+                <div class="glass-panel bg-danger bg-opacity-10 border border-danger mb-3">
+                    <h5 class="text-danger fw-semibold mb-2">DANGER ZONE (Zona Berbahaya)</h5>
+                    <p class="text-danger-emphasis small">Tindakan di bawah ini akan menghapus data secara permanen dari database cloud Supabase Anda.</p>
+                    <button class="btn btn-danger" onclick="resetDatabase()">Kosongkan Seluruh Database</button>
+                </div>
+                <div class="glass-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-semibold mb-0">Daftar Tabel Tersimpan di Database</h5>
+                        <button onclick="loadAdminTables()" class="btn btn-outline-primary btn-sm">Refresh Data</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>File</th>
-                                    <th>Tahun</th>
-                                    <th>Status</th>
+                                    <th class="fw-semibold">ID</th>
+                                    <th class="fw-semibold">Nama Tabel</th>
+                                    <th class="fw-semibold">Tahun</th>
+                                    <th class="fw-semibold">CSV</th>
+                                    <th class="fw-semibold">Status (Rows)</th>
+                                    <th class="fw-semibold">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="docs-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- PAGE 3: Browser Dokumen & Tabel -->
-        <div id="page-tabel" class="page-section">
-            <div class="glass-panel">
-                <h2>Daftar Dokumen & Tabel</h2>
-                <div id="document-list-container" style="margin-top: 1rem;">
-                    <!-- Filled by JS: Level 1 (docs) → Level 2 (babs) → Level 3 (tables) -->
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE 4: Editor Tabel (CRUD - Full Page) -->
-        <div id="page-editor" class="page-section">
-
-            <!-- Header Bar -->
-            <div class="editor-header">
-                <div class="editor-header-info" style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                        <div class="editable-input-container" style="display: flex; align-items: center; border: 1px dashed #cbd5e1; background: #fafafa; border-radius: 6px; padding: 2px 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='#4F46E5'; this.style.background='#ffffff';" onmouseleave="this.style.borderColor='#cbd5e1'; this.style.background='#fafafa';">
-                            <input id="editor-table-number" type="text" placeholder="No. Tabel" style="font-weight: 700; color: var(--primary); font-size: 1.1rem; border: none; background: transparent; outline: none; width: 110px;" onblur="saveTableIdentityInline();" onkeydown="if(event.key === 'Enter') { this.blur(); }">
-                            <span style="font-size: 0.8rem; color: #a1a1aa; pointer-events: none; margin-left: 2px;">✏️</span>
-                        </div>
-                        <span style="color: #cbd5e1; font-size: 1.1rem;">|</span>
-                        <div class="editable-input-container" style="display: flex; align-items: center; border: 1px dashed #cbd5e1; background: #fafafa; border-radius: 6px; padding: 2px 8px; flex: 1; transition: all 0.2s;" onmouseenter="this.style.borderColor='#4F46E5'; this.style.background='#ffffff';" onmouseleave="this.style.borderColor='#cbd5e1'; this.style.background='#fafafa';">
-                            <input id="editor-title" type="text" placeholder="Judul Tabel" style="font-weight: 600; color: #1e293b; font-size: 1.05rem; border: none; background: transparent; outline: none; width: 100%;" onblur="saveTableIdentityInline();" onkeydown="if(event.key === 'Enter') { this.blur(); }">
-                            <span style="font-size: 0.8rem; color: #a1a1aa; pointer-events: none; margin-left: 4px;">✏️</span>
-                        </div>
-                    </div>
-                    <span id="editor-page-tag" class="editor-page-tag" style="display:none; font-size: 0.8rem; color: #64748b; margin-left: 6px;"></span>
-                </div>
-                <span id="editor-mode-badge" class="editor-mode-badge badge-csv">Mode CSV</span>
-            </div>
-
-            <!-- Toolbar -->
-            <div class="editor-toolbar" id="editor-toolbar">
-                <!-- Filled by JS based on mode -->
-            </div>
-
-            <!-- Data Table (full scrollable) -->
-            <div class="editor-table-wrapper">
-                <table id="data-grid">
-                    <thead id="data-grid-head">
-                        <tr><th style="color:#94a3b8; font-style:italic;">Pilih tabel untuk mulai mengedit</th></tr>
-                    </thead>
-                    <tbody id="data-grid-body"></tbody>
-                </table>
-            </div>
-
-            <!-- Section Ringkasan (Jumlah/Kabupaten) - hanya tampil di View Mode -->
-            <div id="summary-rows-section" style="display:none; margin-top: 1.5rem;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
-                    <div style="height:2px; flex:1; background: linear-gradient(to right, #e2e8f0, transparent);"></div>
-                    <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap;">📊 Ringkasan / Agregat</span>
-                    <div style="height:2px; flex:1; background: linear-gradient(to left, #e2e8f0, transparent);"></div>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table id="summary-grid" style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-                        <thead id="summary-grid-head"></thead>
-                        <tbody id="summary-grid-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div><!-- end page-editor -->
-
-        <!-- PAGE 5: Analisis Deret Waktu -->
-        <div id="page-timeseries" class="page-section">
-            <div class="glass-panel">
-                <h2>Sinkronisasi Deret Waktu (Time Series)</h2>
-                <p style="color: #64748b; margin-bottom: 1.5rem;">Cari metrik statistik tertentu dan lihat perkembangannya dari tahun ke tahun.</p>
-                
-                <form id="ts-search-form" onsubmit="searchTimeSeries(event)" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
-                    <div class="form-group" style="flex: 2; min-width: 250px;">
-                        <label>Kata Kunci (Misal: Cabai, Penduduk, Padi)</label>
-                        <input type="text" id="ts-keyword" placeholder="Masukkan metrik yang ingin dicari..." required>
-                    </div>
-                    <div class="form-group" style="flex: 1; min-width: 120px;">
-                        <label>Tahun Awal</label>
-                        <input type="number" id="ts-start" placeholder="Contoh: 2020">
-                    </div>
-                    <div class="form-group" style="flex: 1; min-width: 120px;">
-                        <label>Tahun Akhir</label>
-                        <input type="number" id="ts-end" placeholder="Contoh: 2026">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary" id="btn-ts-search">Cari Data</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="glass-panel" style="margin-top: 1.5rem;" id="ts-results-container">
-                <div id="ts-results-loading" style="display: none; padding: 2rem; text-align: center; color: #64748b;">
-                    <i>Mencari data ke database...</i>
-                </div>
-                
-                <div id="ts-results-content" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 id="ts-result-title">Hasil Pencarian: -</h3>
-                        <button class="btn btn-small btn-primary" onclick="exportTimeSeriesCSV()" style="background: #10b981; border-color: #10b981;">Export ke CSV</button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table id="ts-grid">
-                            <thead id="ts-grid-head">
-                                <!-- Dynamic headers based on year -->
-                            </thead>
-                            <tbody id="ts-grid-body">
-                                <!-- Dynamic rows -->
+                            <tbody id="admin-tables-tbody">
+                                <tr><td colspan="6" class="text-center text-muted py-3">Memuat data database...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                
-                <div id="ts-results-empty" style="display: none; padding: 2rem; text-align: center; color: #ef4444;">
-                    Data tidak ditemukan untuk kata kunci tersebut.
-                </div>
-                
-                <!-- Pilih tabel jika ada beberapa yang cocok -->
-                <div id="ts-table-picker" style="display: none;"></div>
             </div>
-        </div><!-- end page-timeseries -->
 
-        <!-- PAGE 6: Manajemen Database (Admin Only) -->
-        <div id="page-admin" class="page-section">
-            <h2>Manajemen Database (Supabase)</h2>
-            <div class="glass-panel" style="margin-bottom: 1.5rem; background: #fef2f2; border: 1px solid #fca5a5;">
-                <h3 style="color: #ef4444; margin-bottom: 10px;">DANGER ZONE (Zona Berbahaya)</h3>
-                <p style="color: #7f1d1d; font-size: 0.9rem; margin-bottom: 1rem;">Tindakan di bawah ini akan menghapus data secara permanen dari database cloud Supabase Anda.</p>
-                <button class="btn btn-primary" style="background: #ef4444; border-color: #ef4444;" onclick="resetDatabase()">Kosongkan Seluruh Database</button>
-            </div>
-            
-            <div class="glass-panel">
-                <h3>Daftar Tabel Tersimpan di Database</h3>
-                <button onclick="loadAdminTables()" class="btn btn-small btn-primary" style="margin-bottom:1rem">Refresh Data</button>
-                <div style="overflow-x:auto">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nama Tabel</th>
-                                <th>Tahun Dokumen</th>
-                                <th>Lokasi File CSV</th>
-                                <th>Status Database (Rows)</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-tables-tbody">
-                            <tr><td colspan="6" style="text-align:center;">Memuat data database...</td></tr>
-                        </tbody>
-                    </table>
+        </div><!-- end main-content -->
+    </div><!-- end d-flex -->
+
+    <!-- Master Dictionary Modal (Bootstrap) -->
+    <div class="modal fade" id="masterDictionaryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📖 Kamus Master (Master Dictionary)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="master-dict-list" class="mb-2">
+                        <p class="text-muted small">Memuat...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="input-group">
+                        <input id="master-dict-new-word" type="text" class="form-control" placeholder="Kata baru...">
+                        <button onclick="addMasterWord()" class="btn btn-success">+ Tambah</button>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    </div><!-- end main-content -->
+    <!-- SVG Icons -->
+    <svg style="display:none;">
+        <symbol id="icon-grid" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5z"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/></symbol>
+        <symbol id="icon-table" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 2h-4v3h4zm0 4h-4v3h4zm-5 3V8H6v3zm-5-3H1v3h4zM1 7h4V4H1zm5-3v3h4V4zm9 2V4h-4v3z"/></symbol>
+        <symbol id="icon-chart" viewBox="0 0 16 16"><path d="M4 11H2v3h2zm5-4H7v7h2zm5-5h-2v12h2zM2 0a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 16 16"><path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .406 0q.114-.033.293-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/></symbol>
+        <symbol id="icon-book" viewBox="0 0 16 16"><path d="M1 2.828A.5.5 0 0 1 1 2.327a.5.5 0 0 1 .5-.5c.885-.37 2.154-.769 4-.9V13.5c1.633-.132 2.964-.565 4-.9V1.928c1.036.335 2.367.768 4 .9V13.5c-.002.002-.023.002 0 0 .885.37 2.154.769 4 .9V2.928c.885.37 2.154.769 4 .9a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5c-.885-.37-2.154-.769-4-.9V13.5a.5.5 0 0 1-.5.5.5.5 0 0 1-.5-.5V13.5c1.633.132 2.964.565 4 .9V14.5c-.885-.37-2.154-.769-4-.9V2.928c-1.036-.335-2.367-.768-4-.9V14.5c-.885.37-2.154.769-4 .9V2.928c-1.036-.335-2.367-.768-4-.9V13.5a.5.5 0 0 1-.5.5.5.5 0 0 1-.5-.5V2.828z"/></symbol>
+    </svg>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/auth_role_logic.js" defer></script>
-    <script src="/static/app.js?v=20260629_1" defer></script>
+    <script src="/static/app.js?v=20260710_2" defer></script>
 </body>
 </html>

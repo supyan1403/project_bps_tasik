@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import re
 import subprocess
@@ -11,12 +12,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import models
 import schemas
 from database import engine, get_db
 # ... [imports and utility functions] ...
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from pipeline_utils import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS
 from extract_toc import get_toc
 
@@ -100,8 +103,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
 
 # =====================================================================
 # DIREKTORI PENYIMPANAN
@@ -573,6 +577,40 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db)):
         return {"message": f"Loaded {len(records)} rows successfully. Found {anomaly_count} anomalies."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading CSV: {str(e)}")
+
+@app.get("/api/tables/{table_id}")
+def get_table_info(table_id: int, db: Session = Depends(get_db)):
+    """Get table basic info including whether DB data exists."""
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Table not found")
+    doc = db.query(models.Document).filter(models.Document.id == table.document_id).first()
+    has_db = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).first() is not None
+    return {
+        "id": table.id,
+        "table_name": table.table_name or "",
+        "csv_path": table.csv_path or "",
+        "document_id": table.document_id,
+        "document_name": doc.filename if doc else "",
+        "document_year": doc.year if doc else None,
+        "has_db_data": has_db
+    }
+
+@app.put("/api/tables/{table_id}/db_rows")
+def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db)):
+    """Batch update database rows from edit mode."""
+    rows = payload.get("rows", [])
+    for row_data in rows:
+        row_id = row_data.get("id")
+        data = row_data.get("data", {})
+        is_anomaly = row_data.get("is_anomaly", False)
+        if row_id:
+            row = db.query(models.TableRow).filter(models.TableRow.id == row_id, models.TableRow.table_id == table_id).first()
+            if row:
+                row.data = data
+                row.is_anomaly = is_anomaly
+    db.commit()
+    return {"message": f"{len(rows)} baris tersimpan"}
 
 @app.get("/api/tables/{table_id}/data")
 def get_table_data(table_id: int, db: Session = Depends(get_db)):
@@ -1299,6 +1337,40 @@ def mark_all_database_anomalies_safe(db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Semua data anomali di database berhasil ditandai aman."}
 
+@app.get("/api/admin/all-data-anomalies")
+def get_all_data_anomalies(db: Session = Depends(get_db)):
+    """Retrieve all rows that contain data anomalies (empty cells or containing '?')."""
+    try:
+        rows = db.query(
+            models.TableRow,
+            models.ExtractedTable.table_name,
+            models.Document.year,
+            models.Document.filename
+        ).join(
+            models.ExtractedTable, models.TableRow.table_id == models.ExtractedTable.id
+        ).join(
+            models.Document, models.ExtractedTable.document_id == models.Document.id
+        ).filter(
+            models.TableRow.is_anomaly == True
+        ).limit(100).all()
+        
+        results = []
+        for r, table_name, doc_year, doc_name in rows:
+            m = re.search(r'Tabel[\s_]*(\d+)', table_name or "", re.IGNORECASE)
+            bab_num = int(m.group(1)) if m else None
+            results.append({
+                "row_id": r.id,
+                "table_id": r.table_id,
+                "table_name": table_name,
+                "document_name": doc_name,
+                "document_year": doc_year,
+                "bab_num": bab_num,
+                "data": r.data
+            })
+        return {"anomalies": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/admin/anomalies")
 def get_tables_with_anomalies(db: Session = Depends(get_db)):
     from sqlalchemy import func
@@ -1328,6 +1400,413 @@ def get_tables_with_anomalies(db: Session = Depends(get_db)):
         }
         for r in results
     ]
+
+# ===== MASTER DICTIONARY & COLUMN ANOMALY API =====
+
+_MASTER_DICT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "master_dictionary.json")
+_DISMISSED_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dismissed_column_anomalies.json")
+
+def _load_master_dict() -> dict:
+    if os.path.exists(_MASTER_DICT_PATH):
+        with open(_MASTER_DICT_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"words": []}
+
+def _save_master_dict(data: dict):
+    with open(_MASTER_DICT_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+def _load_dismissed() -> dict:
+    if os.path.exists(_DISMISSED_PATH):
+        with open(_DISMISSED_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"dismissed": []}
+
+def _save_dismissed(data: dict):
+    with open(_DISMISSED_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+@app.get("/api/master-dictionary")
+def get_master_dictionary():
+    return _load_master_dict()
+
+@app.post("/api/master-dictionary/words")
+def add_master_words(body: dict):
+    words = body.get("words", [])
+    data = _load_master_dict()
+    existing = set(w.lower() for w in data["words"])
+    added = []
+    for w in words:
+        wl = w.lower()
+        if wl not in existing:
+            data["words"].append(wl)
+            existing.add(wl)
+            added.append(w)
+    _save_master_dict(data)
+    return {"message": f"Added {len(added)} words", "added": added}
+
+@app.delete("/api/master-dictionary/words/{word}")
+def delete_master_word(word: str):
+    data = _load_master_dict()
+    before = len(data["words"])
+    data["words"] = [w for w in data["words"] if w.lower() != word.lower()]
+    _save_master_dict(data)
+    return {"message": f"Removed {before - len(data['words'])} occurrences"}
+
+@app.get("/api/dismissed-anomalies")
+def get_dismissed_anomalies():
+    return _load_dismissed()
+
+@app.post("/api/dismiss-column-anomaly")
+def dismiss_column_anomaly(body: dict):
+    key = body.get("key", "")
+    data = _load_dismissed()
+    if key not in data["dismissed"]:
+        data["dismissed"].append(key)
+    _save_dismissed(data)
+    return {"message": "Dismissed"}
+
+@app.post("/api/undismiss-column-anomaly")
+def undismiss_column_anomaly(body: dict):
+    key = body.get("key", "")
+    data = _load_dismissed()
+    data["dismissed"] = [k for k in data["dismissed"] if k != key]
+    _save_dismissed(data)
+    return {"message": "Undismissed"}
+
+@app.get("/api/admin/all-column-anomalies")
+def get_all_column_anomalies(db: Session = Depends(get_db)):
+    """Analyze column header anomalies across all tables in all documents."""
+    try:
+        master = _load_master_dict()
+        master_set = set(w.lower() for w in master["words"])
+        dismissed = _load_dismissed()
+        dismissed_set = set(dismissed["dismissed"])
+        
+        tables = db.query(
+            models.ExtractedTable,
+            models.Document.year,
+            models.Document.filename
+        ).join(
+            models.Document,
+            models.ExtractedTable.document_id == models.Document.id
+        ).all()
+        
+        all_anomalies = []
+        for table, doc_year, doc_name in tables:
+            csv_path = table.csv_path
+            if not csv_path or not os.path.exists(csv_path):
+                continue
+            
+            try:
+                with open(csv_path, "r", encoding="utf-8") as f:
+                    reader = csv.reader(f)
+                    headers = next(reader) if reader else []
+            except:
+                continue
+                
+            m = re.search(r'Tabel[\s_]*(\d+)', table.table_name or "", re.IGNORECASE)
+            bab_num = int(m.group(1)) if m else None
+            
+            for idx, h in enumerate(headers):
+                if idx == 0:
+                    continue
+                key = f"{table.id}:{idx}:{h}"
+                if key in dismissed_set:
+                    continue
+                words = re.findall(r'[a-zA-Z]+', h)
+                unknown = [w for w in words if w.lower() not in master_set]
+                if unknown:
+                    all_anomalies.append({
+                        "table_id": table.id,
+                        "table_name": table.table_name,
+                        "document_name": doc_name,
+                        "document_year": doc_year,
+                        "bab_num": bab_num,
+                        "col_index": idx,
+                        "header": h,
+                        "unknown_words": unknown,
+                        "key": key
+                    })
+        return {"anomalies": all_anomalies}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/tables/{table_id}/column-anomalies")
+def get_column_anomalies(table_id: int, db: Session = Depends(get_db)):
+    import re
+    master = _load_master_dict()
+    master_set = set(w.lower() for w in master["words"])
+    dismissed = _load_dismissed()
+    dismissed_set = set(dismissed["dismissed"])
+    
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Table not found")
+    
+    # Get CSV headers
+    csv_path = table.csv_path
+    if not csv_path or not os.path.exists(csv_path):
+        return {"anomalies": [], "headers": []}
+    try:
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            headers = next(reader) if reader else []
+    except:
+        return {"anomalies": [], "headers": []}
+    
+    anomalies = []
+    for idx, h in enumerate(headers):
+        key = f"{table_id}:{idx}:{h}"
+        if key in dismissed_set:
+            continue
+        words = re.findall(r'[a-zA-Z]+', h)
+        unknown = [w for w in words if w.lower() not in master_set]
+        if unknown:
+            anomalies.append({
+                "col_index": idx,
+                "header": h,
+                "unknown_words": unknown,
+                "key": key
+            })
+    return {"anomalies": anomalies, "headers": headers}
+
+@app.post("/api/tables/{table_id}/apply-column-fix")
+def apply_column_fix(table_id: int, body: dict, db: Session = Depends(get_db)):
+    """Apply a suggested column rename fix directly to CSV file"""
+    col_index = body.get("col_index")
+    new_name = body.get("new_name", "").strip()
+    if col_index is None or not new_name:
+        raise HTTPException(400, "col_index and new_name required")
+    
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table or not table.csv_path or not os.path.exists(table.csv_path):
+        raise HTTPException(404, "CSV not found")
+    
+    with open(table.csv_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    lines = content.split("\n")
+    if not lines:
+        raise HTTPException(400, "Empty CSV")
+    header_parts = lines[0].split(",") if lines[0] else []
+    if col_index >= len(header_parts):
+        raise HTTPException(400, "Column index out of range")
+    header_parts[col_index] = new_name
+    lines[0] = ",".join(header_parts)
+    with open(table.csv_path, "w", newline="", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    
+    # Also auto-dismiss this anomaly
+    old_header = header_parts[col_index]
+    dismiss_key = f"{table_id}:{col_index}:{old_header}"
+    dismissed = _load_dismissed()
+    if dismiss_key not in dismissed["dismissed"]:
+        dismissed["dismissed"].append(dismiss_key)
+    _save_dismissed(dismissed)
+    
+    return {"message": f"Column {col_index} renamed to '{new_name}'"}
+
+
+# ===== MASTER KOLOM =====
+MASTER_COLUMNS_FILE = os.path.join(_BASE_DIR, "master_columns.json")
+
+def _load_master_columns():
+    if not os.path.exists(MASTER_COLUMNS_FILE):
+        return {"version": "", "document_id": None, "columns": [], "next_id": 1}
+    with open(MASTER_COLUMNS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def _save_master_columns(data):
+    with open(MASTER_COLUMNS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+@app.get("/api/documents/by-year")
+def get_document_by_year(year: int, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.year == year).first()
+    if not doc:
+        raise HTTPException(404, f"No document found for year {year}")
+    return {"id": doc.id, "filename": doc.filename, "year": doc.year, "status": doc.status}
+
+@app.post("/api/master/regenerate-columns")
+def regenerate_master_columns(document_id: int, db: Session = Depends(get_db)):
+    """Generate master columns ONLY from CSV headers of a reference document."""
+    doc = db.query(models.Document).filter(models.Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(404, "Document not found")
+
+    tables = db.query(models.ExtractedTable).filter(
+        models.ExtractedTable.document_id == document_id
+    ).all()
+
+    all_headers = {}
+    for t in tables:
+        if t.csv_path and os.path.exists(t.csv_path):
+            try:
+                with open(t.csv_path, "r", encoding="utf-8", errors="replace") as f:
+                    reader = csv.reader(f)
+                    raw_rows = [row for row in reader]
+            except:
+                continue
+            if raw_rows:
+                for h in raw_rows[0]:
+                    h_stripped = h.strip()
+                    if not h_stripped:
+                        continue
+                    key = h_stripped.lower()
+                    if key not in all_headers:
+                        all_headers[key] = {"standard": h_stripped, "count": 0}
+                    all_headers[key]["count"] += 1
+
+    sorted_headers = sorted(all_headers.values(), key=lambda x: -x["count"])
+
+    columns_out = []
+    for idx, h in enumerate(sorted_headers):
+        columns_out.append({"id": idx + 1, "standard": h["standard"], "count": h["count"]})
+
+    data = {
+        "version": str(doc.year),
+        "document_id": document_id,
+        "document_name": doc.filename,
+        "columns": columns_out,
+        "next_id": len(columns_out) + 1
+    }
+    _save_master_columns(data)
+    return {"message": f"Master columns regenerated from {doc.filename}", "total": len(columns_out)}
+
+@app.get("/api/master/columns")
+def get_master_columns():
+    return _load_master_columns()
+
+@app.post("/api/master/columns/add")
+def add_master_column(body: dict):
+    """Add a new master column header."""
+    standard = body.get("standard", "").strip()
+    if not standard:
+        raise HTTPException(400, "standard is required")
+    data = _load_master_columns()
+    # Check duplicate (case-insensitive)
+    for col in data["columns"]:
+        if col["standard"].lower() == standard.lower():
+            raise HTTPException(400, f"Column '{standard}' already exists")
+    new_id = data["next_id"]
+    data["columns"].append({"id": new_id, "standard": standard, "count": 0})
+    data["next_id"] = new_id + 1
+    _save_master_columns(data)
+    return {"message": f"Column '{standard}' added", "id": new_id}
+
+@app.put("/api/master/columns/{column_id}")
+def update_master_column(column_id: int, body: dict):
+    """Edit/rename a master column."""
+    new_standard = body.get("standard", "").strip()
+    if not new_standard:
+        raise HTTPException(400, "standard is required")
+    data = _load_master_columns()
+    for col in data["columns"]:
+        if col["id"] == column_id:
+            col["standard"] = new_standard
+            _save_master_columns(data)
+            return {"message": f"Column updated to '{new_standard}'"}
+    raise HTTPException(404, "Column not found")
+
+@app.delete("/api/master/columns/{column_id}")
+def delete_master_column(column_id: int):
+    """Delete a master column."""
+    data = _load_master_columns()
+    before = len(data["columns"])
+    data["columns"] = [c for c in data["columns"] if c["id"] != column_id]
+    if len(data["columns"]) == before:
+        raise HTTPException(404, "Column not found")
+    _save_master_columns(data)
+    return {"message": "Column deleted"}
+
+
+# ===== TABLE NEIGHBORS =====
+@app.get("/api/tables/{table_id}/neighbors")
+def get_table_neighbors(table_id: int, db: Session = Depends(get_db)):
+    """Get next and previous table IDs within the same document."""
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Table not found")
+    
+    siblings = db.query(models.ExtractedTable).filter(
+        models.ExtractedTable.document_id == table.document_id
+    ).order_by(models.ExtractedTable.id).all()
+    
+    prev_id = None
+    next_id = None
+    for i, s in enumerate(siblings):
+        if s.id == table_id:
+            if i > 0:
+                prev_id = siblings[i - 1].id
+            if i < len(siblings) - 1:
+                next_id = siblings[i + 1].id
+            break
+    
+    return {
+        "prev_id": prev_id,
+        "next_id": next_id,
+        "current_index": i if 'i' in locals() else -1,
+        "total_in_doc": len(siblings)
+    }
+
+
+# ===== PENCARIAN TABEL =====
+@app.get("/api/tables/search")
+def search_tables(q: str = "", year: int = None, limit: int = 50, db: Session = Depends(get_db)):
+    """Search tables by keyword or numbering. Returns list with document info."""
+    try:
+        query = db.query(
+            models.ExtractedTable,
+            models.Document.year,
+            models.Document.filename
+        ).join(
+            models.Document,
+            models.ExtractedTable.document_id == models.Document.id
+        )
+
+        if q:
+            kw = q.strip().lower()
+            # Clean common prefixes like "tabel " or "tabel_" if user typed it
+            kw_clean = re.sub(r'^(tabel[\s_]*)', '', kw)
+            
+            # If search term is a number/dot pattern, e.g. "2.1.1" or "2"
+            if re.match(r'^[\d.]+$', kw_clean):
+                query = query.filter(
+                    (models.ExtractedTable.table_name.ilike(f"Tabel {kw_clean}%")) |
+                    (models.ExtractedTable.table_name.ilike(f"Tabel_{kw_clean}%")) |
+                    (models.ExtractedTable.table_name.ilike(f"%{kw_clean}%"))
+                )
+            else:
+                query = query.filter(
+                    models.ExtractedTable.table_name.ilike(f"%{kw}%")
+                )
+
+        if year:
+            query = query.filter(models.Document.year == year)
+
+        results = query.order_by(models.ExtractedTable.id).limit(limit).all()
+
+        tables_out = []
+        for t, doc_year, doc_name in results:
+            if not t:
+                continue
+            table_name_str = t.table_name or ""
+            # Extract chapter number safely
+            m = re.search(r'Tabel[\s_]*(\d+)', table_name_str, re.IGNORECASE)
+            bab_num = int(m.group(1)) if m else None
+            tables_out.append({
+                "id": t.id,
+                "table_name": table_name_str,
+                "document_id": t.document_id,
+                "document_year": doc_year,
+                "document_name": doc_name,
+                "bab_num": bab_num
+            })
+
+        return {"tables": tables_out, "total": len(tables_out)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database search failed: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

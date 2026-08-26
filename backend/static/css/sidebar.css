@@ -1,0 +1,640 @@
+/* ===================== SIDEBAR ===================== */
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border-right: 1px solid #e2e8f0;
+    padding: 1.5rem 12px 1.25rem 12px !important;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+    flex-shrink: 0;
+    position: relative;
+    contain: layout;
+    transition: width 0.15s ease-out, min-width 0.15s ease-out, background-color 0.22s ease, border-color 0.22s ease;
+}
+
+.sipedas-brand-lockup {
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    padding: 2px 8px 10px 8px !important;
+    margin: 0 0 14px 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    user-select: none;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sipedas-brand-main {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.bps-brand-logo {
+    height: 28px !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    object-fit: contain;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+.bps-brand-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    opacity: 1;
+    max-width: 180px;
+    margin-left: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, margin-left 0.15s ease-out;
+}
+
+.bps-brand-text span {
+    display: block;
+    white-space: nowrap !important;
+}
+
+.nav-link,
+#btn-admin-login,
+#btn-admin-logout {
+    min-height: 44px;
+    height: 44px;
+    padding: 0 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    margin: 0 !important;
+    width: 100%;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-switch-box {
+    cursor: pointer;
+}
+
+.nav-link i,
+.theme-mode-icon,
+#btn-admin-login i,
+#btn-admin-logout i {
+    font-size: 1.15rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+}
+
+.nav-link i::before,
+.theme-mode-icon::before,
+#btn-admin-login i::before,
+#btn-admin-logout i::before {
+    vertical-align: 0 !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.nav-link-text,
+.sidebar-btn-text,
+.theme-mode-label,
+.submenu-arrow {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    opacity: 1;
+    max-width: 200px;
+    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, margin-left 0.15s ease-out;
+}
+
+.nav-link-text,
+.sidebar-btn-text {
+    margin-left: 10px;
+}
+
+.theme-mode-label {
+    margin-left: 10px;
+    margin-right: 14px;
+}
+
+.theme-switch-pill {
+    width: 36px;
+    height: 20px;
+    background: #cbd5e1;
+    border-radius: 20px;
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 1;
+    overflow: hidden;
+    transition: background-color 0.15s ease, opacity 0.12s ease-out, max-width 0.15s ease-out, width 0.15s ease-out;
+}
+
+[data-bs-theme="dark"] .theme-switch-pill,
+body.dark-mode .theme-switch-pill {
+    background: #2563eb !important;
+}
+
+.theme-switch-knob {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-bs-theme="dark"] .theme-switch-knob,
+body.dark-mode .theme-switch-knob {
+    transform: translateX(16px);
+}
+
+/* Sidebar Divider Line */
+.sidebar-divider {
+    height: 1px;
+    width: 100%;
+    background-color: #e2e8f0;
+    margin: 0.65rem 0;
+}
+
+[data-bs-theme="dark"] .sidebar-divider,
+body.dark-mode .sidebar-divider {
+    background-color: #334155 !important;
+}
+
+/* ===================== COLLAPSED SIDEBAR STATE ===================== */
+body.sidebar-collapsed .sidebar {
+    width: 68px !important;
+    min-width: 68px !important;
+    padding: 1.5rem 12px 1.25rem 12px !important;
+    overflow-y: hidden !important;
+}
+
+/* Bagian tulisan tertutup cepat dan ringan */
+body.sidebar-collapsed .bps-brand-text,
+body.sidebar-collapsed .nav-link-text,
+body.sidebar-collapsed .sidebar-btn-text,
+body.sidebar-collapsed .theme-mode-label,
+body.sidebar-collapsed .submenu-arrow {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.1s ease-out, max-width 0.15s ease-out;
+}
+
+body.sidebar-collapsed .theme-switch-pill {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
+
+body.sidebar-collapsed #tabel-submenu,
+body.sidebar-collapsed #admin-submenu {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    display: none !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+}
+
+/* Seluruh Icon Tetap Diam di Posisi Asal */
+body.sidebar-collapsed .sipedas-brand-lockup {
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    padding: 2px 8px 10px 8px !important;
+    margin: 0 0 14px 0 !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+body.sidebar-collapsed .sipedas-brand-main {
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.sidebar-collapsed .nav-link,
+body.sidebar-collapsed #btn-admin-login,
+body.sidebar-collapsed #btn-admin-logout {
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+body.sidebar-collapsed .theme-switch-pill {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
+
+body.sidebar-collapsed .bps-brand-logo,
+body.sidebar-collapsed .nav-link i,
+body.sidebar-collapsed .theme-mode-icon,
+body.sidebar-collapsed #btn-admin-login i,
+body.sidebar-collapsed #btn-admin-logout i {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+/* ===================== FLOATING FLYOUT POPOVER (Sidebar Tertutup) ===================== */
+.sidebar-floating-popover {
+    display: none; /* Hidden by default; shown via JS/hover when sidebar is collapsed */
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 0;
+    z-index: 9999;
+    min-width: 200px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    /* pop-in animation */
+    opacity: 0;
+    transform: translateX(6px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.sidebar-floating-popover.popover-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Only allow the popover to appear when sidebar is actually collapsed */
+body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover,
+body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
+    display: block;
+}
+
+.sidebar-floating-popover .popover-header {
+    background: #f8fafc;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sidebar-floating-popover .popover-body {
+    padding: 6px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popover-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px !important;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #475569;
+    transition: background 0.12s ease, color 0.12s ease;
+    white-space: nowrap;
+}
+
+.popover-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.popover-item i {
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] .sidebar-floating-popover,
+body.dark-mode .sidebar-floating-popover {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .sidebar-floating-popover .popover-header,
+body.dark-mode .sidebar-floating-popover .popover-header {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .popover-item,
+body.dark-mode .popover-item {
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .popover-item:hover,
+body.dark-mode .popover-item:hover {
+    background: #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* Small triangle/caret pointing left */
+.sidebar-floating-popover::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: -6px;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    transform: rotate(45deg);
+}
+
+[data-bs-theme="dark"] .sidebar-floating-popover::before,
+body.dark-mode .sidebar-floating-popover::before {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+
+/* ===================== SIPEDAS BRAND LOCKUP ===================== */
+.sipedas-brand-lockup {
+    user-select: none;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.sipedas-brand-lockup:hover {
+    transform: translateY(-1px);
+}
+
+.sipedas-logo-icon {
+    filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.18));
+}
+
+.sipedas-brand-acronym {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+.sipedas-brand-sub {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: -0.1px;
+}
+
+.sipedas-brand-inst {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* ===================== BPS BRAND LOCKUP ===================== */
+.bps-brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    padding: 0 4px;
+    user-select: none;
+    text-decoration: none;
+}
+
+.bps-brand-logo {
+    height: 38px;
+    width: auto;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+}
+
+.bps-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.bps-brand-title {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-weight: 800;
+    font-style: italic;
+    font-size: 0.76rem;
+    color: #0f172a; /* Default: Gelap di background terang */
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+.bps-brand-subtitle {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-weight: 800;
+    font-style: italic;
+    font-size: 0.68rem;
+    color: #0f172a; /* Default: Gelap di background terang */
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+/* Otomatis teks Putih saat berada di background gelap / dark theme */
+.bps-brand-lockup.text-light .bps-brand-title,
+.bps-brand-lockup.text-light .bps-brand-subtitle,
+.bg-dark .bps-brand-lockup .bps-brand-title,
+.bg-dark .bps-brand-lockup .bps-brand-subtitle,
+.bg-primary .bps-brand-lockup .bps-brand-title,
+.bg-primary .bps-brand-lockup .bps-brand-subtitle,
+.welcome-banner .bps-brand-lockup .bps-brand-title,
+.welcome-banner .bps-brand-lockup .bps-brand-subtitle,
+[data-bs-theme="dark"] .bps-brand-lockup .bps-brand-title,
+[data-bs-theme="dark"] .bps-brand-lockup .bps-brand-subtitle {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item {
+    padding: 0;
+    margin: 0;
+}
+
+.nav-link {
+    margin-bottom: 0.35rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #64748b !important;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+}
+
+.nav-link:not(.active):hover {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    transform: translateX(4px);
+}
+
+/* 1. Active Primary Top-level Nav (tanpa submenu) */
+.nav-link:not(.subnav-link).active {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.32) !important;
+    border-color: transparent !important;
+}
+.nav-link:not(.subnav-link).active i,
+.nav-link:not(.subnav-link).active span {
+    color: #ffffff !important;
+}
+
+/* 2. Active Parent Nav dengan Submenu (#nav-tabel, #nav-admin) */
+#nav-tabel.active,
+#nav-admin.active {
+    background: #eef2ff !important;
+    color: #4338ca !important;
+    font-weight: 600 !important;
+    border: 1px solid #c7d2fe !important;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.1) !important;
+}
+#nav-tabel.active i,
+#nav-admin.active i {
+    color: #4f46e5 !important;
+}
+#nav-tabel.active span,
+#nav-admin.active span {
+    color: #4338ca !important;
+}
+
+.submenu-arrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+.submenu-arrow.open {
+    transform: rotate(90deg);
+}
+
+/* 3. Submenu Links */
+.subnav-link {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.85rem 0.45rem 1.75rem !important;
+    margin-bottom: 0.2rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease;
+}
+
+.subnav-link:not(.active):hover {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    transform: translateX(4px);
+}
+
+.subnav-link.active {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28) !important;
+    border-color: transparent !important;
+}
+.subnav-link.active i {
+    color: #ffffff !important;
+}
+
+#admin-submenu,
+#tabel-submenu {
+    padding: 0.25rem 0 0.35rem 0.5rem;
+    border-left: 2.5px solid #818cf8;
+    margin: 0.15rem 0 0.5rem 1rem;
+}
+
+/* Nav Editor: hidden by default, shown when editor is open */
+#nav-editor {
+    display: none;
+    margin-top: 0.5rem;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 0.9rem;
+    position: relative;
+}
+#nav-editor.visible {
+    display: block;
+}
+#nav-editor:not(.active) {
+    color: #f59e0b;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+}
+#nav-editor:not(.active):hover {
+    background: #fef3c7;
+    color: #92400e;
+    box-shadow: none;
+}
+

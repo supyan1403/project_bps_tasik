@@ -1,0 +1,53 @@
+# Lingkungan Virtual Python
+venv/
+backend/venv/
+env/
+.venv/
+
+# Cache dan file sistem
+__pycache__/
+*.pyc
+*.db
+.vscode/
+.continue/
+
+# Dataset atau output (opsional, jika ukurannya besar)
+*.csv
+*.xlsx
+*.pdf
+
+# Folder data lokal lama (jika masih ada, abaikan)
+backend/uploads/
+backend/hasil_ekstraksi_web/
+uploads/
+hasil_ekstraksi_web/
+
+# Backup database (simpan di disk, jangan di-commit)
+backups/
+*.sql
+
+# Output ekstraksi (regenerable)
+output_extraction/
+
+# Dev scratch (sudah dihapus, antisipasi)
+scratch/
+
+# Log & media temp
+*.log
+*.mp4
+*.png
+!backend/static/*.png
+!backend/static/*.svg
+server_err.txt
+history_search.txt
+temp_script*.py
+server_out.txt
+backend/logs.txt
+nul
+NUL
+
+# Output ekstraksi test (regenerable)
+outputs/
+
+# Preview asset dev
+backend/static/preview/

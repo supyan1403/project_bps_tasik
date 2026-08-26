@@ -1,0 +1,184 @@
+import os
+import json
+import secrets
+import hashlib
+import time
+from datetime import datetime, timedelta
+from fastapi import APIRouter, HTTPException, Request, Response, Depends, Cookie
+from sqlalchemy.orm import Session
+
+import models
+from database import get_db
+
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
+# Configuration paths
+_CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+os.makedirs(_CONFIG_DIR, exist_ok=True)
+_AUTH_CONFIG_FILE = os.path.join(_CONFIG_DIR, "auth_credentials.json")
+
+# In-memory session store & brute-force rate limiter
+# {session_id: {"role": "admin", "created_at": datetime, "last_active": datetime}}
+active_sessions = {}
+SESSION_MAX_AGE_HOURS = 8
+
+# Brute-force tracking: {ip_address: {"failed_count": int, "lock_until": float}}
+_login_attempts = {}
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_DURATION_SECONDS = 300  # 5 menit
+
+def _hash_password(plain_password: str, salt: bytes = None) -> tuple[str, str]:
+    """Mengenkripsi password menggunakan PBKDF2-HMAC-SHA256 dengan random salt 16-byte."""
+    if salt is None:
+        salt = secrets.token_bytes(16)
+    hashed = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt, 100_000)
+    return hashed.hex(), salt.hex()
+
+def _verify_password(plain_password: str, stored_hash_hex: str, stored_salt_hex: str) -> bool:
+    """Verifikasi kecocokan password dengan hash tersimpan (constant-time compare)."""
+    try:
+        salt = bytes.fromhex(stored_salt_hex)
+        computed_hash = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt, 100_000).hex()
+        return secrets.compare_digest(computed_hash, stored_hash_hex)
+    except Exception:
+        return False
+
+def _get_or_create_admin_credentials():
+    """Mengambil kredensial hash admin atau inisialisasi default terenkripsi."""
+    if os.path.exists(_AUTH_CONFIG_FILE):
+        try:
+            with open(_AUTH_CONFIG_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if "password_hash" in data and "salt" in data:
+                    return data["password_hash"], data["salt"]
+        except Exception:
+            pass
+    
+    # Inisialisasi default dari environment atau 'bps2025'
+    default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD", "bps2025")
+    p_hash, salt = _hash_password(default_plain)
+    try:
+        with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now().isoformat()}, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to save auth credentials: {e}")
+    return p_hash, salt
+
+def _update_admin_password(new_plain_password: str):
+    p_hash, salt = _hash_password(new_plain_password)
+    with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now().isoformat()}, f, indent=2)
+
+def _clean_expired_sessions():
+    now = datetime.now()
+    cutoff = now - timedelta(hours=SESSION_MAX_AGE_HOURS)
+    expired = [sid for sid, s in active_sessions.items() if s.get("last_active", s["created_at"]) < cutoff]
+    for sid in expired:
+        active_sessions.pop(sid, None)
+
+def create_session(role: str = "admin") -> str:
+    _clean_expired_sessions()
+    sid = secrets.token_hex(32)
+    now = datetime.now()
+    active_sessions[sid] = {"role": role, "created_at": now, "last_active": now}
+    return sid
+
+def destroy_session(session_id: str):
+    active_sessions.pop(session_id, None)
+
+def get_current_role(session_id: str = Cookie(None, alias="sipedas_session")):
+    _clean_expired_sessions()
+    if session_id and session_id in active_sessions:
+        active_sessions[session_id]["last_active"] = datetime.now()
+        return active_sessions[session_id]["role"]
+    return "pegawai"
+
+def require_admin(request: Request):
+    _clean_expired_sessions()
+    session_id = request.cookies.get("sipedas_session")
+    if not session_id or session_id not in active_sessions:
+        raise HTTPException(status_code=401, detail="Unauthorized: silakan login sebagai admin.")
+    active_sessions[session_id]["last_active"] = datetime.now()
+    return active_sessions[session_id]
+
+def log_activity(db: Session, action: str, target: str = "", detail: dict = None):
+    """Catat aktivitas admin ke database."""
+    log = models.ActivityLog(action=action, target=target, detail=detail or {})
+    db.add(log)
+    db.commit()
+
+@router.post("/login")
+def auth_login(payload: dict, request: Request, response: Response):
+    client_ip = request.client.host if request.client else "unknown"
+    now_ts = time.time()
+    
+    # 1. Periksa Lockout Rate Limiter
+    attempt_info = _login_attempts.get(client_ip, {"failed_count": 0, "lock_until": 0})
+    if attempt_info["lock_until"] > now_ts:
+        remaining_sec = int(attempt_info["lock_until"] - now_ts)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Terlalu banyak percobaan login yang gagal. Akun dikunci sementara. Coba lagi dalam {remaining_sec} detik."
+        )
+
+    password = str(payload.get("password", "")).strip()
+    stored_hash, stored_salt = _get_or_create_admin_credentials()
+    
+    # 2. Verifikasi Password Hashing
+    if not _verify_password(password, stored_hash, stored_salt):
+        attempt_info["failed_count"] += 1
+        if attempt_info["failed_count"] >= MAX_FAILED_ATTEMPTS:
+            attempt_info["lock_until"] = now_ts + LOCKOUT_DURATION_SECONDS
+            _login_attempts[client_ip] = attempt_info
+            raise HTTPException(
+                status_code=429,
+                detail=f"Password salah 5 kali berturut-turut. Akses dikunci selama {LOCKOUT_DURATION_SECONDS // 60} menit demi keamanan."
+            )
+        _login_attempts[client_ip] = attempt_info
+        sisa = MAX_FAILED_ATTEMPTS - attempt_info["failed_count"]
+        raise HTTPException(status_code=401, detail=f"Password salah! Sisa percobaan: {sisa} kali.")
+
+    # 3. Login Sukses: Reset Rate Limiter & Buat Sesi
+    _login_attempts.pop(client_ip, None)
+    sid = create_session("admin")
+    response.set_cookie(
+        key="sipedas_session",
+        value=sid,
+        httponly=True,
+        samesite="lax",
+        max_age=SESSION_MAX_AGE_HOURS * 3600,
+        path="/",
+    )
+    return {"role": "admin", "message": "Login admin berhasil.", "session_expires_in_hours": SESSION_MAX_AGE_HOURS}
+
+@router.post("/logout")
+def auth_logout(request: Request, response: Response):
+    session_id = request.cookies.get("sipedas_session")
+    if session_id:
+        destroy_session(session_id)
+    response.delete_cookie("sipedas_session", path="/")
+    return {"role": "pegawai", "message": "Logout berhasil."}
+
+@router.get("/me")
+def auth_me(request: Request):
+    session_id = request.cookies.get("sipedas_session")
+    if session_id and session_id in active_sessions:
+        return {"role": active_sessions[session_id]["role"]}
+    return {"role": "pegawai"}
+
+@router.post("/change-password")
+def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Fitur ganti password admin yang aman."""
+    old_password = str(payload.get("old_password", "")).strip()
+    new_password = str(payload.get("new_password", "")).strip()
+    
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password baru minimal harus 6 karakter!")
+    
+    stored_hash, stored_salt = _get_or_create_admin_credentials()
+    if not _verify_password(old_password, stored_hash, stored_salt):
+        raise HTTPException(status_code=401, detail="Password lama Anda salah!")
+    
+    _update_admin_password(new_password)
+    log_activity(db, "change_admin_password", "Admin mengganti password sistem")
+    return {"message": "Password admin berhasil diperbarui dengan aman."}

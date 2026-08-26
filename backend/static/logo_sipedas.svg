@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <radialGradient id="glow-opt3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0093dd" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#eb891b" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#68b92e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ribbon-flow-3" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#68b92e"/>
+      <stop offset="50%" stop-color="#eb891b"/>
+      <stop offset="100%" stop-color="#0093dd"/>
+    </linearGradient>
+    <linearGradient id="node-b3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0093dd"/>
+    </linearGradient>
+    <linearGradient id="node-o3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#eb891b"/>
+    </linearGradient>
+    <linearGradient id="node-g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635"/>
+      <stop offset="100%" stop-color="#68b92e"/>
+    </linearGradient>
+    <filter id="sh-opt3" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <circle cx="100" cy="100" r="80" fill="url(#glow-opt3)"/>
+
+  <g filter="url(#sh-opt3)">
+    <!-- Main Smooth S Spine -->
+    <path d="M 60 155 C 28 150, 30 115, 80 102 C 140 88, 168 80, 140 45 C 120 20, 80 32, 70 52" 
+          fill="none" stroke="url(#ribbon-flow-3)" stroke-width="8.5" stroke-linecap="round"/>
+    
+    <!-- Secondary Dynamic Dash Track -->
+    <path d="M 58 155 C 80 158, 120 150, 138 120" 
+          fill="none" stroke="#68b92e" stroke-width="3" stroke-dasharray="3 3" opacity="0.7"/>
+  </g>
+
+  <!-- 3 Clean Key Nodes -->
+  <circle cx="60" cy="155" r="12" fill="url(#node-g3)" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="60" cy="155" r="4.5" fill="#ffffff"/>
+
+  <circle cx="100" cy="98" r="14" fill="url(#node-o3)" stroke="#ffffff" stroke-width="3.5"/>
+  <circle cx="100" cy="98" r="5.5" fill="#ffffff"/>
+
+  <circle cx="140" cy="45" r="13" fill="url(#node-b3)" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="140" cy="45" r="5" fill="#ffffff"/>
+
+  <circle cx="70" cy="52" r="7" fill="#38bdf8" stroke="#ffffff" stroke-width="2"/>
+</svg>

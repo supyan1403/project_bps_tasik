@@ -1,0 +1,16 @@
+{
+    "modifications": [
+        {
+            "table_number": "4.1.4",
+            "merge_with_same_number": true
+        },
+        {
+            "table_number": "4.1.5",
+            "merge_with_same_number": true
+        },
+        {
+            "table_number": "4.1.6",
+            "merge_with_same_number": true
+        }
+    ]
+}

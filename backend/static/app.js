@@ -8633,25 +8633,15 @@ const UNIVERSAL_UNIT_FAMILIES = {
     },
 
     // 7. Cacah Unit / Ekor / Pohon (Base: unit)
-
     count: {
-
         baseUnit: 'unit',
-
-        displayName: 'Jumlah Unit / Ekor',
-
+        displayName: 'Jumlah Kuantitas / Unit',
         units: {
-
-            'unit': { label: 'Unit', btnLabel: 'Unit / Ekor', factor: 1, isInteger: true, maxDecimals: 0 },
-
+            'unit': { label: 'Unit', btnLabel: 'Unit', factor: 1, isInteger: true, maxDecimals: 0 },
             'ribu_unit': { label: 'Ribu Unit', btnLabel: 'Ribu Unit', factor: 0.001, isInteger: false, maxDecimals: 2 },
-
             'juta_unit': { label: 'Juta Unit', btnLabel: 'Juta Unit', factor: 0.000001, isInteger: false, maxDecimals: 3 }
-
         },
-
         triggers: ['ekor', 'pohon', 'unit', 'buah', 'batang', 'kendaraan', 'populasi ternak']
-
     }
 
 };
@@ -8752,12 +8742,41 @@ function renderUnitConverterBar(checkedVKs) {
 
     function buildChips(groupName) {
         let html = '';
+        const combinedInfo = `${vkUnit || ''} ${firstVk || ''} ${typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : ''}`.toLowerCase();
+        const isEkor = /\b(ekor|ternak|populasi ternak|unggas|sapi|kambing|domba|ayam|itik|kerbau|kuda|babi)\b/i.test(combinedInfo);
+        const isPohon = /\b(pohon|batang)\b/i.test(combinedInfo);
+
         for (const [unitKey, unitCfg] of Object.entries(family.units)) {
             const isActive = (unitKey === tsActiveUnitKey);
+            let displayLabel = unitCfg.btnLabel || unitCfg.label;
+
+            // Context-aware dynamic labels for count family
+            if (familyKey === 'count') {
+                if (isEkor) {
+                    if (unitKey === 'unit') displayLabel = 'Ekor';
+                    else if (unitKey === 'ribu_unit') displayLabel = 'Ribu Ekor';
+                    else if (unitKey === 'juta_unit') displayLabel = 'Juta Ekor';
+                } else if (isPohon) {
+                    if (unitKey === 'unit') displayLabel = 'Pohon / Batang';
+                    else if (unitKey === 'ribu_unit') displayLabel = 'Ribu Batang';
+                    else if (unitKey === 'juta_unit') displayLabel = 'Juta Batang';
+                } else {
+                    if (unitKey === 'unit') {
+                        displayLabel = (vkUnit && vkUnit.trim() && !['unit/ekor', 'satuan', 'unit'].includes(vkUnit.trim().toLowerCase()) && vkUnit.trim().length <= 12)
+                            ? vkUnit.trim()
+                            : 'Unit';
+                    } else if (unitKey === 'ribu_unit') {
+                        displayLabel = 'Ribu Unit';
+                    } else if (unitKey === 'juta_unit') {
+                        displayLabel = 'Juta Unit';
+                    }
+                }
+            }
+
             html += `
                 <label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${unitKey}')">
                     <input type="radio" name="${groupName}" value="${unitKey}" ${isActive ? 'checked' : ''}>
-                    <span>${unitCfg.btnLabel || unitCfg.label}</span>
+                    <span>${typeof escHtml === 'function' ? escHtml(displayLabel) : displayLabel}</span>
                 </label>`;
         }
         return html;
@@ -11716,6 +11735,7 @@ let tsInsightYearEnd = null;
 
 let tsInsightActiveVk = null;
 
+const tsHiddenEntities = new Set();
 let tsInsightSelectedEntities = new Set();
 let tsInsightSelectedTrends = new Set(['up', 'down', 'stagnant', 'empty']);
 let tsInsightSearchKeyword = '';
@@ -11767,13 +11787,21 @@ function toggleTimeSeriesInsights(forceState) {
 
 
     if (tsInsightsExpanded) {
-
         initInsightFilterOptions();
-
         computeAndRenderTimeSeriesInsights();
-
     }
+}
 
+function quickJumpToInsights() {
+    if (!tsInsightsExpanded) {
+        toggleTimeSeriesInsights(true);
+    }
+    setTimeout(() => {
+        const target = document.getElementById('ts-insights-drawer') || document.querySelector('.ts-trend-banner');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 150);
 }
 
 
@@ -11870,6 +11898,9 @@ function initInsightFilterOptions() {
 
 
 
+    // Sinkronkan tsInsightSelectedEntities dari tsHiddenEntities
+    tsInsightSelectedEntities = new Set(allEntities.filter(e => !tsHiddenEntities.has(e)));
+
     // Populate Searchable Entity Dropdown inside Insight Drawer
     const listEl = document.getElementById('ts-insight-entity-list');
     const btnSelectAll = document.getElementById('btn-ts-insight-select-all');
@@ -11879,7 +11910,7 @@ function initInsightFilterOptions() {
     function updateInsightEntityBtnText() {
         if (!btnText) return;
         const total = allEntities.length;
-        const sel = tsInsightSelectedEntities ? tsInsightSelectedEntities.size : 0;
+        const sel = allEntities.filter(e => !tsHiddenEntities.has(e)).length;
         if (sel === total) {
             btnText.textContent = `Semua Rincian (${total})`;
         } else if (sel === 0) {
@@ -11892,7 +11923,7 @@ function initInsightFilterOptions() {
     if (listEl) {
         let listHtml = '';
         allEntities.forEach(ent => {
-            const isChecked = tsInsightSelectedEntities && tsInsightSelectedEntities.has(ent);
+            const isChecked = !tsHiddenEntities.has(ent);
             listHtml += `
                 <label class="dropdown-item px-1 py-1 ts-insight-entity-item" data-name="${ent.toLowerCase()}" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
                     <input type="checkbox" class="ts-insight-entity-cb" data-entity="${escHtml(ent)}" ${isChecked ? 'checked' : ''} style="width:16px;height:16px;">
@@ -11906,12 +11937,32 @@ function initInsightFilterOptions() {
             cb.onchange = function(e) {
                 if (e) e.stopPropagation();
                 const ent = this.getAttribute('data-entity');
-                if (!tsInsightSelectedEntities) tsInsightSelectedEntities = new Set(allEntities);
-                if (this.checked) {
-                    tsInsightSelectedEntities.add(ent);
-                } else {
+                const isHidden = !this.checked;
+                if (isHidden) {
+                    tsHiddenEntities.add(ent);
                     tsInsightSelectedEntities.delete(ent);
+                } else {
+                    tsHiddenEntities.delete(ent);
+                    tsInsightSelectedEntities.add(ent);
                 }
+
+                // 2-Way Sync: Update semua checkbox di grafik/tabel
+                document.querySelectorAll(`.ts-entity-cb[data-entity="${CSS.escape(ent)}"]`).forEach(c => {
+                    c.checked = !isHidden;
+                });
+
+                // Update counter badge di tombol filter atas
+                const newVisCount = allEntities.filter(x => !tsHiddenEntities.has(x)).length;
+                const newLabel = (newVisCount === allEntities.length) ? 'Semua' : `${newVisCount}/${allEntities.length}`;
+                document.querySelectorAll('.entity-count-badge').forEach(b => {
+                    b.textContent = newLabel;
+                });
+
+                // Update grafik, legenda, & tabel
+                _syncEntityVisibility(ent, isHidden);
+                if (tsRenderCallback) tsRenderCallback(!isHidden ? ent : null);
+
+                // Update teks tombol & ranking wawasan tren
                 updateInsightEntityBtnText();
                 computeAndRenderTimeSeriesInsights();
             };
@@ -11921,10 +11972,23 @@ function initInsightFilterOptions() {
     if (btnSelectAll) {
         btnSelectAll.onclick = function(e) {
             if (e) e.stopPropagation();
+            tsHiddenEntities.clear();
             tsInsightSelectedEntities = new Set(allEntities);
+
+            // Update semua checkbox di wawasan tren
             if (listEl) {
                 listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => cb.checked = true);
             }
+            // Update semua checkbox di atas (grafik & tabel)
+            document.querySelectorAll('.ts-entity-cb').forEach(cb => cb.checked = true);
+            document.querySelectorAll('.entity-count-badge').forEach(b => {
+                b.textContent = 'Semua';
+            });
+
+            // Update grafik, legenda, & tabel
+            allEntities.forEach(x => _syncEntityVisibility(x, false));
+            if (tsRenderCallback) tsRenderCallback(null);
+
             updateInsightEntityBtnText();
             computeAndRenderTimeSeriesInsights();
         };
@@ -11933,10 +11997,23 @@ function initInsightFilterOptions() {
     if (btnClearAll) {
         btnClearAll.onclick = function(e) {
             if (e) e.stopPropagation();
+            allEntities.forEach(x => tsHiddenEntities.add(x));
             tsInsightSelectedEntities = new Set();
+
+            // Update semua checkbox di wawasan tren
             if (listEl) {
                 listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => cb.checked = false);
             }
+            // Update semua checkbox di atas (grafik & tabel)
+            document.querySelectorAll('.ts-entity-cb').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.entity-count-badge').forEach(b => {
+                b.textContent = `0/${allEntities.length}`;
+            });
+
+            // Update grafik, legenda, & tabel
+            allEntities.forEach(x => _syncEntityVisibility(x, true));
+            if (tsRenderCallback) tsRenderCallback(null);
+
             updateInsightEntityBtnText();
             computeAndRenderTimeSeriesInsights();
         };
@@ -12037,6 +12114,40 @@ function initInsightFilterOptions() {
     updateInsightEntityBtnText();
 
 }
+
+function syncInsightEntityChecklistUI() {
+    const listEl = document.getElementById('ts-insight-entity-list');
+    const btnText = document.getElementById('ts-insight-entity-btn-text');
+    if (currentTimeSeriesData && currentTimeSeriesData.entityMap) {
+        const allEntities = _sortEntitiesWithKabLast(Object.keys(currentTimeSeriesData.entityMap));
+        tsInsightSelectedEntities = new Set(allEntities.filter(e => !tsHiddenEntities.has(e)));
+
+        if (listEl) {
+            listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => {
+                const ent = cb.getAttribute('data-entity');
+                cb.checked = !tsHiddenEntities.has(ent);
+            });
+        }
+
+        if (btnText) {
+            const total = allEntities.length;
+            const sel = allEntities.filter(e => !tsHiddenEntities.has(e)).length;
+            if (sel === total) {
+                btnText.textContent = `Semua Rincian (${total})`;
+            } else if (sel === 0) {
+                btnText.textContent = `0 Rincian Terpilih`;
+            } else {
+                btnText.textContent = `${sel} Rincian Terpilih`;
+            }
+        }
+
+        // Recompute Wawasan Tren insights if panel is open
+        if (tsInsightsExpanded) {
+            computeAndRenderTimeSeriesInsights();
+        }
+    }
+}
+
 
 
 
@@ -18564,8 +18675,6 @@ let timeSeriesChartYAxisInstance = null;
 let timeSeriesChartYAxis2Instance = null;
 let timeSeriesChartYAxis3Instance = null;
 
-const tsHiddenEntities = new Set();
-
 let tsRenderCallback = null;
 
 let tsForceRecreateChart = true;
@@ -18761,6 +18870,79 @@ function _hideLegendEntityPopover() {
         }, 120);
     }
 }
+
+// Mobile / Touch Tap-to-Focus state
+let tsFocusedEntity = null;
+
+function _applyTimeSeriesEntityFocus(entityName) {
+    tsFocusedEntity = entityName;
+
+    // Update styling on all legend pills
+    document.querySelectorAll('.custom-legend-item').forEach(legEl => {
+        const ent = legEl.dataset.entity;
+        if (!ent) return;
+        if (ent === entityName) {
+            legEl.classList.add('ts-legend-focused');
+            legEl.classList.remove('ts-legend-dimmed');
+        } else {
+            legEl.classList.remove('ts-legend-focused');
+            legEl.classList.add('ts-legend-dimmed');
+        }
+    });
+
+    // Update charts: highlight focused dataset and dim others
+    [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+        if (inst && inst.data && inst.data.datasets) {
+            inst.data.datasets.forEach(ds => {
+                if (ds.entity === entityName) {
+                    ds.borderWidth = 4.5;
+                    ds.pointRadius = 6.5;
+                    ds.order = -1;
+                } else {
+                    ds.borderWidth = 1.2;
+                    ds.pointRadius = 2.5;
+                    ds.order = 1;
+                }
+            });
+            inst.update('none');
+        }
+    });
+}
+
+function _resetTimeSeriesEntityFocus() {
+    if (!tsFocusedEntity) return;
+    tsFocusedEntity = null;
+
+    // Reset legend pills
+    document.querySelectorAll('.custom-legend-item').forEach(legEl => {
+        legEl.classList.remove('ts-legend-focused');
+        legEl.classList.remove('ts-legend-dimmed');
+    });
+
+    // Reset charts: restore normal line thicknesses
+    [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+        if (inst && inst.data && inst.data.datasets) {
+            inst.data.datasets.forEach(ds => {
+                ds.borderWidth = 2.5;
+                ds.pointRadius = 4.5;
+                ds.order = 0;
+            });
+            inst.update('none');
+        }
+    });
+}
+
+// Global click/tap listener to reset focus when tapping outside
+document.addEventListener('pointerdown', function(e) {
+    if (!tsFocusedEntity) return;
+    // Don't reset if tapping on a legend pill itself
+    if (e.target.closest('.custom-legend-item') || e.target.closest('#ts-legend-hover-popover')) {
+        return;
+    }
+    _resetTimeSeriesEntityFocus();
+    _hideLegendEntityPopover();
+});
+
 
 function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityMap, chartIdx, animatingEntityName) {
 
@@ -20059,104 +20241,114 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
         legendDiv.querySelectorAll('.custom-legend-item').forEach(item => {
 
-            item.addEventListener('click', function() {
+            let _legendLastTapTime = 0;
 
+            item.addEventListener('click', function(e) {
                 const entityName = this.dataset.entity;
-
                 if (!entityName) return;
 
+                const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
+                if (isTouchDevice) {
+                    const now = Date.now();
+                    const isDoubleTap = (now - _legendLastTapTime < 350);
+                    _legendLastTapTime = now;
 
-                const willHide = !tsHiddenEntities.has(entityName);
+                    if (isDoubleTap) {
+                        // Double tap on touch: Hide / Show toggle
+                        _toggleEntityHideState(entityName);
+                        return;
+                    }
 
-                if (willHide) {
+                    // Single tap on touch: Tap-to-Focus (Highlight line & dim others)
+                    if (tsFocusedEntity === entityName) {
+                        // If already focused, unfocus and hide popover
+                        _resetTimeSeriesEntityFocus();
+                        _hideLegendEntityPopover();
+                    } else {
+                        // Focus this entity
+                        _applyTimeSeriesEntityFocus(entityName);
 
-                    tsHiddenEntities.add(entityName);
-
-                } else {
-
-                    tsHiddenEntities.delete(entityName);
-
+                        // Also show the popover with stats on mobile
+                        let matchedDs = null;
+                        let activeLabels = null;
+                        [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+                            if (inst && inst.data && inst.data.datasets) {
+                                if (!activeLabels && inst.data.labels) activeLabels = inst.data.labels;
+                                inst.data.datasets.forEach(ds => {
+                                    if (ds.entity === entityName) matchedDs = ds;
+                                });
+                            }
+                        });
+                        if (matchedDs) {
+                            const unitStr = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[selectedVk]) || (typeof unitLabel !== 'undefined' ? unitLabel : '');
+                            _showLegendEntityPopover(this, entityName, activeLabels || years, matchedDs.data, matchedDs.borderColor || matchedDs.backgroundColor, unitStr);
+                        }
+                    }
+                    return;
                 }
 
+                // Desktop click: toggle hide/show
+                _toggleEntityHideState(entityName);
+            });
 
+            function _toggleEntityHideState(entityName) {
+                const willHide = !tsHiddenEntities.has(entityName);
+                if (willHide) {
+                    tsHiddenEntities.add(entityName);
+                    if (tsFocusedEntity === entityName) {
+                        _resetTimeSeriesEntityFocus();
+                        _hideLegendEntityPopover();
+                    }
+                } else {
+                    tsHiddenEntities.delete(entityName);
+                }
 
                 // Update all legend items for this entity across all active charts
-
                 document.querySelectorAll(`.custom-legend-item[data-entity="${entityName}"]`).forEach(legEl => {
-
                     legEl.style.opacity = willHide ? '0.4' : '1';
-
                     if (willHide) {
-
                         legEl.classList.add('ts-legend-disabled');
-
                     } else {
-
                         legEl.classList.remove('ts-legend-disabled');
-
                     }
-
                     const textSpan = legEl.querySelector('.custom-legend-text');
-
                     if (textSpan) {
-
                         textSpan.style.textDecoration = willHide ? 'line-through' : 'none';
-
                     }
-
                 });
-
-
 
                 // Update dataset visibility in all active charts without re-rendering legend DOM
-
                 [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
-
                     if (inst && inst.data && inst.data.datasets) {
-
                         inst.data.datasets.forEach((ds, dsIdx) => {
-
                             if (ds.entity === entityName) {
-
                                 inst.setDatasetVisibility(dsIdx, !willHide);
-
                             }
-
                         });
-
                         inst.update('none');
-
                     }
-
                 });
 
-
-
                 // Update table row display for this entity
-
                 const gridBody = document.getElementById('ts-grid-body');
-
                 if (gridBody) {
-
                     gridBody.querySelectorAll(`tr[data-entity="${entityName}"]`).forEach(tr => {
-
                         tr.style.display = willHide ? 'none' : '';
-
                     });
-
                 }
-
-
 
                 // Update dropdown counter & checkboxes in buildEntityChecklist
                 if (currentTimeSeriesData && currentTimeSeriesData.entityMap) {
                     const allEnts = _sortEntitiesWithKabLast(Object.keys(currentTimeSeriesData.entityMap));
                     buildEntityChecklist(allEnts);
                 }
-            });
+            }
 
             item.addEventListener('mouseenter', function() {
+                // If on touch device, ignore mouseenter to avoid fighting tap events
+                if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) return;
+
                 _cancelHideLegendEntityPopover();
                 const entityName = this.dataset.entity;
                 if (!entityName || tsHiddenEntities.has(entityName)) return;
@@ -20189,6 +20381,8 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
             });
 
             item.addEventListener('mouseleave', function() {
+                if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) return;
+
                 _scheduleHideLegendEntityPopover();
                 const entityName = this.dataset.entity;
                 if (!entityName) return;
@@ -20719,6 +20913,11 @@ function buildEntityChecklist(allEntities) {
                 document.querySelectorAll('.entity-count-badge').forEach(b => {
                     b.textContent = newLabel;
                 });
+
+                // Sinkronkan juga ke Wawasan Tren
+                if (typeof syncInsightEntityChecklistUI === 'function') {
+                    syncInsightEntityChecklistUI();
+                }
             };
         });
 
@@ -20733,6 +20932,9 @@ function buildEntityChecklist(allEntities) {
                 document.querySelectorAll('.entity-count-badge').forEach(b => {
                     b.textContent = 'Semua';
                 });
+                if (typeof syncInsightEntityChecklistUI === 'function') {
+                    syncInsightEntityChecklistUI();
+                }
             };
         }
 
@@ -20747,6 +20949,9 @@ function buildEntityChecklist(allEntities) {
                 document.querySelectorAll('.entity-count-badge').forEach(b => {
                     b.textContent = `0/${allEntities.length}`;
                 });
+                if (typeof syncInsightEntityChecklistUI === 'function') {
+                    syncInsightEntityChecklistUI();
+                }
             };
         }
     });

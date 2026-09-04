@@ -105,13 +105,39 @@
     background: var(--primary-faint);
 }
 
+/* Touch device active and focused states */
+#ts-custom-legend .ts-legend-pill:active,
+#ts-custom-legend-2 .ts-legend-pill:active,
+#ts-custom-legend-3 .ts-legend-pill:active,
+.custom-legend-item:active {
+    transform: scale(0.96);
+    background: var(--primary-faint);
+}
+
+.custom-legend-item.ts-legend-focused,
+#ts-custom-legend .ts-legend-pill.ts-legend-focused,
+#ts-custom-legend-2 .ts-legend-pill.ts-legend-focused,
+#ts-custom-legend-3 .ts-legend-pill.ts-legend-focused {
+    background: var(--primary-faint) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.35) !important;
+    font-weight: 700 !important;
+}
+
+.custom-legend-item.ts-legend-dimmed,
+#ts-custom-legend .ts-legend-pill.ts-legend-dimmed,
+#ts-custom-legend-2 .ts-legend-pill.ts-legend-dimmed,
+#ts-custom-legend-3 .ts-legend-pill.ts-legend-dimmed {
+    opacity: 0.35 !important;
+}
+
 /* Table header */
 #ts-grid thead {
-    background: var(--primary) !important;
-    color: var(--text-white) !important;
+    background: var(--bg-page) !important;
+    color: var(--text-primary) !important;
 }
 #ts-grid thead th {
-    border-color: rgba(255,255,255,0.2) !important;
+    border-color: var(--border) !important;
     font-size: 0.78rem;
     letter-spacing: 0.2px;
 }
@@ -942,4 +968,43 @@ button.ts-insight-select.dropdown-toggle::after {
 
 [data-bs-theme="dark"] #modal-ts-export-custom .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* ==========================================================================
+   SCROLLABLE COMPACT LEGEND CONTAINER
+   Membatasi tinggi kumpulan pill legenda (hingga 39 entitas) agar tidak 
+   memenuhi area tampilan grafik ke bawah.
+   ========================================================================== */
+.ts-custom-legend-scrollable {
+    max-height: 84px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 6px 10px !important;
+    background: rgba(248, 250, 252, 0.85);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+.ts-custom-legend-scrollable::-webkit-scrollbar {
+    width: 5px;
+}
+
+.ts-custom-legend-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ts-custom-legend-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 4px;
+}
+
+.ts-custom-legend-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.7);
+}
+
+[data-bs-theme="dark"] .ts-custom-legend-scrollable {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
 }

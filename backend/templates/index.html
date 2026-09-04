@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=20260904_16">
+    <link rel="stylesheet" href="/static/style.css?v=20260904_63">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -192,8 +192,8 @@
                     </div>
                 </div>
 
-                <!-- Sisi Kanan: Identitas Resmi BPS Kabupaten Tasikmalaya -->
-                <div class="d-flex align-items-center">
+                <!-- Sisi Kanan: Identitas Resmi BPS Kabupaten Tasikmalaya (Hanya tampil di tablet & desktop agar mobile tidak pengap) -->
+                <div class="d-none d-md-flex align-items-center">
                     <div class="d-none d-sm-block me-3" style="width: 1px; height: 26px; background: var(--border); opacity: 0.9;"></div>
                     <div class="d-flex flex-column text-end justify-content-center">
                         <span style="font-weight:700; font-size:0.75rem; letter-spacing:0.3px; line-height:1.25; color:var(--text-primary); text-transform:uppercase;">BADAN PUSAT STATISTIK</span>
@@ -936,13 +936,13 @@
                     <!-- 4. Banner Content -->
                     <div class="position-relative" style="z-index: 2;">
                         <!-- Top Bar: Badge & Feature Pills -->
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-1">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2 pb-1">
                             <span class="badge banner-badge d-inline-flex align-items-center gap-2" style="letter-spacing: 0.4px;">
                                 <i class="bi bi-graph-up text-warning" style="font-size: 0.95rem;"></i>
                                 <span>MODUL ANALISIS DERET WAKTU (TIME SERIES)</span>
                             </span>
 
-                            <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                            <div class="d-none d-md-flex align-items-center flex-wrap" style="gap: 10px;">
                                 <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
                                     <i class="bi bi-calendar-range text-info" style="font-size: 0.82rem;"></i>
                                     <span>Lintas Tahun Terpadu</span>
@@ -959,17 +959,17 @@
                         </div>
 
                         <!-- Main Content -->
-                        <div class="mt-2">
-                            <h1 class="fs-2 fw-bold text-white mb-2.5 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
+                        <div class="mt-1">
+                            <h1 class="fs-2 fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap ts-hero-title" style="letter-spacing: -0.3px; line-height: 1.3;">
                                 Eksplorasi Deret Waktu &amp; <span class="text-brand-ts">Tren Statistik</span>
                             </h1>
                             
-                            <p class="mb-3 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
+                            <p class="mb-2 text-white text-opacity-85 fw-normal ts-hero-desc" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
                                 Analisis tren data statistik lintas tahun, pantau laju pertumbuhan indikator, dan bandingkan capaian antarwilayah secara akurat.
                             </p>
                             
-                            <!-- Workflow Steps (Clean Text-Only Stepper, No Numbers, Generous Spacing) -->
-                            <div class="d-flex align-items-center flex-wrap" style="font-size: 0.86rem; color: rgba(255, 255, 255, 0.9); gap: 14px;">
+                            <!-- Workflow Steps (Clean Text-Only Stepper, Desktop Only) -->
+                            <div class="d-none d-md-flex align-items-center flex-wrap" style="font-size: 0.86rem; color: rgba(255, 255, 255, 0.9); gap: 14px;">
                                 <span class="fw-semibold text-warning d-inline-flex align-items-center gap-2" style="letter-spacing: 0.2px;">
                                     <i class="bi bi-info-circle" style="font-size: 0.95rem;"></i>
                                     <span>Alur Cepat :</span>
@@ -1175,15 +1175,15 @@
                             <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
                                 <div id="ts-chart-title-1" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;display:none;"></div>
                                 
-                                <!-- Kustom Legenda (Fixed) -->
-                                <div id="ts-custom-legend" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                                <!-- Kustom Legenda (Scrollable Ringkas) -->
+                                <div id="ts-custom-legend" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
                             
                             <!-- Area Render Grafik -->
                             <div class="d-flex align-items-start" style="height:350px; position:relative;">
                                 <!-- Scrollable Chart Area -->
-                                <div id="ts-chart-scrollable" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: hidden; min-width: 0;">
+                                <div id="ts-chart-scrollable" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: visible; touch-action: pan-y; min-width: 0;">
                                     <div id="ts-chart-wrapper" style="position:relative; width:100%; height:320px;">
-                                        <canvas id="timeSeriesChart" height="320"></canvas>
+                                        <canvas id="timeSeriesChart" height="320" style="touch-action: pan-y;"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -1191,11 +1191,11 @@
                         <!-- Second Chart (for multi-VK) -->
                         <div id="ts-chart-container-2" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
                             <div id="ts-chart-title-2" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
-                            <div id="ts-custom-legend-2" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                            <div id="ts-custom-legend-2" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
                             <div class="d-flex align-items-start" style="height:350px; position:relative;">
-                                <div id="ts-chart-scrollable-2" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: hidden; min-width: 0;">
+                                <div id="ts-chart-scrollable-2" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: visible; touch-action: pan-y; min-width: 0;">
                                     <div id="ts-chart-wrapper-2" style="position:relative; width:100%; height:320px;">
-                                        <canvas id="timeSeriesChart2" height="320"></canvas>
+                                        <canvas id="timeSeriesChart2" height="320" style="touch-action: pan-y;"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -1203,11 +1203,11 @@
                         <!-- Third Chart (for 3+ VKs) -->
                         <div id="ts-chart-container-3" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
                             <div id="ts-chart-title-3" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
-                            <div id="ts-custom-legend-3" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                            <div id="ts-custom-legend-3" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
                             <div class="d-flex align-items-start" style="height:350px; position:relative;">
-                                <div id="ts-chart-scrollable-3" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: hidden; min-width: 0;">
+                                <div id="ts-chart-scrollable-3" style="flex-grow: 1; height: 350px; overflow-x: auto; overflow-y: visible; touch-action: pan-y; min-width: 0;">
                                     <div id="ts-chart-wrapper-3" style="position:relative; width:100%; height:320px;">
-                                        <canvas id="timeSeriesChart3" height="320"></canvas>
+                                        <canvas id="timeSeriesChart3" height="320" style="touch-action: pan-y;"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -1315,7 +1315,7 @@
                                             </div>
 
                                             <!-- 3. Multi-Select Checklist Filter Tren -->
-                                             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                             <div class="col-12 col-sm-4 col-md-3 col-lg-2">
                                                  <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-trend">
                                                      Filter Tren:
                                                  </label>
@@ -1348,21 +1348,25 @@
                                                  </div>
                                              </div>
 
-                                            <!-- 4. Tahun Awal -->
-                                            <div class="col-6 col-sm-4 col-md-2">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
-                                                    Tahun Awal:
-                                                </label>
-                                                <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                            </div>
-
-                                            <!-- 5. Tahun Akhir -->
-                                            <div class="col-6 col-sm-4 col-md-2">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
-                                                    Tahun Akhir:
-                                                </label>
-                                                <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                            </div>
+                                             <!-- 4 & 5. Tahun Awal & Tahun Akhir (Selalu Sejajar Berdampingan 50%-50%) -->
+                                             <div class="col-12 col-sm-8 col-md-4 col-lg-3">
+                                                 <div class="row g-2">
+                                                     <!-- Tahun Awal -->
+                                                     <div class="col-6">
+                                                         <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
+                                                             Tahun Awal:
+                                                         </label>
+                                                         <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                                     </div>
+                                                     <!-- Tahun Akhir -->
+                                                     <div class="col-6">
+                                                         <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
+                                                             Tahun Akhir:
+                                                         </label>
+                                                         <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                                     </div>
+                                                 </div>
+                                             </div>
 
                                             <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
                                             <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">
@@ -2456,7 +2460,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260904_45" defer></script>
+    <script src="/static/app.js?v=20260904_46" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

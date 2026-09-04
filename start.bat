@@ -6,5 +6,10 @@ echo.
 echo Mengaktifkan Virtual Environment dan Memulai Server...
 cd backend
 call venv\Scripts\activate
+
+REM === MAINTENANCE MODE ===
+REM Uncomment baris di bawah untuk aktifkan maintenance mode:
+REM set SIPEDAS_MAINTENANCE=1
+
 python run_server.py
 pause

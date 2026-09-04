@@ -52,14 +52,21 @@ Publikasi data statistik berkala resmi, seperti buku **Kabupaten Dalam Angka (DD
 
 ## Fitur-Fitur Utama
 
-- **Dashboard Eksekutif Interaktif**: Ringkasan akumulasi data statistik secara langsung, visualisasi sebaran tabel per bab publikasi, dan indikator pemantauan status basis data.
+- **Dashboard Eksekutif Interaktif**: Ringkasan akumulasi data statistik secara langsung, visualisasi sebaran tabel per bab publikasi, banner selamat datang dengan jam & kalender digital dinamis, serta indikator pemantauan status basis data.
+- **Modern Responsive Layout & Smart Sidebar**:
+  - Sidebar pintar yang mendukung mode diperluas (*expanded*) dan mode ringkas (*collapsed 68px*) dengan satu klik pada logo SIPEDAS.
+  - *Floating Submenu Popover* mulus saat sidebar tertutup (pada menu Manajemen Database dan Akun Administrator).
+  - Kartu profil Administrator dengan *Space-Between Layout*, avatar perisai resmi BPS dengan indikator status online aktif, serta menu *Logout Flyout* melayang ke samping kanan tanpa pernah menutupi menu navigasi.
+- **Pemisahan Peran & Keamanan Berlapis (Role-Based Access Control)**:
+  - **Mode Publik / Pegawai**: Akses cepat pencarian indikator, penelusuran tabel, dan grafik deret waktu tanpa menu sensitif.
+  - **Mode Administrator**: Kontrol penuh pengelolaan basis data, impor, koreksi kolom, hingga backup sistem.
+  - Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak 16-byte, serta proteksi pembatasan percobaan gagal (*Anti-Brute Force Lockout* 5 menit).
 - **Ekstraksi PDF Cerdas**: Ekstraksi otomatis nomor tabel, judul publikasi, satuan unit, dan multi-level header menggunakan integrasi PyMuPDF & pdfplumber.
 - **Sinkronisasi & Parser Excel**: Dukungan impor berkas lembar kerja spreadsheet Excel (`.xlsx` / `.xls`) langsung ke dalam basis data relasional.
 - **Data Table Explorer & Live Cell Editor**: Penelusuran data tabel per bab/kategori, pencarian cepat pada tingkat kolom maupun baris, serta fitur pengeditan sel nilai data langsung di browser.
 - **Modul Analisis Deret Waktu (Time Series Engine)**: Pelacakan tren statistik lintas tahun secara dinamis, penyaringan indikator tunggal/gabungan, visualisasi grafik garis & batang interaktif, serta ekspor laporan kustom (PDF, PNG, CSV, Excel).
 - **Deteksi & Resolusi Anomali Data**: Pemindaian otomatis anomali nama kolom bilingual / duplikat serta koreksi inkonsistensi struktur tabel secara massal.
 - **Manajemen Database & Restore Web**: Pencadangan basis data otomatis (`.sql`), pemulihan data instan langsung melalui antarmuka web, serta kompatibilitas multi-database (MySQL / SQLite).
-- **Keamanan Administrator**: Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak, proteksi pembatasan percobaan gagal (Anti-Brute Force Lockout 5 menit).
 
 ---
 

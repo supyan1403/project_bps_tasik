@@ -17,9 +17,6 @@ _CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 os.makedirs(_CONFIG_DIR, exist_ok=True)
 _AUTH_CONFIG_FILE = os.path.join(_CONFIG_DIR, "auth_credentials.json")
 
-# In-memory session store & brute-force rate limiter
-# {session_id: {"role": "admin", "created_at": datetime, "last_active": datetime}}
-active_sessions = {}
 SESSION_MAX_AGE_HOURS = 8
 
 # Brute-force tracking: {ip_address: {"failed_count": int, "lock_until": float}}
@@ -53,7 +50,7 @@ def _get_or_create_admin_credentials():
                     return data["password_hash"], data["salt"]
         except Exception:
             pass
-    
+
     # Inisialisasi default dari environment atau 'bps2025'
     default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD", "bps2025")
     p_hash, salt = _hash_password(default_plain)
@@ -69,37 +66,44 @@ def _update_admin_password(new_plain_password: str):
     with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now().isoformat()}, f, indent=2)
 
-def _clean_expired_sessions():
-    now = datetime.now()
-    cutoff = now - timedelta(hours=SESSION_MAX_AGE_HOURS)
-    expired = [sid for sid, s in active_sessions.items() if s.get("last_active", s["created_at"]) < cutoff]
-    for sid in expired:
-        active_sessions.pop(sid, None)
+def _clean_expired_sessions(db: Session):
+    cutoff = datetime.utcnow() - timedelta(hours=SESSION_MAX_AGE_HOURS)
+    db.query(models.UserSession).filter(models.UserSession.last_active < cutoff).delete()
+    db.commit()
 
-def create_session(role: str = "admin") -> str:
-    _clean_expired_sessions()
+def create_session(role: str = "admin", db: Session = None) -> str:
     sid = secrets.token_hex(32)
-    now = datetime.now()
-    active_sessions[sid] = {"role": role, "created_at": now, "last_active": now}
+    now = datetime.utcnow()
+    if db:
+        session = models.UserSession(id=sid, role=role, created_at=now, last_active=now)
+        db.add(session)
+        db.commit()
     return sid
 
-def destroy_session(session_id: str):
-    active_sessions.pop(session_id, None)
+def destroy_session(session_id: str, db: Session = None):
+    if db and session_id:
+        db.query(models.UserSession).filter(models.UserSession.id == session_id).delete()
+        db.commit()
 
-def get_current_role(session_id: str = Cookie(None, alias="sipedas_session")):
-    _clean_expired_sessions()
-    if session_id and session_id in active_sessions:
-        active_sessions[session_id]["last_active"] = datetime.now()
-        return active_sessions[session_id]["role"]
+def get_current_role(session_id: str = Cookie(None, alias="sipedas_session"), db: Session = Depends(get_db)):
+    if session_id:
+        sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
+        if sess:
+            sess.last_active = datetime.utcnow()
+            db.commit()
+            return sess.role
     return "pegawai"
 
-def require_admin(request: Request):
-    _clean_expired_sessions()
+def require_admin(request: Request, db: Session = Depends(get_db)):
     session_id = request.cookies.get("sipedas_session")
-    if not session_id or session_id not in active_sessions:
+    if not session_id:
         raise HTTPException(status_code=401, detail="Unauthorized: silakan login sebagai admin.")
-    active_sessions[session_id]["last_active"] = datetime.now()
-    return active_sessions[session_id]
+    sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=401, detail="Unauthorized: silakan login sebagai admin.")
+    sess.last_active = datetime.utcnow()
+    db.commit()
+    return {"role": sess.role}
 
 def log_activity(db: Session, action: str, target: str = "", detail: dict = None):
     """Catat aktivitas admin ke database."""
@@ -108,10 +112,10 @@ def log_activity(db: Session, action: str, target: str = "", detail: dict = None
     db.commit()
 
 @router.post("/login")
-def auth_login(payload: dict, request: Request, response: Response):
+def auth_login(payload: dict, request: Request, response: Response, db: Session = Depends(get_db)):
     client_ip = request.client.host if request.client else "unknown"
     now_ts = time.time()
-    
+
     # 1. Periksa Lockout Rate Limiter
     attempt_info = _login_attempts.get(client_ip, {"failed_count": 0, "lock_until": 0})
     if attempt_info["lock_until"] > now_ts:
@@ -123,7 +127,7 @@ def auth_login(payload: dict, request: Request, response: Response):
 
     password = str(payload.get("password", "")).strip()
     stored_hash, stored_salt = _get_or_create_admin_credentials()
-    
+
     # 2. Verifikasi Password Hashing
     if not _verify_password(password, stored_hash, stored_salt):
         attempt_info["failed_count"] += 1
@@ -138,9 +142,10 @@ def auth_login(payload: dict, request: Request, response: Response):
         sisa = MAX_FAILED_ATTEMPTS - attempt_info["failed_count"]
         raise HTTPException(status_code=401, detail=f"Password salah! Sisa percobaan: {sisa} kali.")
 
-    # 3. Login Sukses: Reset Rate Limiter & Buat Sesi
+    # 3. Login Sukses: Reset Rate Limiter & Buat Sesi di database
     _login_attempts.pop(client_ip, None)
-    sid = create_session("admin")
+    _clean_expired_sessions(db)
+    sid = create_session("admin", db)
     response.set_cookie(
         key="sipedas_session",
         value=sid,
@@ -152,18 +157,20 @@ def auth_login(payload: dict, request: Request, response: Response):
     return {"role": "admin", "message": "Login admin berhasil.", "session_expires_in_hours": SESSION_MAX_AGE_HOURS}
 
 @router.post("/logout")
-def auth_logout(request: Request, response: Response):
+def auth_logout(request: Request, response: Response, db: Session = Depends(get_db)):
     session_id = request.cookies.get("sipedas_session")
     if session_id:
-        destroy_session(session_id)
+        destroy_session(session_id, db)
     response.delete_cookie("sipedas_session", path="/")
     return {"role": "pegawai", "message": "Logout berhasil."}
 
 @router.get("/me")
-def auth_me(request: Request):
+def auth_me(request: Request, db: Session = Depends(get_db)):
     session_id = request.cookies.get("sipedas_session")
-    if session_id and session_id in active_sessions:
-        return {"role": active_sessions[session_id]["role"]}
+    if session_id:
+        sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
+        if sess:
+            return {"role": sess.role}
     return {"role": "pegawai"}
 
 @router.post("/change-password")
@@ -171,14 +178,14 @@ def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = 
     """Fitur ganti password admin yang aman."""
     old_password = str(payload.get("old_password", "")).strip()
     new_password = str(payload.get("new_password", "")).strip()
-    
+
     if len(new_password) < 6:
         raise HTTPException(status_code=400, detail="Password baru minimal harus 6 karakter!")
-    
+
     stored_hash, stored_salt = _get_or_create_admin_credentials()
     if not _verify_password(old_password, stored_hash, stored_salt):
         raise HTTPException(status_code=401, detail="Password lama Anda salah!")
-    
+
     _update_admin_password(new_password)
     log_activity(db, "change_admin_password", "Admin mengganti password sistem")
     return {"message": "Password admin berhasil diperbarui dengan aman."}

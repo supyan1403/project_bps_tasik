@@ -707,14 +707,25 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
         padding-right: 1rem !important;
     }
 
-    /* Operator header full width */
+    /* Operator header menyatu penuh ke tepi layar (flush) */
     .operator-header {
-        margin: 0 0 12px 0 !important;
+        margin: -1rem -1rem 1rem -1rem !important;
+        padding: 10px 1rem !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: 1px solid var(--border) !important;
+        background: #ffffff !important;
     }
 }
 
 /* --- Small Phone: < 576px --- */
 @media (max-width: 575.98px) {
+    .operator-header {
+        margin: -0.75rem -0.75rem 0.85rem -0.75rem !important;
+        padding: 8px 0.75rem !important;
+    }
     .mobile-menu-toggle {
         width: 36px !important;
         height: 36px !important;

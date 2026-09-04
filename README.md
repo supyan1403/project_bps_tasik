@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="Database" />
   <img src="https://img.shields.io/badge/Frontend-Vanilla%20SPA%20%26%20Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Frontend" />
   <img src="https://img.shields.io/badge/Charts-Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js" />
-  <img src="https://img.shields.io/badge/Status-Beta%20v2.0-F59E0B?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Status-Beta%20v4.0-F59E0B?style=flat-square" alt="Status" />
 </p>
 
 <p align="center">

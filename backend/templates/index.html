@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=20260824_13">
+    <link rel="stylesheet" href="/static/style.css?v=20260828_45">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -40,106 +40,73 @@
             <ul class="nav flex-column mb-auto gap-1">
                 <li class="nav-item list-unstyled admin-only" style="display:none;">
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-dashboard" onclick="navigate('dashboard', this)" title="Dashboard">
-                        <i class="bi bi-grid" style="color:#4f46e5;"></i> <span class="nav-link-text">Dashboard</span>
+                        <i class="bi bi-grid"></i> <span class="nav-link-text">Dashboard</span>
                     </div>
                 </li>
                 <li class="nav-item list-unstyled admin-only" style="display:none;">
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-publikasi" onclick="navigate('publikasi', this)" title="Ekstraksi PDF">
-                        <i class="bi bi-filetype-pdf" style="color:#ef4444;"></i> <span class="nav-link-text">Ekstraksi PDF</span>
+                        <i class="bi bi-filetype-pdf"></i> <span class="nav-link-text">Ekstraksi PDF</span>
                     </div>
                 </li>
                 <li class="nav-item list-unstyled admin-only" style="display:none;">
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-import" onclick="navigate('import', this)" title="Import Excel">
-                        <i class="bi bi-filetype-xlsx" style="color:#16a34a;"></i> <span class="nav-link-text">Import Excel</span>
+                        <i class="bi bi-filetype-xlsx"></i> <span class="nav-link-text">Import Excel</span>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" style="display:none;">
-                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel" onclick="toggleTabelSubmenu()" title="Data Tabel">
-                        <i class="bi bi-table" style="color:#2563eb;"></i> <span class="nav-link-text">Data Tabel</span>
-                        <span id="tabel-submenu-icon" class="submenu-arrow ms-auto">▶</span>
-                    </div>
-                    <!-- Inline Submenu (Ketika Sidebar Terbuka) -->
-                    <div id="tabel-submenu" style="display:none;">
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel-publikasi" onclick="navigateDataTabelTab('publikasi', this)"><i class="bi bi-folder2-open" style="color:#2563eb;"></i> <span class="nav-link-text">Buka Publikasi</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel-kolom" onclick="navigateDataTabelTab('kolom', this)"><i class="bi bi-columns-gap" style="color:#2563eb;"></i> <span class="nav-link-text">Cari Kolom</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel-baris" onclick="navigateDataTabelTab('baris', this)"><i class="bi bi-list-ul" style="color:#2563eb;"></i> <span class="nav-link-text">Cari Baris</span></div>
-                    </div>
-                    <!-- Floating Popover (Ketika Sidebar Tertutup) -->
-                    <div class="sidebar-floating-popover shadow-lg" id="flyout-tabel-submenu">
-                        <div class="popover-header px-3 py-2 border-bottom fw-bold text-primary small d-flex align-items-center gap-2">
-                            <i class="bi bi-table"></i> Data Tabel
-                        </div>
-                        <div class="popover-body p-1.5 d-flex flex-column gap-1">
-                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateDataTabelTab('publikasi', this)">
-                                <i class="bi bi-folder2-open text-primary"></i> <span>Buka Publikasi</span>
-                            </div>
-                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateDataTabelTab('kolom', this)">
-                                <i class="bi bi-columns-gap text-primary"></i> <span>Cari Kolom</span>
-                            </div>
-                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateDataTabelTab('baris', this)">
-                                <i class="bi bi-list-ul text-primary"></i> <span>Cari Baris</span>
-                            </div>
-                        </div>
+                <li class="nav-item list-unstyled admin-only position-relative" style="display:none;">
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel" onclick="navigate('tabel', this)" title="Data Tabel">
+                        <i class="bi bi-table"></i> <span class="nav-link-text">Data Tabel</span>
                     </div>
                 </li>
                 <li class="nav-item list-unstyled">
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium active" id="nav-timeseries" onclick="navigate('timeseries', this)" title="Analisis Deret Waktu">
-                        <i class="bi bi-graph-up" style="color:#f59e0b;"></i> <span class="nav-link-text">Analisis Deret Waktu</span>
+                        <i class="bi bi-graph-up"></i> <span class="nav-link-text">Analisis Deret Waktu</span>
                     </div>
                 </li>
                 <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" style="display:none;">
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin" onclick="toggleAdminSubmenu()" title="Manajemen Database">
-                        <i class="bi bi-database" style="color:#0d9488;"></i> <span class="nav-link-text">Manajemen Database</span>
+                        <i class="bi bi-database"></i> <span class="nav-link-text">Manajemen Database</span>
                         <span id="admin-submenu-icon" class="submenu-arrow ms-auto">▶</span>
                     </div>
                     <!-- Inline Submenu (Ketika Sidebar Terbuka) -->
                     <div id="admin-submenu" style="display:none;">
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-backup" onclick="navigateAdminTab('backup', this)"><i class="bi bi-cloud-arrow-up" style="color:#0d9488;"></i> <span class="nav-link-text">Backup Database</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-db" onclick="navigateAdminTab('db', this)"><i class="bi bi-hdd-stack" style="color:#0d9488;"></i> <span class="nav-link-text">Database</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-master" onclick="navigateAdminTab('master', this)"><i class="bi bi-book" style="color:#0d9488;"></i> <span class="nav-link-text">Master Kolom</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-header" onclick="navigateAdminTab('header', this)"><i class="bi bi-exclamation-triangle" style="color:#0d9488;"></i> <span class="nav-link-text">Anomali Header</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-data" onclick="navigateAdminTab('data', this)"><i class="bi bi-exclamation-diamond" style="color:#0d9488;"></i> <span class="nav-link-text">Anomali Data</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-password" onclick="openSettingsModal()"><i class="bi bi-key" style="color:#0d9488;"></i> <span class="nav-link-text">Ganti Password</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-backup" onclick="navigateAdminTab('backup', this)"><i class="bi bi-cloud-arrow-up"></i> <span class="nav-link-text">Backup Database</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-db" onclick="navigateAdminTab('db', this)"><i class="bi bi-hdd-stack"></i> <span class="nav-link-text">Database</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-master" onclick="navigateAdminTab('master', this)"><i class="bi bi-book"></i> <span class="nav-link-text">Master Kolom</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-header" onclick="navigateAdminTab('header', this)"><i class="bi bi-exclamation-triangle"></i> <span class="nav-link-text">Anomali Header</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-data" onclick="navigateAdminTab('data', this)"><i class="bi bi-exclamation-diamond"></i> <span class="nav-link-text">Anomali Data</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-password" onclick="openSettingsModal()"><i class="bi bi-key"></i> <span class="nav-link-text">Ganti Password</span></div>
                     </div>
                     <!-- Floating Popover (Ketika Sidebar Tertutup) -->
                     <div class="sidebar-floating-popover shadow-lg" id="flyout-admin-submenu">
-                        <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2" style="color: #0d9488;">
+                        <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
                             <i class="bi bi-database"></i> Manajemen Database
                         </div>
                         <div class="popover-body p-1.5 d-flex flex-column gap-1">
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateAdminTab('backup', this)">
-                                <i class="bi bi-cloud-arrow-up" style="color:#0d9488;"></i> <span>Backup Database</span>
+                                <i class="bi bi-cloud-arrow-up"></i> <span>Backup Database</span>
                             </div>
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateAdminTab('db', this)">
-                                <i class="bi bi-hdd-stack" style="color:#0d9488;"></i> <span>Database</span>
+                                <i class="bi bi-hdd-stack"></i> <span>Database</span>
                             </div>
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateAdminTab('master', this)">
-                                <i class="bi bi-book" style="color:#0d9488;"></i> <span>Master Kolom</span>
+                                <i class="bi bi-book"></i> <span>Master Kolom</span>
                             </div>
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateAdminTab('header', this)">
-                                <i class="bi bi-exclamation-triangle" style="color:#0d9488;"></i> <span>Anomali Header</span>
+                                <i class="bi bi-exclamation-triangle"></i> <span>Anomali Header</span>
                             </div>
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="navigateAdminTab('data', this)">
-                                <i class="bi bi-exclamation-diamond" style="color:#0d9488;"></i> <span>Anomali Data</span>
+                                <i class="bi bi-exclamation-diamond"></i> <span>Anomali Data</span>
                             </div>
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" onclick="openSettingsModal()">
-                                <i class="bi bi-key" style="color:#0d9488;"></i> <span>Ganti Password</span>
+                                <i class="bi bi-key"></i> <span>Ganti Password</span>
                             </div>
                         </div>
                     </div>
                 </li>
             </ul>
 
-            <!-- Theme Toggle Switcher (.nav-link based for 100% unified geometry) -->
-            <div class="position-relative mt-auto mb-1" style="z-index: 2;">
-                <a class="nav-link d-flex align-items-center cursor-pointer" onclick="toggleTheme()" title="Ganti Mode Terang / Gelap" role="button" tabindex="0">
-                    <i class="bi bi-moon-stars-fill text-warning theme-mode-icon" id="sidebar-theme-icon"></i>
-                    <span class="nav-link-text theme-mode-label" id="sidebar-theme-label">Mode Gelap</span>
-                    <div class="theme-switch-pill ms-auto" id="sidebar-theme-switch-pill">
-                        <div class="theme-switch-knob"></div>
-                    </div>
-                </a>
-            </div>
+            <!-- Theme removed -->
 
             <!-- Garis Pembatas (Divider) Antara Switch Mode dan Logout -->
             <div class="sidebar-divider position-relative" style="z-index: 2;"></div>
@@ -160,6 +127,15 @@
 
         <!-- Main Content -->
         <div class="main-content flex-grow-1 px-3 py-3 overflow-auto">
+
+            <!-- Operator Header (shown only for non-admin, hidden by default) -->
+            <div id="operator-header" class="operator-header" style="display:none !important;">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo" style="height:32px;">
+                    <span class="fw-bold" style="font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--text-primary);">SIPEDAS</span>
+                    <span class="text-muted d-none d-sm-inline" style="font-size:0.85rem;">Analisis Deret Waktu</span>
+                </div>
+            </div>
 
             <!-- PAGE 1: Dashboard -->
             <div id="page-dashboard" class="page-section">
@@ -214,30 +190,30 @@
                     <div class="position-relative" style="z-index: 2;">
                         <!-- Top Bar: Left BPS Badge, Right All Status & Clock Pills in ONE Horizontal Line -->
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-1">
-                            <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600; font-size: 0.75rem; padding: 6px 14px; border-radius: 8px; letter-spacing: 0.5px;">
+                            <span class="badge banner-badge">
                                 <i class="bi bi-building me-1.5 text-warning"></i> BADAN PUSAT STATISTIK KABUPATEN TASIKMALAYA
                             </span>
 
                             <!-- Top Right Horizontal Status & Clock Bar (Berjejer Rapi dengan Padding Lega) -->
                             <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
                                 <!-- Status Sistem Online Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill" style="padding: 5px 18px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.16); font-size: 0.76rem;">
+                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark">
                                     <span class="position-relative d-inline-flex me-0.5" style="width: 8px; height: 8px;">
                                         <span class="position-absolute w-100 h-100 rounded-circle bg-success" style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.75;"></span>
                                         <span class="rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
                                     </span>
                                     <span class="text-white text-opacity-85 fw-medium">STATUS:</span>
-                                    <span class="fw-bold" style="color: #4ade80 !important;">ONLINE</span>
+                                    <span class="fw-bold text-online">ONLINE</span>
                                 </div>
 
                                 <!-- Database Connected Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill" style="padding: 5px 18px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.16); font-size: 0.76rem; color: rgba(255, 255, 255, 0.92);">
+                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark" style="color: rgba(255, 255, 255, 0.92);">
                                     <i class="bi bi-database-check text-info fs-6"></i>
                                     <span>Database Terhubung</span>
                                 </div>
 
                                 <!-- Live Clock & Calendar Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill" style="padding: 5px 18px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.16); font-size: 0.76rem;">
+                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark">
                                     <i class="bi bi-clock text-info fs-6"></i>
                                     <span id="banner-live-clock" class="fw-bold text-white font-monospace" style="letter-spacing: 0.8px;">--:--:--</span>
                                     <span class="text-white text-opacity-35 mx-1">|</span>
@@ -249,14 +225,14 @@
                         <!-- Main Content of Banner -->
                         <div class="mt-1">
                             <h1 class="fs-2 fw-bold text-white mb-2 pb-1 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
-                                Selamat Datang di <span style="font-family:'Inter', sans-serif; font-style:italic; font-weight:900; letter-spacing:-0.5px; color:#60a5fa; text-shadow: 0 2px 10px rgba(96, 165, 250, 0.4);">SIPEDAS</span>
+                                Selamat Datang di <span class="text-brand-sipedas">SIPEDAS</span>
                             </h1>
                             
                             <p class="mb-3.5 text-white text-opacity-85 fw-normal" style="font-size: 0.96rem; line-height: 1.6; max-width: 640px;">
                                 Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.
                             </p>
                             
-                            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background: rgba(0, 0, 0, 0.22); border: 1px solid rgba(255, 255, 255, 0.16); font-size: 0.84rem; color: rgba(255, 255, 255, 0.95);">
+                            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 role-badge">
                                 <i class="bi bi-person-badge text-info fs-5"></i> 
                                 <span id="welcome-role-text" class="fw-medium">Anda masuk sebagai Operator SIPEDAS.</span>
                             </div>
@@ -274,7 +250,12 @@
                             </span>
                             <h5 class="fw-bold text-dark mb-0 fs-6">Karakteristik &amp; Kedalaman Database SIPEDAS</h5>
                         </div>
-                        <small class="text-muted" style="font-size: 0.78rem;"><i class="bi bi-database-check me-1 text-success"></i>Live Query Database BPS</small>
+                        <div class="d-flex align-items-center gap-3">
+                            <small class="text-muted" style="font-size: 0.78rem;"><i class="bi bi-database-check me-1.5 text-success"></i>Live Query Database BPS</small>
+                            <button onclick="loadDashboardStats()" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-2 shadow-2xs" style="font-size:0.75rem; font-weight:500;" title="Muat ulang seluruh metrik &amp; statistik">
+                                <i class="bi bi-arrow-clockwise"></i> Perbarui
+                            </button>
+                        </div>
                     </div>
 
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
@@ -306,7 +287,7 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <div class="fs-3 fw-bold text-dark" id="stat-total-pts">-</div>
-                                        <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 8px;">Titik Nilai</span>
+                                        <span class="badge badge-green">Titik Nilai</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.72rem;">Jumlah Sel Data Terisi</div>
                                 </div>
@@ -345,7 +326,7 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <div class="fs-3 fw-bold text-dark" id="stat-total-tables">-</div>
-                                        <span class="badge" style="background: #dbeafe; color: #1d4ed8; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 8px;">Tabel</span>
+                                        <span class="badge badge-blue">Tabel</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.72rem;">Tabel Data Terintegrasi</div>
                                 </div>
@@ -375,13 +356,13 @@
                                 <div class="position-relative" style="z-index: 2;">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Baris</span>
-                                        <div class="rounded-circle p-1.5 bg-orange bg-opacity-10" style="color: #f97316;">
+                                        <div class="rounded-circle p-1.5 bg-orange bg-opacity-10 icon-orange">
                                             <i class="bi bi-list-columns-reverse fs-6"></i>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <div class="fs-3 fw-bold text-dark" id="stat-total-rows">-</div>
-                                        <span class="badge" style="background: #ffedd5; color: #c2410c; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 8px;">Baris</span>
+                                        <span class="badge badge-orange">Baris</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.72rem;">Baris Record Data Statistik</div>
                                 </div>
@@ -410,13 +391,13 @@
                                 <div class="position-relative" style="z-index: 2;">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Publikasi</span>
-                                        <div class="rounded-circle p-1.5 bg-purple bg-opacity-10" style="color: #8b5cf6;">
+                                        <div class="rounded-circle p-1.5 bg-purple bg-opacity-10 icon-purple">
                                             <i class="bi bi-journal-bookmark-fill fs-6"></i>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <div class="fs-3 fw-bold text-dark" id="stat-total-docs">-</div>
-                                        <span class="badge" style="background: #ede9fe; color: #6d28d9; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 8px;">Publikasi</span>
+                                        <span class="badge badge-purple">Publikasi</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.72rem;">Buku Publikasi Terintegrasi</div>
                                 </div>
@@ -429,15 +410,18 @@
                         <div class="col-xl-5 col-lg-5 col-md-12">
                             <div class="glass-panel chart-card-glass h-100 p-4">
                                 <div class="mb-3">
-                                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart text-primary"></i> Sebaran Tabel per Tahun</h6>
-                                    <small class="text-muted d-block" style="font-size: 0.74rem;">Distribusi tabel berdasarkan tahun terbit</small>
-                                    <div class="d-flex align-items-center gap-2 mt-2">
-                                        <select class="form-select form-select-sm chart-year-filter" id="barChartYearFilter" onchange="filterBarChart(this.value)" style="font-size:0.72rem; padding: 0.2rem 1.8rem 0.2rem 0.5rem; border-radius:8px; border-color: #e2e8f0; background-color: #fff; color: #475569; cursor:pointer; width: auto;">
+                                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                        <div class="min-w-0 flex-grow-1">
+                                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; line-height: 1.3;">Sebaran Tabel per Tahun</h6>
+                                            <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem; line-height: 1.3;">Distribusi tabel berdasarkan tahun terbit</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select class="form-select form-select-sm chart-year-filter select-filter" id="barChartYearFilter" onchange="filterBarChart(this.value)">
                                             <option value="all">Semua</option>
                                             <option value="5">5 Tahun</option>
                                             <option value="10">10 Tahun</option>
                                         </select>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1" style="font-size: 0.68rem;">Tahun Terbit</span>
                                     </div>
                                 </div>
                                 <div style="position:relative; height:260px;">
@@ -448,8 +432,11 @@
                         <div class="col-xl-7 col-lg-7 col-md-12">
                             <div class="glass-panel chart-card-glass h-100 p-4">
                                 <div class="mb-3">
-                                    <div class="d-flex align-items-center justify-content-between mb-1">
-                                        <h6 class="fw-bold mb-0 text-dark" id="ref-chart-title"><i class="bi bi-graph-up text-info"></i> Sebaran Banyak Titik Nilai Data per Tahun</h6>
+                                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2 flex-wrap">
+                                        <div class="min-w-0 flex-grow-1">
+                                            <h6 class="fw-bold mb-0 text-dark" id="ref-chart-title" style="font-size: 0.95rem; line-height: 1.3;">Sebaran Banyak Titik Nilai Data per Tahun</h6>
+                                            <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem; line-height: 1.3;" id="ref-chart-subtitle">Distribusi titik nilai sel data statistik berdasarkan tahun kejadian riil</small>
+                                        </div>
                                         <div class="chart-toggle-pill-group d-inline-flex p-1 rounded-pill flex-shrink-0" role="group">
                                         <button type="button" class="chart-toggle-btn rounded-pill fw-semibold active" id="btn-chart-view-points" onclick="switchRefChartView('points')">
                                             Titik Data
@@ -459,9 +446,8 @@
                                         </button>
                                         </div>
                                     </div>
-                                    <small class="text-muted d-block" style="font-size: 0.74rem;" id="ref-chart-subtitle">Distribusi titik nilai sel data statistik berdasarkan tahun kejadian riil</small>
                                     <div class="mt-2">
-                                        <select class="form-select form-select-sm chart-year-filter" id="refChartYearFilter" onchange="filterRefChart(this.value)" style="font-size:0.72rem; padding: 0.2rem 1.8rem 0.2rem 0.5rem; border-radius:8px; border-color: #e2e8f0; background-color: #fff; color: #475569; cursor:pointer; width: auto;">
+                                        <select class="form-select form-select-sm chart-year-filter select-filter" id="refChartYearFilter" onchange="filterRefChart(this.value)">
                                             <option value="all">Semua</option>
                                             <option value="5">5 Tahun</option>
                                             <option value="10">10 Tahun</option>
@@ -481,7 +467,7 @@
                             <div class="glass-panel chart-card-glass h-100 p-4">
                                 <div class="d-flex justify-content-between align-items-start mb-3 gap-2 flex-wrap">
                                     <div class="min-w-0 flex-grow-1">
-                                        <h6 class="fw-bold mb-0" id="trend-chart-title" style="font-size: 0.95rem;"><i class="bi bi-graph-up-arrow text-success"></i> Tren Pertumbuhan Titik Data</h6>
+                                        <h6 class="fw-bold mb-0" id="trend-chart-title" style="font-size: 0.95rem;">Tren Pertumbuhan Titik Data</h6>
                                         <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem;" id="trend-chart-subtitle">Akumulasi titik nilai sel data statistik berdasarkan tahun publikasi</small>
                                     </div>
                                     <div class="chart-toggle-pill-group d-inline-flex p-1 rounded-pill flex-shrink-0 mt-0.5" role="group">
@@ -502,7 +488,7 @@
                             <div class="glass-panel chart-card-glass h-100 p-4 d-flex flex-column">
                                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 flex-shrink-0">
                                     <div>
-                                        <h6 class="fw-bold mb-0" style="font-size: 0.95rem;"><i class="bi bi-book text-primary"></i> Publikasi Rilis Terbaru</h6>
+                                        <h6 class="fw-bold mb-0" style="font-size: 0.95rem;">Publikasi Rilis Terbaru</h6>
                                         <small class="text-muted" style="font-size: 0.73rem;">Dokumen statistik terkini BPS</small>
                                     </div>
                                 </div>
@@ -523,7 +509,7 @@
 
                     <div id="admin-anomalies-panel" class="glass-panel mb-4" style="display:none;">
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <h5 class="mb-0 fw-semibold"><i class="bi bi-exclamation-triangle text-warning"></i> Daftar Tabel dengan Data Anomali</h5>
+                            <h5 class="mb-0 fw-semibold">Daftar Tabel dengan Data Anomali</h5>
                             <button onclick="markAllDbAnomaliesSafe()" class="btn btn-outline-danger btn-sm">
                                 <i class="bi bi-check-circle"></i> Tandai Semua Aman di Database
                             </button>
@@ -548,14 +534,9 @@
                     <!-- 6. ADMIN-ONLY: Log Aktivitas -->
                     <div class="glass-panel mb-4 p-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="d-flex align-items-center gap-4">
-                                <div class="stat-icon-glow rounded-3 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background:rgba(37,99,235,0.1); color:#2563eb;">
-                                    <i class="bi bi-clock-history fs-5"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-0 text-dark">Riwayat Aktivitas Admin</h6>
-                                    <small class="text-muted d-block mt-0.5" style="font-size:0.75rem;">Catatan aksi yang dilakukan di sistem</small>
-                                </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Riwayat Aktivitas Admin</h6>
+                                <small class="text-muted d-block mt-0.5" style="font-size:0.75rem;">Catatan aksi yang dilakukan di sistem</small>
                             </div>
                             <span class="badge bg-secondary bg-opacity-10 text-muted px-2.5 py-1 rounded-pill" style="font-size:0.72rem;">10 Terakhir</span>
                         </div>
@@ -577,24 +558,18 @@
                     </div>
 
                     <!-- 7. ADMIN-ONLY: Backup Widget -->
-                    <div class="glass-panel mb-4">
+                    <div class="glass-panel mb-4 p-4">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
-                                <h5 class="fw-semibold mb-1 d-inline-flex align-items-center gap-2"><i class="bi bi-shield-check text-primary"></i> Backup Database</h5>
+                                <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">Backup Database</h6>
                                 <div id="dashboard-backup-info" class="small text-muted">Memuat info backup...</div>
                             </div>
                             <div class="d-flex gap-2">
                                 <button onclick="loadDashboardBackupInfo()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-                                <button onclick="backupDatabase()" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-shield-check"></i> Backup Sekarang</button>
+                                <button onclick="backupDatabase(event)" id="btn-dashboard-backup" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-shield-check"></i> Backup Sekarang</button>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-2 mb-4 d-flex justify-content-end">
-                    <button onclick="loadDashboardStats()" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5">
-                        <i class="bi bi-arrow-clockwise"></i> Perbarui Statistik
-                    </button>
                 </div>
             </div>
 
@@ -613,7 +588,7 @@
                                 <div class="mb-2">
                                     <label class="form-label small fw-semibold text-muted">File PDF</label>
                                     <div id="pdf-drop-zone" class="dropzone-modern">
-                                        <div id="pdf-drop-text" style="color:#64748b; font-size:0.85rem;">
+                                        <div id="pdf-drop-text" class="text-dropzone">
                                             <i class="bi bi-cloud-arrow-up text-primary dropzone-icon"></i><br>
                                             <span class="fw-semibold text-dark">Seret & lepas PDF di sini</span>, atau <span class="text-primary text-decoration-underline">pilih file</span>
                                             <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Mendukung buku publikasi resmi BPS (PDF)</div>
@@ -716,7 +691,7 @@
                             <div class="mb-3 flex-grow-1 d-flex flex-column">
                                 <label class="form-label small fw-semibold text-muted">File .xlsx (Single / Multi-File)</label>
                                 <div id="excel-drop-zone" class="dropzone-modern flex-grow-1 d-flex flex-column align-items-center justify-content-center">
-                                    <div id="excel-drop-text" style="color:#64748b; font-size:0.85rem;">
+                                    <div id="excel-drop-text" class="text-dropzone">
                                         <i class="bi bi-file-earmark-spreadsheet text-success dropzone-icon"></i><br>
                                         <span class="fw-semibold text-dark">Seret & lepas 1 atau banyak file .xlsx di sini</span>, atau <span class="text-success text-decoration-underline">pilih file</span>
                                         <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Dapat memilih banyak file sekaligus (Multi-File Import)</div>
@@ -735,15 +710,15 @@
                         </div>
                     </div>
 
-                    <!-- 3. Status Publikasi Hasil Import Template -->
+                    <!-- 3. Status Publikasi Hasil Import & Entri Tabel -->
                     <div class="col-12 mt-2">
                         <div class="glass-panel p-3.5">
                             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 pb-2 border-bottom">
                                 <div>
                                     <h6 class="fw-bold mb-0 d-flex align-items-center gap-2" style="font-size:0.95rem;">
-                                        <i class="bi bi-folder-check text-success fs-5"></i> Status Publikasi Hasil Import Template Excel
+                                        <i class="bi bi-journal-bookmark text-primary fs-5"></i> Daftar Publikasi & Entri Tabel BPS
                                     </h6>
-                                    <small class="text-muted" style="font-size:0.76rem;">Daftar publikasi yang disusun dan diimpor melalui template tabel Excel</small>
+                                    <small class="text-muted" style="font-size:0.76rem;">Daftar publikasi yang dikelola melalui template Excel dan penambahan tabel web</small>
                                 </div>
                                 <button class="btn btn-outline-secondary btn-sm px-2.5 py-1 d-inline-flex align-items-center gap-1 rounded-2" onclick="loadImportedExcelPublications()" style="font-size:0.75rem;">
                                     <i class="bi bi-arrow-clockwise"></i> Refresh Status
@@ -765,7 +740,7 @@
                             <h5 class="fw-semibold mb-0">Data Tabel</h5>
                             <small class="text-muted" style="font-size:0.75rem;">Jelajahi, cari, dan kelola seluruh tabel statistik publikasi BPS</small>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-none align-items-center gap-2" id="header-tabel-actions">
                             <button class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2" onclick="openCreateDocModal()">
                                 <i class="bi bi-journal-plus"></i> Tambah Publikasi Baru
                             </button>
@@ -775,44 +750,28 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: Buka Publikasi -->
-                    <div id="tab-tabel-publikasi">
-                        <div class="mt-2 p-3 bg-light rounded-3 border">
-                            <div class="mb-2 small fw-semibold text-muted"><i class="bi bi-search"></i> Cari Tabel</div>
-                            <div class="d-flex gap-2">
-                                <input type="text" id="search-table-input" class="form-control" placeholder="Cari tabel... mis: Tabel 1.1 atau Luas Wilayah" oninput="onSearchInput()">
-                                <button onclick="searchTables()" class="btn btn-primary btn-sm px-3">Cari</button>
-                            </div>
-                            <div id="search-table-results" class="mt-2" style="max-height:300px; overflow-y:auto;"></div>
+                    <!-- Unified Search Bar -->
+                    <div class="mt-2 mb-3 position-relative">
+                        <div class="d-flex align-items-stretch bg-white border shadow-sm overflow-hidden rounded-3" style="transition: box-shadow 0.2s; border-color:var(--border,#e2e8f0);">
+                            <select id="search-type-select" class="form-select border-0 text-secondary fw-semibold bg-transparent" style="max-width:120px; font-size:0.85rem; cursor:pointer;" onchange="onSearchTypeChange()">
+                                <option value="tabel">Tabel</option>
+                                <option value="kolom">Kolom</option>
+                                <option value="baris">Baris</option>
+                            </select>
+                            <input type="text" id="search-table-input" class="form-control border-0 py-2.5 bg-transparent" style="font-size:0.9rem;" placeholder="Cari nomor tabel (mis. 1.1.2) atau kata kunci judul..." oninput="onSearchInput()" autocomplete="off">
+                            <button id="search-clear-btn" class="btn bg-transparent border-0 text-muted px-2" style="display:none;" onclick="clearTableSearch()" type="button" title="Hapus">
+                                <i class="bi bi-x-lg" style="font-size:0.85rem;"></i>
+                            </button>
+                            <button onclick="onUnifiedSearch()" class="btn btn-primary px-4 fw-semibold" type="button" style="border:none;">
+                                Cari
+                            </button>
                         </div>
-                        <div id="document-list-container" class="mt-3"></div>
+                        <div id="search-table-results" class="mt-1" style="max-height:360px; overflow-y:auto; display:none;"></div>
                     </div>
 
-                    <!-- TAB 2: Cari Kolom -->
-                    <div id="tab-tabel-kolom" style="display:none;">
-                        <div class="mt-2 p-3 bg-light rounded-3 border">
-                            <div class="mb-2 small fw-semibold text-muted"><i class="bi bi-search"></i> Cari Kolom di Semua Tabel</div>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                                <input type="text" id="global-column-search" class="form-control" placeholder="Ketik nama kolom... (mis. jumlah penduduk)" onkeyup="searchGlobalColumnsDebounced()" autocomplete="off">
-                            </div>
-                            <div class="mt-1 text-end"><span id="global-column-count" class="small text-muted"></span></div>
-                        </div>
-                        <div id="global-column-results" class="mt-2"></div>
-                    </div>
-
-                    <!-- TAB 3: Cari Baris -->
-                    <div id="tab-tabel-baris" style="display:none;">
-                        <div class="mt-2 p-3 bg-light rounded-3 border">
-                            <div class="mb-2 small fw-semibold text-muted"><i class="bi bi-search"></i> Cari Baris di Semua Tabel</div>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-table"></i></span>
-                                <input type="text" id="global-row-search" class="form-control" placeholder="Ketik nilai/entitas... (mis. nama kecamatan, angka, dsb)" onkeyup="searchGlobalRowsDebounced()" autocomplete="off">
-                            </div>
-                            <div class="mt-1 text-end"><span id="global-row-count" class="small text-muted"></span></div>
-                        </div>
-                        <div id="global-row-results" class="mt-2"></div>
-                    </div>
+                    <!-- Unified Results Area -->
+                    <div id="unified-search-results" class="mt-3"></div>
+                    <div id="document-list-container" class="mt-3"></div>
                 </div>
             </div>
 
@@ -821,17 +780,18 @@
                 <div class="editor-header d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 border">
                     <div class="d-flex flex-column gap-1 flex-grow-1 min-w-0">
                         <div class="d-flex align-items-center gap-2 w-100">
-                            <div class="d-flex align-items-center border border-2 border-dashed rounded-1 p-1 bg-light bg-opacity-50 editable-input-container" style="border-style:dashed;border-color:#cbd5e1;">
-                                <input id="editor-table-number" type="text" class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary" placeholder="No. Tabel" style="width:120px;" onblur="saveTableIdentityInline();" onkeydown="if(event.key==='Enter'){this.blur();}">
+                            <div class="d-flex align-items-center gap-1.5 px-2.5 py-1 rounded-2 border bg-light-subtle editable-input-container table-number-wrapper" style="min-width: fit-content;">
+                                <span class="badge bg-primary text-white fw-bold px-2 py-0.5 rounded-1 shadow-xs" style="font-size:0.75rem; letter-spacing:0.5px;">TABEL</span>
+                                <input id="editor-table-number" type="text" class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary font-monospace p-0 text-center" placeholder="1.1.1" style="width:75px; font-size:0.9rem;" onblur="saveTableIdentityInline();" onkeydown="if(event.key==='Enter'){this.blur();}">
                             </div>
-                            <span class="text-muted">|</span>
-                            <div class="d-flex align-items-center flex-grow-1 border border-2 border-dashed rounded-1 p-1 bg-light bg-opacity-50 editable-input-container" style="border-style:dashed;border-color:#cbd5e1;">
+                            <span class="text-muted opacity-50">|</span>
+                            <div class="d-flex align-items-center flex-grow-1 border border-2 border-dashed rounded-2 p-1 bg-light bg-opacity-50 editable-input-container input-border">
                                 <input id="editor-title" type="text" class="form-control form-control-sm border-0 bg-transparent fw-semibold text-dark" placeholder="Judul Tabel" onblur="saveTableIdentityInline();" onkeydown="if(event.key==='Enter'){this.blur();}">
                             </div>
                         </div>
                         <span id="editor-page-tag" class="small text-muted ms-1" style="display:none;"></span>
                     </div>
-                    <span id="editor-mode-badge" class="badge bg-primary">Mode CSV</span>
+                    <span id="editor-mode-badge" class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-semibold"><i class="bi bi-database me-1"></i> Editor Database</span>
                 </div>
 
                 <div class="editor-toolbar d-flex flex-wrap gap-2 p-3 bg-white rounded-3 border mb-2 shadow-sm align-items-center" id="editor-toolbar"></div>
@@ -867,72 +827,72 @@
             <!-- PAGE 5: Time Series -->
             <div id="page-timeseries" class="page-section active">
                 <!-- Hero Banner Analisis Deret Waktu -->
-                <div class="welcome-banner ts-hero-banner text-white p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #091224 0%, #17153b 45%, #2e236c 80%, #4338ca 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.35);">
-                    <!-- 1. Dot Matrix Pattern -->
-                    <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.6; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
+                <div class="welcome-banner ts-hero-banner text-white p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
+                    <!-- 1. Background Dot Matrix Pattern -->
+                    <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.65; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
 
-                    <!-- 2. Time Series SVG Graph Curves & Wave Motif -->
-                    <div style="position: absolute; right: 0; bottom: 0; top: 0; width: 60%; max-width: 700px; pointer-events: none; z-index: 1; opacity: 0.38; overflow: hidden;">
-                        <svg viewBox="0 0 700 280" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                    <!-- 2. Statistical Wave & Trend Line Curves (SVG Graphic Motif) -->
+                    <div style="position: absolute; right: 0; bottom: 0; top: 0; width: 65%; max-width: 750px; pointer-events: none; z-index: 1; opacity: 0.35; overflow: hidden;">
+                        <svg viewBox="0 0 700 300" preserveAspectRatio="none" style="width: 100%; height: 100%;">
                             <defs>
-                                <linearGradient id="ts-grad-violet" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.1"></stop>
-                                    <stop offset="50%" stop-color="#a78bfa" stop-opacity="0.85"></stop>
-                                    <stop offset="100%" stop-color="#c084fc" stop-opacity="0.95"></stop>
+                                <linearGradient id="ts-curve-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.1"></stop>
+                                    <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.8"></stop>
+                                    <stop offset="100%" stop-color="#93c5fd" stop-opacity="0.9"></stop>
                                 </linearGradient>
-                                <linearGradient id="ts-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.1"></stop>
-                                    <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.75"></stop>
-                                    <stop offset="100%" stop-color="#67e8f9" stop-opacity="0.9"></stop>
+                                <linearGradient id="ts-curve-grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.05"></stop>
+                                    <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.6"></stop>
+                                    <stop offset="100%" stop-color="#fde047" stop-opacity="0.8"></stop>
                                 </linearGradient>
-                                <linearGradient id="ts-area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.25"></stop>
-                                    <stop offset="100%" stop-color="#312e81" stop-opacity="0.0"></stop>
+                                <linearGradient id="ts-area-grad-blue" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"></stop>
+                                    <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.0"></stop>
                                 </linearGradient>
                             </defs>
 
                             <!-- Background Area Fill -->
-                            <path d="M 0,210 Q 150,140 300,170 T 520,90 T 700,60 L 700,280 L 0,280 Z" fill="url(#ts-area-grad)"></path>
+                            <path d="M 0,220 Q 140,160 280,190 T 520,110 T 700,90 L 700,300 L 0,300 Z" fill="url(#ts-area-grad-blue)"></path>
 
-                            <!-- Baseline Dotted Grid / Trend -->
-                            <path d="M 0,230 Q 160,220 320,160 T 560,130 T 700,50" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-dasharray="6,6"></path>
+                            <!-- Secondary Trend Wave (Dotted) -->
+                            <path d="M 0,250 Q 160,240 320,180 T 560,150 T 700,70" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="6,6"></path>
 
-                            <!-- Primary Wave (Violet to Fuchsia) -->
-                            <path d="M 0,210 Q 150,140 300,170 T 520,90 T 700,60" fill="none" stroke="url(#ts-grad-violet)" stroke-width="2.5"></path>
+                            <!-- Primary Statistical Wave (Cyan) -->
+                            <path d="M 0,220 Q 140,160 280,190 T 520,110 T 700,90" fill="none" stroke="url(#ts-curve-grad-cyan)" stroke-width="2.5"></path>
 
-                            <!-- Secondary Wave (Cyan) -->
-                            <path d="M 100,260 Q 250,180 400,190 T 600,110 T 700,95" fill="none" stroke="url(#ts-grad-cyan)" stroke-width="2"></path>
+                            <!-- Accent Statistical Peak Wave (Amber) -->
+                            <path d="M 120,280 Q 260,200 400,210 T 600,130 T 700,120" fill="none" stroke="url(#ts-curve-grad-amber)" stroke-width="2"></path>
 
-                            <!-- Data Points Nodes -->
-                            <circle cx="300" cy="170" r="5" fill="#818cf8" stroke="#ffffff" stroke-width="1.8"></circle>
-                            <circle cx="520" cy="90" r="5.5" fill="#a78bfa" stroke="#ffffff" stroke-width="2"></circle>
-                            <circle cx="400" cy="190" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"></circle>
-                            <circle cx="600" cy="110" r="5" fill="#67e8f9" stroke="#ffffff" stroke-width="1.8"></circle>
+                            <!-- Floating Data Nodes / Points -->
+                            <circle cx="280" cy="190" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"></circle>
+                            <circle cx="520" cy="110" r="5" fill="#60a5fa" stroke="#ffffff" stroke-width="2"></circle>
+                            <circle cx="400" cy="210" r="4" fill="#fbbf24" stroke="#ffffff" stroke-width="1.5"></circle>
+                            <circle cx="600" cy="130" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"></circle>
                         </svg>
                     </div>
 
-                    <!-- 3. Ambient Glows -->
-                    <div style="position: absolute; right: 20%; top: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
-                    <div style="position: absolute; right: -5%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+                    <!-- 3. Subtle Ambient Light Glows -->
+                    <div style="position: absolute; right: 15%; top: -25%; width: 320px; height: 320px; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+                    <div style="position: absolute; right: -2%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
 
                     <!-- 4. Banner Content -->
                     <div class="position-relative" style="z-index: 2;">
                         <!-- Top Bar: Badge & Feature Pills -->
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-1">
-                            <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600; font-size: 0.75rem; padding: 6px 14px; border-radius: 8px; letter-spacing: 0.5px;">
+                            <span class="badge banner-badge">
                                 <i class="bi bi-graph-up me-1.5 text-warning"></i> MODUL ANALISIS DERET WAKTU (TIME SERIES)
                             </span>
 
                             <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
-                                <div class="d-inline-flex align-items-center rounded-pill" style="gap: 7px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.76rem; color: rgba(255, 255, 255, 0.9); padding: 5px 14px;">
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
                                     <i class="bi bi-calendar-range text-info" style="font-size: 0.82rem; margin-right: 2px;"></i>
                                     <span>Lintas Tahun Terpadu</span>
                                 </div>
-                                <div class="d-inline-flex align-items-center rounded-pill" style="gap: 7px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.76rem; color: rgba(255, 255, 255, 0.9); padding: 5px 14px;">
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
                                     <i class="bi bi-lightning-charge text-warning" style="font-size: 0.82rem; margin-right: 2px;"></i>
                                     <span>Indikator Pertumbuhan Otomatis</span>
                                 </div>
-                                <div class="d-inline-flex align-items-center rounded-pill" style="gap: 7px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.76rem; color: rgba(255, 255, 255, 0.9); padding: 5px 14px;">
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
                                     <i class="bi bi-file-earmark-arrow-down text-success" style="font-size: 0.82rem; margin-right: 2px;"></i>
                                     <span>Ekspor Excel, CSV, PDF &amp; PNG</span>
                                 </div>
@@ -942,7 +902,7 @@
                         <!-- Main Content -->
                         <div class="mt-1">
                             <h1 class="fs-2 fw-bold text-white mb-2 pb-1 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
-                                Eksplorasi Deret Waktu &amp; <span style="font-family:'Inter', sans-serif; font-style:italic; font-weight:900; letter-spacing:-0.5px; color:#a5b4fc; text-shadow: 0 2px 10px rgba(165, 180, 252, 0.4);">Tren Statistik</span>
+                                Eksplorasi Deret Waktu &amp; <span class="text-brand-ts">Tren Statistik</span>
                             </h1>
                             
                             <p class="mb-3 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
@@ -950,7 +910,7 @@
                             </p>
                             
                             <!-- Workflow Steps Bar -->
-                            <div class="d-inline-flex align-items-center flex-wrap rounded-pill" style="padding: 8px 22px; background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.83rem; color: rgba(255, 255, 255, 0.95); gap: 14px;">
+                            <div class="d-inline-flex align-items-center flex-wrap rounded-pill workflow-bar">
                                 <span class="fw-semibold text-warning d-inline-flex align-items-center" style="letter-spacing: 0.2px;">
                                     <i class="bi bi-info-circle" style="margin-right: 8px; font-size: 0.95rem;"></i> Alur Cepat :
                                 </span>
@@ -992,15 +952,15 @@
                                     </div>
                                     <input type="text" id="ts-wizard-search" class="form-control form-control-sm mb-2" placeholder="Cari indikator master..." oninput="filterTSIndicators(this.value)" style="font-size:0.85rem; padding: 7px 12px; height: 35px;">
                                     <div id="ts-wizard-kolom-checkboxes" class="ts-wizard-box ts-wizard-box--enhanced d-flex flex-column gap-0">
-                                        <div style="padding:8px;text-align:center;color:#94a3b8;font-size:0.85rem;"><i>Memuat master kolom...</i></div>
+                                        <div class="text-loading"><i>Memuat master kolom...</i></div>
                                     </div>
                                 </div>
                                 <!-- Step 2: Pilih Tahun Data -->
                                 <div class="col-12 ts-wizard-col--year d-flex flex-column">
                                     <div class="d-flex align-items-center justify-content-between mb-2" style="min-height: 26px;">
                                         <label class="form-label small fw-semibold text-muted mb-0"><span class="ts-step-badge">2</span>Pilih Tahun Data</label>
-                                        <div class="d-flex align-items-center gap-1.5">
-                                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 fw-semibold" id="btn-ts-toggle-all-years" onclick="toggleSelectAllYearsBtn()" style="font-size:0.75rem; height:26px; border-radius:6px; display:none;" title="Pilih atau batal pilih semua tahun">Pilih Semua</button>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-xs btn-outline-primary py-1 px-3 fw-semibold" id="btn-ts-toggle-all-years" onclick="toggleSelectAllYearsBtn()" style="font-size:0.75rem; height:28px; border-radius:6px; display:none;" title="Pilih atau batal pilih semua tahun">Pilih Semua</button>
                                             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none ts-collapse-btn" id="btn-toggle-year-picker" onclick="toggleYearPicker()" title="Perkecil / Besarkan pemilih tahun">
                                                 <i class="bi bi-chevron-up" id="year-picker-chevron"></i>
                                             </button>
@@ -1059,9 +1019,9 @@
                                 <div class="ts-insight-card d-flex align-items-center justify-content-between">
                                     <div>
                                         <div class="text-muted small" style="font-size:0.72rem; font-weight:600;"><i class="bi bi-calendar"></i> TAHUN OBSERVASI</div>
-                                        <div class="fs-5 fw-bold text-purple" style="color:#7c3aed;" id="ts-stat-years">-</div>
+                                        <div class="fs-5 fw-bold text-ts-purple" id="ts-stat-years">-</div>
                                     </div>
-                                    <div class="rounded-circle p-2 bg-purple bg-opacity-10" style="color:#7c3aed;"><i class="bi bi-calendar3 fs-6"></i></div>
+                                    <div class="rounded-circle p-2 bg-purple bg-opacity-10 text-ts-purple"><i class="bi bi-calendar3 fs-6"></i></div>
                                 </div>
                             </div>
                         </div>
@@ -1144,9 +1104,17 @@
 
                                     <!-- Filter Toolbar (Top-aligned Labels) -->
                                     <div class="p-3 rounded-3 mb-3 border ts-insight-filter-bar">
-                                        <div class="row g-3 align-items-end">
-                                            <!-- 1. Searchable Checklist Dropdown for Rincian -->
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                        <div class="row g-2.5 align-items-end">
+                                            <!-- 1. Varian Rincian (muncul jika query memiliki > 1 varian) -->
+                                            <div class="col-12 col-sm-6 col-md-3 flex-column" id="ts-insight-variant-container" style="display:none;">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-variant">
+                                                    <i class="bi bi-diagram-3 text-primary me-1.5"></i> Varian Rincian:
+                                                </label>
+                                                <select id="ts-insight-select-variant" class="ts-insight-select w-100" onchange="onInsightVariantFilterChanged()"></select>
+                                            </div>
+
+                                            <!-- 2. Searchable Checklist Dropdown for Rincian -->
+                                            <div class="col-12 col-sm-6 col-md-3">
                                                 <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-entity">
                                                     <i class="bi bi-funnel text-primary me-1.5"></i> Rincian:
                                                 </label>
@@ -1167,28 +1135,62 @@
                                                 </div>
                                             </div>
 
-                                            <!-- 2. Tahun Awal -->
-                                            <div class="col-6 col-sm-3 col-md-2">
+                                            <!-- 3. Multi-Select Checklist Filter Tren -->
+                                             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                                 <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-trend">
+                                                     <i class="bi bi-arrow-down-up text-primary me-1.5"></i> Filter Tren:
+                                                 </label>
+                                                 <div class="dropdown w-100" id="ts-insight-trend-dropdown-container">
+                                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-trend" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
+                                                         <span class="text-truncate" id="ts-insight-trend-btn-text">Semua Tren</span>
+                                                     </button>
+                                                     <div class="dropdown-menu p-2 shadow" style="width:230px;" id="ts-insight-trend-menu">
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
+                                                             <input type="checkbox" id="ts-insight-trend-check-all" checked style="width:16px;height:16px;">
+                                                             <span>Pilih Semua</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="up" checked style="width:16px;height:16px;">
+                                                             <span class="text-success fw-semibold">▲ Peningkatan (Naik)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="down" checked style="width:16px;height:16px;">
+                                                             <span class="text-danger fw-semibold">▼ Penurunan (Turun)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="stagnant" checked style="width:16px;height:16px;">
+                                                             <span class="text-secondary">― Stagnan / Tetap (0%)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="empty" checked style="width:16px;height:16px;">
+                                                             <span class="text-muted">- Belum Lengkap / Strip</span>
+                                                         </label>
+                                                     </div>
+                                                 </div>
+                                             </div>
+
+                                            <!-- 4. Tahun Awal -->
+                                            <div class="col-6 col-sm-4 col-md-2">
                                                 <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
                                                     <i class="bi bi-calendar-event text-primary me-1.5"></i> Tahun Awal:
                                                 </label>
-                                                <select id="ts-insight-select-year-start" class="form-select form-select-sm ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                                <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
                                             </div>
 
-                                            <!-- 3. Tahun Akhir -->
-                                            <div class="col-6 col-sm-3 col-md-2">
+                                            <!-- 5. Tahun Akhir -->
+                                            <div class="col-6 col-sm-4 col-md-2">
                                                 <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
                                                     <i class="bi bi-calendar-check text-primary me-1.5"></i> Tahun Akhir:
                                                 </label>
-                                                <select id="ts-insight-select-year-end" class="form-select form-select-sm ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                                <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
                                             </div>
 
-                                            <!-- 4. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
-                                            <div class="col-12 col-md-4 col-lg-5 flex-column" id="ts-insight-indicator-container" style="display:none;">
+                                            <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
+                                            <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">
                                                 <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-indicator">
                                                     <i class="bi bi-tag text-primary me-1.5"></i> Indikator:
                                                 </label>
-                                                <select id="ts-insight-select-indicator" class="form-select form-select-sm ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                                <select id="ts-insight-select-indicator" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
                                             </div>
                                         </div>
                                     </div>
@@ -1259,12 +1261,9 @@
                             <!-- Top Control Bar: Unit Converter (Left) & Display Toggles (Right) -->
                             <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-top-control-bar">
                                 <!-- Universal Unit Converter Bar (if active) -->
-                                <div id="ts-unit-converter-container" class="d-flex flex-column gap-2" style="display:none;">
-                                    <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> KONVERSI SATUAN:</span>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap pt-0.5">
-                                        <div id="ts-unit-btn-group" class="btn-group btn-group-sm" role="group" aria-label="Konversi Satuan"></div>
-                                        <span id="ts-unit-current-badge" class="badge bg-primary-subtle text-primary border px-2.5 py-1" style="font-size:0.76rem; font-weight:600;">Satuan Aktif: -</span>
-                                    </div>
+                                <div id="ts-unit-converter-container" class="d-flex flex-column" style="display:none;">
+                                    <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
+                                    <div id="ts-unit-btn-group" class="d-flex gap-2 flex-wrap mt-1"></div>
                                 </div>
 
                                 <!-- Right Side: Display Toggles (Badge & Tooltip) -->
@@ -1321,7 +1320,7 @@
                                 </button>
 
                                 <!-- Garis Pemisah Proporsional -->
-                                <div class="d-none d-sm-block" style="width: 1.5px; height: 22px; background-color: #cbd5e1; margin: 0 8px;"></div>
+                                <div class="d-none d-sm-block separator-v"></div>
 
                                 <!-- Kelompok 2: Data Mentah Tabular -->
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -1443,51 +1442,169 @@
 
                 <!-- PANEL DATABASE -->
                 <div id="tab-admin-db" style="display:none;">
-                    <div class="glass-panel bg-danger bg-opacity-10 border border-danger mb-3">
-                        <h5 class="text-danger fw-semibold mb-2">DANGER ZONE (Zona Berbahaya)</h5>
-                        <p class="text-danger-emphasis small">Tindakan di bawah ini akan menghapus data secara permanen dari database Anda.</p>
-                        <button class="btn btn-danger" onclick="clearAllLoadedData()">Hapus Semua Data Ter-load</button>
-                    </div>
-                    <div class="glass-panel">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-semibold mb-0">Daftar Tabel Tersimpan di Database</h5>
-                            <button onclick="loadAdminTables()" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-5">
-                                <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                                    <input type="text" id="admin-table-search" class="form-control" placeholder="Cari nama tabel, dokumen, atau tahun..." oninput="renderAdminTables()" autocomplete="off">
+                    <!-- 1. Ringkasan Metrik Database (5 Kartu Lengkap & Seimbang) -->
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 mb-3">
+                        <div class="col">
+                            <div class="card border rounded-3 p-3 bg-white shadow-2xs d-flex flex-row align-items-center gap-3 h-100">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: #fdf4ff; color: #a855f7; font-size: 1.25rem;">
+                                    <i class="bi bi-journal-bookmark"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-medium d-block">Total Publikasi</span>
+                                    <h5 class="fw-bold text-dark mb-0" id="admin-db-metric-docs">0 Dokumen</h5>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <select id="admin-filter-year" class="form-select" onchange="renderAdminTables()">
-                                    <option value="">Semua Tahun</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <select id="admin-filter-status" class="form-select" onchange="renderAdminTables()">
-                                    <option value="">Semua Status</option>
-                                    <option value="db"><i class="bi bi-check-circle text-success"></i> DB (Ter-load)</option>
-                                    <option value="csv"><i class="bi bi-exclamation-triangle text-warning"></i> Hanya CSV</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <select id="admin-sort" class="form-select" onchange="renderAdminTables()">
-                                    <option value="id">Sort: ID</option>
-                                    <option value="name">Sort: Nama</option>
-                                    <option value="year">Sort: Tahun</option>
-                                    <option value="rows">Sort: Baris</option>
-                                </select>
+                        </div>
+                        <div class="col">
+                            <div class="card border rounded-3 p-3 bg-white shadow-2xs d-flex flex-row align-items-center gap-3 h-100">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: var(--primary-faint, #eff6ff); color: var(--primary, #1e40af); font-size: 1.25rem;">
+                                    <i class="bi bi-table"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-medium d-block">Total Tabel Aktif</span>
+                                    <h5 class="fw-bold text-dark mb-0" id="admin-db-metric-tables">0 Tabel</h5>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-2 text-end"><span id="admin-tables-count" class="small text-muted"></span></div>
-                        <div id="admin-table-list" style="max-height:420px; overflow-y:auto;">
-                            <div class="text-center text-muted py-3">Memuat data database...</div>
+                        <div class="col">
+                            <div class="card border rounded-3 p-3 bg-white shadow-2xs d-flex flex-row align-items-center gap-3 h-100">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: #eff6ff; color: #2563eb; font-size: 1.25rem;">
+                                    <i class="bi bi-hdd-stack"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-medium d-block">Total Baris Data</span>
+                                    <h5 class="fw-bold text-dark mb-0" id="admin-db-metric-rows">0 Baris</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card border rounded-3 p-3 bg-white shadow-2xs d-flex flex-row align-items-center gap-3 h-100">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: #ecfdf5; color: #059669; font-size: 1.25rem;">
+                                    <i class="bi bi-grid-3x3"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-medium d-block">Titik Nilai Data</span>
+                                    <h5 class="fw-bold text-dark mb-0" id="admin-db-metric-cells">0 Titik</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card border rounded-3 p-3 bg-white shadow-2xs d-flex flex-row align-items-center gap-3 h-100">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: #f0fdf4; color: #16a34a; font-size: 1.25rem;">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-medium d-block">Status Basis Data</span>
+                                    <div class="mt-0.5">
+                                        <span class="fw-bold text-success" style="font-size: 0.92rem;">SQLite Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Glass Panel Inventaris Tabel -->
+                    <div class="glass-panel p-4 rounded-4 shadow-sm border mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-1 flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0.5 d-flex align-items-center gap-2">
+                                    <i class="bi bi-database-gear text-primary"></i> Inventaris Database SIPEDAS
+                                </h5>
+                                <span class="text-muted small">Kelola, pratinjau ringkas, analisis tren, dan audit rekaman tabel individual</span>
+                            </div>
+                            <button onclick="loadAdminTables()" class="btn btn-outline-primary btn-sm px-3 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5 shadow-2xs">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                            </button>
+                        </div>
+
+                        <!-- Filter Bar Terpadu (Pencarian + Jalur Masuk + Tahun + Urutan + Paginasi) -->
+                        <div class="row g-2.5 mb-3 align-items-center">
+                            <div class="col-md-4">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="admin-table-search" class="form-control border-start-0" placeholder="Cari nama tabel, dokumen, atau tahun..." oninput="onAdminSearchInput()" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <select id="admin-filter-source" class="form-select form-select-sm" onchange="onAdminFilterChange()">
+                                    <option value="all">Semua Jalur Masuk Data</option>
+                                    <option value="pdf">Ekstraksi PDF</option>
+                                    <option value="excel">Import Excel</option>
+                                    <option value="web">Entri Manual Web</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <select id="admin-filter-year" class="form-select form-select-sm" onchange="onAdminFilterChange()">
+                                    <option value="">Semua Tahun</option>
+                                    <option value="2022">Tahun 2022</option>
+                                    <option value="2023">Tahun 2023</option>
+                                    <option value="2024">Tahun 2024</option>
+                                    <option value="2025">Tahun 2025</option>
+                                    <option value="2026">Tahun 2026</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <select id="admin-sort" class="form-select form-select-sm" onchange="onAdminFilterChange()">
+                                    <option value="id">Urutkan: ID Tabel</option>
+                                    <option value="name">Urutkan: Nama Tabel</option>
+                                    <option value="year">Urutkan: Tahun</option>
+                                    <option value="rows">Urutkan: Jml Baris Data</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-sm-6">
+                                <div class="d-flex align-items-center justify-content-md-end gap-1.5">
+                                    <select id="admin-page-size" class="form-select form-select-sm px-1.5" onchange="changeAdminPageSize(this.value)" title="Jumlah data per halaman">
+                                        <option value="10">10/hlm</option>
+                                        <option value="25">25/hlm</option>
+                                        <option value="50">50/hlm</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DataGrid Container (Bersih, Luas & Terpadu) -->
+                        <div class="table-responsive rounded-3 border bg-white shadow-2xs mb-3">
+                            <table class="table table-hover align-middle mb-0" style="font-size: 0.86rem; width: 100%;">
+                                <thead class="table-light border-bottom" style="background: #f8fafc;">
+                                    <tr>
+                                        <th style="width: 80px;" class="text-center py-2.5">ID Tabel</th>
+                                        <th class="py-2.5">Judul Tabel Statistik</th>
+                                        <th style="width: 280px;" class="py-2.5">Publikasi BPS & Bab</th>
+                                        <th style="width: 140px;" class="text-center py-2.5">Tahun</th>
+                                        <th style="width: 170px;" class="text-center py-2.5">Volume Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-list">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4"><i class="bi bi-arrow-repeat spin me-1.5"></i> Memuat data database...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Footer Navigation -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-1">
+                            <span class="small text-muted fw-medium" id="admin-pagination-info">
+                                Menampilkan 0 dari 0 tabel
+                            </span>
+                            <nav aria-label="Navigasi Halaman Database">
+                                <ul class="pagination pagination-sm mb-0 shadow-2xs" id="admin-pagination-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- 3. Danger Zone Pindah ke Paling Bawah -->
+                    <div class="card border border-danger border-opacity-25 rounded-3 p-4 shadow-2xs" style="background: rgba(239, 68, 68, 0.04); padding: 1.25rem 1.5rem !important;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div class="min-w-0">
+                                <h6 class="fw-bold text-danger mb-1" style="font-size: 0.95rem;">Zona Berbahaya</h6>
+                                <small class="text-muted d-block" style="font-size: 0.78rem; line-height: 1.4;">Tindakan ini akan mengosongkan seluruh data tabel dari database secara permanen.</small>
+                            </div>
+                            <button class="btn btn-danger btn-sm px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs flex-shrink-0" onclick="clearAllLoadedData()" style="font-size: 0.82rem; border-radius: 6px;">
+                                <i class="bi bi-trash3-fill"></i> Hapus Semua Data Ter-load
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1555,8 +1672,8 @@
                         </div>
                         <div id="headeranom-actions" class="d-flex gap-2 align-items-center mb-3 px-3 pt-3 flex-wrap" style="display:none;">
                             <input type="text" id="anomali-search-input" placeholder="Cari Tabel atau Header Anomali..." class="form-control form-control-sm" style="width: 300px;" oninput="filterAnomaliPage(this.value)">
-                            <button onclick="fixSaranTerpilihAnomali()" class="btn btn-primary btn-sm" style="background:#4f46e5; border-color:#4f46e5;">Fix Terpilih</button>
-                            <button onclick="fixSemuaSaranAnomali()" class="btn btn-success btn-sm" style="background:#10b981; border-color:#10b981;">Fix Semua Saran</button>
+                            <button onclick="fixSaranTerpilihAnomali()" class="btn btn-primary btn-sm btn-fix-primary">Fix Terpilih</button>
+                            <button onclick="fixSemuaSaranAnomali()" class="btn btn-success btn-sm btn-fix-success">Fix Semua Saran</button>
                         </div>
                         <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
                             <table class="table table-sm align-middle">
@@ -1677,7 +1794,7 @@
     <!-- Modal Inspeksi Anomali Tabel (Anomaly Table Inspector) -->
     <div class="modal fade" id="anomalyTableModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 92vw; width: 1340px; margin: 1.75rem auto;">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden; background: #fff; box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.25);">
+            <div class="modal-content border-0 shadow-lg modal-content-custom">
                 <div class="modal-header bg-white border-bottom px-4 py-3.5 d-flex align-items-center justify-content-between" style="padding: 1.25rem 2rem !important;">
                     <div class="min-w-0 flex-grow-1 me-3">
                         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
@@ -1687,21 +1804,21 @@
                             <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-1.5 rounded-pill" id="anom-modal-doc-year" style="font-size: 0.8rem;"></span>
                             <span class="badge bg-info bg-opacity-10 text-info px-3 py-1.5 rounded-pill" id="anom-modal-location" style="font-size: 0.8rem;">Tasikmalaya</span>
                         </div>
-                        <h5 class="modal-title fw-bold text-dark text-break mb-0" id="anom-modal-title" style="font-size: 1.25rem; line-height: 1.45; color: #0f172a;">
+                        <h5 class="modal-title fw-bold text-dark text-break mb-0 modal-title-custom" id="anom-modal-title">
                             Inspeksi Tabel Anomali
                         </h5>
                     </div>
                     <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Tutup" style="padding: 0.75rem; border-radius: 8px;"></button>
                 </div>
                 
-                <div class="modal-body p-4" style="background: #f8fafc; padding: 1.75rem 2rem !important;">
+                <div class="modal-body p-4 modal-body-light" style="padding: 1.75rem 2rem !important;">
                     <!-- Banner Alert Anomali -->
-                    <div class="card border-warning border-1 shadow-sm mb-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-radius: 14px; border: 1.5px solid #fde047 !important;" id="anom-modal-banner">
+                    <div class="card border-warning border-1 shadow-sm anomaly-banner" id="anom-modal-banner">
                         <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                             <div class="d-flex align-items-start gap-3">
                                 <div class="text-warning lh-1 p-3 bg-white rounded-3 shadow-sm flex-shrink-0 d-flex align-items-center justify-content-center" id="anom-modal-icon" style="width: 52px; height: 52px; font-size: 1.75rem;"><i class="bi bi-exclamation-triangle"></i></div>
                                 <div>
-                                    <h6 class="fw-bold text-dark mb-1" id="anom-modal-banner-title" style="font-size: 1rem; color: #1e293b;">Rincian Anomali Data</h6>
+                                    <h6 class="fw-bold text-dark mb-1 anomaly-banner-title" id="anom-modal-banner-title">Rincian Anomali Data</h6>
                                     <div class="text-secondary small fw-medium" id="anom-modal-banner-msg" style="font-size: 0.875rem; line-height: 1.5;">
                                         Memuat informasi anomali...
                                     </div>
@@ -1723,13 +1840,13 @@
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1 flex-wrap gap-2">
                         <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="d-inline-block px-3 py-1 rounded-pill border border-info border-opacity-50" style="background:#e0f2fe; font-weight:700; color:#0369a1; font-size:0.75rem;">
+                                <span class="d-inline-block px-3 py-1 rounded-pill border border-info border-opacity-50 legend-blue">
                                     Sel Biru
                                 </span>
                                 <span id="anom-legend-prev-label" class="fw-medium text-secondary" style="font-size: 0.84rem;">= Nilai Awal / Asal</span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="d-inline-block px-3 py-1 rounded-pill border border-warning border-opacity-50" style="background:#fef08a; font-weight:700; color:#854d0e; font-size:0.75rem;">
+                                <span class="d-inline-block px-3 py-1 rounded-pill border border-warning border-opacity-50 legend-yellow">
                                     Sel Kuning
                                 </span>
                                 <span id="anom-legend-curr-label" class="fw-medium text-secondary" style="font-size: 0.84rem;">= Nilai Terindikasi Anomali</span>
@@ -1739,7 +1856,7 @@
                     </div>
 
                     <!-- Grid Table Wrapper -->
-                    <div class="table-responsive bg-white rounded-3 border shadow-sm" style="max-height: 480px; overflow: auto; border-radius: 12px !important; border-color: #e2e8f0 !important;">
+                    <div class="table-responsive bg-white rounded-3 border shadow-sm table-wrapper-border" style="max-height: 480px; overflow: auto; border-radius: 12px !important;">
                         <table class="table table-hover mb-0" id="anom-modal-table" style="font-size: 0.875rem; border-collapse: separate !important; border-spacing: 0 !important; width: 100%;">
                             <thead class="sticky-top" id="anom-modal-thead" style="z-index: 10;">
                                 <tr><th>Memuat...</th></tr>
@@ -1751,7 +1868,7 @@
 
                 <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-between align-items-center" style="padding: 1rem 2rem !important;">
                         <span class="text-muted small" style="font-size: 0.84rem;"><i class="bi bi-lightbulb text-warning"></i> Tip: Anda dapat langsung memperbaiki angka pada sel yang salah lalu klik tombol simpan.</span>
-                    <button type="button" class="btn btn-secondary px-4 py-2 fw-medium shadow-sm" data-bs-dismiss="modal" style="border-radius: 8px; font-size: 0.875rem; background: #64748b; border: none;">Tutup</button>
+                    <button type="button" class="btn btn-secondary px-4 py-2 fw-medium shadow-sm btn-secondary-custom" data-bs-dismiss="modal" style="border-radius: 8px; font-size: 0.875rem;">Tutup</button>
                 </div>
             </div>
         </div>
@@ -1760,54 +1877,57 @@
     <!-- MODAL PRATINJAU SNIPPET TABEL (#7) -->
     <div class="modal fade" id="tableSnippetModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
-                <div class="modal-header border-bottom px-4 py-3 bg-light">
-                    <div class="flex-grow-1 min-w-0 me-2">
-                        <div class="d-flex align-items-center gap-2 mb-1.5 flex-wrap">
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill small fw-semibold" id="snippet-badge-year">
-                                <i class="bi bi-calendar"></i> Tahun
-                            </span>
-                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill small" id="snippet-badge-bab">
-                                <i class="bi bi-folder2-open"></i> Bab
-                            </span>
-                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 rounded-pill small" id="snippet-badge-size">
-                                <i class="bi bi-table"></i> 0 Baris × 0 Kolom
-                            </span>
-                        </div>
-                        <h5 class="modal-title fw-bold text-dark mb-0" id="snippet-table-title" style="font-size: 1.15rem; line-height: 1.45; word-break: break-word;">
+            <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="modal-header px-4 px-md-5 py-3.5 border-bottom bg-white d-flex align-items-start justify-content-between">
+                    <div class="d-flex align-items-start min-w-0 flex-grow-1">
+                        <div class="modal-title w-100" id="snippet-table-title" style="word-break: break-word; white-space: normal;">
                             Pratinjau Tabel
-                        </h5>
+                        </div>
                     </div>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none ms-3 mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small fw-medium">Menampilkan 5 baris pertama data:</span>
-                        <span class="badge bg-light text-muted border px-2 py-1 small">Mode Pratinjau Ringkas</span>
+                <div class="modal-body px-4 px-md-5 py-3.5 bg-light bg-opacity-50">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <span class="text-muted small fw-semibold d-flex align-items-center gap-2" style="font-size: 0.84rem;">
+                            <i class="bi bi-info-circle text-primary fs-6"></i> Menampilkan 5 baris pertama data:
+                        </span>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill small fw-semibold" id="snippet-badge-year">
+                                <i class="bi bi-calendar3 me-1"></i> Tahun
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 rounded-pill small fw-medium" id="snippet-badge-bab">
+                                <i class="bi bi-folder2 me-1"></i> Bab
+                            </span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1 rounded-pill small fw-medium" id="snippet-badge-size">
+                                <i class="bi bi-grid-3x3 me-1"></i> 0 Baris × 0 Kolom
+                            </span>
+                            <span class="badge bg-white text-muted border px-2.5 py-1 small fw-medium shadow-2xs">Mode Ringkas</span>
+                        </div>
                     </div>
-                    <div class="table-responsive rounded-3 border shadow-sm" style="max-height: 380px; overflow: auto; border-radius: 10px !important;">
-                        <table class="table table-sm table-bordered table-hover mb-0" id="snippet-table-content" style="font-size: 0.82rem; width: 100%;">
+                    <div class="table-responsive rounded-3 border bg-white shadow-xs" style="max-height: 380px; overflow: auto;">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="snippet-table-content" style="font-size: 0.86rem; width: 100%;">
                             <thead class="table-light sticky-top" id="snippet-thead"></thead>
                             <tbody id="snippet-tbody"></tbody>
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-warning btn-sm text-dark fw-semibold d-flex align-items-center gap-1 shadow-sm" id="snippet-btn-ts" onclick="openTimeSeriesFromSnippet()">
-                            <i class="bi bi-graph-up"></i> Buka Deret Waktu
+                <div class="modal-footer bg-white border-top px-4 px-md-5 py-4 d-flex justify-content-between align-items-center flex-wrap" style="gap: 16px;">
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 12px;">
+                        <button type="button" class="btn btn-primary btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-editor" onclick="openEditorFromSnippet()">
+                            <i class="bi bi-pencil-square"></i> Buka Penuh (Editor)
                         </button>
-                        <button type="button" class="btn btn-primary btn-sm fw-medium d-flex align-items-center gap-1 shadow-sm" id="snippet-btn-editor" onclick="openEditorFromSnippet()">
-                            <i class="bi bi-box-arrow-up-right"></i> Buka Penuh (Editor)
+                        <button type="button" class="btn btn-warning btn-sm text-dark px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-ts" onclick="openTimeSeriesFromSnippet()">
+                            <i class="bi bi-graph-up-arrow"></i> Deret Waktu
                         </button>
-                        <button type="button" class="btn btn-success btn-sm fw-medium d-flex align-items-center gap-1.5 shadow-sm" id="snippet-btn-excel" onclick="downloadExcelFromSnippet()">
+                        <div class="d-none d-sm-block separator-v my-0" style="height: 24px; margin: 0 4px;"></div>
+                        <button type="button" class="btn btn-success btn-sm px-3.5 py-2.5 fw-medium d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-excel" onclick="downloadExcelFromSnippet()">
                             <i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)
                         </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5 shadow-sm" id="snippet-btn-csv" onclick="downloadCsvFromSnippet()">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3.5 py-2.5 d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-csv" onclick="downloadCsvFromSnippet()">
                             <i class="bi bi-filetype-csv"></i> CSV
                         </button>
                     </div>
-                    <button type="button" class="btn btn-light border btn-sm px-3 fw-medium" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-light border btn-sm px-4 py-2.5 fw-semibold text-muted" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -1818,9 +1938,9 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
                 <!-- Header -->
-                <div class="modal-header border-bottom px-4 py-3.5" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
+                <div class="modal-header border-bottom px-4 py-3.5 modal-header-blue">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px; height:42px; border-radius:12px; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); backdrop-filter:blur(6px); box-shadow:0 3px 10px rgba(0,0,0,0.15);">
+                        <div class="d-flex align-items-center justify-content-center flex-shrink-0 modal-icon-box">
                             <i class="bi bi-table fs-5 text-white"></i>
                         </div>
                         <div>
@@ -1911,7 +2031,7 @@
                             </div>
                         </div>
 
-                        <div class="rounded-3 border d-flex align-items-start" style="padding: 1rem 1.25rem !important; gap: 1rem; background: rgba(37, 99, 235, 0.05); border-color: rgba(37, 99, 235, 0.2) !important;">
+                        <div class="rounded-3 border d-flex align-items-start info-box-blue" style="padding: 1rem 1.25rem !important; gap: 1rem;">
                             <label class="custom-switch-wrapper pt-0.5" for="create-table-auto-kecamatan">
                                 <input type="checkbox" id="create-table-auto-kecamatan" class="custom-switch-input" checked onchange="onToggleKecamatanSwitch()">
                                 <span class="custom-switch-track"></span>
@@ -1943,9 +2063,9 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg border-0" style="border-radius: 18px; overflow: hidden;">
                 <!-- Header -->
-                <div class="modal-header border-bottom px-4 py-3.5" style="background: linear-gradient(135deg, #091e42 0%, #1e3a8a 60%, #2563eb 100%); color: white;">
+                <div class="modal-header border-bottom px-4 py-3.5 modal-header-blue-deep">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px; height:42px; border-radius:12px; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); backdrop-filter:blur(6px); box-shadow:0 3px 10px rgba(0,0,0,0.15);">
+                        <div class="d-flex align-items-center justify-content-center flex-shrink-0 modal-icon-box">
                             <i class="bi bi-journal-plus fs-5 text-white"></i>
                         </div>
                         <div>
@@ -2052,7 +2172,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
                 <!-- Modal Header: Explicit dark gradient and crystal white text -->
-                <div class="modal-header px-4 py-3.5 border-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%) !important; color: #ffffff !important;">
+                <div class="modal-header px-4 py-3.5 border-0 modal-header-violet">
                     <div class="d-flex align-items-center gap-3">
                         <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(255, 255, 255, 0.18); width: 42px; height: 42px;">
                             <i class="bi bi-cloud-arrow-down-fill fs-5 text-warning"></i>
@@ -2069,7 +2189,7 @@
                     <button type="button" class="btn-close btn-close-white opacity-75" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body p-4" style="background: #f8fafc;">
+                <div class="modal-body p-4 modal-body-light">
                     <!-- 1. Pilihan Format File (PDF vs PNG) -->
                     <div class="mb-4 pb-1">
                         <label class="form-label fw-bold text-dark d-flex align-items-center gap-2 mb-2.5" style="font-size: 0.86rem; letter-spacing: 0.2px;">
@@ -2173,15 +2293,15 @@
                                 <div id="ts-export-insights-suboptions" class="border-top" style="padding-left: 29px; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-top: 10px;">
                                     <span class="text-secondary small fw-bold" style="font-size: 0.75rem;">Pilihan Format Tren:</span>
                                     <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0; font-size: 0.8rem; color: #1e293b;">
+                                        <label class="radio-label">
                                             <input type="radio" name="ts-export-insights-scope" value="both" checked class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
                                             <span class="fw-medium">Semua (Card + Tabel Peringkat)</span>
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0; font-size: 0.8rem; color: #1e293b;">
+                                        <label class="radio-label">
                                             <input type="radio" name="ts-export-insights-scope" value="card_only" class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
                                             <span class="fw-medium">Card Ringkasan Saja</span>
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0; font-size: 0.8rem; color: #1e293b;">
+                                        <label class="radio-label">
                                             <input type="radio" name="ts-export-insights-scope" value="table_only" class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
                                             <span class="fw-medium">Tabel Peringkat Saja</span>
                                         </label>
@@ -2228,7 +2348,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260827_2" defer></script>
-    <script src="/static/auth_role_logic.js?v=20260827_2" defer></script>
+    <script src="/static/app.js?v=20260830_53" defer></script>
+    <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

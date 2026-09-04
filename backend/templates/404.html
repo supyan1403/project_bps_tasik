@@ -17,8 +17,23 @@
             align-items:center;
             justify-content:center;
             color:#1e293b;
+            position:relative;
+            overflow:hidden;
         }
-        .error-logo { width:56px; height:56px; margin-bottom:20px; }
+        .bg-logo {
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%, -50%);
+            width:500px;
+            height:500px;
+            object-fit:contain;
+            opacity:0.07;
+            filter:blur(40px);
+            pointer-events:none;
+            z-index:0;
+        }
+        .content { position:relative; z-index:1; text-align:center; }
         .error-code {
             font-size:80px;
             font-weight:900;
@@ -37,8 +52,7 @@
             color:#64748b;
             line-height:1.6;
             max-width:360px;
-            text-align:center;
-            margin-bottom:28px;
+            margin:0 auto 28px;
         }
         .btn-home {
             display:inline-flex;
@@ -61,18 +75,21 @@
             bottom:20px;
             font-size:11px;
             color:#94a3b8;
+            z-index:1;
         }
     </style>
 </head>
 <body>
-    <img src="/static/logo_sipedas.png" alt="SIPEDAS" class="error-logo">
-    <div class="error-code">404</div>
-    <div class="error-title">Halaman Tidak Ditemukan</div>
-    <div class="error-desc">
-        Halaman yang Anda cari tidak tersedia atau telah dipindahkan.
-        Silakan kembali ke halaman utama SIPEDAS.
+    <img src="/static/logo_sipedas.png" alt="" class="bg-logo">
+    <div class="content">
+        <div class="error-code">404</div>
+        <div class="error-title">Halaman Tidak Ditemukan</div>
+        <div class="error-desc">
+            Halaman yang Anda cari tidak tersedia atau telah dipindahkan.
+            Silakan kembali ke halaman utama SIPEDAS.
+        </div>
+        <a href="/" class="btn-home">Kembali ke Beranda</a>
     </div>
-    <a href="/" class="btn-home">Kembali ke Beranda</a>
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 </body>
 </html>

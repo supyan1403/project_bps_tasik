@@ -17,8 +17,23 @@
             align-items:center;
             justify-content:center;
             color:#1e293b;
+            position:relative;
+            overflow:hidden;
         }
-        .error-logo { width:56px; height:56px; margin-bottom:20px; }
+        .bg-logo {
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%, -50%);
+            width:500px;
+            height:500px;
+            object-fit:contain;
+            opacity:0.07;
+            filter:blur(40px);
+            pointer-events:none;
+            z-index:0;
+        }
+        .content { position:relative; z-index:1; text-align:center; }
         .error-icon { font-size:40px; margin-bottom:16px; }
         .badge-maintenance {
             display:inline-block;
@@ -42,25 +57,27 @@
             color:#64748b;
             line-height:1.6;
             max-width:360px;
-            text-align:center;
-            margin-bottom:28px;
+            margin:0 auto 28px;
         }
         .footer-text {
             position:fixed;
             bottom:20px;
             font-size:11px;
             color:#94a3b8;
+            z-index:1;
         }
     </style>
 </head>
 <body>
-    <img src="/static/logo_sipedas.png" alt="SIPEDAS" class="error-logo">
-    <div class="error-icon">&#9881;&#65039;</div>
-    <div class="badge-maintenance">PEMELIHARAAN</div>
-    <div class="error-title">SIPEDAS Sedang Dalam Pemeliharaan</div>
-    <div class="error-desc">
-        Sistem sedang dalam pemeliharaan terjadwal untuk peningkatan kualitas layanan.
-        Silakan coba kembali beberapa saat lagi.
+    <img src="/static/logo_sipedas.png" alt="" class="bg-logo">
+    <div class="content">
+        <div class="error-icon">&#9881;&#65039;</div>
+        <div class="badge-maintenance">PEMELIHARAAN</div>
+        <div class="error-title">SIPEDAS Sedang Dalam Pemeliharaan</div>
+        <div class="error-desc">
+            Sistem sedang dalam pemeliharaan terjadwal untuk peningkatan kualitas layanan.
+            Silakan coba kembali beberapa saat lagi.
+        </div>
     </div>
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 </body>

@@ -1,5 +1,18 @@
 let __excelDragFiles = [];
 
+// Global error handler — tangkap unhandled JS errors
+window.addEventListener('error', function(e) {
+    console.error('[SIPEDAS Error]', e.filename, e.lineno, e.message);
+    if (typeof showToast === 'function') {
+        showToast('error', 'Kesalahan Sistem', 'Terjadi kesalahan tak terduga. Silakan muat ulang halaman.');
+    }
+});
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('[SIPEDAS Unhandled Promise]', e.reason);
+    if (typeof showToast === 'function') {
+        showToast('error', 'Kesalahan Jaringan', 'Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    }
+});
 
 
 function cssVar(name) {

@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=20260828_45">
+    <link rel="stylesheet" href="/static/style.css?v=20260904_16">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,6 +22,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="role-pegawai">
+    <!-- Mobile Overlay -->
+    <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
     <div class="d-flex vh-100 w-100">
         <!-- Sidebar -->
         <div class="sidebar d-flex flex-column flex-shrink-0 border-end bg-white">
@@ -112,13 +115,58 @@
             <div class="sidebar-divider position-relative" style="z-index: 2;"></div>
 
             <!-- Footer Action Button (Di bawah garis pembatas) -->
-            <div class="position-relative sidebar-footer-action" style="z-index: 2;">
-                <button type="button" id="btn-admin-login" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-1" onclick="adminLogin()" title="Login Admin SIPEDAS">
+            <div class="position-relative sidebar-footer-action mt-auto" style="z-index: 2;">
+                <!-- Login Button (Ketika mode Operator / Tamu) -->
+                <button type="button" id="btn-admin-login" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-0" onclick="adminLogin()" title="Login Admin SIPEDAS">
                     <i class="bi bi-shield-lock"></i> <span class="sidebar-btn-text">Login Admin SIPEDAS</span>
                 </button>
-                <button type="button" id="btn-admin-logout" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-1" onclick="adminLogout()" style="display:none !important;" title="Logout Admin SIPEDAS">
-                    <i class="bi bi-box-arrow-right"></i> <span class="sidebar-btn-text">Logout Admin SIPEDAS</span>
-                </button>
+
+                <!-- User Account Profile Card & Dropdown (Ketika Mode Admin Aktif) -->
+                <div id="sidebar-user-widget" class="sidebar-user-widget position-relative has-flyout-submenu" style="display:none !important;">
+                    <div id="sidebar-user-btn" class="sidebar-user-card nav-link d-flex align-items-center justify-content-between p-2 rounded-3 cursor-pointer" onclick="toggleUserMenu(event)" role="button" tabindex="0" title="Akun Administrator">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                            <div class="sidebar-user-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
+                                <i class="bi bi-shield-check text-white"></i>
+                                <span class="sidebar-user-online-dot"></span>
+                            </div>
+                            <div class="sidebar-user-info d-flex flex-column text-truncate">
+                                <span class="sidebar-user-name fw-bold" style="font-size:0.83rem; line-height:1.2;">Administrator</span>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted sidebar-user-chevron ms-auto" style="font-size:0.75rem; transition: transform 0.2s ease;"></i>
+                    </div>
+
+                    <!-- Dropdown / Popover Menu Akun Admin (Ketika Expanded / Di-klik) -->
+                    <div id="sidebar-user-dropdown" class="sidebar-user-dropdown shadow-lg rounded-3 border bg-white position-absolute" style="display:none;">
+                        <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2" style="background: var(--bg-page);">
+                            <i class="bi bi-person-check text-primary"></i>
+                            <div>
+                                <div class="fw-bold" style="font-size:0.78rem; line-height:1.2;">Admin SIPEDAS</div>
+                                <div class="text-muted" style="font-size:0.68rem;">Kontrol Penuh Sistem</div>
+                            </div>
+                        </div>
+                        <div class="p-1.5 d-flex flex-column gap-1">
+                            <button type="button" class="btn btn-sm text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 border-0 w-100 sidebar-user-menu-item text-danger" onclick="adminLogout(); hideUserMenu();">
+                                <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Floating Popover (Ketika Sidebar Tertutup / Hover Sama Seperti Manajemen Database) -->
+                    <div class="sidebar-floating-popover shadow-lg" id="flyout-user-submenu">
+                        <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-shaded text-primary"></i> Administrator
+                        </div>
+                        <div class="popover-body p-1.5 d-flex flex-column gap-1">
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-danger fw-medium" onclick="adminLogout()">
+                                <i class="bi bi-box-arrow-right text-danger"></i> <span>Logout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden fallback logout button to preserve any legacy scripts -->
+                <button type="button" id="btn-admin-logout" class="d-none" style="display:none !important;"></button>
             </div>
 
             <!-- Sidebar Clean Ultra-Minimalist Ambient Background -->
@@ -128,18 +176,35 @@
         <!-- Main Content -->
         <div class="main-content flex-grow-1 px-3 py-3 overflow-auto">
 
-            <!-- Operator Header (shown only for non-admin, hidden by default) -->
-            <div id="operator-header" class="operator-header" style="display:none !important;">
+            <!-- Operator / Top App Bar (Header Halaman Utama) -->
+            <div id="operator-header" class="operator-header align-items-center justify-content-between">
+                <!-- Sisi Kiri: Logo + SIPEDAS & Kepanjangannya (Unified Lockup) -->
                 <div class="d-flex align-items-center gap-3">
-                    <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo" style="height:32px;">
-                    <span class="fw-bold" style="font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--text-primary);">SIPEDAS</span>
-                    <span class="text-muted d-none d-sm-inline" style="font-size:0.85rem;">Analisis Deret Waktu</span>
+                    <button id="mobile-menu-toggle" class="mobile-menu-toggle me-1" onclick="toggleMobileSidebar()" aria-label="Buka menu">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="d-flex align-items-center gap-2.5">
+                        <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo SIPEDAS" style="height: 34px; width: auto; object-fit: contain;">
+                        <div class="d-flex flex-column justify-content-center">
+                            <span style="font-family:'Inter', sans-serif; font-weight:800; font-style:italic; font-size:1.05rem; letter-spacing:-0.2px; color:var(--text-primary); line-height:1.15;">SIPEDAS</span>
+                            <span style="font-size:0.64rem; font-weight:500; color:var(--text-secondary); line-height:1.2; letter-spacing:-0.05px;">Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sisi Kanan: Identitas Resmi BPS Kabupaten Tasikmalaya -->
+                <div class="d-flex align-items-center">
+                    <div class="d-none d-sm-block me-3" style="width: 1px; height: 26px; background: var(--border); opacity: 0.9;"></div>
+                    <div class="d-flex flex-column text-end justify-content-center">
+                        <span style="font-weight:700; font-size:0.75rem; letter-spacing:0.3px; line-height:1.25; color:var(--text-primary); text-transform:uppercase;">BADAN PUSAT STATISTIK</span>
+                        <span style="font-weight:600; font-size:0.68rem; letter-spacing:0.4px; line-height:1.25; color:var(--text-secondary); text-transform:uppercase;">KABUPATEN TASIKMALAYA</span>
+                    </div>
                 </div>
             </div>
 
             <!-- PAGE 1: Dashboard -->
             <div id="page-dashboard" class="page-section">
-                <div class="welcome-banner text-white p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
+                <div class="welcome-banner text-white px-4 py-4 px-md-5 py-md-5 rounded-4 mb-4 position-relative overflow-hidden d-flex flex-column justify-content-center" style="min-height: 180px; background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
                     <!-- 1. Background Dot Matrix Pattern -->
                     <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.65; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
 
@@ -187,56 +252,49 @@
                     <div style="position: absolute; right: 15%; top: -25%; width: 320px; height: 320px; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
                     <div style="position: absolute; right: -2%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
 
-                    <div class="position-relative" style="z-index: 2;">
-                        <!-- Top Bar: Left BPS Badge, Right All Status & Clock Pills in ONE Horizontal Line -->
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-1">
-                            <span class="badge banner-badge">
-                                <i class="bi bi-building me-1.5 text-warning"></i> BADAN PUSAT STATISTIK KABUPATEN TASIKMALAYA
+                    <!-- Top Right Live Status & Clock -->
+                    <div class="position-absolute" style="top: 20px; right: 24px; z-index: 3;">
+                        <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark py-1 px-3" style="font-size: 0.78rem;">
+                            <span class="position-relative d-inline-flex me-1" style="width: 7px; height: 7px;">
+                                <span class="position-absolute w-100 h-100 rounded-circle bg-success" style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.75;"></span>
+                                <span class="rounded-circle bg-success" style="width: 7px; height: 7px;"></span>
                             </span>
+                            <span class="fw-bold text-online me-1" style="font-size: 0.74rem; letter-spacing: 0.5px;">ONLINE</span>
+                            <span class="text-white text-opacity-30 me-1">|</span>
+                            <i class="bi bi-clock text-info" style="font-size: 0.78rem;"></i>
+                            <span id="banner-live-clock" class="fw-bold text-white font-monospace" style="letter-spacing: 0.6px; font-size: 0.78rem;">--:--:--</span>
+                            <span class="text-white text-opacity-30 mx-1">|</span>
+                            <span id="banner-live-date" class="text-white text-opacity-85 fw-medium" style="font-size: 0.78rem;">Memuat tanggal...</span>
+                        </div>
+                    </div>
 
-                            <!-- Top Right Horizontal Status & Clock Bar (Berjejer Rapi dengan Padding Lega) -->
-                            <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
-                                <!-- Status Sistem Online Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark">
-                                    <span class="position-relative d-inline-flex me-0.5" style="width: 8px; height: 8px;">
-                                        <span class="position-absolute w-100 h-100 rounded-circle bg-success" style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.75;"></span>
-                                        <span class="rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
-                                    </span>
-                                    <span class="text-white text-opacity-85 fw-medium">STATUS:</span>
-                                    <span class="fw-bold text-online">ONLINE</span>
-                                </div>
+                    <!-- Main Content (Vertically Centered along Y-Axis) -->
+                    <div class="position-relative my-auto" style="z-index: 2;">
+                        <h1 class="fs-2 fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.4px; line-height: 1.25;">
+                            Selamat Datang di <span class="text-brand-sipedas">SIPEDAS</span>
+                        </h1>
+                        <p class="mb-0 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
+                            Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.
+                        </p>
 
-                                <!-- Database Connected Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark" style="color: rgba(255, 255, 255, 0.92);">
-                                    <i class="bi bi-database-check text-info fs-6"></i>
-                                    <span>Database Terhubung</span>
-                                </div>
-
-                                <!-- Live Clock & Calendar Pill -->
-                                <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark">
-                                    <i class="bi bi-clock text-info fs-6"></i>
-                                    <span id="banner-live-clock" class="fw-bold text-white font-monospace" style="letter-spacing: 0.8px;">--:--:--</span>
-                                    <span class="text-white text-opacity-35 mx-1">|</span>
-                                    <span id="banner-live-date" class="text-white text-opacity-85 fw-medium">Memuat tanggal...</span>
-                                </div>
-                            </div>
+                        <!-- Admin Capabilities Badges (Hanya tampil saat mode Admin aktif) -->
+                        <div class="admin-only align-items-center flex-wrap gap-2 mt-3" style="display: none;">
+                            <span class="badge rounded-pill fw-medium" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.76rem; padding: 5px 12px; letter-spacing: 0.2px;">
+                                Ekstraksi PDF
+                            </span>
+                            <span class="badge rounded-pill fw-medium" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.76rem; padding: 5px 12px; letter-spacing: 0.2px;">
+                                Manajemen Database
+                            </span>
+                            <span class="badge rounded-pill fw-medium" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.76rem; padding: 5px 12px; letter-spacing: 0.2px;">
+                                Pemantauan Anomali Data
+                            </span>
+                            <span class="badge rounded-pill fw-medium" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.76rem; padding: 5px 12px; letter-spacing: 0.2px;">
+                                Backup &amp; Restore
+                            </span>
                         </div>
 
-                        <!-- Main Content of Banner -->
-                        <div class="mt-1">
-                            <h1 class="fs-2 fw-bold text-white mb-2 pb-1 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
-                                Selamat Datang di <span class="text-brand-sipedas">SIPEDAS</span>
-                            </h1>
-                            
-                            <p class="mb-3.5 text-white text-opacity-85 fw-normal" style="font-size: 0.96rem; line-height: 1.6; max-width: 640px;">
-                                Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.
-                            </p>
-                            
-                            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 role-badge">
-                                <i class="bi bi-person-badge text-info fs-5"></i> 
-                                <span id="welcome-role-text" class="fw-medium">Anda masuk sebagai Operator SIPEDAS.</span>
-                            </div>
-                        </div>
+                        <!-- Hidden span to prevent JS reference error -->
+                        <span id="welcome-role-text" style="display:none;"></span>
                     </div>
                 </div>
 
@@ -879,52 +937,48 @@
                     <div class="position-relative" style="z-index: 2;">
                         <!-- Top Bar: Badge & Feature Pills -->
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-1">
-                            <span class="badge banner-badge">
-                                <i class="bi bi-graph-up me-1.5 text-warning"></i> MODUL ANALISIS DERET WAKTU (TIME SERIES)
+                            <span class="badge banner-badge d-inline-flex align-items-center gap-2" style="letter-spacing: 0.4px;">
+                                <i class="bi bi-graph-up text-warning" style="font-size: 0.95rem;"></i>
+                                <span>MODUL ANALISIS DERET WAKTU (TIME SERIES)</span>
                             </span>
 
                             <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
-                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
-                                    <i class="bi bi-calendar-range text-info" style="font-size: 0.82rem; margin-right: 2px;"></i>
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-calendar-range text-info" style="font-size: 0.82rem;"></i>
                                     <span>Lintas Tahun Terpadu</span>
                                 </div>
-                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
-                                    <i class="bi bi-lightning-charge text-warning" style="font-size: 0.82rem; margin-right: 2px;"></i>
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-lightning-charge text-warning" style="font-size: 0.82rem;"></i>
                                     <span>Indikator Pertumbuhan Otomatis</span>
                                 </div>
-                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm">
-                                    <i class="bi bi-file-earmark-arrow-down text-success" style="font-size: 0.82rem; margin-right: 2px;"></i>
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-file-earmark-arrow-down text-success" style="font-size: 0.82rem;"></i>
                                     <span>Ekspor Excel, CSV, PDF &amp; PNG</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Main Content -->
-                        <div class="mt-1">
-                            <h1 class="fs-2 fw-bold text-white mb-2 pb-1 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
+                        <div class="mt-2">
+                            <h1 class="fs-2 fw-bold text-white mb-2.5 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.3px; line-height: 1.3;">
                                 Eksplorasi Deret Waktu &amp; <span class="text-brand-ts">Tren Statistik</span>
                             </h1>
                             
                             <p class="mb-3 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
-                                Lacak kesinambungan data statistik sektoral lintas tahun publikasi, amati dinamika pertumbuhan angka, dan bandingkan distribusi capaian wilayah secara komprehensif.
+                                Analisis tren data statistik lintas tahun, pantau laju pertumbuhan indikator, dan bandingkan capaian antarwilayah secara akurat.
                             </p>
                             
-                            <!-- Workflow Steps Bar -->
-                            <div class="d-inline-flex align-items-center flex-wrap rounded-pill workflow-bar">
-                                <span class="fw-semibold text-warning d-inline-flex align-items-center" style="letter-spacing: 0.2px;">
-                                    <i class="bi bi-info-circle" style="margin-right: 8px; font-size: 0.95rem;"></i> Alur Cepat :
+                            <!-- Workflow Steps (Clean Text-Only Stepper, No Numbers, Generous Spacing) -->
+                            <div class="d-flex align-items-center flex-wrap" style="font-size: 0.86rem; color: rgba(255, 255, 255, 0.9); gap: 14px;">
+                                <span class="fw-semibold text-warning d-inline-flex align-items-center gap-2" style="letter-spacing: 0.2px;">
+                                    <i class="bi bi-info-circle" style="font-size: 0.95rem;"></i>
+                                    <span>Alur Cepat :</span>
                                 </span>
-                                <span class="d-inline-flex align-items-center">
-                                    <b class="text-white" style="margin-right: 6px;">1.</b> Pilih Indikator Master
-                                </span>
+                                <span class="text-white fw-medium">Pilih Indikator Master</span>
                                 <i class="bi bi-chevron-right text-white text-opacity-40" style="font-size: 0.72rem;"></i>
-                                <span class="d-inline-flex align-items-center">
-                                    <b class="text-white" style="margin-right: 6px;">2.</b> Pilih Tahun Data
-                                </span>
+                                <span class="text-white fw-medium">Pilih Tahun Data</span>
                                 <i class="bi bi-chevron-right text-white text-opacity-40" style="font-size: 0.72rem;"></i>
-                                <span class="d-inline-flex align-items-center">
-                                    <b class="text-white" style="margin-right: 6px;">3.</b> Klik Tampilkan Grafik &amp; Tabel
-                                </span>
+                                <span class="text-white fw-medium">Klik Tampilkan Grafik &amp; Tabel</span>
                             </div>
                         </div>
                     </div>
@@ -988,239 +1042,141 @@
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                             <div>
                                 <h5 id="ts-result-title" class="mb-2 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 1.15rem;">Hasil Analisis Deret Waktu</h5>
-                                <div id="ts-result-badges" class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-0.5" style="display:none;"></div>
+                <div id="ts-result-badges" class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-0.5" style="display:none;"></div>
                             </div>
                             <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <!-- Unified Export Dropdown (Always Accessible) -->
+                                <div class="dropdown" id="ts-unified-export-dropdown">
+                                    <button class="btn btn-primary btn-sm dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm px-3 py-1.5" type="button" id="btn-ts-main-export" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.84rem; border-radius: 8px; font-weight: 600;">
+                                        <i class="bi bi-download"></i> <span>Unduh / Ekspor</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="btn-ts-main-export">
+                                        <li class="dropdown-header-custom">Laporan Visual & Dokumen</li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="openTimeSeriesExportModal()">
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">Laporan Resmi (PDF / PNG)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Termasuk grafik, tren, & tabel</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="dropdown-header-custom">Matriks Data Mentah Tabular</li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="exportTimeSeriesExcel()">
+                                                <i class="bi bi-file-earmark-excel text-success fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">Microsoft Excel (.xlsx)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Seluruh angka & baris tabel</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="exportTimeSeriesCSV()">
+                                                <i class="bi bi-filetype-csv text-primary fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">File CSV (.csv)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Format teks dipisah koma</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                                 <button class="btn btn-outline-secondary btn-sm" id="btn-ts-back" onclick="backToTablePicker()" style="display:none; border-radius: 8px;">← Kembali</button>
                             </div>
                         </div>
 
                         <!-- Quick Insights Summary Bar -->
-                        <div id="ts-quick-summary-container" class="row row-cols-1 row-cols-sm-3 g-2 mb-3" style="display:none;">
-                            <div class="col">
-                                <div class="ts-insight-card d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <div class="text-muted small" style="font-size:0.72rem; font-weight:600;"><i class="bi bi-database"></i> TOTAL TITIK DATA</div>
-                                        <div class="fs-5 fw-bold text-dark" id="ts-stat-total-points">-</div>
-                                    </div>
-                                    <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary"><i class="bi bi-graph-up fs-6"></i></div>
+                        <div id="ts-quick-summary-container" class="row row-cols-1 row-cols-sm-3 g-3 mb-3 align-items-stretch" style="display:none;">
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-center">
+                                    <div class="text-muted text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px;">Total Titik Data</div>
+                                    <div class="fs-5 fw-bold text-dark" id="ts-stat-total-points">-</div>
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="ts-insight-card d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <div class="text-muted small" style="font-size:0.72rem; font-weight:600;"><i class="bi bi-graph-up"></i> RENTANG NILAI (MIN - MAX)</div>
-                                        <div class="fs-5 fw-bold text-success" id="ts-stat-range">-</div>
-                                    </div>
-                                    <div class="rounded-circle p-2 bg-success bg-opacity-10 text-success"><i class="bi bi-arrow-down-up fs-6"></i></div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-center">
+                                    <div class="text-muted text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px;">Rentang Nilai (Min - Max)</div>
+                                    <div class="fs-5 fw-bold text-success" id="ts-stat-range">-</div>
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="ts-insight-card d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <div class="text-muted small" style="font-size:0.72rem; font-weight:600;"><i class="bi bi-calendar"></i> TAHUN OBSERVASI</div>
-                                        <div class="fs-5 fw-bold text-ts-purple" id="ts-stat-years">-</div>
-                                    </div>
-                                    <div class="rounded-circle p-2 bg-purple bg-opacity-10 text-ts-purple"><i class="bi bi-calendar3 fs-6"></i></div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-center">
+                                    <div class="text-muted text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px;">Tahun Observasi</div>
+                                    <div class="fs-5 fw-bold" style="color: #d97706;" id="ts-stat-years">-</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Trend Insights Banner -->
-                        <div class="ts-trend-banner mb-3" onclick="toggleTimeSeriesInsights()" role="button" tabindex="0">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="ts-trend-banner-icon">
-                                    <i class="bi bi-lightbulb-fill"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-bold text-white" style="font-size:0.95rem;">Wawasan Tren & Pertumbuhan</div>
-                                    <div class="text-white-50" style="font-size:0.78rem;">Analisis pertumbuhan, tren wilayah, dan perbandingan antar kecamatan</div>
-                                </div>
-                                <div class="ts-trend-banner-cta text-white fw-semibold" style="font-size:0.82rem;">
-                                    Lihat Analisis <i class="bi bi-arrow-right"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Expandable Trend & Growth Insights Drawer -->
-                        <div id="ts-insights-drawer" class="ts-insights-drawer mb-3" style="display: none;">
-                            <div class="ts-insights-card p-3 p-md-4 rounded-3 border shadow-sm">
-                                <!-- Header Panel -->
-                                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                                    <div class="d-flex align-items-center gap-2.5">
-                                        <div class="ts-insight-header-icon"><i class="bi bi-stars text-warning fs-5"></i></div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.96rem;">Analisis Pertumbuhan & Tren Wilayah</h6>
-                                            <small class="text-muted" id="ts-insights-subtitle" style="font-size: 0.77rem;">Berdasarkan perubahan data antar tahun observasi</small>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-link p-1 text-muted text-decoration-none" onclick="toggleTimeSeriesInsights(false)" title="Tutup Panel" style="font-size: 1.1rem; line-height: 1;">
-                                        <i class="bi bi-x-circle-fill"></i>
+                        <!-- View Mode Switcher Toolbar (Executive Segmented Control) -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3 px-4 py-2.5 rounded-3" id="ts-view-mode-bar" style="display:none; background: var(--bg-card, #ffffff); border: 1px solid var(--border, #e2e8f0); box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                            <div class="d-flex align-items-center flex-wrap gap-3">
+                                <span class="ts-view-mode-label me-1">
+                                    <i class="bi bi-layout-text-window-reverse text-primary"></i> MODE TAMPILAN:
+                                </span>
+                                <div class="ts-segmented-control" id="ts-view-mode-group">
+                                    <button type="button" class="ts-segmented-btn active" id="btn-ts-view-chart" onclick="setTimeSeriesViewMode('chart')">
+                                        <i class="bi bi-graph-up text-primary"></i> <span>Grafik</span>
+                                    </button>
+                                    <button type="button" class="ts-segmented-btn" id="btn-ts-view-table" onclick="setTimeSeriesViewMode('table')">
+                                        <i class="bi bi-table text-success"></i> <span>Tabel Data</span>
+                                    </button>
+                                    <button type="button" class="ts-segmented-btn" id="btn-ts-view-both" onclick="setTimeSeriesViewMode('both')">
+                                        <i class="bi bi-layout-split text-info"></i> <span>Keduanya</span>
                                     </button>
                                 </div>
-
-                                <!-- 3 Highlight Metric Cards -->
-                                <div class="row row-cols-1 row-cols-md-3 g-3 mb-4" id="ts-insights-metric-cards">
-                                    <div class="col">
-                                        <div class="ts-highlight-stat-card ts-stat-gainer p-3 rounded-3 border">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="ts-stat-tag text-success fw-bold" style="font-size: 0.76rem;"><i class="bi bi-graph-up-arrow"></i> KENAIKAN TERTINGGI</span>
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 fw-bold" id="ts-gainer-badge" style="font-size: 0.78rem;">+0%</span>
-                                            </div>
-                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-gainer-name">-</div>
-                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-gainer-detail">-</div>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="ts-highlight-stat-card ts-stat-decliner p-3 rounded-3 border">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="ts-stat-tag text-danger fw-bold" style="font-size: 0.76rem;"><i class="bi bi-graph-down-arrow"></i> PENURUNAN TERBESAR</span>
-                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 fw-bold" id="ts-decliner-badge" style="font-size: 0.78rem;">-0%</span>
-                                            </div>
-                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-decliner-name">-</div>
-                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-decliner-detail">-</div>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="ts-highlight-stat-card ts-stat-avg p-3 rounded-3 border">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="ts-stat-tag text-primary fw-bold" style="font-size: 0.76rem;"><i class="bi bi-activity"></i> RATA-RATA PERTUMBUHAN</span>
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 fw-bold" id="ts-avg-badge" style="font-size: 0.78rem;">0% / thn</span>
-                                            </div>
-                                            <div class="fw-bold text-dark fs-6 mt-1.5" id="ts-trend-summary">Tren Keseluruhan</div>
-                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-trend-detail">-</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Growth Ranking Section with Filter Toolbar Directly Above Table -->
-                                <div class="pt-3 border-top">
-                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-1">
-                                        <label class="fw-bold text-dark small mb-0 d-flex align-items-center gap-2" style="font-size: 0.88rem;">
-                                            <i class="bi bi-bar-chart-steps text-primary fs-6 me-1.5"></i> <span>Peringkat Pertumbuhan Rincian</span>
-                                        </label>
-                                        <span class="text-muted" style="font-size: 0.78rem;" id="ts-growth-table-count">-</span>
-                                    </div>
-
-                                    <!-- Filter Toolbar (Top-aligned Labels) -->
-                                    <div class="p-3 rounded-3 mb-3 border ts-insight-filter-bar">
-                                        <div class="row g-2.5 align-items-end">
-                                            <!-- 1. Varian Rincian (muncul jika query memiliki > 1 varian) -->
-                                            <div class="col-12 col-sm-6 col-md-3 flex-column" id="ts-insight-variant-container" style="display:none;">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-variant">
-                                                    <i class="bi bi-diagram-3 text-primary me-1.5"></i> Varian Rincian:
-                                                </label>
-                                                <select id="ts-insight-select-variant" class="ts-insight-select w-100" onchange="onInsightVariantFilterChanged()"></select>
-                                            </div>
-
-                                            <!-- 2. Searchable Checklist Dropdown for Rincian -->
-                                            <div class="col-12 col-sm-6 col-md-3">
-                                                <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-entity">
-                                                    <i class="bi bi-funnel text-primary me-1.5"></i> Rincian:
-                                                </label>
-                                                <div class="dropdown w-100" id="ts-insight-entity-dropdown-container">
-                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-entity" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
-                                                        <span class="text-truncate" id="ts-insight-entity-btn-text">Semua Rincian</span>
-                                                    </button>
-                                                    <div class="dropdown-menu p-2 shadow" style="max-height:300px; width:260px;" id="ts-insight-entity-menu">
-                                                        <div class="px-1 pb-2 mb-1 border-bottom" onclick="event.stopPropagation();">
-                                                            <input type="text" id="ts-insight-entity-search" class="form-control form-control-sm" placeholder="Cari rincian..." style="font-size:0.78rem;">
-                                                        </div>
-                                                        <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
-                                                            <input type="checkbox" id="ts-insight-check-all" checked style="width:16px;height:16px;">
-                                                            <span>Pilih Semua</span>
-                                                        </label>
-                                                        <div id="ts-insight-entity-list" style="max-height:180px; overflow-y:auto;"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- 3. Multi-Select Checklist Filter Tren -->
-                                             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                                                 <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-trend">
-                                                     <i class="bi bi-arrow-down-up text-primary me-1.5"></i> Filter Tren:
-                                                 </label>
-                                                 <div class="dropdown w-100" id="ts-insight-trend-dropdown-container">
-                                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-trend" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
-                                                         <span class="text-truncate" id="ts-insight-trend-btn-text">Semua Tren</span>
-                                                     </button>
-                                                     <div class="dropdown-menu p-2 shadow" style="width:230px;" id="ts-insight-trend-menu">
-                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
-                                                             <input type="checkbox" id="ts-insight-trend-check-all" checked style="width:16px;height:16px;">
-                                                             <span>Pilih Semua</span>
-                                                         </label>
-                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="up" checked style="width:16px;height:16px;">
-                                                             <span class="text-success fw-semibold">▲ Peningkatan (Naik)</span>
-                                                         </label>
-                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="down" checked style="width:16px;height:16px;">
-                                                             <span class="text-danger fw-semibold">▼ Penurunan (Turun)</span>
-                                                         </label>
-                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="stagnant" checked style="width:16px;height:16px;">
-                                                             <span class="text-secondary">― Stagnan / Tetap (0%)</span>
-                                                         </label>
-                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="empty" checked style="width:16px;height:16px;">
-                                                             <span class="text-muted">- Belum Lengkap / Strip</span>
-                                                         </label>
-                                                     </div>
-                                                 </div>
-                                             </div>
-
-                                            <!-- 4. Tahun Awal -->
-                                            <div class="col-6 col-sm-4 col-md-2">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
-                                                    <i class="bi bi-calendar-event text-primary me-1.5"></i> Tahun Awal:
-                                                </label>
-                                                <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                            </div>
-
-                                            <!-- 5. Tahun Akhir -->
-                                            <div class="col-6 col-sm-4 col-md-2">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
-                                                    <i class="bi bi-calendar-check text-primary me-1.5"></i> Tahun Akhir:
-                                                </label>
-                                                <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                            </div>
-
-                                            <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
-                                            <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">
-                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-indicator">
-                                                    <i class="bi bi-tag text-primary me-1.5"></i> Indikator:
-                                                </label>
-                                                <select id="ts-insight-select-indicator" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Table Area -->
-                                    <div class="table-responsive rounded-2 border" style="max-height: 260px; overflow-y: auto;">
-                                        <table class="table table-sm table-hover mb-0" style="font-size: 0.82rem;" id="ts-growth-ranking-table">
-                                            <thead class="table-light sticky-top" style="z-index: 2; font-size: 0.75rem; text-transform: uppercase;">
-                                                <tr>
-                                                    <th style="width: 50px; text-align: center;">#</th>
-                                                    <th>Rincian</th>
-                                                    <th style="text-align: right;" id="ts-th-year-start">Awal</th>
-                                                    <th style="text-align: right;" id="ts-th-year-end">Akhir</th>
-                                                    <th style="text-align: right;">Selisih Nominal</th>
-                                                    <th style="text-align: right;">Perubahan (%)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="ts-growth-ranking-tbody">
-                                                <tr><td colspan="6" class="text-center py-3 text-muted">Memuat peringkat...</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                            </div>
+                            <div class="d-flex align-items-center ms-auto">
+                                <span class="ts-view-mode-hint-badge" id="ts-view-mode-hint">
+                                    <i class="bi bi-info-circle me-1"></i> Visualisasi grafik deret waktu & analisis tren
+                                </span>
                             </div>
                         </div>
-                        <!-- Time Series Chart Area -->
-                        <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
-                            <div id="ts-chart-title-1" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;display:none;"></div>
-                            <!-- Kustom Legenda (Fixed) -->
-                            <div id="ts-custom-legend" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+
+                        <!-- SECTION 1: CHART VIEW (Fokus Visual & Analisis Tren) -->
+                        <div id="ts-view-section-chart">
+                            <!-- Chart Controls Card: Unit Converter + Display Options (Badge & Tooltip) + Entity Filter -->
+                            <div id="ts-chart-control-card" class="ts-data-control-card mb-3 border shadow-sm" style="display:none; background: #ffffff; padding: 18px 22px; border-radius: 12px;">
+                                <!-- Top Row: Unit Converter (Left) & Display Options (Right) -->
+                                <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-chart-top-control-bar">
+                                    <!-- Chart Unit Converter -->
+                                    <div id="ts-chart-unit-wrapper" class="d-flex flex-column" style="display:none;">
+                                        <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
+                                        <div id="ts-chart-unit-btn-group" class="d-flex gap-2 flex-wrap mt-1"></div>
+                                    </div>
+
+                                    <!-- Chart Display Toggles: Badge Naik/Turun & Tooltip -->
+                                    <div class="d-flex flex-column gap-2 ms-auto" id="ts-chart-display-toggles-container">
+                                        <span class="ts-filter-section-title"><i class="bi bi-sliders text-secondary me-2"></i> OPSI TAMPILAN:</span>
+                                        <div class="d-flex align-items-center flex-wrap pt-0.5" style="gap: 12px;">
+                                            <label class="ts-filter-chip active" id="ts-chart-badge-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
+                                                <input type="checkbox" id="ts-chart-growth-badge-toggle" checked>
+                                                <span>Badge Naik/Turun</span>
+                                            </label>
+                                            <label class="ts-filter-chip active" id="ts-chart-tooltip-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
+                                                <input type="checkbox" id="ts-chart-tooltip-toggle" checked>
+                                                <span>Tooltip</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom Row: Entity Filter -->
+                                <div class="d-flex flex-column gap-2 w-100" id="ts-chart-entity-wrapper">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <span class="ts-filter-section-title"><i class="bi bi-funnel-fill text-primary me-2"></i> FILTER RINCIAN:</span>
+                                    </div>
+                                    <div id="ts-entity-checklist-chart" class="d-flex align-items-center"></div>
+                                </div>
+                            </div>
+
+                            <!-- Time Series Chart Area -->
+                            <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
+                                <div id="ts-chart-title-1" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;display:none;"></div>
+                                
+                                <!-- Kustom Legenda (Fixed) -->
+                                <div id="ts-custom-legend" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
                             
                             <!-- Area Render Grafik -->
                             <div class="d-flex align-items-start" style="height:350px; position:relative;">
@@ -1256,32 +1212,201 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Trend Insights Banner -->
+                        <div class="ts-trend-banner mb-3" onclick="toggleTimeSeriesInsights()" role="button" tabindex="0">
+                            <div>
+                                <div class="fw-bold text-white" style="font-size:0.95rem; letter-spacing:0.2px;">Wawasan Tren & Pertumbuhan</div>
+                                <div style="color: #94a3b8; font-size:0.78rem;">Analisis pertumbuhan, tren wilayah, dan perbandingan antar kecamatan</div>
+                            </div>
+                            <div class="ts-trend-banner-cta">
+                                <span>Lihat Analisis</span> <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Expandable Trend & Growth Insights Drawer -->
+                        <div id="ts-insights-drawer" class="ts-insights-drawer mb-3" style="display: none;">
+                            <div class="ts-insights-card p-3 p-md-4 rounded-3 border shadow-sm">
+                                <!-- Header Panel -->
+                                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.96rem;">Analisis Pertumbuhan & Tren Wilayah</h6>
+                                        <small class="text-muted" id="ts-insights-subtitle" style="font-size: 0.77rem;">Berdasarkan perubahan data antar tahun observasi</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-link p-1 text-muted text-decoration-none" onclick="toggleTimeSeriesInsights(false)" title="Tutup Panel" style="font-size: 1.1rem; line-height: 1;">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                </div>
+
+                                <!-- 3 Highlight Metric Cards -->
+                                <div class="row row-cols-1 row-cols-md-3 g-3 mb-4" id="ts-insights-metric-cards">
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-gainer p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="ts-stat-tag text-success fw-bold" style="font-size: 0.76rem;">KENAIKAN TERTINGGI</span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 fw-bold" id="ts-gainer-badge" style="font-size: 0.78rem;">+0%</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-gainer-name">-</div>
+                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-gainer-detail">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-decliner p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="ts-stat-tag text-danger fw-bold" style="font-size: 0.76rem;">PENURUNAN TERBESAR</span>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 fw-bold" id="ts-decliner-badge" style="font-size: 0.78rem;">-0%</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-decliner-name">-</div>
+                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-decliner-detail">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-avg p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="ts-stat-tag text-primary fw-bold" style="font-size: 0.76rem;">RATA-RATA PERTUMBUHAN</span>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 fw-bold" id="ts-avg-badge" style="font-size: 0.78rem;">0% / thn</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 mt-1.5" id="ts-trend-summary">Tren Keseluruhan</div>
+                                            <div class="text-muted small mt-1" style="font-size: 0.76rem;" id="ts-trend-detail">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Growth Ranking Section with Filter Toolbar Directly Above Table -->
+                                <div class="pt-3 border-top">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-1">
+                                        <label class="fw-bold text-dark small mb-0" style="font-size: 0.88rem;">
+                                            <span>Peringkat Pertumbuhan Rincian</span>
+                                        </label>
+                                        <span class="text-muted" style="font-size: 0.78rem;" id="ts-growth-table-count">-</span>
+                                    </div>
+
+                                    <!-- Filter Toolbar (Top-aligned Labels) -->
+                                    <div class="p-3 rounded-3 mb-3 border ts-insight-filter-bar">
+                                        <div class="row g-2.5 align-items-end">
+                                            <!-- 1. Varian Rincian (muncul jika query memiliki > 1 varian) -->
+                                            <div class="col-12 col-sm-6 col-md-3 flex-column" id="ts-insight-variant-container" style="display:none;">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-variant">
+                                                    Varian Rincian:
+                                                </label>
+                                                <select id="ts-insight-select-variant" class="ts-insight-select w-100" onchange="onInsightVariantFilterChanged()"></select>
+                                            </div>
+
+                                            <!-- 2. Searchable Checklist Dropdown for Rincian -->
+                                            <div class="col-12 col-sm-6 col-md-3">
+                                                <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-entity">
+                                                    Rincian:
+                                                </label>
+                                                <div class="dropdown w-100" id="ts-insight-entity-dropdown-container">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-entity" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
+                                                        <span class="text-truncate" id="ts-insight-entity-btn-text">Semua Rincian</span>
+                                                    </button>
+                                                    <div class="dropdown-menu p-2 shadow" style="max-height:300px; width:260px;" id="ts-insight-entity-menu" onclick="event.stopPropagation();">
+                                                        <div class="px-1 pb-2 mb-1 border-bottom">
+                                                            <input type="text" id="ts-insight-entity-search" class="form-control form-control-sm" placeholder="Cari rincian..." style="font-size:0.78rem;">
+                                                        </div>
+                                                        <div class="d-flex align-items-center gap-2 px-2 py-1 mb-1 border-bottom">
+                                                            <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-bold text-primary" id="btn-ts-insight-select-all" style="font-size:0.78rem;">Pilih Semua</button>
+                                                            <span class="text-muted" style="font-size:0.75rem;">|</span>
+                                                            <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-semibold text-danger" id="btn-ts-insight-clear-all" style="font-size:0.78rem;">Hapus Semua</button>
+                                                        </div>
+                                                        <div id="ts-insight-entity-list" style="max-height:180px; overflow-y:auto;"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. Multi-Select Checklist Filter Tren -->
+                                             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                                 <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-trend">
+                                                     Filter Tren:
+                                                 </label>
+                                                 <div class="dropdown w-100" id="ts-insight-trend-dropdown-container">
+                                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-trend" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
+                                                         <span class="text-truncate" id="ts-insight-trend-btn-text">Semua Tren</span>
+                                                     </button>
+                                                     <div class="dropdown-menu p-2 shadow" style="width:230px;" id="ts-insight-trend-menu">
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
+                                                             <input type="checkbox" id="ts-insight-trend-check-all" checked style="width:16px;height:16px;">
+                                                             <span>Pilih Semua</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="up" checked style="width:16px;height:16px;">
+                                                             <span class="text-success fw-semibold">▲ Peningkatan (Naik)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="down" checked style="width:16px;height:16px;">
+                                                             <span class="text-danger fw-semibold">▼ Penurunan (Turun)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="stagnant" checked style="width:16px;height:16px;">
+                                                             <span class="text-secondary">― Stagnan / Tetap (0%)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="empty" checked style="width:16px;height:16px;">
+                                                             <span class="text-muted">- Belum Lengkap / Strip</span>
+                                                         </label>
+                                                     </div>
+                                                 </div>
+                                             </div>
+
+                                            <!-- 4. Tahun Awal -->
+                                            <div class="col-6 col-sm-4 col-md-2">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
+                                                    Tahun Awal:
+                                                </label>
+                                                <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                            </div>
+
+                                            <!-- 5. Tahun Akhir -->
+                                            <div class="col-6 col-sm-4 col-md-2">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
+                                                    Tahun Akhir:
+                                                </label>
+                                                <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                            </div>
+
+                                            <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
+                                            <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-indicator">
+                                                    Indikator:
+                                                </label>
+                                                <select id="ts-insight-select-indicator" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Table Area -->
+                                    <div class="table-responsive rounded-2 border" style="max-height: 260px; overflow-y: auto;">
+                                        <table class="table table-sm table-hover mb-0" style="font-size: 0.82rem;" id="ts-growth-ranking-table">
+                                            <thead class="table-light sticky-top" style="z-index: 2; font-size: 0.75rem; text-transform: uppercase;">
+                                                <tr>
+                                                    <th style="width: 50px; text-align: center;">No.</th>
+                                                    <th>Rincian</th>
+                                                    <th style="text-align: right;" id="ts-th-year-start">Awal</th>
+                                                    <th style="text-align: right;" id="ts-th-year-end">Akhir</th>
+                                                    <th style="text-align: right;">Selisih Nominal</th>
+                                                    <th style="text-align: right;">Perubahan (%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ts-growth-ranking-tbody">
+                                                <tr><td colspan="6" class="text-center py-3 text-muted">Memuat peringkat...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- SECTION 2: TABLE VIEW (Fokus Data Tabular & Ekspor) -->
+                        <div id="ts-view-section-table" style="display:none;">
                         <!-- Unified TS Data Controls Card: Unit Converter + Column Filters + Display Toggles + Entity Checklist -->
                         <div id="ts-data-control-card" class="ts-data-control-card mb-4 border shadow-sm" style="display:none; background: #ffffff; padding: 22px 24px; border-radius: 12px;">
-                            <!-- Top Control Bar: Unit Converter (Left) & Display Toggles (Right) -->
+                            <!-- Top Control Bar: Unit Converter -->
                             <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-top-control-bar">
                                 <!-- Universal Unit Converter Bar (if active) -->
                                 <div id="ts-unit-converter-container" class="d-flex flex-column" style="display:none;">
                                     <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
                                     <div id="ts-unit-btn-group" class="d-flex gap-2 flex-wrap mt-1"></div>
-                                </div>
-
-                                <!-- Right Side: Display Toggles (Badge & Tooltip) -->
-                                <div class="d-flex align-items-start flex-wrap gap-4 ms-auto" id="ts-display-and-entity-tools">
-                                    <!-- Module 2: Opsi Tampilan -->
-                                    <div class="d-flex flex-column gap-2" id="ts-display-toggles-container">
-                                        <span class="ts-filter-section-title"><i class="bi bi-sliders text-secondary me-2"></i> OPSI TAMPILAN:</span>
-                                        <div class="d-flex align-items-center flex-wrap pt-0.5" style="gap: 12px;">
-                                            <label class="ts-filter-chip active" id="ts-badge-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
-                                                <input type="checkbox" id="ts-growth-badge-toggle" checked>
-                                                <span>Badge Naik/Turun</span>
-                                            </label>
-                                            <label class="ts-filter-chip active" id="ts-tooltip-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
-                                                <input type="checkbox" id="ts-tooltip-toggle" checked>
-                                                <span>Tooltip</span>
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -1300,38 +1425,18 @@
                             </div>
                         </div>
 
-                        <!-- Toolbar Tabel & Tombol Ekspor Terkategori & Lacak Sumber Data -->
-                        <div class="d-flex justify-content-between align-items-center mt-3 mb-2 flex-wrap gap-3 pt-2 border-top">
-                            <div class="d-flex align-items-center gap-2">
-                                <h6 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.95rem;">
-                                    <i class="bi bi-table text-primary"></i> Tabel Data Deret Waktu
+                        <!-- Toolbar Tabel & Tombol Ekspor Data Tabular & Lacak Sumber Data -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 mb-2 flex-nowrap gap-2 pt-2 border-top" style="overflow-x: auto; scrollbar-width: none;">
+                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                <h6 class="mb-0 fw-bold text-dark text-nowrap" style="font-size: 0.95rem;">
+                                    Tabel Data Deret Waktu
                                 </h6>
                             </div>
-                            <div class="d-flex align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center flex-nowrap gap-2 flex-shrink-0">
                                 <!-- Admin Data Lineage -->
                                 <button class="btn btn-outline-primary btn-sm align-items-center gap-1.5 shadow-sm admin-only" id="btn-ts-toggle-sources" onclick="toggleTimeSeriesSources()" title="Lacak Asal Sumber Data (Publikasi, Tabel, dan Kolom Asal)" style="display:none;">
                                     <i class="bi bi-diagram-3"></i> <span>Lacak Asal Sumber Data</span>
                                 </button>
-
-                                <!-- Kelompok 1: Laporan Lengkap (Visual & Tren) -->
-                                <button class="btn btn-danger btn-sm d-flex align-items-center gap-1.5 shadow-sm px-3" onclick="openTimeSeriesExportModal()" title="Unduh laporan dokumen PDF atau gambar PNG (bisa berisi grafik, ringkasan tren, dan/atau tabel data)">
-                                    <i class="bi bi-file-earmark-pdf-fill"></i>
-                                    <span>Unduh Laporan & Grafik (PDF / PNG)</span>
-                                </button>
-
-                                <!-- Garis Pemisah Proporsional -->
-                                <div class="d-none d-sm-block separator-v"></div>
-
-                                <!-- Kelompok 2: Data Mentah Tabular -->
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="text-secondary fw-bold d-none d-md-inline" style="font-size: 0.76rem; letter-spacing: 0.3px;">Data Tabel:</span>
-                                    <button class="btn btn-success btn-sm d-flex align-items-center gap-1.5 shadow-sm btn-ts-export-primary px-2.5" onclick="exportTimeSeriesExcel()" title="Unduh seluruh angka matriks tabel data dalam format Excel (.xlsx)">
-                                        <i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)
-                                    </button>
-                                    <button class="btn btn-ts-export-csv btn-sm d-flex align-items-center gap-1.5 shadow-sm px-2.5" onclick="exportTimeSeriesCSV()" title="Unduh seluruh angka matriks tabel data dalam format CSV">
-                                        <i class="bi bi-filetype-csv"></i> CSV
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
@@ -1368,6 +1473,7 @@
                                     <tbody id="ts-sources-lineage-body"></tbody>
                                 </table>
                             </div>
+                        </div>
                         </div>
                     </div>
                     <div id="ts-results-empty" class="text-center text-danger py-4" style="display:none;">Data tidak ditemukan untuk kata kunci tersebut.</div>
@@ -2171,29 +2277,29 @@
     <div class="modal fade" id="modal-ts-export-custom" tabindex="-1" aria-labelledby="modalTsExportTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
-                <!-- Modal Header: Explicit dark gradient and crystal white text -->
-                <div class="modal-header px-4 py-3.5 border-0 modal-header-violet">
+                <!-- Modal Header: Executive Pure White / Clean Minimalist -->
+                <div class="modal-header px-4 py-3.5 bg-white border-bottom">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(255, 255, 255, 0.18); width: 42px; height: 42px;">
-                            <i class="bi bi-cloud-arrow-down-fill fs-5 text-warning"></i>
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle" style="width: 42px; height: 42px;">
+                            <i class="bi bi-cloud-arrow-down-fill fs-5"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0" id="modalTsExportTitle" style="font-size: 1.08rem; letter-spacing: -0.2px; color: #ffffff !important;">
+                            <h5 class="modal-title fw-bold mb-0 text-dark" id="modalTsExportTitle" style="font-size: 1.05rem; letter-spacing: -0.2px;">
                                 Unduh Laporan & Grafik Deret Waktu
                             </h5>
-                            <div style="font-size: 0.78rem; color: #cbd5e1 !important; margin-top: 3px;">
+                            <div class="text-muted small" style="font-size: 0.78rem; margin-top: 2px;">
                                 Kustomisasi format dokumen dan komponen data yang ingin disertakan
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white opacity-75" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body p-4 modal-body-light">
                     <!-- 1. Pilihan Format File (PDF vs PNG) -->
                     <div class="mb-4 pb-1">
-                        <label class="form-label fw-bold text-dark d-flex align-items-center gap-2 mb-2.5" style="font-size: 0.86rem; letter-spacing: 0.2px;">
-                            <i class="bi bi-file-earmark-arrow-down text-primary fs-6"></i> 1. PILIH FORMAT BERKAS:
+                        <label class="form-label fw-bold text-dark mb-2.5" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                            1. PILIH FORMAT BERKAS:
                         </label>
                         <div class="row g-3">
                             <div class="col-sm-6">
@@ -2204,7 +2310,7 @@
                                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> Dokumen PDF (.pdf)
                                         </div>
                                         <div class="text-muted small mt-1.5" style="font-size: 0.76rem; line-height: 1.4;">
-                                            Laporan eksekutif resmi BPS siap cetak / arsip (A4) lengkap dengan Kop, Metadata & Tanggal.
+                                            Laporan resmi SIPEDAS siap cetak / arsip (A4) lengkap dengan cover, grafik, dan tabel data.
                                         </div>
                                     </div>
                                 </label>
@@ -2217,7 +2323,7 @@
                                             <i class="bi bi-file-earmark-image-fill text-primary fs-5"></i> Gambar High-Res (.png)
                                         </div>
                                         <div class="text-muted small mt-1.5" style="font-size: 0.76rem; line-height: 1.4;">
-                                            Gambar grafis resolusi tinggi (High DPI) sangat tajam untuk bahan presentasi PowerPoint.
+                                            Gambar grafis resolusi tinggi (High DPI) sangat tajam untuk bahan paparan dan presentasi.
                                         </div>
                                     </div>
                                 </label>
@@ -2228,36 +2334,38 @@
                     <!-- 2. Pilihan Komponen yang Disertakan -->
                     <div class="mb-4 pb-1">
                         <div class="d-flex align-items-center justify-content-between mb-2.5">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center gap-2 mb-0" style="font-size: 0.86rem; letter-spacing: 0.2px;">
-                                <i class="bi bi-check2-square text-primary fs-6"></i> 2. KOMPONEN YANG INGIN DISERTAKAN:
+                            <label class="form-label fw-bold text-dark mb-0" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                                2. KOMPONEN YANG INGIN DISERTAKAN:
                             </label>
                             <span class="badge bg-primary-subtle text-primary border px-2.5 py-1" style="font-size: 0.73rem;">Bebas dipilih</span>
                         </div>
 
-                        <!-- Quick Presets -->
-                        <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 8px;">
-                            <span class="text-secondary small fw-bold me-1" style="font-size: 0.76rem;">Preset Cepat:</span>
-                            <button type="button" class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill" onclick="applyExportPreset('all')" style="font-size: 0.76rem; font-weight:600;">
-                                <i class="bi bi-star text-warning"></i> Laporan Lengkap (Semua)
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2.5 rounded-pill" onclick="applyExportPreset('chart')" style="font-size: 0.76rem;">
-                                <i class="bi bi-bar-chart"></i> Hanya Grafik
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2.5 rounded-pill" onclick="applyExportPreset('table')" style="font-size: 0.76rem;">
-                                <i class="bi bi-file-earmark-text text-info"></i> Hanya Tabel
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2.5 rounded-pill" onclick="applyExportPreset('chart_insights')" style="font-size: 0.76rem;">
-                                <i class="bi bi-graph-up"></i> Grafik + Tren
-                            </button>
+                        <!-- Quick Presets (Segmented Pill Group) -->
+                        <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 10px;">
+                            <span class="text-secondary small fw-bold" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Cepat:</span>
+                            <div class="ts-export-preset-group" id="ts-export-preset-container">
+                                <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
+                                    Laporan Lengkap (Semua)
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="chart" onclick="applyExportPreset('chart')">
+                                    Hanya Grafik
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="table" onclick="applyExportPreset('table')">
+                                    Hanya Tabel
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="chart_insights" onclick="applyExportPreset('chart_insights')">
+                                    Grafik + Tren
+                                </button>
+                            </div>
                         </div>
 
                         <div class="bg-white rounded-3 border shadow-xs d-flex flex-column" style="padding: 14px; gap: 10px;">
                             <!-- Komponen A: Grafik Visual -->
                             <label class="d-flex align-items-start rounded-3 ts-export-component-item cursor-pointer" style="padding: 12px 14px; gap: 12px; margin: 0;">
-                                <input type="checkbox" id="ts-export-opt-chart" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                <input type="checkbox" id="ts-export-opt-chart" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
                                 <div class="w-100">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;"><i class="bi bi-graph-up text-primary me-1.5"></i> Grafik Visual Deret Waktu</span>
+                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;">Grafik Visual Deret Waktu</span>
                                         <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Grafik Visual</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Diagram garis pergerakan tren data dari tahun ke tahun beserta titik simpul warna.</div>
@@ -2266,10 +2374,10 @@
 
                             <!-- Komponen B: Tabel Data -->
                             <label class="d-flex align-items-start rounded-3 ts-export-component-item cursor-pointer" style="padding: 12px 14px; gap: 12px; margin: 0;">
-                                <input type="checkbox" id="ts-export-opt-table" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                <input type="checkbox" id="ts-export-opt-table" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
                                 <div class="w-100">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;"><i class="bi bi-table text-success me-1.5"></i> Tabel Data Deret Waktu</span>
+                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;">Tabel Data Deret Waktu</span>
                                         <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Matriks Tabel</span>
                                     </div>
                                     <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Matriks tabel data tabular per rincian wilayah/entitas sesuai satuan aktif yang dipilih.</div>
@@ -2279,10 +2387,10 @@
                             <!-- Komponen C: Analisis Tren & Peringkat Pertumbuhan -->
                             <div class="rounded-3 ts-export-component-item" style="padding: 12px 14px; margin: 0;">
                                 <label class="d-flex align-items-start cursor-pointer w-100 mb-0" style="gap: 12px;">
-                                    <input type="checkbox" id="ts-export-opt-insights" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="toggleInsightsSuboptions(this.checked)">
+                                    <input type="checkbox" id="ts-export-opt-insights" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="toggleInsightsSuboptions(this.checked); syncExportPresetState();">
                                     <div class="w-100">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <span class="fw-bold text-dark" style="font-size: 0.86rem;"><i class="bi bi-lightning-charge text-warning me-1.5"></i> Analisis Tren & Peringkat Pertumbuhan</span>
+                                            <span class="fw-bold text-dark" style="font-size: 0.86rem;">Analisis Tren & Peringkat Pertumbuhan</span>
                                             <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Wawasan & Peringkat</span>
                                         </div>
                                         <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Metrik pertumbuhan tahunan, Top Gainer, Top Decliner, dan tabel urutan pertumbuhan rincian.</div>
@@ -2313,8 +2421,8 @@
 
                     <!-- 3. Pengaturan Tambahan PDF -->
                     <div id="ts-export-pdf-options" class="bg-white rounded-3 border shadow-xs" style="padding: 18px 20px;">
-                        <label class="form-label fw-bold text-dark d-flex align-items-center gap-2 mb-2.5" style="font-size: 0.85rem; letter-spacing: 0.2px;">
-                            <i class="bi bi-sliders text-primary fs-6"></i> 3. PENGATURAN TATA LETAK LAPORAN:
+                        <label class="form-label fw-bold text-dark mb-2.5" style="font-size: 0.85rem; letter-spacing: 0.2px;">
+                            3. PENGATURAN TATA LETAK LAPORAN:
                         </label>
                         <div class="row g-3 align-items-center">
                             <div class="col-sm-6">
@@ -2325,10 +2433,10 @@
                                 </select>
                             </div>
                             <div class="col-sm-6">
-                                <label class="small text-muted fw-medium mb-1.5" style="font-size: 0.76rem;">Kop & Atribusi Resmi:</label>
+                                <label class="small text-muted fw-medium mb-1.5" style="font-size: 0.76rem;">Header Dokumen:</label>
                                 <div class="form-check form-switch pt-1">
                                     <input class="form-check-input" type="checkbox" id="ts-export-include-header" checked style="cursor: pointer;">
-                                    <label class="form-check-label small text-dark fw-medium" for="ts-export-include-header" style="font-size: 0.8rem; cursor: pointer;">Sertakan Logo BPS & Tanggal Cetak</label>
+                                    <label class="form-check-label small text-dark fw-medium" for="ts-export-include-header" style="font-size: 0.8rem; cursor: pointer;">Sertakan Header & Logo SIPEDAS</label>
                                 </div>
                             </div>
                         </div>
@@ -2348,7 +2456,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260830_53" defer></script>
+    <script src="/static/app.js?v=20260904_45" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

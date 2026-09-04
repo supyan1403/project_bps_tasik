@@ -444,7 +444,7 @@ kbd {
     display: none !important;
 }
 body.role-admin #btn-admin-logout {
-    display: flex !important;
+    display: none !important;
 }
 body.role-admin #btn-admin-login {
     display: none !important;
@@ -845,6 +845,18 @@ body.role-pegawai #btn-admin-login {
     border-radius: var(--border-radius-lg) !important;
     max-width: 440px !important;
     box-shadow: var(--shadow-lg) !important;
+}
+
+/* Mobile login modal */
+@media (max-width: 575.98px) {
+    .swal2-popup.sipedas-login-modal {
+        max-width: 92vw !important;
+        padding: 1.25rem 1rem !important;
+        margin: 0.5rem !important;
+    }
+    .swal2-html-container {
+        margin: 0.5rem 0 !important;
+    }
 }
 
 .sipedas-login-input-group {

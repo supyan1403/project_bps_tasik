@@ -1,0 +1,243 @@
+/* ==========================================================================
+   SIPEDAS — Responsive Overrides
+   ========================================================================== */
+
+/* ===================== TABLET: < 992px ===================== */
+@media (max-width: 991.98px) {
+    .main-content {
+        padding: 1rem !important;
+    }
+
+    .widget-value {
+        font-size: 1.4rem;
+    }
+
+    .ts-wizard-box {
+        height: 220px;
+        min-height: 220px;
+        max-height: 220px;
+    }
+
+    .ts-insight-search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .dropzone-modern {
+        min-height: 180px;
+        padding: 24px 16px;
+    }
+
+    .welcome-banner {
+        padding: 1rem 1.25rem;
+    }
+
+    .welcome-banner h4 {
+        font-size: 1.1rem;
+    }
+
+    .welcome-banner p {
+        font-size: 0.82rem;
+    }
+
+    .data-tabel-section-title {
+        font-size: 0.9rem;
+    }
+
+    .glass-panel {
+        padding: 0.85rem 1rem;
+    }
+}
+
+/* ===================== LARGE PHONE: < 768px ===================== */
+@media (max-width: 767.98px) {
+    .widget {
+        padding: 1rem;
+    }
+
+    .widget-value {
+        font-size: 1.25rem;
+    }
+
+    .widget-label {
+        font-size: 0.72rem;
+    }
+
+    .ts-insights-card {
+        padding: 16px !important;
+    }
+
+    .ts-highlight-stat-card {
+        padding: 12px !important;
+    }
+
+    .ts-trend-banner {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .ts-trend-banner-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .info-tile {
+        min-height: auto;
+        padding: 1rem 1.25rem;
+    }
+
+    .settings-card {
+        padding: 1rem;
+    }
+
+    .settings-banner {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .data-tabel-card {
+        padding: 12px 14px;
+    }
+
+    .data-tabel-card-icon {
+        font-size: 1.5rem;
+    }
+
+    .ts-filter-chip {
+        padding: 5px 12px;
+        margin: 2px 3px;
+    }
+
+    .welcome-banner {
+        padding: 0.85rem 1rem;
+    }
+
+    .welcome-banner h4 {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .welcome-banner p {
+        font-size: 0.78rem;
+    }
+
+    .doc-icon-wrapper {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* ===================== SMALL PHONE: < 576px ===================== */
+@media (max-width: 575.98px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
+    .main-content {
+        padding: 0.75rem !important;
+    }
+
+    .widget-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .widget {
+        padding: 0.85rem;
+    }
+
+    .widget-value {
+        font-size: 1.1rem;
+    }
+
+    .widget-label {
+        font-size: 0.68rem;
+    }
+
+    .ts-wizard-box {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+    }
+
+    .ts-vk-chip {
+        max-width: 100% !important;
+    }
+
+    .ts-vk-text {
+        max-width: 100% !important;
+    }
+
+    .ts-insight-search-box {
+        width: 100% !important;
+    }
+
+    .swal2-popup {
+        padding: 1rem !important;
+    }
+
+    .swal2-title {
+        font-size: 1.1rem !important;
+    }
+
+    .dropzone-modern {
+        min-height: 140px;
+        padding: 16px 12px;
+    }
+
+    .dropzone-icon {
+        font-size: 1.4rem;
+    }
+
+    .doc-icon-wrapper {
+        width: 40px;
+        height: 40px;
+    }
+
+    .data-tabel-card-icon {
+        font-size: 1.3rem;
+    }
+
+    .btn-table-action {
+        white-space: normal;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.85rem;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .glass-panel {
+        padding: 0.75rem;
+    }
+
+    .ts-insights-card {
+        padding: 12px !important;
+    }
+
+    .ts-highlight-stat-card {
+        padding: 10px !important;
+    }
+
+    .welcome-banner {
+        padding: 0.75rem;
+    }
+
+    .welcome-banner h4 {
+        font-size: 0.9rem;
+    }
+
+    .welcome-banner p {
+        font-size: 0.72rem;
+    }
+
+    .info-tile {
+        padding: 0.85rem 1rem;
+    }
+}

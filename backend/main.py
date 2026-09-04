@@ -35,7 +35,7 @@ import models
 import schemas
 from database import engine, get_db
 # ... [imports and utility functions] ...
-from pipeline import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS, parse_indonesian_number, get_toc
+from pipeline import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS, parse_indonesian_number
 
 # Trigger reload to load updated INDO_SAFE_WORDS from pipeline_utils
 def clean_bilingual_header(header: str) -> str:
@@ -245,7 +245,9 @@ except Exception as e:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    active_sessions.clear()
+    _db = next(get_db())
+    _clean_expired_sessions(_db)
+    _db.close()
     reset_stuck_extractions()
     yield
 
@@ -264,7 +266,7 @@ def reset_stuck_extractions():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -283,7 +285,7 @@ async def add_cache_control_header(request: Request, call_next):
 # =====================================================================
 # AUTH ROUTER — Session-based admin authentication
 # =====================================================================
-from routers.auth import router as auth_router, require_admin, get_current_role, log_activity, active_sessions
+from routers.auth import router as auth_router, require_admin, get_current_role, log_activity, _clean_expired_sessions
 app.include_router(auth_router)
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -461,6 +463,12 @@ from routers.master_data import (
     suggest_master_columns
 )
 app.include_router(master_data_router)
+
+# =====================================================================
+# EXCEL IMPORT ROUTER
+# =====================================================================
+from routers.import_excel import router as import_excel_router
+app.include_router(import_excel_router)
 
 STANDARD_TASIK_KECAMATAN = [
     "Cipatujah", "Karangnunggal", "Cikalong", "Pancatengah", "Cikatomas",

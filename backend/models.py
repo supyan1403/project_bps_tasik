@@ -36,8 +36,16 @@ class TableRow(Base):
     data = Column(JSON) # Stores dict of column_name: value natively in DB
     is_anomaly = Column(Boolean, default=False)
     sort_order = Column(Integer, index=True) # Urutan tampil (menunjang insert di posisi tertentu)
-    
+
     table = relationship("ExtractedTable", back_populates="rows")
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id = Column(String(64), primary_key=True)  # session_id (token_hex)
+    role = Column(String(20), nullable=False, default="pegawai")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_active = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class ActivityLog(Base):
     __tablename__ = "activity_logs"

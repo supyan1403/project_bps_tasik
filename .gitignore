@@ -10,15 +10,15 @@ __pycache__/
 *.db
 .vscode/
 .continue/
+node_modules/
 
 # Dataset atau output (opsional, jika ukurannya besar)
 *.csv
 *.xlsx
 *.pdf
 
-# Folder data lokal lama (jika masih ada, abaikan)
+# Folder data lokal
 backend/uploads/
-backend/hasil_ekstraksi_web/
 uploads/
 hasil_ekstraksi_web/
 
@@ -28,8 +28,9 @@ backups/
 
 # Output ekstraksi (regenerable)
 output_extraction/
+outputs/
 
-# Dev scratch (sudah dihapus, antisipasi)
+# Dev scratch
 scratch/
 
 # Log & media temp
@@ -46,8 +47,9 @@ backend/logs.txt
 nul
 NUL
 
-# Output ekstraksi test (regenerable)
-outputs/
+# File temp
+scan_all_results.json
+modifications_example.json
 
 # Preview asset dev
 backend/static/preview/

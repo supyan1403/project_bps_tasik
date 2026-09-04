@@ -3,48 +3,9 @@
     transition: all 0.25s ease-in-out;
 }
 
-[data-bs-theme="dark"] #ts-sources-lineage-container,
-body.dark-mode #ts-sources-lineage-container {
-    background-color: #1a2332 !important;
-    border-color: #2e3e56 !important;
-    color: #f1f5f9 !important;
-}
+/* ===================== TIME SERIES WIZARD ===================== */
 
-[data-bs-theme="dark"] #ts-sources-lineage-container .table,
-body.dark-mode #ts-sources-lineage-container .table {
-    color: #cbd5e1 !important;
-}
-
-[data-bs-theme="dark"] #ts-sources-lineage-container thead,
-body.dark-mode #ts-sources-lineage-container thead {
-    background-color: #243248 !important;
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] #ts-sources-lineage-container thead th,
-body.dark-mode #ts-sources-lineage-container thead th {
-    background-color: #243248 !important;
-    border-color: #334155 !important;
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] #ts-sources-lineage-container tbody td,
-body.dark-mode #ts-sources-lineage-container tbody td {
-    border-color: #243248 !important;
-}
-
-[data-bs-theme="dark"] #ts-sources-lineage-container code,
-body.dark-mode #ts-sources-lineage-container code {
-    background-color: #243248 !important;
-    color: #cbd5e1 !important;
-}
-
-/* ============================================================
-   ENHANCED VISUALS — TIME SERIES (Operator)  [ADDITIVE ONLY]
-   Tidak mengubah workflow/checkbox/onclick yang sudah ada.
-   ============================================================ */
-
-/* Step badge (1, 2) di samping label wizard */
+/* Step badge (1, 2) */
 .ts-step-badge {
     display: inline-flex;
     align-items: center;
@@ -52,18 +13,14 @@ body.dark-mode #ts-sources-lineage-container code {
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-    color: #fff;
+    background: var(--primary);
+    color: var(--text-white);
     font-size: 0.72rem;
     font-weight: 700;
     line-height: 1;
     text-align: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
     margin-right: 6px;
-}
-body.dark-mode .ts-step-badge {
-    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
 }
 
 /* Wizard box (Step 1 & Step 2 Containers) */
@@ -72,7 +29,7 @@ body.dark-mode .ts-step-badge {
     min-height: 260px;
     max-height: 260px;
     overflow-y: auto;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     padding: 12px;
     font-size: 0.85rem;
     box-sizing: border-box;
@@ -81,68 +38,51 @@ body.dark-mode .ts-step-badge {
     align-content: flex-start;
 }
 
-/* Wizard box enhancement (diterapkan via JS, tidak hapus style lama) */
 .ts-wizard-box--enhanced {
-    background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #e2e8f0;
-    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.03);
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+    transition: border-color var(--transition-normal);
 }
 .ts-wizard-box--enhanced:hover {
-    border-color: #c7d2fe;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
-}
-body.dark-mode .ts-wizard-box--enhanced {
-    background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
-    border-color: #334155;
+    border-color: var(--primary-pale);
 }
 
-/* Indicator checkbox label jadi pill */
+/* Indicator checkbox pill */
 .ts-indicator-pill {
     transition: background 0.15s ease, border-color 0.15s ease;
     border: 1px solid transparent;
 }
 .ts-indicator-pill:has(input:checked) {
-    background: #eef2ff;
-    border-color: #c7d2fe;
+    background: var(--primary-faint);
+    border-color: var(--primary-pale);
     border-radius: 6px;
 }
-body.dark-mode .ts-indicator-pill:has(input:checked) {
-    background: rgba(79, 70, 229, 0.18);
-    border-color: #6366f1;
-}
 
-/* Insight cards hover glow */
+/* Insight cards hover */
 .ts-insight-card {
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 .ts-insight-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
-    border-color: #c7d2fe;
-}
-body.dark-mode .ts-insight-card:hover {
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
-    border-color: #6366f1;
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-pale);
 }
 
-/* Chart panel header strip */
+/* Chart panel */
 .ts-chart-glass-panel {
     position: relative;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
 }
 .ts-chart-glass-panel::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #6366f1 0%, #06b6d4 50%, #10b981 100%);
-    opacity: 0.85;
+    background: var(--primary);
 }
-body.dark-mode .ts-chart-glass-panel { border-color: #334155; }
 
-/* Custom legend → pill dengan color dot */
+/* Custom legend pills */
 #ts-custom-legend .ts-legend-pill,
 #ts-custom-legend-2 .ts-legend-pill,
 #ts-custom-legend-3 .ts-legend-pill {
@@ -151,31 +91,24 @@ body.dark-mode .ts-chart-glass-panel { border-color: #334155; }
     gap: 6px;
     padding: 3px 10px;
     border-radius: 20px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-page);
+    border: 1px solid var(--border);
     font-size: 11px;
     font-weight: 600;
-    color: #334155;
+    color: var(--text-primary);
     cursor: default;
     transition: background 0.15s ease;
 }
 #ts-custom-legend .ts-legend-pill:hover,
 #ts-custom-legend-2 .ts-legend-pill:hover,
 #ts-custom-legend-3 .ts-legend-pill:hover {
-    background: #eef2ff;
-}
-body.dark-mode #ts-custom-legend .ts-legend-pill,
-body.dark-mode #ts-custom-legend-2 .ts-legend-pill,
-body.dark-mode #ts-custom-legend-3 .ts-legend-pill {
-    background: #1e293b;
-    border-color: #334155;
-    color: #cbd5e1;
+    background: var(--primary-faint);
 }
 
-/* Table header gradient + row hover */
+/* Table header */
 #ts-grid thead {
-    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
-    color: #fff !important;
+    background: var(--primary) !important;
+    color: var(--text-white) !important;
 }
 #ts-grid thead th {
     border-color: rgba(255,255,255,0.2) !important;
@@ -186,18 +119,14 @@ body.dark-mode #ts-custom-legend-3 .ts-legend-pill {
     transition: background 0.12s ease;
 }
 #ts-grid tbody tr:hover {
-    background: #f1f5ff !important;
-}
-body.dark-mode #ts-grid tbody tr:hover {
-    background: #243248 !important;
+    background: var(--primary-faint) !important;
 }
 
-/* Export button gradient */
+/* Export button */
 .btn-ts-export-primary {
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+    background: var(--success) !important;
     border: none !important;
-    color: #fff !important;
-    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+    color: var(--text-white) !important;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .btn-ts-export-primary:hover {
@@ -210,20 +139,15 @@ body.dark-mode #ts-grid tbody tr:hover {
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 .ts-select-all-years:hover {
-    background: #dbeafe !important;
-    border-color: #93c5fd !important;
+    background: var(--primary-pale) !important;
+    border-color: var(--primary-light) !important;
 }
 .ts-select-all-years:has(input:checked) {
-    background: #dbeafe;
-    border-color: #60a5fa;
-}
-body.dark-mode .ts-select-all-years {
-    background: rgba(37, 99, 235, 0.15);
-    border-color: #6366f1;
-    color: #93c5fd;
+    background: var(--primary-pale);
+    border-color: var(--primary-light);
 }
 
-/* Year picker collapsible (ciutkan/besarkan) */
+/* Year picker collapsible */
 .ts-year-picker-collapsed {
     min-height: 0 !important;
     max-height: 0 !important;
@@ -233,52 +157,38 @@ body.dark-mode .ts-select-all-years {
     margin: 0 !important;
 }
 .ts-collapse-btn {
-    color: #6366f1 !important;
+    color: var(--primary) !important;
     font-size: 0.95rem;
     line-height: 1;
 }
-body.dark-mode .ts-collapse-btn {
-    color: #818cf8 !important;
-}
 
-/* Wizard column 70/30 split (desktop) — indikator 70%, tahun 30% */
+/* Wizard column 70/30 split */
 @media (min-width: 768px) {
-    .ts-wizard-col--indicator {
-        flex: 0 0 70% !important;
-        max-width: 70% !important;
-    }
-    .ts-wizard-col--year {
-        flex: 0 0 30% !important;
-        max-width: 30% !important;
-    }
+    .ts-wizard-col--indicator { flex: 0 0 70% !important; max-width: 70% !important; }
+    .ts-wizard-col--year { flex: 0 0 30% !important; max-width: 30% !important; }
 }
 
-/* Wizard indicator grouping: "Terpilih" & "Bab X" */
+/* Wizard indicator grouping */
 .ts-terpilih-header {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #15803d;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
+    color: var(--success-dark);
+    background: var(--success-light);
+    border: 1px solid var(--success-light-border);
     border-radius: 6px;
     padding: 3px 8px;
     margin: 2px 0 4px 0;
-}
-body.dark-mode .ts-terpilih-header {
-    background: rgba(22, 163, 74, 0.15);
-    border-color: #166534;
-    color: #86efac;
 }
 .ts-bab-group-header {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #4338ca;
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    border: 1px solid #c7d2fe;
+    color: var(--primary-hover);
+    background: var(--primary-faint);
+    border: 1px solid var(--primary-pale);
     border-radius: 6px;
     padding: 3px 8px;
     margin: 8px 0 4px 0;
@@ -288,173 +198,91 @@ body.dark-mode .ts-terpilih-header {
     cursor: pointer;
     user-select: none;
 }
-.ts-bab-group-body-collapsed {
-    display: none;
-}
-body.dark-mode .ts-bab-group-header {
-    background: rgba(79, 70, 229, 0.18);
-    border-color: #4f46e5;
-    color: #a5b4fc;
-}
+.ts-bab-group-body-collapsed { display: none; }
 
-/* ===================== TIME SERIES HERO CONTAINER MOTIF ===================== */
+/* ===================== TIME SERIES HERO (Simplified) ===================== */
 .ts-hero-container {
     position: relative;
-    background-color: #ffffff;
-    background-image: 
-        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
-        radial-gradient(rgba(99, 102, 241, 0.1) 1.2px, transparent 1.2px);
-    background-size: 100% 100%, 100% 100%, 20px 20px;
-    border: 1px solid rgba(226, 232, 240, 0.9) !important;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
 }
 
-body.dark-mode .ts-hero-container {
-    background-color: #1e293b;
-    background-image: 
-        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
-        radial-gradient(rgba(148, 163, 184, 0.15) 1.2px, transparent 1.2px);
-    border-color: rgba(51, 65, 85, 0.8) !important;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-}
-
-/* Time Series Hero Banner Styling */
+/* Time Series Hero Banner (Simplified) */
 .ts-hero-banner {
-    background: linear-gradient(135deg, #091224 0%, #17153b 45%, #2e236c 80%, #4338ca 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.35) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none !important;
 }
 .ts-hero-banner:hover {
-    box-shadow: 0 16px 36px -6px rgba(46, 35, 108, 0.45) !important;
-}
-body.dark-mode .ts-hero-banner {
-    background: linear-gradient(135deg, #060b18 0%, #0f1026 45%, #1c1642 80%, #2e236c 100%) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 .ts-hero-icon-badge {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    color: #ffffff;
+    background: var(--text-white);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
     flex-shrink: 0;
 }
 
 .text-gradient-ts {
-    background: linear-gradient(135deg, #1e293b 0%, #4338ca 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-body.dark-mode .text-gradient-ts {
-    background: linear-gradient(135deg, #f8fafc 0%, #a5b4fc 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
-/* Year Chips Styling */
+/* Year Chips */
 .ts-year-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    background: var(--bg-page);
+    border: 1px solid var(--border);
     font-size: 0.82rem;
     font-weight: 500;
-    color: #334155;
+    color: var(--text-primary);
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease-in-out;
 }
 .ts-year-chip:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--bg-hover);
+    border-color: var(--border);
 }
 .ts-year-chip.active {
-    background: #eff6ff;
-    border-color: #93c5fd;
-    color: #1d4ed8;
+    background: var(--primary-faint);
+    border-color: var(--primary-light);
+    color: var(--primary);
     font-weight: 600;
 }
-body.dark-mode .ts-year-chip {
-    background: #0f172a;
-    border-color: #334155;
-    color: #cbd5e1;
-}
-body.dark-mode .ts-year-chip:hover {
-    background: #1e293b;
-    border-color: #475569;
-}
-body.dark-mode .ts-year-chip.active {
-    background: rgba(30, 58, 138, 0.4);
-    border-color: #3b82f6;
-    color: #93c5fd;
-}
 
-/* ===================== TIME SERIES DATA CONTROL CARD & FILTER CHIPS ===================== */
+/* ===================== TIME SERIES DATA CONTROL CARD ===================== */
 .ts-data-control-card {
-    background-color: #ffffff;
-    background-image: 
-        radial-gradient(circle at 50% 0%, rgba(241, 245, 249, 0.85) 0%, transparent 65%),
-        radial-gradient(rgba(203, 213, 225, 0.4) 1px, transparent 1px);
-    background-size: 100% 100%, 18px 18px;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-body.dark-mode .ts-data-control-card {
-    background-color: #1e293b !important;
-    background-image: 
-        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 65%),
-        radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px) !important;
-    background-size: 100% 100%, 18px 18px !important;
-    border-color: #334155 !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35) !important;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-card) !important;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-/* Quick Insight Summary Cards Motif */
+/* Quick Insight Summary Cards */
 .ts-insight-card {
-    background-color: #ffffff;
-    background-image: 
-        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 45%),
-        radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 14px 14px;
-    border: 1px solid rgba(226, 232, 240, 0.9) !important;
-    border-radius: 12px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--border-radius-lg);
     padding: 14px 18px;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.03);
-    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
 }
 .ts-insight-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.06);
-}
-body.dark-mode .ts-insight-card {
-    background-color: #1e293b;
-    background-image: 
-        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 60%),
-        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
-        radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 14px 14px;
-    border-color: rgba(51, 65, 85, 0.9) !important;
-    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
 /* ===================== TIME SERIES EXPANDABLE INSIGHTS DRAWER ===================== */
@@ -462,117 +290,99 @@ body.dark-mode .ts-insight-card {
     animation: tsSlideDown 0.22s ease-out;
 }
 @keyframes tsSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .ts-insights-card {
-    background-color: #ffffff;
-    background-image: 
-        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.06) 0%, transparent 45%),
-        radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
-        radial-gradient(rgba(203, 213, 225, 0.35) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 16px 16px;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 14px !important;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--border-radius-lg) !important;
     padding: 22px 24px !important;
-    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.06) !important;
-}
-body.dark-mode .ts-insights-card {
-    background-color: #1e293b !important;
-    background-image: 
-        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-        radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
-        radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px) !important;
-    border-color: #475569 !important;
-    box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: var(--shadow-md) !important;
 }
 
 .ts-highlight-stat-card {
-    transition: all 0.2s ease;
-    background: #ffffff;
-    border-color: #e2e8f0 !important;
+    transition: all var(--transition-normal);
+    background: var(--bg-card);
+    border-color: var(--border) !important;
     padding: 16px 18px !important;
-    border-radius: 12px !important;
+    border-radius: var(--border-radius-lg) !important;
 }
 .ts-highlight-stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-md);
 }
 .ts-highlight-stat-card.ts-stat-gainer {
-    border-left: 4px solid #10b981 !important;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, #ffffff 100%);
+    border-left: 4px solid var(--success) !important;
 }
 .ts-highlight-stat-card.ts-stat-decliner {
-    border-left: 4px solid #ef4444 !important;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, #ffffff 100%);
+    border-left: 4px solid var(--danger) !important;
 }
 .ts-highlight-stat-card.ts-stat-avg {
-    border-left: 4px solid #3b82f6 !important;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, #ffffff 100%);
+    border-left: 4px solid var(--primary-light) !important;
 }
 
-body.dark-mode .ts-highlight-stat-card {
-    background: #0f172a;
-    border-color: #334155 !important;
-}
-body.dark-mode .ts-highlight-stat-card.ts-stat-gainer {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, #0f172a 100%);
-}
-body.dark-mode .ts-highlight-stat-card.ts-stat-decliner {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, #0f172a 100%);
-}
-body.dark-mode .ts-highlight-stat-card.ts-stat-avg {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, #0f172a 100%);
-}
-
-/* Standalone Insight Filter Bar Directly Above Table */
+/* Standalone Insight Filter Bar */
 .ts-insight-filter-bar {
-    background-color: #f8fafc;
-    border-color: #e2e8f0 !important;
+    background-color: var(--bg-page);
+    border-color: var(--border) !important;
     padding: 12px 16px !important;
     border-radius: 10px !important;
     margin-bottom: 14px !important;
 }
-body.dark-mode .ts-insight-filter-bar {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-}
 .ts-insight-filter-label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 5px;
     margin-bottom: 6px !important;
     width: 100%;
 }
-body.dark-mode .ts-insight-filter-label {
-    color: #94a3b8;
-}
 .ts-insight-select {
     font-size: 0.82rem !important;
     font-weight: 600 !important;
     border-radius: 7px !important;
     width: auto !important;
+    min-height: 34px;
     padding: 5px 28px 5px 10px !important;
-    background-color: #ffffff;
-    border-color: #cbd5e1;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+    transition: none !important;
 }
-body.dark-mode .ts-insight-select {
-    background-color: #1e293b !important;
-    border-color: #475569 !important;
-    color: #f1f5f9 !important;
+.ts-insight-select:hover {
+    border-color: var(--primary-light) !important;
+    transform: none !important;
 }
-.ts-insight-search-box {
-    width: 240px;
+.ts-insight-select:focus,
+.ts-insight-select:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px var(--primary-faint) !important;
 }
+.ts-insight-select option {
+    font-weight: 500;
+}
+button.ts-insight-select.dropdown-toggle {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+    transition: none !important;
+}
+button.ts-insight-select.dropdown-toggle:hover {
+    border-color: var(--primary-light) !important;
+    transform: none !important;
+}
+button.ts-insight-select.dropdown-toggle:focus,
+button.ts-insight-select.dropdown-toggle:active {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px var(--primary-faint) !important;
+}
+button.ts-insight-select.dropdown-toggle::after {
+    margin-left: auto;
+}
+.ts-insight-search-box { width: 240px; }
 .ts-insight-search-box input {
     font-size: 0.82rem;
     border-radius: 0 7px 7px 0 !important;
@@ -581,55 +391,28 @@ body.dark-mode .ts-insight-select {
     border-radius: 7px 0 0 7px !important;
 }
 
-/* Time Series Chart Clean Container (No pattern motif to keep chart lines crisp) */
+/* Time Series Chart Clean Container */
 .ts-chart-glass-panel {
-    background-color: #ffffff;
-    background-image: none !important;
-    border: 1px solid rgba(226, 232, 240, 0.9) !important;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
-}
-body.dark-mode .ts-chart-glass-panel {
-    background-color: #1e293b !important;
-    background-image: none !important;
-    border-color: rgba(51, 65, 85, 0.8) !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35) !important;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-card);
 }
 
-/* Wizard Selection Boxes Motif */
+/* Wizard Selection Boxes */
 .ts-wizard-box--enhanced {
-    background-color: #f8fafc;
-    background-image: radial-gradient(rgba(203, 213, 225, 0.5) 1px, transparent 1px);
-    background-size: 14px 14px;
-    border: 1px solid #e2e8f0;
+    background-color: var(--bg-page);
+    border: 1px solid var(--border);
     border-radius: 10px;
 }
-body.dark-mode .ts-wizard-box--enhanced {
-    background-color: #0f172a !important;
-    background-image: radial-gradient(rgba(51, 65, 85, 0.5) 1px, transparent 1px) !important;
-    background-size: 14px 14px !important;
-    border-color: #334155 !important;
-}
 
-/* Main Results Container Motif */
+/* Main Results Container */
 #ts-results-container {
-    background-color: #ffffff;
-    background-image: 
-        radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 40%);
-}
-body.dark-mode #ts-results-container {
-    background-color: #1e293b !important;
-    background-image: 
-        radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 40%) !important;
+    background-color: var(--bg-card);
 }
 
 .ts-header-divider {
-    border-color: rgba(226, 232, 240, 0.9) !important;
-}
-body.dark-mode .ts-header-divider {
-    border-color: rgba(51, 65, 85, 0.8) !important;
+    border-color: var(--border) !important;
 }
 
 .ts-filter-section-title {
@@ -637,16 +420,12 @@ body.dark-mode .ts-header-divider {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #334155;
+    color: var(--text-primary);
     margin-right: 8px;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-}
-[data-bs-theme="dark"] .ts-filter-section-title,
-body.dark-mode .ts-filter-section-title {
-    color: #f1f5f9 !important;
 }
 
 .ts-filter-chip {
@@ -655,39 +434,25 @@ body.dark-mode .ts-filter-section-title {
     gap: 8px;
     padding: 7px 16px;
     margin: 3px 5px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    background: var(--bg-page);
+    border: 1px solid var(--border);
     font-size: 0.85rem;
     font-weight: 500;
-    color: #334155;
+    color: var(--text-primary);
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;
 }
 .ts-filter-chip:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--bg-hover);
+    border-color: var(--border);
 }
 .ts-filter-chip.active {
-    background: #eff6ff;
-    border-color: #93c5fd;
-    color: #1d4ed8;
+    background: var(--primary-faint);
+    border-color: var(--primary-light);
+    color: var(--primary);
     font-weight: 600;
-}
-body.dark-mode .ts-filter-chip {
-    background: #0f172a;
-    border-color: #334155;
-    color: #cbd5e1;
-}
-body.dark-mode .ts-filter-chip:hover {
-    background: #1e293b;
-    border-color: #475569;
-}
-body.dark-mode .ts-filter-chip.active {
-    background: rgba(30, 58, 138, 0.4);
-    border-color: #3b82f6;
-    color: #93c5fd;
 }
 
 .ts-filter-chip input[type="checkbox"] {
@@ -695,16 +460,16 @@ body.dark-mode .ts-filter-chip.active {
     height: 15px;
     cursor: pointer;
     margin: 0;
-    accent-color: #4f46e5;
+    accent-color: var(--primary);
 }
 
-/* Smart Column Indicator Chips in Time Series */
+/* Smart Column Indicator Chips */
 .ts-vk-chip {
-    max-width: 320px;
+    max-width: 480px;
     margin: 0 !important;
     padding: 5px 12px !important;
     font-size: 0.82rem !important;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -722,81 +487,66 @@ body.dark-mode .ts-filter-chip.active {
     overflow: hidden;
     text-overflow: ellipsis;
     display: inline-block;
-    max-width: 250px;
+    max-width: 400px;
 }
 
-/* Variant / Sub-type Radio Chips in Time Series */
+/* Variant / Sub-type Radio Chips */
 .ts-variant-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 5px 13px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    background: var(--bg-page);
+    border: 1px solid var(--border);
     font-size: 0.82rem;
     font-weight: 500;
-    color: #475569;
+    color: var(--text-secondary);
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;
 }
 .ts-variant-chip:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-    color: #1e293b;
+    background: var(--bg-hover);
+    border-color: var(--border);
+    color: var(--text-primary);
 }
 .ts-variant-chip.active {
-    background: #eef2ff;
-    border-color: #818cf8;
-    color: #4338ca;
+    background: var(--primary-faint);
+    border-color: var(--primary-light);
+    color: var(--primary);
     font-weight: 600;
-    box-shadow: 0 1px 4px rgba(99, 102, 241, 0.15);
-}
-body.dark-mode .ts-variant-chip {
-    background: #0f172a;
-    border-color: #334155;
-    color: #cbd5e1;
-}
-body.dark-mode .ts-variant-chip:hover {
-    background: #1e293b;
-    border-color: #475569;
-}
-body.dark-mode .ts-variant-chip.active {
-    background: rgba(49, 46, 129, 0.5);
-    border-color: #6366f1;
-    color: #c7d2fe;
 }
 .ts-variant-chip input[type="radio"] {
     width: 14px;
     height: 14px;
     margin: 0;
-    accent-color: #4f46e5;
+    accent-color: var(--primary);
     cursor: pointer;
 }
 
 /* ===================== TS CUSTOM CHART LEGEND PILLS ===================== */
 .custom-legend-item {
-    transition: all 0.2s ease;
+    transition: all var(--transition-normal);
     padding: 3px 8px;
     border-radius: 6px;
 }
 .custom-legend-item:hover {
-    background: rgba(148, 163, 184, 0.15);
+    background: var(--bg-hover);
 }
 .custom-legend-item.ts-legend-disabled {
     opacity: 0.45 !important;
 }
 .custom-legend-item.ts-legend-disabled .custom-legend-text {
     text-decoration: line-through !important;
-    color: #94a3b8 !important;
+    color: var(--text-light) !important;
 }
 .custom-legend-item.ts-legend-disabled .custom-legend-dot {
     filter: grayscale(100%);
     opacity: 0.6;
 }
 
-/* ===================== TS GRID TABLE & LEAK-PROOF STICKY HEADER ===================== */
+/* ===================== TS GRID TABLE & STICKY HEADER ===================== */
 #ts-grid {
     border-collapse: separate !important;
     border-spacing: 0 !important;
@@ -813,23 +563,23 @@ body.dark-mode .ts-variant-chip.active {
 #ts-grid thead tr:first-child th {
     position: sticky;
     top: 0;
-    background-color: #f1f5f9 !important;
-    color: #1e293b;
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary);
     font-weight: 700;
     z-index: 10;
     border-top: none;
-    border-bottom: 1px solid #cbd5e1 !important;
+    border-bottom: 1px solid var(--border) !important;
     background-clip: padding-box;
 }
 
-/* Rincian Header (Spans 2 rows, sticky top & left) */
+/* Rincian Header (Sticky top & left) */
 #ts-grid thead tr:first-child th:first-child {
     position: sticky;
     top: 0;
     left: 0;
     z-index: 25 !important;
-    background-color: #e2e8f0 !important;
-    border-right: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-hover) !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
     background-clip: padding-box;
 }
@@ -837,12 +587,12 @@ body.dark-mode .ts-variant-chip.active {
 /* Row 2 Headers (Metric / Indicators) */
 #ts-grid thead tr:nth-child(2) th {
     position: sticky;
-    top: 35px; /* offset by exact height of row 1 */
-    background-color: #f8fafc !important;
-    color: #334155;
+    top: 35px;
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary);
     z-index: 9;
     border-top: none;
-    border-bottom: 2px solid #cbd5e1 !important;
+    border-bottom: 2px solid var(--border) !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     background-clip: padding-box;
 }
@@ -852,68 +602,29 @@ body.dark-mode .ts-variant-chip.active {
     position: sticky;
     left: 0;
     z-index: 4;
-    background-color: #ffffff !important;
-    border-right: 2px solid #e2e8f0;
+    background-color: var(--bg-card) !important;
+    border-right: 2px solid var(--border);
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.03);
     background-clip: padding-box;
 }
 #ts-grid tbody tr:hover td:first-child {
-    background-color: #f8fafc !important;
-}
-
-/* Dark mode overrides for ts-grid sticky header */
-body.dark-mode #ts-grid thead tr:first-child th {
-    background-color: #1e293b !important;
-    color: #f8fafc;
-    border-bottom-color: #334155 !important;
-}
-body.dark-mode #ts-grid thead tr:first-child th:first-child {
-    background-color: #0f172a !important;
-    border-right-color: #334155 !important;
-}
-body.dark-mode #ts-grid thead tr:nth-child(2) th {
-    background-color: #1e293b !important;
-    color: #cbd5e1;
-    border-bottom-color: #334155 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-}
-body.dark-mode #ts-grid tbody tr td:first-child {
-    background-color: #0f172a !important;
-    border-right-color: #334155;
-    color: #f1f5f9;
-}
-body.dark-mode #ts-grid tbody tr:hover td:first-child {
-    background-color: #1e293b !important;
+    background-color: var(--bg-page) !important;
 }
 
 /* ===== TREND INSIGHTS BANNER ===== */
 .ts-trend-banner {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
-    border-radius: 12px;
+    background: var(--primary);
+    border-radius: var(--border-radius-lg);
     padding: 16px 22px;
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.4);
+    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
 }
-.ts-trend-banner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-.ts-trend-banner:hover::before {
-    opacity: 1;
-}
 .ts-trend-banner:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px -3px rgba(99, 102, 241, 0.55);
+    box-shadow: var(--shadow-lg);
 }
 .ts-trend-banner:active {
     transform: translateY(0);
@@ -927,14 +638,13 @@ body.dark-mode #ts-grid tbody tr:hover td:first-child {
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
-    color: #fbbf24;
+    color: var(--warning-accent);
     flex-shrink: 0;
-    animation: tsBannerPulse 2.5s ease-in-out infinite;
 }
 .ts-trend-banner-cta {
     background: rgba(255,255,255,0.2);
     padding: 6px 14px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     white-space: nowrap;
     transition: background 0.2s ease;
     flex-shrink: 0;
@@ -942,20 +652,3 @@ body.dark-mode #ts-grid tbody tr:hover td:first-child {
 .ts-trend-banner:hover .ts-trend-banner-cta {
     background: rgba(255,255,255,0.3);
 }
-@keyframes tsBannerPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
-    50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
-}
-
-/* Dark mode */
-body.dark-mode .ts-trend-banner {
-    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 50%, #7c3aed 100%);
-    box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.3);
-}
-body.dark-mode .ts-trend-banner:hover {
-    box-shadow: 0 8px 25px -3px rgba(99, 102, 241, 0.45);
-}
-body.dark-mode .ts-trend-banner-icon {
-    background: rgba(255,255,255,0.15);
-}
-

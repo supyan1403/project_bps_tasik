@@ -320,6 +320,12 @@ def read_root(request: Request):
     response.headers["Cache-Control"] = "no-store"
     return response
 
+@app.get("/login")
+def login_page(request: Request):
+    response = templates.TemplateResponse(request=request, name="index.html", context={})
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
 @app.get("/favicon.ico", include_in_schema=False)
 def get_favicon():
     favicon_path = os.path.join(STATIC_DIR, "logo_sipedas.png")
@@ -629,8 +635,15 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db)):
 
 # ===== PENCARIAN TABEL =====
 @app.get("/api/tables/search")
-def search_tables(q: str = "", year: int = None, limit: int = 50, db: Session = Depends(get_db)):
-    """Search tables by keyword or numbering. Returns list with document info."""
+def search_tables(
+    q: str = "",
+    year: int = None,
+    document_id: int = None,
+    bab: int = None,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """Search tables by keyword or numbering. Supports document_id and bab filters."""
     try:
         query = db.query(
             models.ExtractedTable,
@@ -640,6 +653,18 @@ def search_tables(q: str = "", year: int = None, limit: int = 50, db: Session = 
             models.Document,
             models.ExtractedTable.document_id == models.Document.id
         )
+
+        if document_id:
+            query = query.filter(models.ExtractedTable.document_id == document_id)
+
+        if bab is not None:
+            query = query.filter(
+                (models.ExtractedTable.table_name.ilike(f"Tabel {bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel_{bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"{bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel {bab}-%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel_{bab}-%"))
+            )
 
         if q:
             kw = q.strip().lower()

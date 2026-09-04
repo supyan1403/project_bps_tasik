@@ -3,8 +3,8 @@ table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    background: white;
-    border-radius: 8px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
 }
 
 .table-responsive,
@@ -29,12 +29,12 @@ table {
 th, td {
     padding: 0.6rem 0.75rem;
     text-align: left;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
     background-clip: padding-box;
 }
 
-/* 1. STICKY HEADER (Fixed Top) untuk tabel data spreadsheet 1-level */
+/* 1. STICKY HEADER */
 .editor-table-wrapper thead th,
 .sticky-table-container thead th,
 #data-grid thead th,
@@ -43,12 +43,12 @@ th, td {
     position: sticky !important;
     top: 0 !important;
     z-index: 15 !important;
-    background-color: #f8fafc !important;
-    border-bottom: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-page) !important;
+    border-bottom: 2px solid var(--border) !important;
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* 2. STICKY KOLOM untuk tabel grid spreadsheet */
+/* 2. STICKY KOLOM */
 .sticky-table-container tbody td:first-child,
 .sticky-table-container tfoot td:first-child,
 #ts-grid tbody td:first-child,
@@ -56,18 +56,18 @@ th, td {
     position: sticky !important;
     left: 0 !important;
     z-index: 8 !important;
-    background-color: #ffffff;
-    border-right: 2px solid #e2e8f0 !important;
+    background-color: var(--bg-card);
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.05);
 }
 
-/* Data Grid View Mode: Kolom 1 (Kecamatan/Rincian) Sticky */
+/* Data Grid View Mode */
 #page-editor.mode-view #data-grid tbody td:first-child {
     position: sticky !important;
     left: 0 !important;
     z-index: 8 !important;
-    background-color: #ffffff;
-    border-right: 2px solid #e2e8f0 !important;
+    background-color: var(--bg-card);
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -76,28 +76,28 @@ th, td {
     top: 0 !important;
     left: 0 !important;
     z-index: 30 !important;
-    background-color: #f1f5f9 !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    border-right: 2px solid #e2e8f0 !important;
+    background-color: var(--bg-page) !important;
+    border-bottom: 2px solid var(--border) !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
 }
 
-/* Data Grid Edit Mode: Kolom 1 (Aksi Baris) dan Kolom 2 (Kecamatan/Entitas) Sticky */
+/* Data Grid Edit Mode */
 #page-editor.mode-edit #data-grid thead th:first-child {
     position: sticky !important;
     top: 0 !important;
     left: 0 !important;
     z-index: 31 !important;
-    background-color: #f8fafc !important;
-    border-right: 1px solid #e2e8f0 !important;
+    background-color: var(--bg-page) !important;
+    border-right: 1px solid var(--border) !important;
 }
 
 #page-editor.mode-edit #data-grid tbody td:first-child {
     position: sticky !important;
     left: 0 !important;
     z-index: 9 !important;
-    background-color: #ffffff !important;
-    border-right: 1px solid #e2e8f0 !important;
+    background-color: var(--bg-card) !important;
+    border-right: 1px solid var(--border) !important;
 }
 
 #page-editor.mode-edit #data-grid thead th:nth-child(2) {
@@ -105,8 +105,8 @@ th, td {
     top: 0 !important;
     left: 80px !important;
     z-index: 30 !important;
-    background-color: #f8fafc !important;
-    border-right: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-page) !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
 }
 
@@ -114,21 +114,21 @@ th, td {
     position: sticky !important;
     left: 80px !important;
     z-index: 8 !important;
-    background-color: #ffffff !important;
-    border-right: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-card) !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.05);
 }
 
-/* 3. INTERSEKSI SUDUT KIRI ATAS UMUM */
+/* 3. INTERSEKSI SUDUT KIRI ATAS */
 .sticky-table-container thead th:first-child,
 #master-columns-table thead th:first-child {
     position: sticky !important;
     top: 0 !important;
     left: 0 !important;
     z-index: 30 !important;
-    background-color: #f1f5f9 !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    border-right: 2px solid #e2e8f0 !important;
+    background-color: var(--bg-page) !important;
+    border-bottom: 2px solid var(--border) !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
 }
 
@@ -136,7 +136,7 @@ th, td {
 #ts-grid {
     border-collapse: separate !important;
     border-spacing: 0 !important;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-family);
     width: max-content;
     min-width: 100%;
 }
@@ -145,11 +145,11 @@ th, td {
     position: sticky !important;
     top: 0 !important;
     z-index: 20 !important;
-    background-color: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background-color: var(--bg-page) !important;
+    border-bottom: 1px solid var(--border) !important;
     padding: 10px 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
     white-space: nowrap;
 }
 
@@ -157,9 +157,9 @@ th, td {
     top: 0 !important;
     left: 0 !important;
     z-index: 35 !important;
-    background-color: #f1f5f9 !important;
-    border-right: 2px solid #e2e8f0 !important;
-    border-bottom: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-page) !important;
+    border-right: 2px solid var(--border) !important;
+    border-bottom: 2px solid var(--border) !important;
     box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
 }
 
@@ -167,35 +167,35 @@ th, td {
     position: sticky !important;
     top: 41px !important;
     z-index: 19 !important;
-    background-color: #f8fafc !important;
-    border-bottom: 2px solid #cbd5e1 !important;
+    background-color: var(--bg-page) !important;
+    border-bottom: 2px solid var(--border) !important;
     padding: 8px 14px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-secondary);
     white-space: nowrap;
 }
 
 #ts-grid tbody td {
     padding: 8px 14px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--bg-hover);
     vertical-align: middle;
-    background-color: #ffffff;
+    background-color: var(--bg-card);
     white-space: nowrap;
 }
 
 #ts-grid tbody tr:hover td {
-    background-color: #f8fafc !important;
+    background-color: var(--bg-page) !important;
 }
 
 #ts-grid tbody tr:hover td:first-child {
-    background-color: #f1f5f9 !important;
+    background-color: var(--bg-hover) !important;
 }
 
 #ts-grid tbody tr:last-child td {
     padding-bottom: 16px !important;
 }
 
-/* 4. MODAL INSPEKSI ANOMALI KHUSUS (Col 1 = No, Col 2 = Entitas Fixed) */
+/* 4. MODAL INSPEKSI ANOMALI */
 #anom-modal-table thead th:nth-child(1),
 #anom-modal-table tbody td:nth-child(1) {
     position: sticky !important;
@@ -208,33 +208,33 @@ th, td {
 #anom-modal-table thead th:nth-child(1) {
     top: 0 !important;
     z-index: 30 !important;
-    background-color: #f1f5f9 !important;
+    background-color: var(--bg-page) !important;
 }
 #anom-modal-table tbody td:nth-child(1) {
     z-index: 8 !important;
-    background-color: #ffffff;
+    background-color: var(--bg-card);
 }
 #anom-modal-table thead th:nth-child(2),
 #anom-modal-table tbody td:nth-child(2) {
     position: sticky !important;
     left: 45px !important;
-    border-right: 2px solid #cbd5e1 !important;
+    border-right: 2px solid var(--border) !important;
     box-shadow: 3px 0 4px -1px rgba(0, 0, 0, 0.06);
 }
 #anom-modal-table thead th:nth-child(2) {
     top: 0 !important;
     z-index: 28 !important;
-    background-color: #f1f5f9 !important;
+    background-color: var(--bg-page) !important;
 }
 #anom-modal-table tbody td:nth-child(2) {
     z-index: 7 !important;
-    background-color: #ffffff;
+    background-color: var(--bg-card);
 }
 
 /* 5. BACKGROUND PRESERVATION FOR STICKY CELLS */
 tr:hover td:first-child,
 #anom-modal-table tr:hover td:nth-child(2) {
-    background-color: #f8fafc !important;
+    background-color: var(--bg-page) !important;
 }
 
 .row-anomaly td:first-child,
@@ -244,12 +244,12 @@ tr:hover td:first-child,
 
 .row-anomaly-focus td:first-child,
 .row-anomaly-focus td:nth-child(2) {
-    background-color: #fefce8 !important;
+    background-color: var(--warning-light-bg) !important;
 }
 
 .status-badge { padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.8rem; }
-.status-done { background: #d1fae5; color: #065f46; }
-.status-pending { background: #fef3c7; color: #92400e; }
+.status-done { background: var(--success-light); color: var(--success-dark); }
+.status-pending { background: var(--warning-light); color: var(--warning-dark); }
 
 /* Editable Cell */
 .editable-cell {
@@ -258,30 +258,28 @@ tr:hover td:first-child,
     transition: all 0.15s;
     min-width: 80px;
 }
-.editable-cell:hover { border-color: #d1d5db; background: #f8fafc; cursor: text; }
-.editable-cell:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 2px rgba(79,70,229,0.15); }
+.editable-cell:hover { border-color: var(--border); background: var(--bg-page); cursor: text; }
+.editable-cell:focus { outline: none; border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.15); }
 
 /* Anomaly Row & Cell Highlighting */
 .row-anomaly { background-color: var(--danger-light); }
-.row-anomaly td { border-bottom-color: #fca5a5; }
+.row-anomaly td {     border-bottom-color: var(--danger-light); }
 
-.row-anomaly-focus {
-    background-color: #fffbeb !important;
-}
+.row-anomaly-focus { background-color: var(--warning-light-bg) !important; }
 
 #anom-modal-table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-family);
 }
 
 #anom-modal-table thead th {
-    background: #f8fafc;
-    border-bottom: 2px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
+    background: var(--bg-page);
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
     padding: 12px 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
     vertical-align: top;
     font-size: 0.84rem;
     letter-spacing: -0.01em;
@@ -289,14 +287,14 @@ tr:hover td:first-child,
 
 #anom-modal-table tbody td {
     padding: 6px 10px;
-    border-bottom: 1px solid #f1f5f9;
-    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--bg-hover);
+    border-right: 1px solid var(--bg-hover);
     vertical-align: middle;
     height: 44px;
 }
 
 #anom-modal-table tbody tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--bg-page);
 }
 
 .anom-cell-input {
@@ -304,67 +302,69 @@ tr:hover td:first-child,
     border-radius: 6px;
     padding: 4px 8px;
     font-size: 0.875rem;
-    color: #1e293b;
+    color: var(--text-primary);
     background: transparent;
     width: 100%;
     transition: all 0.15s ease-in-out;
 }
 
 .anom-cell-input:hover {
-    border-color: #cbd5e1;
-    background: #ffffff;
+    border-color: var(--border);
+    background: var(--bg-card);
 }
 
 .anom-cell-input:focus {
-    border-color: #6366f1;
-    background: #ffffff;
+    border-color: var(--primary-light);
+    background: var(--bg-card);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
     outline: none;
 }
 
 .cell-anomaly-prev {
-    background-color: #e0f2fe !important;
-    border: 2px solid #0284c7 !important;
-    color: #0369a1 !important;
+    background-color: var(--info-light) !important;
+    border: 2px solid var(--info) !important;
+    color: var(--info-dark) !important;
     font-weight: 700 !important;
     position: relative;
     border-radius: 6px;
-    box-shadow: 0 0 8px rgba(2, 132, 199, 0.35);
 }
 
 .cell-anomaly-prev input {
     background-color: transparent !important;
     font-weight: 700 !important;
-    color: #0369a1 !important;
+    color: var(--info-dark) !important;
     border: none !important;
 }
 
 .cell-anomaly-highlight {
-    background-color: #fef08a !important;
-    border: 2px solid #eab308 !important;
-    color: #854d0e !important;
+    background-color: var(--warning-bg) !important;
+    border: 2px solid var(--warning) !important;
+    color: var(--warning-text) !important;
     font-weight: 700 !important;
     position: relative;
     border-radius: 6px;
-    box-shadow: 0 0 8px rgba(234, 179, 8, 0.4);
-    animation: pulseAnomaly 2.5s infinite ease-in-out;
-}
-
-@keyframes pulseAnomaly {
-    0%, 100% {
-        box-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
-    }
-    50% {
-        box-shadow: 0 0 14px rgba(234, 179, 8, 0.85);
-        background-color: #fde047 !important;
-    }
 }
 
 .cell-anomaly-highlight input {
     background-color: transparent !important;
     font-weight: 700 !important;
-    color: #854d0e !important;
+    color: var(--warning-text) !important;
     border: none !important;
+}
+
+/* ===================== COLUMN HIGHLIGHT (from search) ===================== */
+.col-highlight {
+    background-color: #dbeafe !important;
+    box-shadow: inset 0 -3px 0 0 #3b82f6;
+    animation: colHighlightPulse 2s ease-out;
+}
+.col-cell-highlight {
+    background-color: #eff6ff !important;
+    transition: background-color 0.5s ease;
+}
+@keyframes colHighlightPulse {
+    0% { background-color: #93c5fd; }
+    100% { background-color: #dbeafe; }
 }
 
 /* ===================== PAGE EDITOR ===================== */
@@ -381,11 +381,11 @@ tr:hover td:first-child,
     align-items: center;
     gap: 1rem;
     padding: 0.9rem 1.25rem;
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-card);
     margin-bottom: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
     flex-shrink: 0;
 }
 
@@ -394,22 +394,22 @@ tr:hover td:first-child,
     align-items: center;
     gap: 6px;
     padding: 7px 16px;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
     font-weight: 600;
     font-size: 0.875rem;
-    color: #475569;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-normal);
     white-space: nowrap;
     flex-shrink: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family);
 }
 .editor-back-btn:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    border-color: #94a3b8;
+    background: var(--border);
+    color: var(--text-primary);
+    border-color: var(--text-light);
     transform: translateX(-2px);
 }
 
@@ -420,7 +420,7 @@ tr:hover td:first-child,
 .editor-header-info h2 {
     margin: 0;
     font-size: 1.05rem;
-    color: #1e293b;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -428,7 +428,7 @@ tr:hover td:first-child,
 }
 .editor-page-tag {
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
@@ -440,9 +440,9 @@ tr:hover td:first-child,
     letter-spacing: 0.01em;
     flex-shrink: 0;
 }
-.badge-csv { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; }
-.badge-csv-view { background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; }
-.badge-db  { background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; }
+.badge-csv { background: var(--primary-faint); color: var(--primary); border: 1.5px solid var(--primary-pale); }
+.badge-csv-view { background: var(--bg-hover); color: var(--text-secondary); border: 1.5px solid var(--border); }
+.badge-db { background: var(--success-light); color: var(--success-dark); border: 1.5px solid var(--success-light-border); }
 
 /* --- Editor Toolbar --- */
 .editor-toolbar {
@@ -450,11 +450,11 @@ tr:hover td:first-child,
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: white;
+    background: var(--bg-card);
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
     margin-bottom: 0.75rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow-sm);
     align-items: center;
     flex-shrink: 0;
 }
@@ -465,21 +465,21 @@ tr:hover td:first-child,
     gap: 6px;
     padding: 7px 15px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Inter', sans-serif;
+    transition: all var(--transition-normal);
+    font-family: var(--font-family);
 }
-.btn-indigo { background: #4F46E5; color: white; }
-.btn-indigo:hover { background: #4338CA; transform: translateY(-1px); }
-.btn-green  { background: #10b981; color: white; }
-.btn-green:hover  { background: #059669; transform: translateY(-1px); }
-.btn-amber  { background: #f59e0b; color: white; }
-.btn-amber:hover  { background: #d97706; transform: translateY(-1px); }
-.btn-slate  { background: #475569; color: white; }
-.btn-slate:hover  { background: #334155; transform: translateY(-1px); }
+.btn-indigo { background: var(--primary); color: white; }
+.btn-indigo:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-green { background: var(--success); color: white; }
+.btn-green:hover { background: var(--success-hover); transform: translateY(-1px); }
+.btn-amber { background: var(--warning); color: white; }
+.btn-amber:hover { background: var(--warning-hover); transform: translateY(-1px); }
+.btn-slate { background: var(--text-secondary); color: white; }
+.btn-slate:hover { background: var(--text-primary); transform: translateY(-1px); }
 
 /* --- Column Delete Bar --- */
 .col-delete-bar {
@@ -488,8 +488,8 @@ tr:hover td:first-child,
     gap: 0.4rem;
     align-items: center;
     padding: 0.65rem 1rem;
-    background: #fef9f0;
-    border: 1px solid #fde68a;
+    background: var(--warning-light);
+    border: 1px solid var(--warning-accent);
     border-radius: 10px;
     margin-bottom: 0.75rem;
     flex-shrink: 0;
@@ -498,7 +498,7 @@ tr:hover td:first-child,
 .col-delete-bar-label {
     font-size: 0.8rem;
     font-weight: 700;
-    color: #92400e;
+    color: var(--warning-dark);
     white-space: nowrap;
     margin-right: 4px;
 }
@@ -507,9 +507,9 @@ tr:hover td:first-child,
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: #fff;
-    border: 1.5px solid #f87171;
-    color: #b91c1c;
+    background: var(--bg-card);
+    border: 1.5px solid var(--danger);
+    color: var(--danger-text);
     font-size: 0.76rem;
     font-weight: 600;
     padding: 3px 9px;
@@ -517,21 +517,21 @@ tr:hover td:first-child,
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family);
 }
 .col-delete-pill:hover {
-    background: #fef2f2;
-    border-color: #dc2626;
+    background: var(--danger-light);
+    border-color: var(--danger);
 }
 
-/* --- Editor Table Wrapper (scrollable) --- */
+/* --- Editor Table Wrapper --- */
 .editor-table-wrapper {
     flex: 1;
     overflow: auto;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
     min-height: 0;
 }
 .editor-table-wrapper table {
@@ -539,7 +539,7 @@ tr:hover td:first-child,
     min-width: max-content;
 }
 .editor-table-wrapper th {
-    background: #f1f5f9;
+    background: var(--bg-hover);
     font-size: 0.82rem;
     padding: 0.65rem 0.9rem;
     white-space: nowrap;
@@ -563,15 +563,15 @@ tr:hover td:first-child,
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family);
     transition: all 0.15s;
 }
-.row-action-cell .btn-row-insert { background: #e2e8f0; color: #475569; }
-.row-action-cell .btn-row-insert:hover { background: #cbd5e1; }
-.row-action-cell .btn-row-del { background: #fee2e2; color: #b91c1c; }
-.row-action-cell .btn-row-del:hover { background: #fecaca; }
+.row-action-cell .btn-row-insert { background: var(--border); color: var(--text-secondary); }
+.row-action-cell .btn-row-insert:hover { background: var(--text-light); }
+.row-action-cell .btn-row-del { background: var(--danger-light); color: var(--danger-text); }
+.row-action-cell .btn-row-del:hover { background: var(--danger-light-bg); }
 
-/* Editable Header (rename kolom on click) */
+/* Editable Header */
 .editable-header {
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
@@ -579,8 +579,8 @@ tr:hover td:first-child,
     user-select: none;
 }
 .editable-header:hover {
-    background: #e0e7ff;
-    color: #3730a3;
+    background: var(--primary-pale);
+    color: var(--primary-hover);
 }
 .rename-hint {
     font-size: 0.7rem;
@@ -592,258 +592,38 @@ tr:hover td:first-child,
     opacity: 1;
 }
 
-/* Read-only cell (mode Lihat CSV) */
+/* Read-only cell */
 .readonly-cell {
     padding: 0.5rem 0.9rem;
     vertical-align: top;
     font-size: 0.88rem;
-    color: #374151;
+    color: var(--text-primary);
     user-select: text;
 }
 
-/* th-action-col: Aksi Baris column header */
 .th-action-col {
     white-space: nowrap;
     min-width: 80px;
 }
 
-
-/* ===================== SPREADSHEET & DATA GRID DARK THEME OVERRIDES ===================== */
-[data-bs-theme="dark"] #ts-grid,
-[data-bs-theme="dark"] #master-columns-table,
-[data-bs-theme="dark"] #data-grid,
-[data-bs-theme="dark"] #anom-modal-table,
-[data-bs-theme="dark"] #snippet-table-content,
-body.dark-mode #ts-grid,
-body.dark-mode #master-columns-table,
-body.dark-mode #data-grid,
-body.dark-mode #anom-modal-table,
-body.dark-mode #snippet-table-content {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] #ts-grid thead tr th,
-[data-bs-theme="dark"] #ts-grid thead tr:first-child th,
-[data-bs-theme="dark"] #ts-grid thead tr:first-child th:first-child,
-[data-bs-theme="dark"] #ts-grid thead tr:nth-child(2) th,
-[data-bs-theme="dark"] #master-columns-table thead th,
-[data-bs-theme="dark"] #master-columns-table thead th:first-child,
-[data-bs-theme="dark"] #data-grid thead th,
-[data-bs-theme="dark"] #data-grid thead th:first-child,
-[data-bs-theme="dark"] #anom-modal-table thead th,
-[data-bs-theme="dark"] #anom-modal-table thead th:first-child,
-[data-bs-theme="dark"] .editor-table-wrapper thead th,
-[data-bs-theme="dark"] .editor-table-wrapper thead th:first-child,
-[data-bs-theme="dark"] #snippet-table-content thead th,
-[data-bs-theme="dark"] #snippet-thead th,
-body.dark-mode #ts-grid thead tr th,
-body.dark-mode #ts-grid thead tr:first-child th,
-body.dark-mode #ts-grid thead tr:first-child th:first-child,
-body.dark-mode #ts-grid thead tr:nth-child(2) th,
-body.dark-mode #master-columns-table thead th,
-body.dark-mode #master-columns-table thead th:first-child,
-body.dark-mode #data-grid thead th,
-body.dark-mode #data-grid thead th:first-child,
-body.dark-mode #anom-modal-table thead th,
-body.dark-mode #anom-modal-table thead th:first-child,
-body.dark-mode .editor-table-wrapper thead th,
-body.dark-mode .editor-table-wrapper thead th:first-child,
-body.dark-mode #snippet-table-content thead th,
-body.dark-mode #snippet-thead th {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-    border-color: #334155 !important;
-    border-bottom-color: #334155 !important;
-    border-right-color: #334155 !important;
-    box-shadow: none !important;
-}
-
-[data-bs-theme="dark"] #ts-grid tbody td,
-[data-bs-theme="dark"] #ts-grid tbody td:first-child,
-[data-bs-theme="dark"] #master-columns-table tbody td,
-[data-bs-theme="dark"] #master-columns-table tbody td:first-child,
-[data-bs-theme="dark"] #data-grid tbody td,
-[data-bs-theme="dark"] #data-grid tbody td:first-child,
-[data-bs-theme="dark"] #anom-modal-table tbody td,
-[data-bs-theme="dark"] #anom-modal-table tbody td:first-child,
-[data-bs-theme="dark"] .editor-table-wrapper tbody td,
-[data-bs-theme="dark"] .editor-table-wrapper tbody td:first-child,
-[data-bs-theme="dark"] #snippet-table-content tbody td,
-[data-bs-theme="dark"] #snippet-tbody td,
-body.dark-mode #ts-grid tbody td,
-body.dark-mode #ts-grid tbody td:first-child,
-body.dark-mode #master-columns-table tbody td,
-body.dark-mode #master-columns-table tbody td:first-child,
-body.dark-mode #data-grid tbody td,
-body.dark-mode #data-grid tbody td:first-child,
-body.dark-mode #anom-modal-table tbody td,
-body.dark-mode #anom-modal-table tbody td:first-child,
-body.dark-mode .editor-table-wrapper tbody td,
-body.dark-mode .editor-table-wrapper tbody td:first-child,
-body.dark-mode #snippet-table-content tbody td,
-body.dark-mode #snippet-tbody td {
-    background-color: #1e293b !important;
-    color: #f1f5f9 !important;
-    border-color: #334155 !important;
-    border-bottom-color: #334155 !important;
-    border-right-color: #334155 !important;
-    box-shadow: none !important;
-}
-
-[data-bs-theme="dark"] #ts-grid tbody tr:hover td,
-[data-bs-theme="dark"] #ts-grid tbody tr:hover td:first-child,
-[data-bs-theme="dark"] #master-columns-table tbody tr:hover td,
-[data-bs-theme="dark"] #master-columns-table tbody tr:hover td:first-child,
-[data-bs-theme="dark"] #data-grid tbody tr:hover td,
-[data-bs-theme="dark"] #data-grid tbody tr:hover td:first-child,
-body.dark-mode #ts-grid tbody tr:hover td,
-body.dark-mode #ts-grid tbody tr:hover td:first-child,
-body.dark-mode #master-columns-table tbody tr:hover td,
-body.dark-mode #master-columns-table tbody tr:hover td:first-child,
-body.dark-mode #data-grid tbody tr:hover td,
-body.dark-mode #data-grid tbody tr:hover td:first-child {
-    background-color: #243248 !important;
-}
-
-/* Time Series Chart Glass Panel & Legend Styling */
+/* Time Series Chart Panel */
 .ts-chart-glass-panel {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: all var(--transition-normal);
 }
 
 .custom-legend-text {
-    color: #475569;
+    color: var(--text-secondary);
 }
 
-[data-bs-theme="dark"] .ts-chart-glass-panel,
-body.dark-mode .ts-chart-glass-panel {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-}
+.ts-filter-label { color: var(--text-secondary); }
+.ts-filter-checkbox-item { color: var(--text-primary); }
 
-[data-bs-theme="dark"] .custom-legend-text,
-body.dark-mode .custom-legend-text {
-    color: #cbd5e1 !important;
-}
-
-/* Time Series Filter Controls (Kolom, Checkbox, Filter Rincian) */
-.ts-filter-label {
-    color: #475569;
-}
-.ts-filter-checkbox-item {
-    color: #334155;
-}
-
-[data-bs-theme="dark"] .ts-filter-label,
-body.dark-mode .ts-filter-label,
-[data-bs-theme="dark"] #ts-valuekey-picker label,
-body.dark-mode #ts-valuekey-picker label,
-[data-bs-theme="dark"] #ts-entity-checklist span,
-body.dark-mode #ts-entity-checklist span,
-[data-bs-theme="dark"] #ts-entity-checklist label,
-body.dark-mode #ts-entity-checklist label,
-[data-bs-theme="dark"] #ts-tipe-rincian-picker label,
-body.dark-mode #ts-tipe-rincian-picker label {
-    color: #f8fafc !important;
-    font-weight: 600;
-}
-
-[data-bs-theme="dark"] .ts-filter-checkbox-item,
-body.dark-mode .ts-filter-checkbox-item {
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] .ts-entity-btn,
-body.dark-mode .ts-entity-btn {
-    color: #f8fafc !important;
-    border-color: #475569 !important;
-    background: #1e293b !important;
-}
-
-[data-bs-theme="dark"] .ts-entity-btn:hover,
-body.dark-mode .ts-entity-btn:hover {
-    background: #334155 !important;
-    color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] .dropdown-menu,
-body.dark-mode .dropdown-menu {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] .dropdown-item,
-body.dark-mode .dropdown-item {
-    color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] .dropdown-item:hover,
-body.dark-mode .dropdown-item:hover {
-    background-color: #243248 !important;
-    color: #ffffff !important;
-}
-
-/* Sidebar Brand Header (SIPEDAS & Badan Pusat Statistik) */
+/* Sidebar Brand Header */
 .bps-brand-name,
 .bps-brand-title,
 .bps-brand-subtitle {
-    color: #002b66;
-    transition: color 0.2s ease;
-}
-
-[data-bs-theme="dark"] .bps-brand-name,
-body.dark-mode .bps-brand-name {
-    color: #ffffff !important;
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
-}
-
-[data-bs-theme="dark"] .bps-brand-title,
-[data-bs-theme="dark"] .bps-brand-subtitle,
-body.dark-mode .bps-brand-title,
-body.dark-mode .bps-brand-subtitle {
-    color: #ffffff !important;
-}
-
-/* ===================== DARK MODE: DATA GRID STICKY HEADERS & COLUMNS ===================== */
-body.dark-mode #data-grid thead th,
-[data-bs-theme="dark"] #data-grid thead th {
-    background-color: #1e293b !important;
-    color: #f8fafc !important;
-    border-bottom: 2px solid #334155 !important;
-}
-
-body.dark-mode #page-editor.mode-view #data-grid tbody td:first-child,
-[data-bs-theme="dark"] #page-editor.mode-view #data-grid tbody td:first-child {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-    border-right: 2px solid #334155 !important;
-}
-
-body.dark-mode #page-editor.mode-view #data-grid thead th:first-child,
-[data-bs-theme="dark"] #page-editor.mode-view #data-grid thead th:first-child {
-    background-color: #1e293b !important;
-    color: #f8fafc !important;
-    border-bottom: 2px solid #334155 !important;
-    border-right: 2px solid #334155 !important;
-}
-
-body.dark-mode #page-editor.mode-edit #data-grid thead th:first-child,
-body.dark-mode #page-editor.mode-edit #data-grid thead th:nth-child(2),
-[data-bs-theme="dark"] #page-editor.mode-edit #data-grid thead th:first-child,
-[data-bs-theme="dark"] #page-editor.mode-edit #data-grid thead th:nth-child(2) {
-    background-color: #1e293b !important;
-    color: #f8fafc !important;
-    border-right: 2px solid #334155 !important;
-}
-
-body.dark-mode #page-editor.mode-edit #data-grid tbody td:first-child,
-body.dark-mode #page-editor.mode-edit #data-grid tbody td:nth-child(2),
-[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody td:first-child,
-[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-    border-right: 2px solid #334155 !important;
+    color: var(--bps-brand);
+    transition: color var(--transition-normal);
 }

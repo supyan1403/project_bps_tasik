@@ -283,6 +283,47 @@ async def add_cache_control_header(request: Request, call_next):
     return response
 
 # =====================================================================
+# MAINTENANCE MODE — Set env var SIPEDAS_MAINTENANCE=1 untuk aktif
+# =====================================================================
+MAINTENANCE_MODE = os.environ.get("SIPEDAS_MAINTENANCE", "0") == "1"
+
+@app.middleware("http")
+async def maintenance_middleware(request: Request, call_next):
+    if MAINTENANCE_MODE:
+        path = request.url.path
+        if path.startswith("/static/") or path == "/favicon.ico":
+            return await call_next(request)
+        if path.startswith("/api/"):
+            return JSONResponse(status_code=503, content={"detail": "Sistem sedang dalam pemeliharaan. Silakan coba lagi nanti."})
+        return templates.TemplateResponse(request=request, name="maintenance.html", status_code=503)
+    return await call_next(request)
+
+# =====================================================================
+# GLOBAL ERROR HANDLERS — 404, 500, dan error tak terduga
+# =====================================================================
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    path = request.url.path
+    if path.startswith("/api/"):
+        return JSONResponse(status_code=404, content={"detail": "Endpoint tidak ditemukan."})
+    return templates.TemplateResponse(request=request, name="404.html", status_code=404)
+
+@app.exception_handler(500)
+async def internal_error_handler(request: Request, exc):
+    path = request.url.path
+    if path.startswith("/api/"):
+        return JSONResponse(status_code=500, content={"detail": "Terjadi kesalahan internal server. Silakan coba lagi."})
+    return templates.TemplateResponse(request=request, name="500.html", status_code=500)
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc):
+    print(f"[ERROR] Unhandled exception at {request.url.path}: {exc}")
+    path = request.url.path
+    if path.startswith("/api/"):
+        return JSONResponse(status_code=500, content={"detail": "Terjadi kesalahan tidak terduga. Silakan coba lagi."})
+    return templates.TemplateResponse(request=request, name="500.html", status_code=500)
+
+# =====================================================================
 # AUTH ROUTER — Session-based admin authentication
 # =====================================================================
 from routers.auth import router as auth_router, require_admin, get_current_role, log_activity, _clean_expired_sessions
@@ -1251,6 +1292,15 @@ def get_table_neighbors(table_id: int, db: Session = Depends(get_db)):
         "current_index": curr_idx,
         "total_in_doc": len(siblings)
     }
+
+# =====================================================================
+# CATCH-ALL ROUTE — SPA fallback untuk URL yang tidak dikenali
+# =====================================================================
+@app.get("/{path:path}")
+def catch_all(request: Request, path: str):
+    if path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Endpoint tidak ditemukan.")
+    return templates.TemplateResponse(request=request, name="404.html", status_code=404)
 
 if __name__ == "__main__":
     import uvicorn

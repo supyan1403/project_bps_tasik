@@ -901,7 +901,7 @@ function filterMasterRegistration(q) {
 
 
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = "/api";
 
 
 
@@ -1239,6 +1239,10 @@ function checkRoleAccess(targetPage) {
 // ===================== NAVIGATION =====================
 
 function navigate(pageId, element) {
+
+    // Tutup mobile sidebar jika terbuka
+    const mobileSidebar = document.querySelector('.sidebar.mobile-open');
+    if (mobileSidebar) toggleMobileSidebar();
 
     // Validasi Akses Role Sistem (Pegawai BPS vs Admin)
 
@@ -2234,9 +2238,9 @@ async function loadDashboardStats() {
 
         welcomeRoleText.textContent = isAdmin 
 
-            ? 'Anda masuk sebagai Admin SIPEDAS (Kontrol Penuh).' 
+            ? 'Admin SIPEDAS (Kontrol Penuh)' 
 
-            : 'Anda masuk sebagai Operator SIPEDAS.';
+            : 'Operator SIPEDAS';
 
     }
 
@@ -8721,8 +8725,12 @@ function renderUnitConverterBar(checkedVKs) {
     const btnGroup = document.getElementById('ts-unit-btn-group');
     if (!container || !btnGroup) return;
 
+    const chartBtnGroup = document.getElementById('ts-chart-unit-btn-group');
+    const chartUnitWrapper = document.getElementById('ts-chart-unit-wrapper');
+
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         return;
     }
 
@@ -8732,6 +8740,7 @@ function renderUnitConverterBar(checkedVKs) {
 
     if (!familyKey || !UNIVERSAL_UNIT_FAMILIES[familyKey]) {
         container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         tsActiveUnitKey = null;
         return;
     }
@@ -8741,19 +8750,28 @@ function renderUnitConverterBar(checkedVKs) {
         tsActiveUnitKey = family.baseUnit;
     }
 
-    let chipsHtml = '';
-    for (const [unitKey, unitCfg] of Object.entries(family.units)) {
-        const isActive = (unitKey === tsActiveUnitKey);
-        chipsHtml += `
-            <label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${unitKey}')">
-                <input type="radio" name="ts-unit-radio" value="${unitKey}" ${isActive ? 'checked' : ''}>
-                ${unitCfg.btnLabel || unitCfg.label}
-            </label>`;
+    function buildChips(groupName) {
+        let html = '';
+        for (const [unitKey, unitCfg] of Object.entries(family.units)) {
+            const isActive = (unitKey === tsActiveUnitKey);
+            html += `
+                <label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${unitKey}')">
+                    <input type="radio" name="${groupName}" value="${unitKey}" ${isActive ? 'checked' : ''}>
+                    <span>${unitCfg.btnLabel || unitCfg.label}</span>
+                </label>`;
+        }
+        return html;
     }
-    btnGroup.innerHTML = chipsHtml;
+
+    btnGroup.innerHTML = buildChips('ts-unit-radio-table');
+    if (chartBtnGroup) chartBtnGroup.innerHTML = buildChips('ts-unit-radio-chart');
 
     container.style.removeProperty('display');
     container.style.display = 'flex';
+    if (chartUnitWrapper) {
+        chartUnitWrapper.style.removeProperty('display');
+        chartUnitWrapper.style.display = 'flex';
+    }
 }
 
 
@@ -9719,8 +9737,10 @@ function resetWizard() {
     if (summaryContainer) summaryContainer.style.display = 'none';
 
     const dataControlCard = document.getElementById('ts-data-control-card');
-
     if (dataControlCard) dataControlCard.style.display = 'none';
+
+    const chartControlCard = document.getElementById('ts-chart-control-card');
+    if (chartControlCard) chartControlCard.style.display = 'none';
 
     toggleTimeSeriesInsights(false);
 
@@ -10890,8 +10910,14 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
     
 
     const dataControlCard = document.getElementById('ts-data-control-card');
-
     if (dataControlCard) dataControlCard.style.display = 'block';
+
+    const chartControlCard = document.getElementById('ts-chart-control-card');
+    if (chartControlCard) chartControlCard.style.display = 'block';
+
+    const viewModeBar = document.getElementById('ts-view-mode-bar');
+    if (viewModeBar) viewModeBar.style.display = 'flex';
+    setTimeSeriesViewMode(tsCurrentViewMode || 'chart');
 
 
 
@@ -11201,6 +11227,45 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         tbody.innerHTML = bodyHtml;
 
+        if (tbody) {
+            tbody.onmouseover = function(e) {
+                const tr = e.target.closest('tr[data-entity]');
+                if (!tr) return;
+                const entityName = tr.dataset.entity;
+                if (!entityName || tsHiddenEntities.has(entityName)) return;
+
+                [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+                    if (inst && inst.data && inst.data.datasets) {
+                        inst.data.datasets.forEach(ds => {
+                            if (ds.entity === entityName) {
+                                ds.borderWidth = 4.5;
+                                ds.pointRadius = 6.5;
+                                ds.order = -1;
+                            } else {
+                                ds.borderWidth = 1.5;
+                                ds.pointRadius = 3.5;
+                                ds.order = 1;
+                            }
+                        });
+                        inst.update('none');
+                    }
+                });
+            };
+
+            tbody.onmouseleave = function() {
+                [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+                    if (inst && inst.data && inst.data.datasets) {
+                        inst.data.datasets.forEach(ds => {
+                            ds.borderWidth = 2.5;
+                            ds.pointRadius = 4.5;
+                            ds.order = 0;
+                        });
+                        inst.update('none');
+                    }
+                });
+            };
+        }
+
         const isAdmin = (currentUserRole === 'admin' || window.currentUserRole === 'admin');
 
         if (isAdmin) {
@@ -11301,84 +11366,108 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         
 
+        // Helper deteksi entitas rekapitulasi/total secara kontekstual
+        // (Kecamatan vs Antar Kab/Kota se-Jawa Barat)
+        function getSummaryEntityDetector(allEntitiesList) {
+            if (!allEntitiesList || allEntitiesList.length === 0) {
+                return (ent) => {
+                    if (!ent) return false;
+                    const c = ent.trim().toLowerCase();
+                    return ['kabupaten tasikmalaya', 'jumlah', 'total', 'grand total', 'keseluruhan', 'subtotal'].includes(c);
+                };
+            }
+            const lower = allEntitiesList.map(e => (typeof e === 'string' ? e.trim().toLowerCase() : ''));
+            const isJabarTable = lower.some(e =>
+                e === 'jawa barat' ||
+                e === 'provinsi jawa barat' ||
+                e.includes('garut') ||
+                e.includes('ciamis') ||
+                e.includes('pangandaran') ||
+                e.includes('kota tasikmalaya') ||
+                e.includes('bandung') ||
+                e.includes('bogor') ||
+                e.includes('sukabumi') ||
+                e.includes('cianjur')
+            );
+
+            if (isJabarTable) {
+                return (ent) => {
+                    if (!ent) return false;
+                    const c = ent.trim().toLowerCase();
+                    return ['jawa barat', 'provinsi jawa barat', 'jumlah', 'total', 'keseluruhan', 'grand total', 'subtotal'].includes(c);
+                };
+            } else {
+                return (ent) => {
+                    if (!ent) return false;
+                    const c = ent.trim().toLowerCase();
+                    return ['kabupaten tasikmalaya', 'jumlah', 'total', 'keseluruhan', 'grand total', 'subtotal'].includes(c);
+                };
+            }
+        }
+
         // Update Quick Insights Summary Bar
-
         try {
-
             const summaryContainer = document.getElementById('ts-quick-summary-container');
-
             const statTotalPts = document.getElementById('ts-stat-total-points');
-
             const statRange = document.getElementById('ts-stat-range');
-
             const statYears = document.getElementById('ts-stat-years');
-
             if (summaryContainer && statTotalPts && statRange && statYears) {
-
                 summaryContainer.style.display = 'flex';
-
                 let totalPoints = 0;
-
                 let minVal = Infinity;
-
                 let maxVal = -Infinity;
+                let summaryTotalVal = null;
+                const isSummaryChecker = getSummaryEntityDetector(filteredEntities);
 
                 filteredEntities.forEach(ent => {
-
+                    const isSummaryRow = isSummaryChecker(ent);
                     years.forEach(y => {
-
                         const yearData = entityMap[ent][y] || {};
-
                         checked.forEach(vk => {
-
                             const raw = yearData[vk];
-
                             if (raw != null && raw !== '-' && raw !== '...' && raw !== '') {
-
                                 totalPoints++;
-
                                 const num = parseIndoNumberToFloat(raw);
-
                                 if (num !== null && !isNaN(num)) {
-
                                     const scaled = unitConfig ? num * (unitConfig.factor != null ? unitConfig.factor : 1) : num;
-
-                                    if (scaled < minVal) minVal = scaled;
-
-                                    if (scaled > maxVal) maxVal = scaled;
-
+                                    if (!isSummaryRow) {
+                                        // Min dan Max hanya dihitung dari entitas wilayah murni (bukan total)
+                                        if (scaled < minVal) minVal = scaled;
+                                        if (scaled > maxVal) maxVal = scaled;
+                                    } else {
+                                        // Simpan nilai total jika ada
+                                        summaryTotalVal = scaled;
+                                    }
                                 }
-
                             }
-
                         });
-
                     });
-
                 });
+
+                // Safety fallback jika semua baris terdeteksi summary
+                if (minVal === Infinity && maxVal === -Infinity && summaryTotalVal !== null) {
+                    minVal = summaryTotalVal;
+                    maxVal = summaryTotalVal;
+                }
 
                 statTotalPts.textContent = totalPoints > 0 ? totalPoints.toLocaleString('id-ID') + ' Titik Data' : '0';
 
                 if (minVal !== Infinity && maxVal !== -Infinity) {
-
                     const minFmt = formatWithUnitScale(minVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
-
                     const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
-
                     const uSuffix = unitConfig ? ' ' + unitConfig.label : '';
-
-                    statRange.textContent = `${minFmt} — ${maxFmt}${uSuffix}`;
-
+                    let rangeHtml = `${minFmt} — ${maxFmt}${uSuffix}`;
+                    if (summaryTotalVal !== null) {
+                        const sumFmt = formatWithUnitScale(summaryTotalVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
+                        rangeHtml += ` <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary,#64748b); display:block; margin-top:2px;">(Total: ${sumFmt}${uSuffix})</span>`;
+                    }
+                    statRange.innerHTML = rangeHtml;
                 } else {
-
                     statRange.textContent = '-';
-
                 }
 
                 statYears.textContent = years.length > 0 ? `${years[0]} s/d ${years[years.length - 1]} (${years.length} Tahun)` : '-';
-
             }
-
         } catch(e) {
 
             console.error("Error populating ts insights:", e);
@@ -11499,104 +11588,62 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
     
 
-    const toggleBadge = document.getElementById('ts-growth-badge-toggle');
+    // Display Toggles (Khusus Grafik): Badge Naik/Turun & Tooltip
+    const chartBadgeToggle = document.getElementById('ts-chart-growth-badge-toggle');
+    if (chartBadgeToggle) {
+        tsGrowthBadgeEnabled = chartBadgeToggle.checked;
+        window.tsGrowthBadgeEnabled = chartBadgeToggle.checked;
 
-    if (toggleBadge) {
+        chartBadgeToggle.addEventListener('change', function() {
+            const isChecked = this.checked;
+            tsGrowthBadgeEnabled = isChecked;
+            window.tsGrowthBadgeEnabled = isChecked;
 
-        tsGrowthBadgeEnabled = toggleBadge.checked;
+            const chip = this.closest('.ts-filter-chip');
+            if (chip) chip.classList.toggle('active', isChecked);
 
-        window.tsGrowthBadgeEnabled = toggleBadge.checked;
-
-        toggleBadge.addEventListener('change', function() {
-
-            tsGrowthBadgeEnabled = this.checked;
-
-            window.tsGrowthBadgeEnabled = this.checked;
-
-            const p = this.closest('.ts-filter-chip');
-
-            if (p) {
-
-                if (this.checked) p.classList.add('active');
-
-                else p.classList.remove('active');
-
-            }
-
-            if (typeof tsRenderCallback === 'function') {
-
-                tsRenderCallback();
-
-            }
-
+            // Re-render grafik aktif secara instan
+            ['timeSeriesChartInstance', 'timeSeriesChart2Instance', 'timeSeriesChart3Instance'].forEach(key => {
+                if (window[key] && typeof window[key].update === 'function') {
+                    window[key].update('none');
+                }
+            });
         });
-
     }
 
+    const chartTooltipToggle = document.getElementById('ts-chart-tooltip-toggle');
+    if (chartTooltipToggle) {
+        tsTooltipEnabled = chartTooltipToggle.checked;
+        window.tsTooltipEnabled = chartTooltipToggle.checked;
 
+        const chip = chartTooltipToggle.closest('.ts-filter-chip');
+        if (chip) chip.classList.toggle('active', chartTooltipToggle.checked);
 
-    const toggleTooltip = document.getElementById('ts-tooltip-toggle');
+        chartTooltipToggle.addEventListener('change', function() {
+            const isChecked = this.checked;
+            tsTooltipEnabled = isChecked;
+            window.tsTooltipEnabled = isChecked;
 
-    if (toggleTooltip) {
+            const c = this.closest('.ts-filter-chip');
+            if (c) c.classList.toggle('active', isChecked);
 
-        tsTooltipEnabled = toggleTooltip.checked;
-
-        window.tsTooltipEnabled = toggleTooltip.checked;
-
-        const chip = document.getElementById('ts-tooltip-toggle-chip') || toggleTooltip.closest('.ts-filter-chip');
-
-        if (chip) chip.classList.toggle('active', toggleTooltip.checked);
-
-
-
-        toggleTooltip.addEventListener('change', function() {
-
-            tsTooltipEnabled = this.checked;
-
-            window.tsTooltipEnabled = this.checked;
-
-            const p = document.getElementById('ts-tooltip-toggle-chip') || this.closest('.ts-filter-chip');
-
-            if (p) {
-
-                if (this.checked) p.classList.add('active');
-
-                else p.classList.remove('active');
-
-            }
-
-            if (!this.checked) {
-
+            if (!isChecked) {
                 ['ts-chart-tooltip', 'ts-chart-tooltip-2', 'ts-chart-tooltip-3'].forEach(id => {
-
                     const el = document.getElementById(id);
-
                     if (el) {
-
                         el.style.opacity = '0';
-
                         el.style.display = 'none';
-
                     }
-
                 });
-
             }
 
-            // Update active chart instances so single-year and multi-year tooltips reflect the new state immediately
-
+            // Update active chart instances segera
             ['timeSeriesChartInstance', 'timeSeriesChart2Instance', 'timeSeriesChart3Instance'].forEach(key => {
-
                 if (window[key] && typeof window[key].update === 'function') {
-
                     window[key].update('none');
-
                 }
-
             });
-
         });
-
     }
 
 }
@@ -11824,139 +11871,79 @@ function initInsightFilterOptions() {
 
 
     // Populate Searchable Entity Dropdown inside Insight Drawer
-
     const listEl = document.getElementById('ts-insight-entity-list');
-
-    const checkAll = document.getElementById('ts-insight-check-all');
-
+    const btnSelectAll = document.getElementById('btn-ts-insight-select-all');
+    const btnClearAll = document.getElementById('btn-ts-insight-clear-all');
     const btnText = document.getElementById('ts-insight-entity-btn-text');
 
-
-
     function updateInsightEntityBtnText() {
-
         if (!btnText) return;
-
         const total = allEntities.length;
-
-        const sel = tsInsightSelectedEntities.size;
-
+        const sel = tsInsightSelectedEntities ? tsInsightSelectedEntities.size : 0;
         if (sel === total) {
-
             btnText.textContent = `Semua Rincian (${total})`;
-
         } else if (sel === 0) {
-
             btnText.textContent = `0 Rincian Terpilih`;
-
         } else {
-
             btnText.textContent = `${sel} Rincian Terpilih`;
-
         }
-
-        if (checkAll) {
-
-            checkAll.checked = (sel === total);
-
-            checkAll.indeterminate = (sel > 0 && sel < total);
-
-        }
-
     }
-
-
 
     if (listEl) {
-
         let listHtml = '';
-
         allEntities.forEach(ent => {
-
-            const isChecked = tsInsightSelectedEntities.has(ent);
-
+            const isChecked = tsInsightSelectedEntities && tsInsightSelectedEntities.has(ent);
             listHtml += `
-
-                <label class="dropdown-item px-1 py-1 ts-insight-entity-item" data-name="${ent.toLowerCase()}" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-
+                <label class="dropdown-item px-1 py-1 ts-insight-entity-item" data-name="${ent.toLowerCase()}" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
                     <input type="checkbox" class="ts-insight-entity-cb" data-entity="${escHtml(ent)}" ${isChecked ? 'checked' : ''} style="width:16px;height:16px;">
-
                     <span class="text-truncate">${escHtml(ent)}</span>
-
                 </label>
-
             `;
-
         });
-
         listEl.innerHTML = listHtml;
 
-
-
         listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => {
-
-            cb.addEventListener('change', function() {
-
-                const ent = this.dataset.entity;
-
+            cb.onchange = function(e) {
+                if (e) e.stopPropagation();
+                const ent = this.getAttribute('data-entity');
+                if (!tsInsightSelectedEntities) tsInsightSelectedEntities = new Set(allEntities);
                 if (this.checked) {
-
                     tsInsightSelectedEntities.add(ent);
-
                 } else {
-
                     tsInsightSelectedEntities.delete(ent);
-
                 }
-
                 updateInsightEntityBtnText();
-
                 computeAndRenderTimeSeriesInsights();
-
-            });
-
+            };
         });
-
     }
 
-
-
-    if (checkAll) {
-
-        checkAll.checked = (tsInsightSelectedEntities.size === allEntities.length);
-
-        checkAll.addEventListener('change', function() {
-
-            if (this.checked) {
-
-                allEntities.forEach(e => tsInsightSelectedEntities.add(e));
-
-            } else {
-
-                tsInsightSelectedEntities.clear();
-
-            }
-
+    if (btnSelectAll) {
+        btnSelectAll.onclick = function(e) {
+            if (e) e.stopPropagation();
+            tsInsightSelectedEntities = new Set(allEntities);
             if (listEl) {
-
-                listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => cb.checked = checkAll.checked);
-
+                listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => cb.checked = true);
             }
-
             updateInsightEntityBtnText();
-
             computeAndRenderTimeSeriesInsights();
-
-        });
-
+        };
     }
 
-
+    if (btnClearAll) {
+        btnClearAll.onclick = function(e) {
+            if (e) e.stopPropagation();
+            tsInsightSelectedEntities = new Set();
+            if (listEl) {
+                listEl.querySelectorAll('.ts-insight-entity-cb').forEach(cb => cb.checked = false);
+            }
+            updateInsightEntityBtnText();
+            computeAndRenderTimeSeriesInsights();
+        };
+    }
 
     const searchInp = document.getElementById('ts-insight-entity-search');
-
     if (searchInp) {
-
         searchInp.value = '';
 
         searchInp.addEventListener('input', function(e) {
@@ -12078,77 +12065,43 @@ function onInsightVariantFilterChanged() {
 }
 
 function onInsightFilterChanged() {
-
     const selStart = document.getElementById('ts-insight-select-year-start');
-
     const selEnd = document.getElementById('ts-insight-select-year-end');
-
     const selInd = document.getElementById('ts-insight-select-indicator');
 
-
-
-    if (selStart) tsInsightYearStart = Number(selStart.value) || tsInsightYearStart;
-
-    if (selEnd) tsInsightYearEnd = Number(selEnd.value) || tsInsightYearEnd;
-
+    if (selStart) tsInsightYearStart = String(selStart.value);
+    if (selEnd) tsInsightYearEnd = String(selEnd.value);
     if (selInd) tsInsightActiveVk = selInd.value || tsInsightActiveVk;
 
-
-
     // Auto-adjust if start year > end year
-
-    if (tsInsightYearStart > tsInsightYearEnd) {
-
+    if (Number(tsInsightYearStart) > Number(tsInsightYearEnd)) {
         tsInsightYearEnd = tsInsightYearStart;
-
         if (selEnd) selEnd.value = tsInsightYearEnd;
-
     }
-
-
 
     computeAndRenderTimeSeriesInsights();
-
 }
 
-
-
 function computeAndRenderTimeSeriesInsights() {
-
     if (!currentTimeSeriesData || !currentTimeSeriesData.years || !currentTimeSeriesData.entityMap) return;
 
-
-
     const { years, valueKeys, entityMap, vkUnits } = currentTimeSeriesData;
-
     const checked = (typeof getCheckedVKs === 'function' ? getCheckedVKs() : valueKeys) || valueKeys;
 
-
-
     if (!tsInsightActiveVk || !checked.includes(tsInsightActiveVk)) {
-
         tsInsightActiveVk = (checked && checked.length > 0) ? checked[0] : valueKeys[0];
-
     }
-
-    if (!tsInsightYearStart || !years.includes(tsInsightYearStart)) {
-
-        tsInsightYearStart = years[0];
-
+    
+    const strYears = years.map(String);
+    if (!tsInsightYearStart || !strYears.includes(String(tsInsightYearStart))) {
+        tsInsightYearStart = String(years[0]);
     }
-
-    if (!tsInsightYearEnd || !years.includes(tsInsightYearEnd)) {
-
-        tsInsightYearEnd = years[years.length - 1];
-
+    if (!tsInsightYearEnd || !strYears.includes(String(tsInsightYearEnd))) {
+        tsInsightYearEnd = String(years[years.length - 1]);
     }
-
-
 
     const startYear = tsInsightYearStart;
-
     const endYear = tsInsightYearEnd;
-
     const activeVk = tsInsightActiveVk;
 
 
@@ -12201,44 +12154,27 @@ function computeAndRenderTimeSeriesInsights() {
 
 
 
-    const yearIdxStart = years.indexOf(startYear);
-
-    const yearIdxEnd = years.indexOf(endYear);
-
-    const intervalYears = Math.max(1, yearIdxEnd - yearIdxStart);
-
-
+    const yearIdxStart = strYears.indexOf(String(startYear));
+    const yearIdxEnd = strYears.indexOf(String(endYear));
+    const intervalYears = Math.max(1, (yearIdxEnd >= 0 && yearIdxStart >= 0) ? (yearIdxEnd - yearIdxStart) : 1);
 
     if (thStart) thStart.textContent = `Thn ${startYear}`;
-
     if (thEnd) thEnd.textContent = `Thn ${endYear}`;
-
     if (subtitleEl) subtitleEl.textContent = `Berdasarkan indikator "${activeVk}" dari Tahun ${startYear} ke ${endYear} (${intervalYears + 1} Tahun Observasi)`;
 
-
-
     const vkUnit = (vkUnits && vkUnits[activeVk]) || '';
-
     const familyKey = detectUnitFamily(vkUnit, activeVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
     const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
     const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
-
     const uSuffix = unitConfig ? ' ' + unitConfig.label : (vkUnit ? ' ' + vkUnit : '');
 
-
-
-    const isSummaryEntity = ent => ['jumlah', 'total', 'subtotal', 'grand total', 'keseluruhan', 'seluruh', 'kabupaten tasikmalaya'].some(kw => ent.trim().toLowerCase() === kw);
-
-
-
     const allEntities = _sortEntitiesWithKabLast(Object.keys(entityMap));
+    const isSummaryEntity = (typeof getSummaryEntityDetector === 'function') 
+        ? getSummaryEntityDetector(allEntities) 
+        : (ent => ['jumlah', 'total', 'subtotal', 'grand total', 'keseluruhan', 'seluruh', 'kabupaten tasikmalaya'].some(kw => ent.trim().toLowerCase() === kw));
 
-    if (!tsInsightSelectedEntities || tsInsightSelectedEntities.size === 0) {
-
+    if (!tsInsightSelectedEntities) {
         tsInsightSelectedEntities = new Set(allEntities);
-
     }
 
     const calculations = [];
@@ -12304,9 +12240,9 @@ function computeAndRenderTimeSeriesInsights() {
     const rankable = [...validCalculations, ...unrankedCalculations];
     const summaryItems = calculations.filter(c => c.isSummary);
 
-    // Filter calculations by tsInsightSelectedEntities (or fallback to all if empty)
-    const filteredRankable = (tsInsightSelectedEntities.size > 0) ? rankable.filter(c => tsInsightSelectedEntities.has(c.entity)) : rankable;
-    const filteredSummaries = (tsInsightSelectedEntities.size > 0) ? summaryItems.filter(c => tsInsightSelectedEntities.has(c.entity)) : summaryItems;
+    // Filter calculations by tsInsightSelectedEntities (strictly respect user selection)
+    const filteredRankable = rankable.filter(c => tsInsightSelectedEntities.has(c.entity));
+    const filteredSummaries = summaryItems.filter(c => tsInsightSelectedEntities.has(c.entity));
 
     // Top Gainer & Decliner computed only from entities with valid percent change
     const validFilteredRankable = filteredRankable.filter(c => c.pctChange !== null);
@@ -12314,7 +12250,7 @@ function computeAndRenderTimeSeriesInsights() {
     // Top Gainer (from selected entities)
     if (validFilteredRankable.length > 0 && validFilteredRankable[0].pctChange > 0) {
         const g = validFilteredRankable[0];
-        const gPct = g.pctChange >= 0 ? `+${g.pctChange.toFixed(2)}%` : `${g.pctChange.toFixed(2)}%`;
+        const gPct = (g.pctChange >= 0 ? '+' : '') + g.pctChange.toFixed(2).replace('.', ',') + '%';
         const gStartFmt = formatWithUnitScale(g.startVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
         const gEndFmt = formatWithUnitScale(g.endVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
         const gDeltaFmt = (g.delta >= 0 ? '+' : '') + formatWithUnitScale(g.delta, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
@@ -12332,7 +12268,7 @@ function computeAndRenderTimeSeriesInsights() {
     const decliners = validFilteredRankable.filter(c => c.pctChange < 0);
     if (decliners.length > 0) {
         const d = decliners[decliners.length - 1]; // most negative
-        const dPct = `${d.pctChange.toFixed(2)}%`;
+        const dPct = d.pctChange.toFixed(2).replace('.', ',') + '%';
         const dStartFmt = formatWithUnitScale(d.startVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
         const dEndFmt = formatWithUnitScale(d.endVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
         const dDeltaFmt = formatWithUnitScale(d.delta, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
@@ -12359,7 +12295,7 @@ function computeAndRenderTimeSeriesInsights() {
 
     if (avgBadgeEl) {
 
-        avgBadgeEl.textContent = (avgAnnualPct >= 0 ? '+' : '') + avgAnnualPct.toFixed(2) + '% / thn';
+        avgBadgeEl.textContent = (avgAnnualPct >= 0 ? '+' : '') + avgAnnualPct.toFixed(2).replace('.', ',') + '% / thn';
 
         avgBadgeEl.className = `badge ${avgAnnualPct >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'} px-2 py-0.5 fw-bold`;
 
@@ -12397,10 +12333,23 @@ function computeAndRenderTimeSeriesInsights() {
         return false;
     });
 
+    let trendFilteredSummaries = filteredSummaries.filter(c => {
+        const isUp = (c.pctChange !== null && c.pctChange > 0) || (c.pctChange === null && c.delta !== null && c.delta > 0);
+        const isDown = (c.pctChange !== null && c.pctChange < 0) || (c.pctChange === null && c.delta !== null && c.delta < 0);
+        const isStagnant = (c.pctChange !== null && c.pctChange === 0) || (c.pctChange === null && c.delta !== null && c.delta === 0);
+        const isEmpty = (c.pctChange === null && c.delta === null);
+
+        if (isUp && tsInsightSelectedTrends.has('up')) return true;
+        if (isDown && tsInsightSelectedTrends.has('down')) return true;
+        if (isStagnant && tsInsightSelectedTrends.has('stagnant')) return true;
+        if (isEmpty && tsInsightSelectedTrends.has('empty')) return true;
+        return false;
+    });
+
     // Populate Ranking Table Count
     if (countEl) {
         const nRincian = trendFilteredRankable.length;
-        const nSummary = filteredSummaries.length;
+        const nSummary = trendFilteredSummaries.length;
         let suffix = 'Rincian Terdaftar';
         const sel = tsInsightSelectedTrends.size;
         if (sel === 2 && tsInsightSelectedTrends.has('up') && tsInsightSelectedTrends.has('down')) suffix = 'Rincian Naik & Turun';
@@ -12416,8 +12365,8 @@ function computeAndRenderTimeSeriesInsights() {
     }
 
     if (tbody) {
-        if (trendFilteredRankable.length === 0 && filteredSummaries.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-3 text-muted">Tidak ada rincian data yang sesuai dengan filter saat ini.</td></tr>`;
+        if (trendFilteredRankable.length === 0 && trendFilteredSummaries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada rincian data yang sesuai dengan filter saat ini. Silakan centang rincian wilayah pada filter di atas.</td></tr>`;
             return;
         }
 
@@ -12436,7 +12385,8 @@ function computeAndRenderTimeSeriesInsights() {
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
                 const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
-                pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${item.pctChange.toFixed(2)}%</span>`;
+                const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
+                pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
 
             tableRowsHtml += `
@@ -12452,7 +12402,7 @@ function computeAndRenderTimeSeriesInsights() {
         });
 
         // Summary items at bottom (e.g. Kabupaten Tasikmalaya)
-        filteredSummaries.forEach(item => {
+        trendFilteredSummaries.forEach(item => {
             const startFmt = item.startVal !== null ? formatWithUnitScale(item.startVal, unitConfig) : '-';
             const endFmt = item.endVal !== null ? formatWithUnitScale(item.endVal, unitConfig) : '-';
             const deltaFmt = item.delta !== null ? ((item.delta >= 0 ? '+' : '') + formatWithUnitScale(item.delta, unitConfig)) : '-';
@@ -12463,7 +12413,8 @@ function computeAndRenderTimeSeriesInsights() {
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
                 const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
-                pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${item.pctChange.toFixed(2)}%</span>`;
+                const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
+                pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
 
             tableRowsHtml += `
@@ -12715,8 +12666,10 @@ function backToTablePicker() {
     document.getElementById("ts-results-content").style.display = "none";
 
     const dataControlCard = document.getElementById('ts-data-control-card');
-
     if (dataControlCard) dataControlCard.style.display = 'none';
+
+    const chartControlCard = document.getElementById('ts-chart-control-card');
+    if (chartControlCard) chartControlCard.style.display = 'none';
 
     toggleTimeSeriesInsights(false);
 
@@ -13186,6 +13139,39 @@ function applyExportPreset(presetType) {
 
     }
 
+
+
+    // Update active visual status on preset buttons
+    const container = document.getElementById('ts-export-preset-container');
+    if (container) {
+        container.querySelectorAll('.ts-export-preset-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.preset === presetType);
+        });
+    }
+}
+
+function syncExportPresetState() {
+    const cbChart = document.getElementById('ts-export-opt-chart')?.checked ?? false;
+    const cbTable = document.getElementById('ts-export-opt-table')?.checked ?? false;
+    const cbInsights = document.getElementById('ts-export-opt-insights')?.checked ?? false;
+
+    let matchedPreset = '';
+    if (cbChart && cbTable && cbInsights) {
+        matchedPreset = 'all';
+    } else if (cbChart && !cbTable && !cbInsights) {
+        matchedPreset = 'chart';
+    } else if (!cbChart && cbTable && !cbInsights) {
+        matchedPreset = 'table';
+    } else if (cbChart && !cbTable && cbInsights) {
+        matchedPreset = 'chart_insights';
+    }
+
+    const container = document.getElementById('ts-export-preset-container');
+    if (container) {
+        container.querySelectorAll('.ts-export-preset-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.preset === matchedPreset);
+        });
+    }
 }
 
 
@@ -13346,640 +13332,770 @@ async function executeTimeSeriesExport() {
 
         let reportHtml = '';
 
-
-
-        // 1. Header / Kop Resmi BPS
-
-        if (includeHeader) {
-
-            reportHtml += `
-
-                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid var(--text-primary, #1e293b); padding-bottom:14px; margin-bottom:20px;">
-
-                    <div style="display:flex; align-items:center; gap:12px;">
-
-                        <img src="/static/logo_sipedas.png" alt="BPS" style="height:46px; width:auto;">
-
-                        <div>
-
-                            <div style="font-size:16px; font-weight:800; color:var(--text-primary, #0f172a); letter-spacing:-0.2px;">BADAN PUSAT STATISTIK KABUPATEN TASIKMALAYA</div>
-
-                            <div style="font-size:12px; color:var(--text-secondary, #475569); font-weight:500;">SIPEDAS — Sistem Integrasi, Pencarian, dan Analisis Data Statistik</div>
-
-                        </div>
-
-                    </div>
-
-                    <div style="text-align:right;">
-
-                        <div style="font-size:11px; font-weight:600; color:var(--text-secondary, #64748b); text-transform:uppercase;">Tanggal Cetak:</div>
-
-                        <div style="font-size:12px; font-weight:700; color:var(--text-primary, #0f172a);">${dateStr} WIB</div>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        }
-
-
-
-        // Title Block
-
-        reportHtml += `
-
-            <div style="margin-bottom:22px;">
-
-                <div style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; margin-bottom:6px; letter-spacing:0.5px;">
-
-                    LAPORAN EKSPOR DERET WAKTU
-
-                </div>
-
-                <h2 style="font-size:20px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 4px 0; line-height:1.25;">${escHtml(keywordTitle)}</h2>
-
-                <div style="font-size:13px; color:var(--text-secondary, #475569); font-weight:500;">
-
-                    <span>📦 ${yearPeriodStr}</span> &nbsp;|&nbsp; 
-
-                    <span>📁 Satuan: <b>${escHtml(unitLabel)}</b></span> &nbsp;|&nbsp; 
-
-                    <span>📊 Kolom: <b>${activeVKs.join(', ')}</b></span>
-
-                </div>
-
+        // Tentukan section aktif terakhir agar footer resmi SIPEDAS menempel di akhir halaman dokumen
+        const lastSectionKey = optTable ? 'data-table' : (optChart ? 'charts' : (optInsights ? 'insights' : 'cover'));
+        const footerHtml = `
+            <div id="ts-pdf-footer" style="border-top:1px solid var(--border, #e2e8f0); padding-top:10px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--text-secondary, #64748b);">
+                <div>Dokumen digenerasi secara otomatis oleh SIPEDAS BPS Kabupaten Tasikmalaya</div>
+                <div>SIPEDAS \u00A9 2026</div>
             </div>
-
         `;
 
+        // Running Header resmi BPS & SIPEDAS untuk semua halaman konten (halaman 2 ke atas)
+        if (includeHeader) {
+            reportHtml += `
+                <div id="ts-pdf-page-running-header" style="display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #cbd5e1; padding:4px 0 14px 0; margin-bottom:28px; background:#ffffff;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:36px; width:auto; object-fit:contain;">
+                        <div>
+                            <div style="font-size:13px; font-weight:800; color:#0f2b5c; letter-spacing:0.4px; font-family:'Inter', sans-serif;">
+                                SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                            </div>
+                            <div style="font-size:11px; font-weight:800; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-family:'Inter', sans-serif;">
+                                Badan Pusat Statistik Kabupaten Tasikmalaya
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
+        // Wrap Executive Modern Minimalist Cover (Option 1)
+        reportHtml += `
+            <div data-pdf-section="cover" style="min-height:510px; display:flex; flex-direction:column; justify-content:center; align-items:center; border:1.5px solid #cbd5e1; border-radius:16px; background:radial-gradient(circle at 50% 40%, #ffffff 0%, #f8fafc 100%); padding:40px 32px; box-sizing:border-box; position:relative; box-shadow:inset 0 0 40px rgba(0,0,0,0.015); margin-bottom:10px;">
+                
+                <!-- Logo SIPEDAS -->
+                <div style="margin-bottom:18px;">
+                    <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:120px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(15, 43, 92, 0.12));">
+                </div>
+
+                <!-- Brand Title -->
+                <div style="font-size:36px; font-weight:900; letter-spacing:3px; color:#0f2b5c; margin-bottom:6px; font-family:'Inter', sans-serif;">SIPEDAS</div>
+
+                <!-- Tagline / Kepanjangan -->
+                <div style="font-size:15px; font-weight:600; color:#475569; letter-spacing:0.3px; max-width:680px; text-align:center; line-height:1.45; margin-bottom:16px; font-family:'Inter', sans-serif;">
+                    Sistem Integrasi, Pencarian, dan Analisis Data Statistik
+                </div>
+
+                <!-- Garis Aksen BPS (Tricolor) -->
+                <div style="display:flex; gap:6px; margin-bottom:20px; align-items:center;">
+                    <span style="width:36px; height:3.5px; background:#0284c7; border-radius:2px;"></span>
+                    <span style="width:36px; height:3.5px; background:#16a34a; border-radius:2px;"></span>
+                    <span style="width:36px; height:3.5px; background:#f59e0b; border-radius:2px;"></span>
+                </div>
+
+                <!-- Nama Instansi Resmi -->
+                <div style="font-size:15px; font-weight:800; color:#1e293b; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:28px; font-family:'Inter', sans-serif;">
+                    Badan Pusat Statistik Kabupaten Tasikmalaya
+                </div>
+
+                <!-- Kartu Identitas Laporan -->
+                <div style="background:#ffffff; border:1px solid #bfdbfe; border-radius:12px; padding:18px 32px; text-align:center; box-shadow:0 3px 12px rgba(37, 99, 235, 0.08); max-width:720px; width:100%; box-sizing:border-box;">
+                    <div style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
+                        Laporan Analisis Deret Waktu
+                    </div>
+                    <div style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:10px; letter-spacing:-0.2px; font-family:'Inter', sans-serif;">
+                        ${escHtml(keywordTitle)}
+                    </div>
+                    <div style="font-size:12.5px; color:#334155; font-weight:600; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+                        <span style="background:#f1f5f9; padding:4px 14px; border-radius:6px; color:#334155;">${escHtml(yearPeriodStr)}</span>
+                        <span style="background:#f1f5f9; padding:4px 14px; border-radius:6px; color:#334155;">Satuan: <b>${escHtml(unitLabel)}</b></span>
+                    </div>
+                </div>
+        `;
+
+        if (lastSectionKey === 'cover') {
+            reportHtml += footerHtml;
+        }
+        // Close cover section
+        reportHtml += `</div>`;
 
         // 2. Komponen: Quick Insights & Peringkat Pertumbuhan (Berdasarkan Sub-opsi)
-
         if (optInsights) {
-
+            reportHtml += `<div data-pdf-section="insights">`;
             reportHtml += `
-
                 <div style="margin-bottom:26px;">
-
-                    <div style="font-size:14px; font-weight:700; color:#1e293b; border-bottom:1.5px solid var(--border, #e2e8f0); padding-bottom:6px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
-
-                        <span>📈</span> RINGKASAN TREN & PERINGKAT PERTUMBUHAN
-
+                    <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:18px; letter-spacing:0.3px;">
+                        RINGKASAN TREN & PERINGKAT PERTUMBUHAN
                     </div>
-
             `;
-
-
 
             // Render Card Metrik (jika 'both' atau 'card_only')
-
             if (insightsScope === 'both' || insightsScope === 'card_only') {
-
                 const gainerName = document.getElementById('ts-gainer-name')?.textContent || '-';
-
                 const gainerBadge = document.getElementById('ts-gainer-badge')?.textContent || '0%';
-
                 const declinerName = document.getElementById('ts-decliner-name')?.textContent || '-';
-
                 const declinerBadge = document.getElementById('ts-decliner-badge')?.textContent || '0%';
-
                 const avgBadge = document.getElementById('ts-avg-badge')?.textContent || '0%';
-
                 const trendSummary = document.getElementById('ts-trend-summary')?.textContent || 'Tren Stabil';
 
-
-
                 reportHtml += `
-
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:14px;">
-
                         <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-
                             <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Pertumbuhan Tertinggi</div>
-
                             <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(gainerName)}</div>
-
                             <div style="font-size:12px; font-weight:700; color:var(--success, #16a34a); margin-top:2px;">${escHtml(gainerBadge)}</div>
-
                         </div>
-
                         <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-
                             <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Penurunan Tertinggi</div>
-
                             <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(declinerName)}</div>
-
                             <div style="font-size:12px; font-weight:700; color:var(--danger, #dc2626); margin-top:2px;">${escHtml(declinerBadge)}</div>
-
                         </div>
-
                         <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-
                             <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Laju Rata-Rata Tahunan</div>
-
                             <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(trendSummary)}</div>
-
                             <div style="font-size:12px; font-weight:700; color:var(--info, #2563eb); margin-top:2px;">${escHtml(avgBadge)}</div>
-
                         </div>
-
                     </div>
-
                 `;
-
             }
-
-
 
             // Render Tabel Peringkat Pertumbuhan (jika 'both' atau 'table_only')
-
             if (insightsScope === 'both' || insightsScope === 'table_only') {
-
                 const rankingTableEl = document.getElementById('ts-growth-ranking-table');
-
                 if (rankingTableEl) {
-
                     const startYearText = document.getElementById('ts-th-year-start')?.textContent || 'Tahun Awal';
-
                     const endYearText = document.getElementById('ts-th-year-end')?.textContent || 'Tahun Akhir';
-
                     const rankingTbody = document.getElementById('ts-growth-ranking-tbody')?.innerHTML || '';
 
-
-
                     reportHtml += `
-
-                        <div style="margin-top:10px;">
-
-                            <div style="font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">📊 Tabel Urutan Peringkat Pertumbuhan (${escHtml(startYearText)} ke ${escHtml(endYearText)})</div>
-
-                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;">
-
-                                <thead>
-
+                        <div style="margin-top:14px;">
+                            <div style="font-size:12.5px; font-weight:700; color:#1e293b; margin-bottom:8px;">Tabel Urutan Peringkat Pertumbuhan (${escHtml(startYearText)} ke ${escHtml(endYearText)})</div>
+                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;" data-pdf-table="ranking">
+                                <thead data-pdf-table-header="ranking">
                                     <tr>
-
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:center; width:45px;">#</th>
-
+                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:center; width:45px;">No.</th>
                                         <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:left;">Rincian</th>
-
                                         <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">${escHtml(startYearText)}</th>
-
                                         <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">${escHtml(endYearText)}</th>
-
                                         <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">Selisih Nominal</th>
-
                                         <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">Perubahan (%)</th>
-
                                     </tr>
-
                                 </thead>
-
                                 <tbody>
-
                                     ${rankingTbody}
-
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     `;
-
                 }
-
             }
-
-
 
             reportHtml += `</div>`;
-
+            if (lastSectionKey === 'insights') {
+                reportHtml += footerHtml;
+            }
+            // Close insights section
+            reportHtml += `</div>`;
         }
-
-
 
         // 3. Komponen: Grafik Visual
-
         if (optChart) {
-
+            reportHtml += `<div data-pdf-section="charts">`;
             reportHtml += `
-
-                <div style="margin-bottom:26px;">
-
-                    <div style="font-size:14px; font-weight:700; color:#1e293b; border-bottom:1.5px solid var(--border, #e2e8f0); padding-bottom:6px; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
-
-                        <span>📊</span> GRAFIK VISUAL DERET WAKTU
-
+                <div style="margin-bottom:26px; page-break-inside:avoid; break-inside:avoid;">
+                    <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:20px; letter-spacing:0.3px;">
+                        GRAFIK VISUAL DERET WAKTU
                     </div>
-
                     <div id="ts-export-chart-images-container" style="display:flex; flex-direction:column; gap:16px;"></div>
-
                 </div>
-
             `;
-
+            if (lastSectionKey === 'charts') {
+                reportHtml += footerHtml;
+            }
+            // Close charts section
+            reportHtml += `</div>`;
         }
-
-
 
         // 4. Komponen: Tabel Data Tabular
-
         if (optTable) {
-
+            reportHtml += `<div data-pdf-section="data-table">`;
             const tableEl = document.getElementById('ts-grid');
-
             if (tableEl) {
-
                 reportHtml += `
-
                     <div style="margin-bottom:24px;">
-
-                        <div style="font-size:14px; font-weight:700; color:#1e293b; border-bottom:1.5px solid var(--border, #e2e8f0); padding-bottom:6px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
-
-                            <span>📋</span> TABEL DATA TABULAR
-
+                        <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:18px; letter-spacing:0.3px;">
+                            TABEL DATA TABULAR
                         </div>
-
                         <div style="overflow-x:auto;">
-
-                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;">
-
+                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;" data-pdf-table="tabular">
                                 ${tableEl.innerHTML}
-
                             </table>
-
                         </div>
-
                     </div>
-
                 `;
-
             }
-
+            if (lastSectionKey === 'data-table') {
+                reportHtml += footerHtml;
+            }
+            // Close data-table section
+            reportHtml += `</div>`;
         }
 
-
-
-        // Footer
-
-        reportHtml += `
-
-            <div style="border-top:1px solid #e2e8f0; padding-top:10px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--text-secondary, #64748b);">
-
-                <div>Dokumen digenerasi secara otomatis oleh SIPEDAS BPS Kabupaten Tasikmalaya</div>
-
-                <div>SIPEDAS © 2026</div>
-
-            </div>
-
-        `;
-
-
-
         reportContainer.innerHTML = reportHtml;
-
-
-
-        // Apply clean styling to cloned table elements inside reportContainer
-
         const clonedTables = reportContainer.querySelectorAll('table');
-
         clonedTables.forEach(tbl => {
+            // Sanitasi: Hapus semua elemen tautan dan ikon lacak sumber data (↗) dari ekspor PDF
+            tbl.querySelectorAll('a, button, .bi-box-arrow-up-right').forEach(el => {
+                el.remove();
+            });
 
             tbl.querySelectorAll('th').forEach(th => {
-
                 th.style.cssText = 'background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:center; font-size:10.5px;';
-
             });
-
             tbl.querySelectorAll('td').forEach(td => {
-
                 td.style.cssText = 'border:1px solid #e2e8f0; padding:5px 8px; font-size:10px; color:#334155;';
-
             });
-
             tbl.querySelectorAll('tr:nth-child(even) td').forEach(td => {
-
                 td.style.backgroundColor = cssVar('--bg-page') || '#f8fafc';
-
             });
-
         });
-
-
 
         document.body.appendChild(reportContainer);
 
-
-
         // If chart is requested, convert active Chart canvases (timeSeriesChart) to high-res image elements
-
         if (optChart) {
-
             const chartImgContainer = reportContainer.querySelector('#ts-export-chart-images-container');
-
             if (chartImgContainer) {
-
                 const chartConfigs = [
-
                     { canvasId: 'timeSeriesChart', containerId: 'ts-chart-container', title: activeVKs[0] },
-
                     { canvasId: 'timeSeriesChart2', containerId: 'ts-chart-container-2', title: activeVKs[1] },
-
                     { canvasId: 'timeSeriesChart3', containerId: 'ts-chart-container-3', title: activeVKs[2] }
-
                 ];
 
-
-
                 chartConfigs.forEach(c => {
-
-                    const canvas = document.getElementById(c.canvasId);
-
-                    const container = document.getElementById(c.containerId);
-
-                    const isVisible = container ? (container.style.display !== 'none' && container.offsetParent !== null) : (canvas && canvas.offsetParent !== null);
-
-                    
-
-                    if (canvas && isVisible) {
-
+                    const cont = document.getElementById(c.containerId);
+                    if (cont && cont.style.display !== 'none') {
                         try {
+                            const canvas = document.getElementById(c.canvasId);
+                            if (!canvas) return;
 
-                            const dataUrl = canvas.toDataURL('image/png', 1.0);
+                            let dataUrl = null;
+                            const originalChart = (window.Chart && Chart.getChart(canvas)) || (window.timeSeriesCharts && window.timeSeriesCharts[c.canvasId]);
+
+                            if (originalChart && originalChart.data && originalChart.data.datasets) {
+                                try {
+                                    const offCanvas = document.createElement('canvas');
+                                    offCanvas.width = 1100;
+                                    offCanvas.height = 480;
+                                    const offCtx = offCanvas.getContext('2d');
+
+                                    offCtx.fillStyle = '#ffffff';
+                                    offCtx.fillRect(0, 0, 1100, 480);
+
+                                    const clonedDatasets = (originalChart.data.datasets || []).map(ds => {
+                                        const isHidden = ds.hidden || tsHiddenEntities.has(ds.entity || ds.label);
+                                        return {
+                                            ...ds,
+                                            hidden: isHidden,
+                                            borderWidth: (ds.borderWidth || 2) + 0.5,
+                                            pointRadius: (ds.pointRadius || 3) + 1
+                                        };
+                                    });
+
+                                    const origYScale = (originalChart.options.scales && originalChart.options.scales.y) || {};
+                                    const yTitleText = (origYScale.title && origYScale.title.text) || unitLabel || '';
+
+                                    const tempChart = new Chart(offCtx, {
+                                        type: originalChart.config.type || 'line',
+                                        data: {
+                                            labels: originalChart.data.labels || [],
+                                            datasets: clonedDatasets
+                                        },
+                                        options: {
+                                            responsive: false,
+                                            animation: false,
+                                            plugins: {
+                                                legend: {
+                                                    display: true,
+                                                    position: 'bottom',
+                                                    labels: {
+                                                        boxWidth: 12,
+                                                        boxHeight: 12,
+                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
+                                                        color: '#334155',
+                                                        padding: 12,
+                                                        filter: function(item, chartData) {
+                                                            const ds = chartData.datasets[item.datasetIndex];
+                                                            return !(ds && ds.hidden);
+                                                        }
+                                                    }
+                                                },
+                                                tooltip: { enabled: false },
+                                                progressiveLineTracer: false
+                                            },
+                                            scales: {
+                                                x: {
+                                                    grid: { display: false },
+                                                    ticks: {
+                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '500' },
+                                                        color: '#475569',
+                                                        maxRotation: 45,
+                                                        minRotation: 0
+                                                    }
+                                                },
+                                                y: {
+                                                    beginAtZero: true,
+                                                    grace: '8%',
+                                                    grid: { color: '#f1f5f9' },
+                                                    title: {
+                                                        display: !!yTitleText,
+                                                        text: yTitleText,
+                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
+                                                        color: '#64748b'
+                                                    },
+                                                    ticks: {
+                                                        font: { family: 'Inter, sans-serif', size: 10 },
+                                                        color: '#64748b',
+                                                        callback: function(v) {
+                                                            if (v >= 1e6) return (v / 1e6).toFixed(1) + 'jt';
+                                                            if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'rb';
+                                                            return v;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    dataUrl = offCanvas.toDataURL('image/png', 1.0);
+                                    tempChart.destroy();
+                                } catch (renderErr) {
+                                    console.warn('Offscreen chart render fallback:', renderErr);
+                                }
+                            }
+
+                            if (!dataUrl) {
+                                dataUrl = canvas.toDataURL('image/png', 1.0);
+                            }
 
                             if (dataUrl && dataUrl.length > 100) {
-
                                 const imgDiv = document.createElement('div');
-
-                                imgDiv.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center; margin-bottom:12px;';
+                                imgDiv.className = 'ts-pdf-chart-card';
+                                imgDiv.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px 18px; text-align:center; margin-bottom:16px; page-break-inside:avoid; break-inside:avoid; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
 
                                 if (c.title) {
-
-                                    imgDiv.innerHTML = `<div style="font-size:13px; font-weight:700; color:var(--text-primary, #0f172a); margin-bottom:10px; text-align:left;"><span style="color:#4f46e5; margin-right:6px;">📈</span> ${escHtml(c.title)}</div>`;
-
+                                    imgDiv.innerHTML = `<div style="font-size:13.5px; font-weight:700; color:var(--text-primary, #0f172a); margin-bottom:12px; text-align:left; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">${escHtml(c.title)}</div>`;
                                 }
 
                                 const img = document.createElement('img');
-
                                 img.src = dataUrl;
-
-                                img.style.cssText = 'width:100%; height:auto; max-height:420px; object-fit:contain; border-radius:6px;';
+                                img.style.cssText = 'width:100%; max-width:1100px; height:auto; display:block; margin:0 auto; object-fit:contain; border-radius:6px;';
 
                                 imgDiv.appendChild(img);
-
                                 chartImgContainer.appendChild(imgDiv);
-
-        }
-
-        // Highlight column if navigated from search
-        if (highlightCol && !isEditable) {
-            setTimeout(() => {
-                const target = highlightCol.toLowerCase().trim();
-                const ths = document.querySelectorAll('#data-grid-head th[data-col-name]');
-                for (const th of ths) {
-                    if (th.getAttribute('data-col-name').includes(target) || target.includes(th.getAttribute('data-col-name'))) {
-                        th.classList.add('col-highlight');
-                        th.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        // Also highlight matching cells in tbody
-                        const colIdx = Array.from(th.parentNode.children).indexOf(th);
-                        document.querySelectorAll(`#data-grid-body tr`).forEach(tr => {
-                            const td = tr.children[colIdx];
-                            if (td) td.classList.add('col-cell-highlight');
-                        });
-                        break;
-                    }
-                }
-            }, 100);
-        }
-
-    } catch (err) {
-
+                            }
+                        } catch (err) {
                             console.error('Error capturing chart canvas:', err);
-
                         }
-
                     }
-
                 });
-
             }
-
         }
-
-
 
         // Wait brief tick for DOM rendering & images to settle
-
         await new Promise(r => setTimeout(r, 250));
 
-
-
         // Render with html2canvas
+        let capturedSections = [];
+        let capturedRunningHeader = null;
 
         const canvas = await html2canvas(reportContainer, {
-
             scale: 2,
-
             backgroundColor: cssVar('--text-white') || '#ffffff',
-
             useCORS: true,
+            logging: false,
+            onclone: function(clonedDoc) {
+                const clonedContainer = clonedDoc.getElementById('ts-export-temp-report');
+                if (!clonedContainer) return;
+                const containerRect = clonedContainer.getBoundingClientRect();
 
-            logging: false
+                const runningHdr = clonedContainer.querySelector('#ts-pdf-page-running-header');
+                if (runningHdr) {
+                    const hdrRect = runningHdr.getBoundingClientRect();
+                    capturedRunningHeader = {
+                        top: Math.max(0, hdrRect.top - containerRect.top),
+                        height: hdrRect.height
+                    };
+                }
 
+                const sections = clonedContainer.querySelectorAll('[data-pdf-section]');
+                
+                sections.forEach(sec => {
+                    const secRect = sec.getBoundingClientRect();
+                    const secTop = Math.max(0, secRect.top - containerRect.top);
+                    const secBottom = Math.max(0, secRect.bottom - containerRect.top);
+                    if (secBottom <= secTop) return;
+
+                    let tableInfo = null;
+                    const table = sec.querySelector('table');
+                    if (table) {
+                        const thead = table.querySelector('thead');
+                        const tbodyRows = table.querySelectorAll('tbody tr').length > 0 
+                            ? table.querySelectorAll('tbody tr') 
+                            : table.querySelectorAll('tr:not(thead tr)');
+                        let theadTop = 0;
+                        let theadH = 0;
+                        if (thead) {
+                            const theadRect = thead.getBoundingClientRect();
+                            theadTop = Math.max(0, theadRect.top - containerRect.top);
+                            theadH = theadRect.height;
+                        }
+
+                        const rowBoundaries = [];
+                        tbodyRows.forEach(tr => {
+                            const trRect = tr.getBoundingClientRect();
+                            const rTop = Math.max(0, trRect.top - containerRect.top);
+                            const rBottom = Math.max(0, trRect.bottom - containerRect.top);
+                            if (rBottom > rTop) {
+                                rowBoundaries.push({ top: rTop, bottom: rBottom });
+                            }
+                        });
+
+                        tableInfo = {
+                            theadTop: theadTop,
+                            theadH: theadH,
+                            rows: rowBoundaries
+                        };
+                    }
+
+                    const chartCards = sec.querySelectorAll('.ts-pdf-chart-card');
+                    const chartCardBoundaries = [];
+                    chartCards.forEach(card => {
+                        const cRect = card.getBoundingClientRect();
+                        const cTop = Math.max(0, cRect.top - containerRect.top);
+                        const cBottom = Math.max(0, cRect.bottom - containerRect.top);
+                        if (cBottom > cTop) {
+                            chartCardBoundaries.push({ top: cTop, bottom: cBottom });
+                        }
+                    });
+
+                    capturedSections.push({
+                        name: sec.dataset.pdfSection,
+                        top: secTop,
+                        bottom: secBottom,
+                        table: tableInfo,
+                        chartCards: chartCardBoundaries
+                    });
+                });
+            }
         });
 
-
-
-        // Clean up temporary DOM element
-
-        if (reportContainer && reportContainer.parentNode) {
-
-            reportContainer.parentNode.removeChild(reportContainer);
-
+        if (!capturedRunningHeader) {
+            const liveHdr = reportContainer.querySelector('#ts-pdf-page-running-header');
+            if (liveHdr) {
+                const cRect = reportContainer.getBoundingClientRect();
+                const hRect = liveHdr.getBoundingClientRect();
+                capturedRunningHeader = {
+                    top: Math.max(0, hRect.top - cRect.top),
+                    height: hRect.height
+                };
+            }
         }
-
-
 
         const fileNameBase = _getTimeSeriesFileName('pdf').replace(/\.pdf$/i, '');
 
-
-
         if (format === 'png') {
-
             // PNG Download
-
             canvas.toBlob(blob => {
-
                 if (!blob) {
-
                     throw new Error('Gagal membuat berkas gambar PNG');
-
                 }
-
                 const url = URL.createObjectURL(blob);
-
                 const a = document.createElement('a');
-
                 a.href = url;
-
                 a.download = `${fileNameBase}.png`;
-
                 document.body.appendChild(a);
-
                 a.click();
-
                 document.body.removeChild(a);
-
                 URL.revokeObjectURL(url);
-
-
-
+                if (reportContainer && reportContainer.parentNode) {
+                    reportContainer.parentNode.removeChild(reportContainer);
+                }
                 Swal.close();
-
                 showToast('success', 'Berhasil', 'Gambar grafik & data (.png) berhasil diunduh.');
-
             }, 'image/png');
-
         } else {
-
-            // PDF Generation using jsPDF with genuine top/bottom margins and clean canvas slicing
-
+            // PDF Generation: Smart Row-Aware & Section-Aware pagination
             const { jsPDF } = window.jspdf;
-
-            const pdf = new jsPDF({
-
-                orientation: orientation,
-
-                unit: 'pt',
-
-                format: 'a4'
-
-            });
-
-
+            const pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
 
             const pdfWidth = pdf.internal.pageSize.getWidth();
-
             const pdfHeight = pdf.internal.pageSize.getHeight();
-
-
-
-            const marginTop = 36;
-
-            const marginBottom = 36;
-
-            const marginLeft = 28;
-
-            const marginRight = 28;
-
-
-
+            const marginTop = 36, marginBottom = 36, marginLeft = 28, marginRight = 28;
             const contentWidth = pdfWidth - (marginLeft + marginRight);
-
             const pageEffectiveHeight = pdfHeight - (marginTop + marginBottom);
+            const maxCanvasSliceH = Math.floor((pageEffectiveHeight * canvas.width) / contentWidth);
+            const totalSrcHeight = canvas.height;
 
+            const canvasScale = canvas.width / (reportContainer.offsetWidth || 1200);
 
+            let runningHeaderCanvasTop = 0;
+            let runningHeaderCanvasH = 0;
+            if (capturedRunningHeader) {
+                runningHeaderCanvasTop = Math.floor(capturedRunningHeader.top * canvasScale);
+                runningHeaderCanvasH = Math.ceil(capturedRunningHeader.height * canvasScale);
+            }
 
-            // Calculate source canvas slice height corresponding to one page's effective height
+            let sectionDataList = [];
+            if (capturedSections.length > 0) {
+                sectionDataList = capturedSections.map(s => {
+                    let tableData = null;
+                    if (s.table) {
+                        tableData = {
+                            theadCanvasTop: Math.floor(s.table.theadTop * canvasScale),
+                            theadCanvasH: Math.ceil(s.table.theadH * canvasScale),
+                            rows: s.table.rows.map(r => ({
+                                top: Math.floor(r.top * canvasScale),
+                                bottom: Math.ceil(r.bottom * canvasScale)
+                            }))
+                        };
+                    }
+                    return {
+                        name: s.name,
+                        canvasTop: Math.floor(s.top * canvasScale),
+                        canvasBottom: Math.min(totalSrcHeight, Math.ceil(s.bottom * canvasScale)),
+                        table: tableData,
+                        chartCards: s.chartCards.map(c => ({
+                            top: Math.floor(c.top * canvasScale),
+                            bottom: Math.ceil(c.bottom * canvasScale)
+                        }))
+                    };
+                });
+            } else {
+                const containerRect = reportContainer.getBoundingClientRect();
+                const containerHeight = reportContainer.offsetHeight || containerRect.height || 1;
+                const canvasScaleY = canvas.height / containerHeight;
+                const sections = reportContainer.querySelectorAll('[data-pdf-section]');
 
-            const sliceSrcHeight = Math.floor((pageEffectiveHeight * canvas.width) / contentWidth);
+                sections.forEach(sec => {
+                    const secRect = sec.getBoundingClientRect();
+                    const secTop = Math.max(0, Math.floor((secRect.top - containerRect.top) * canvasScaleY));
+                    const secBottom = Math.min(totalSrcHeight, Math.ceil((secRect.bottom - containerRect.top) * canvasScaleY));
+                    if (secBottom <= secTop) return;
 
+                    let tableInfo = null;
+                    const table = sec.querySelector('table');
+                    if (table) {
+                        const thead = table.querySelector('thead');
+                        const tbodyRows = table.querySelectorAll('tbody tr').length > 0
+                            ? table.querySelectorAll('tbody tr')
+                            : table.querySelectorAll('tr:not(thead tr)');
+                        let theadCanvasTop = 0;
+                        let theadCanvasH = 0;
+                        if (thead) {
+                            const theadRect = thead.getBoundingClientRect();
+                            theadCanvasTop = Math.max(0, Math.floor((theadRect.top - containerRect.top) * canvasScaleY));
+                            theadCanvasH = Math.ceil(theadRect.height * canvasScaleY);
+                        }
 
+                        const rowBoundaries = [];
+                        tbodyRows.forEach(tr => {
+                            const trRect = tr.getBoundingClientRect();
+                            const rTop = Math.max(0, Math.floor((trRect.top - containerRect.top) * canvasScaleY));
+                            const rBottom = Math.min(totalSrcHeight, Math.ceil((trRect.bottom - containerRect.top) * canvasScaleY));
+                            if (rBottom > rTop) {
+                                rowBoundaries.push({ top: rTop, bottom: rBottom });
+                            }
+                        });
 
-            let srcY = 0;
+                        tableInfo = {
+                            theadCanvasTop: theadCanvasTop,
+                            theadCanvasH: theadCanvasH,
+                            rows: rowBoundaries
+                        };
+                    }
+
+                    const chartCards = sec.querySelectorAll('.ts-pdf-chart-card');
+                    const chartCardBoundaries = [];
+                    chartCards.forEach(card => {
+                        const cRect = card.getBoundingClientRect();
+                        const cTop = Math.max(0, Math.floor((cRect.top - containerRect.top) * canvasScaleY));
+                        const cBottom = Math.min(totalSrcHeight, Math.ceil((cRect.bottom - containerRect.top) * canvasScaleY));
+                        if (cBottom > cTop) {
+                            chartCardBoundaries.push({ top: cTop, bottom: cBottom });
+                        }
+                    });
+
+                    sectionDataList.push({
+                        name: sec.dataset.pdfSection,
+                        canvasTop: secTop,
+                        canvasBottom: secBottom,
+                        table: tableInfo,
+                        chartCards: chartCardBoundaries
+                    });
+                });
+            }
 
             let pageNum = 1;
 
-            const totalSrcHeight = canvas.height;
+            if (sectionDataList.length > 0) {
+                for (const secData of sectionDataList) {
+                    let currY = secData.canvasTop;
+                    const secEnd = secData.canvasBottom;
+                    let isFirstPageOfSec = true;
 
+                    while (currY < secEnd) {
+                        const isCover = (secData.name === 'cover');
+                        // Running header appears on ALL pages EXCEPT the cover
+                        const includeRunningHeader = !isCover && (runningHeaderCanvasH > 0);
+                        const runningH = includeRunningHeader ? runningHeaderCanvasH : 0;
+                        // Jarak napas lega antara garis bawah kop resmi dan judul konten di bawahnya (28pt)
+                        const headerGap = includeRunningHeader ? Math.round(28 * canvasScale) : 0;
 
+                        const hasTable = !!(secData.table && secData.table.theadCanvasH > 0);
+                        // Repeat table header ONLY if this section has a table, and we are beyond the first page of this section
+                        const needTableHeader = !isFirstPageOfSec && hasTable && (currY >= (secData.table.theadCanvasTop + secData.table.theadCanvasH));
+                        const tableH = needTableHeader ? secData.table.theadCanvasH : 0;
 
-            while (srcY < totalSrcHeight) {
+                        const availContentH = maxCanvasSliceH - runningH - headerGap - tableH;
 
-                const currentSliceHeight = Math.min(sliceSrcHeight, totalSrcHeight - srcY);
+                        if (availContentH <= 30) {
+                            break;
+                        }
 
+                        const idealCutY = currY + availContentH;
+                        let cutY = idealCutY;
 
+                        if (idealCutY >= secEnd) {
+                            cutY = secEnd;
+                        } else if (hasTable && secData.table.rows.length > 0) {
+                            const remainingRows = secData.table.rows.filter(r => r.bottom > currY + 2);
+                            if (remainingRows.length > 0) {
+                                const fittingRows = remainingRows.filter(r => r.bottom <= idealCutY);
+                                if (fittingRows.length > 0) {
+                                    if (fittingRows.length === remainingRows.length && secEnd <= idealCutY) {
+                                        cutY = secEnd;
+                                    } else {
+                                        const lastFit = fittingRows[fittingRows.length - 1];
+                                        cutY = lastFit.bottom;
+                                    }
+                                } else {
+                                    cutY = Math.min(secEnd, Math.max(currY + 30, idealCutY));
+                                }
+                            }
+                        } else if (secData.chartCards && secData.chartCards.length > 0) {
+                            const remainingCards = secData.chartCards.filter(c => c.bottom > currY + 2);
+                            if (remainingCards.length > 0) {
+                                const fittingCards = remainingCards.filter(c => c.bottom <= idealCutY);
+                                if (fittingCards.length > 0) {
+                                    if (fittingCards.length === remainingCards.length && secEnd <= idealCutY) {
+                                        cutY = secEnd;
+                                    } else {
+                                        cutY = fittingCards[fittingCards.length - 1].bottom;
+                                    }
+                                }
+                            }
+                        }
 
-                // Create clean slice canvas
+                        const contentH = cutY - currY;
+                        if (contentH <= 0) break;
 
-                const sliceCanvas = document.createElement('canvas');
+                        const totalSliceH = contentH + runningH + headerGap + tableH;
+                        const sliceCanvas = document.createElement('canvas');
+                        sliceCanvas.width = canvas.width;
+                        sliceCanvas.height = totalSliceH;
+                        const sCtx = sliceCanvas.getContext('2d');
+                        sCtx.fillStyle = '#ffffff';
+                        sCtx.fillRect(0, 0, sliceCanvas.width, totalSliceH);
 
-                sliceCanvas.width = canvas.width;
+                        // 1. Draw Running Header (for all content pages)
+                        if (runningH > 0) {
+                            sCtx.drawImage(
+                                canvas,
+                                0, runningHeaderCanvasTop, canvas.width, runningHeaderCanvasH,
+                                0, 0, canvas.width, runningH
+                            );
+                        }
 
-                sliceCanvas.height = currentSliceHeight;
+                        // 2. Draw Table Header if continuation page
+                        if (tableH > 0) {
+                            sCtx.drawImage(
+                                canvas,
+                                0, secData.table.theadCanvasTop, canvas.width, secData.table.theadCanvasH,
+                                0, runningH + headerGap, canvas.width, tableH
+                            );
+                        }
 
-                const sCtx = sliceCanvas.getContext('2d');
+                        // 3. Draw content slice below headers
+                        const destY = runningH + headerGap + tableH;
+                        sCtx.drawImage(
+                            canvas,
+                            0, currY, canvas.width, contentH,
+                            0, destY, canvas.width, contentH
+                        );
 
-                sCtx.fillStyle = cssVar('--text-white') || '#ffffff';
+                        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+                        const slicePdfH = (totalSliceH * contentWidth) / canvas.width;
 
-                sCtx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                        // Position calculation:
+                        // Page 1 (Cover): 100% symmetrically centered vertically on the A4 sheet!
+                        const finalY = (pageNum === 1 && isCover)
+                            ? Math.max(0, Math.floor((pdfHeight - slicePdfH) / 2))
+                            : marginTop;
 
-                sCtx.drawImage(canvas, 0, srcY, canvas.width, currentSliceHeight, 0, 0, canvas.width, currentSliceHeight);
+                        if (pageNum > 1) pdf.addPage();
+                        pdf.addImage(sliceData, 'JPEG', marginLeft, finalY, contentWidth, slicePdfH);
 
+                        // Print page number footer on content pages (not on cover)
+                        if (!isCover || pageNum > 1) {
+                            pdf.setFontSize(8);
+                            pdf.setTextColor(148, 163, 184);
+                            pdf.text('SIPEDAS BPS Kabupaten Tasikmalaya  \u2022  Halaman ' + pageNum, marginLeft, pdfHeight - 16);
+                        }
+                        pageNum++;
 
-
-                const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
-
-                const slicePdfHeight = (currentSliceHeight * contentWidth) / canvas.width;
-
-
-
-                if (pageNum > 1) {
-
-                    pdf.addPage();
-
+                        // Advance currY to the next row boundary
+                        let nextY = cutY;
+                        if (hasTable && secData.table.rows.length > 0) {
+                            const nextRow = secData.table.rows.find(r => r.top >= cutY - 2);
+                            if (nextRow && nextRow.top > cutY) {
+                                nextY = nextRow.top;
+                            }
+                        }
+                        if (nextY <= currY) {
+                            currY = cutY + 1;
+                        } else {
+                            currY = nextY;
+                        }
+                        isFirstPageOfSec = false;
+                    }
                 }
+            } else {
+                for (let srcY = 0; srcY < totalSrcHeight; srcY += maxCanvasSliceH) {
+                    const contentH = Math.min(maxCanvasSliceH, totalSrcHeight - srcY);
+                    if (contentH <= 0) break;
 
+                    const sliceCanvas = document.createElement('canvas');
+                    sliceCanvas.width = canvas.width;
+                    sliceCanvas.height = contentH;
+                    const sCtx = sliceCanvas.getContext('2d');
+                    sCtx.fillStyle = '#ffffff';
+                    sCtx.fillRect(0, 0, sliceCanvas.width, contentH);
+                    sCtx.drawImage(canvas, 0, srcY, canvas.width, contentH, 0, 0, canvas.width, contentH);
 
+                    const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+                    const slicePdfH = (contentH * contentWidth) / canvas.width;
 
-                // Add image strictly inside the top/bottom margin boundary
-
-                pdf.addImage(sliceData, 'JPEG', marginLeft, marginTop, contentWidth, slicePdfHeight);
-
-
-
-                // Running Footer with page number
-
-                pdf.setFontSize(8);
-
-                pdf.setTextColor(148, 163, 184);
-
-                pdf.text(`SIPEDAS BPS Kabupaten Tasikmalaya  •  Halaman ${pageNum}`, marginLeft, pdfHeight - 16);
-
-
-
-                srcY += currentSliceHeight;
-
-                pageNum++;
-
-
-
-                // If remaining content is negligible (< 10px in canvas space), stop to avoid trailing blank page
-
-                if (totalSrcHeight - srcY <= 15) {
-
-                    break;
-
+                    if (pageNum > 1) pdf.addPage();
+                    pdf.addImage(sliceData, 'JPEG', marginLeft, marginTop, contentWidth, slicePdfH);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(148, 163, 184);
+                    pdf.text('SIPEDAS BPS Kabupaten Tasikmalaya  \u2022  Halaman ' + pageNum, marginLeft, pdfHeight - 16);
+                    pageNum++;
                 }
-
             }
-
-
 
             pdf.save(`${fileNameBase}.pdf`);
 
-
+            if (reportContainer && reportContainer.parentNode) {
+                reportContainer.parentNode.removeChild(reportContainer);
+            }
 
             Swal.close();
-
             showToast('success', 'Berhasil', 'Laporan Deret Waktu (.pdf) berhasil diunduh.');
-
         }
+
 
 
 
@@ -13992,6 +14108,7 @@ async function executeTimeSeriesExport() {
         const tempEl = document.getElementById('ts-export-temp-report');
 
         if (tempEl && tempEl.parentNode) tempEl.parentNode.removeChild(tempEl);
+        else if (reportContainer && reportContainer.parentNode) reportContainer.parentNode.removeChild(reportContainer);
 
 
 
@@ -14017,7 +14134,56 @@ let currentUserRole = "pegawai";
 
 window.currentUserRole = "pegawai";
 
+function toggleUserMenu(e) {
+    if (e) e.stopPropagation();
+    if (document.body && document.body.classList.contains('sidebar-collapsed')) {
+        return; // Saat sidebar tertutup, interaksi menggunakan hover popover
+    }
+    const dropdown = document.getElementById('sidebar-user-dropdown');
+    const card = document.getElementById('sidebar-user-btn');
+    if (!dropdown || !card) return;
 
+    const isShown = dropdown.style.display === 'block';
+    if (isShown) {
+        hideUserMenu();
+    } else {
+        // Pindahkan dropdown ke body agar bebas dari overflow dan clipping sidebar
+        if (!dropdown._originalParent) dropdown._originalParent = dropdown.parentNode;
+        if (dropdown.parentNode !== document.body) {
+            document.body.appendChild(dropdown);
+        }
+
+        const rect = card.getBoundingClientRect();
+        dropdown.style.display = 'block';
+        dropdown.style.position = 'fixed';
+        
+        // Posisikan tepat di samping kanan kartu akun (selaras vertikal)
+        const dropHeight = dropdown.offsetHeight || 105;
+        let targetTop = rect.top + (rect.height / 2) - (dropHeight / 2);
+        if (targetTop < 10) targetTop = 10;
+        if (targetTop + dropHeight > window.innerHeight - 10) {
+            targetTop = window.innerHeight - dropHeight - 10;
+        }
+
+        dropdown.style.top = Math.round(targetTop) + 'px';
+        dropdown.style.left = Math.round(rect.right + 12) + 'px';
+        card.classList.add('active');
+    }
+}
+
+function hideUserMenu() {
+    const dropdown = document.getElementById('sidebar-user-dropdown');
+    const card = document.getElementById('sidebar-user-btn');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+        if (dropdown._originalParent && dropdown.parentNode !== dropdown._originalParent) {
+            dropdown._originalParent.appendChild(dropdown);
+        }
+    }
+    if (card) card.classList.remove('active');
+}
+
+document.addEventListener('click', hideUserMenu);
 
 function updateRoleUI(role) {
 
@@ -14032,14 +14198,15 @@ function updateRoleUI(role) {
     }
 
     const btnLogin = document.getElementById('btn-admin-login');
-
     const btnLogout = document.getElementById('btn-admin-logout');
+    const userWidget = document.getElementById('sidebar-user-widget');
 
     if (isAdmin) {
 
         if (btnLogin) btnLogin.style.setProperty('display', 'none', 'important');
+        if (userWidget) userWidget.style.setProperty('display', 'block', 'important');
 
-        if (btnLogout) btnLogout.style.setProperty('display', 'flex', 'important');
+        if (btnLogout) btnLogout.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll(".admin-only").forEach(el => el.style.removeProperty('display'));
 
@@ -14051,6 +14218,7 @@ function updateRoleUI(role) {
         tsShowSources = false;
 
         if (btnLogin) btnLogin.style.setProperty('display', 'none', 'important');
+        if (userWidget) userWidget.style.setProperty('display', 'none', 'important');
 
         if (btnLogout) btnLogout.style.setProperty('display', 'none', 'important');
 
@@ -14131,12 +14299,9 @@ async function adminLogin() {
 
             <div style="text-align: center; padding: 6px 4px 0 4px;">
 
-                <!-- Ikon Utama Tengah: Kunci Keamanan BPS -->
-
-                <div style="width: 54px; height: 54px; margin: 0 auto 16px auto; border-radius: 16px; background: linear-gradient(135deg, #091e42 0%, #1e3a8a 60%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);">
-
-                    <i class="bi bi-shield-lock-fill"></i>
-
+                <!-- Logo SIPEDAS -->
+                <div style="margin: 0 auto 16px auto; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                    <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="width: 64px; height: 64px; object-fit: contain;">
                 </div>
 
 
@@ -14315,8 +14480,8 @@ function adminLogout() {
 
         html: `
             <div style="text-align: center; padding: 6px 4px 0 4px;">
-                <div style="width: 54px; height: 54px; margin: 0 auto 16px auto; border-radius: 16px; background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 60%, #ef4444 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.28);">
-                    <i class="bi bi-box-arrow-right"></i>
+                <div style="margin: 0 auto 16px auto; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                    <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="width: 64px; height: 64px; object-fit: contain;">
                 </div>
                 <h5 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 700; color: ${isDark ? cssVar('--bg-page') || '#f8fafc' : cssVar('--slate-900') || '#0f172a'}; letter-spacing: -0.3px;">
                     Logout Admin SIPEDAS?
@@ -18392,10 +18557,12 @@ async function regenerateMasterColumns() {
 
 
 // ===== TIME SERIES ADVANCED FEATURES (CHART & MASTER COLUMNS) =====
-
 let timeSeriesChartInstance = null;
-
+let timeSeriesChart2Instance = null;
+let timeSeriesChart3Instance = null;
 let timeSeriesChartYAxisInstance = null;
+let timeSeriesChartYAxis2Instance = null;
+let timeSeriesChartYAxis3Instance = null;
 
 const tsHiddenEntities = new Set();
 
@@ -18408,10 +18575,192 @@ let tsOriginalTablesData = null;
 let tsCurrentSubType = 'Semua';
 
 let tsSavedVKChecks = null;
-
 let tsSavedSubType = 'Semua';
 
+// Palet 60 warna unik, kontras tinggi, dan saling berselang-seling (Glasbey/Polychrome standard)
+const TS_DISTINCT_60_COLORS = [
+    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed',
+    '#0891b2', '#db2777', '#4b5563', '#84cc16', '#4f46e5',
+    '#ea580c', '#059669', '#9333ea', '#ca8a04', '#0284c7',
+    '#e11d48', '#65a30d', '#6366f1', '#b45309', '#0d9488',
+    '#c026d3', '#78716c', '#0369a1', '#be123c', '#15803d',
+    '#f59e0b', '#6d28d9', '#0e7490', '#9f1239', '#3b82f6',
+    '#4d7c0f', '#a855f7', '#78350f', '#14b8a6', '#f43f5e',
+    '#312e81', '#854d0e', '#047857', '#ec4899', '#1e293b',
+    '#06b6d4', '#eab308', '#8b5cf6', '#ef4444', '#10b981',
+    '#f97316', '#008080', '#d946ef', '#374151', '#22c55e',
+    '#4338ca', '#e05638', '#065f46', '#e59819', '#818cf8',
+    '#fb7185', '#166534', '#c2410c', '#7e22ce', '#0f172a'
+];
 
+function getTSDistinctColor(entityName, entIdx, allEntities) {
+    if (!entityName) return TS_DISTINCT_60_COLORS[0];
+    const isSummary = (typeof getSummaryEntityDetector === 'function') ? getSummaryEntityDetector(allEntities) : (e => e.trim().toLowerCase() === 'kabupaten tasikmalaya');
+    if (isSummary(entityName)) {
+        return '#0f172a';
+    }
+    const idx = (allEntities && allEntities.length > 0) ? allEntities.indexOf(entityName) : entIdx;
+    const safeIdx = Math.max(0, idx >= 0 ? idx : (entIdx || 0));
+    return TS_DISTINCT_60_COLORS[safeIdx % TS_DISTINCT_60_COLORS.length];
+}
+
+let _legendPopoverHideTimer = null;
+
+function _scheduleHideLegendEntityPopover() {
+    _legendPopoverHideTimer = setTimeout(() => {
+        _hideLegendEntityPopover();
+    }, 180);
+}
+
+function _cancelHideLegendEntityPopover() {
+    if (_legendPopoverHideTimer) {
+        clearTimeout(_legendPopoverHideTimer);
+        _legendPopoverHideTimer = null;
+    }
+}
+
+function _showLegendEntityPopover(targetEl, entityName, years, dataPoints, color, unit) {
+    _cancelHideLegendEntityPopover();
+    let pop = document.getElementById('ts-legend-hover-popover');
+    if (!pop) {
+        pop = document.createElement('div');
+        pop.id = 'ts-legend-hover-popover';
+        pop.style.cssText = 'position:fixed; z-index:999999; background:#0f172a; color:#f8fafc; border:1px solid #334155; border-radius:10px; padding:10px 14px; box-shadow:0 12px 28px -4px rgba(0,0,0,0.6), 0 8px 10px -6px rgba(0,0,0,0.4); pointer-events:auto; font-family:"Inter", -apple-system, BlinkMacSystemFont, sans-serif; transition:opacity 0.12s ease, transform 0.12s ease; opacity:0; transform:translateY(4px); width:330px;';
+        pop.addEventListener('mouseenter', _cancelHideLegendEntityPopover);
+        pop.addEventListener('mouseleave', _scheduleHideLegendEntityPopover);
+        document.body.appendChild(pop);
+    }
+
+    const unitStr = unit ? ` ${unit}` : '';
+    let tableRows = '';
+    let validValues = [];
+
+    if (years && dataPoints) {
+        years.forEach((yr, i) => {
+            const val = dataPoints[i];
+            const isValid = (val !== null && val !== undefined && !isNaN(val));
+            if (isValid) validValues.push(val);
+
+            let growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">—</span>`;
+            if (i > 0 && isValid) {
+                const prevVal = dataPoints[i - 1];
+                if (prevVal !== null && prevVal !== undefined && !isNaN(prevVal)) {
+                    const diff = val - prevVal;
+                    if (diff > 0.0001) {
+                        const pct = prevVal !== 0 ? `+${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `+${formatIndoNumber(diff)}`;
+                        growthBadge = `<span style="background:rgba(34,197,94,0.16); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▲ ${pct}</span>`;
+                    } else if (diff < -0.0001) {
+                        const pct = prevVal !== 0 ? `${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `${formatIndoNumber(diff)}`;
+                        growthBadge = `<span style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▼ ${pct}</span>`;
+                    } else {
+                        growthBadge = `<span style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.22); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600; white-space:nowrap;">— 0%</span>`;
+                    }
+                }
+            } else if (i === 0 && isValid) {
+                growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">(Awal)</span>`;
+            }
+
+            const displayVal = !isValid ? '-' : `${formatIndoNumber(val)}${unitStr}`;
+            tableRows += `
+                <div style="display:grid; grid-template-columns: 46px 1fr 68px; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:11.5px;">
+                    <span style="color:#94a3b8; font-weight:600; font-variant-numeric:tabular-nums;">${yr}</span>
+                    <span style="color:#ffffff; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayVal}</span>
+                    <div style="display:flex; justify-content:flex-end; align-items:center;">
+                        ${growthBadge}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Overall trend badge in header
+    let trendBadge = '';
+    if (validValues.length >= 2) {
+        const first = validValues[0];
+        const last = validValues[validValues.length - 1];
+        const totalDiff = last - first;
+        if (totalDiff > 0.0001) {
+            trendBadge = `<span style="margin-left:auto; background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▲ Naik (+${formatIndoNumber(totalDiff)})</span>`;
+        } else if (totalDiff < -0.0001) {
+            trendBadge = `<span style="margin-left:auto; background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▼ Turun (${formatIndoNumber(totalDiff)})</span>`;
+        } else {
+            trendBadge = `<span style="margin-left:auto; background:rgba(148,163,184,0.18); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-size:9.5px; font-weight:600; padding:1px 6px; border-radius:4px;">— Tetap (0)</span>`;
+        }
+    }
+
+    pop.innerHTML = `
+        <style>
+            #ts-legend-hover-popover .ts-popover-scroll {
+                max-height: 82px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+                padding-right: 8px;
+            }
+            #ts-legend-hover-popover .ts-popover-scroll::-webkit-scrollbar {
+                width: 4px;
+            }
+            #ts-legend-hover-popover .ts-popover-scroll::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            #ts-legend-hover-popover .ts-popover-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.25);
+                border-radius: 6px;
+            }
+            #ts-legend-hover-popover .ts-popover-scroll::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.45);
+            }
+        </style>
+        <div style="display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:6px; margin-bottom:6px;">
+            <span style="width:10px; height:10px; border-radius:50%; background:${color || '#38bdf8'}; display:inline-block; flex-shrink:0;"></span>
+            <span style="font-size:12.5px; font-weight:800; color:#ffffff; letter-spacing:0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${entityName}</span>
+            ${trendBadge}
+        </div>
+        <!-- Table Column Headers -->
+        <div style="display:grid; grid-template-columns: 46px 1fr 68px; gap:6px; padding:0 8px 3px 0; border-bottom:1px solid rgba(255,255,255,0.1); font-size:10px; font-weight:700; color:#64748b; letter-spacing:0.3px; text-transform:uppercase;">
+            <span>Tahun</span>
+            <span style="text-align:right;">Nilai</span>
+            <span style="text-align:right;">Perubahan</span>
+        </div>
+        <!-- Scrollable Table Body (Tepat 3 baris terlihat, jika >3 tahun otomatis scroll) -->
+        <div class="ts-popover-scroll">
+            ${tableRows}
+        </div>
+    `;
+
+    const rect = targetEl.getBoundingClientRect();
+    pop.style.display = 'block';
+    const popRect = pop.getBoundingClientRect();
+
+    let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+    if (left < 10) left = 10;
+    if (left + popRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - popRect.width - 10;
+    }
+
+    let top = rect.bottom + 8;
+    if (top + popRect.height > window.innerHeight - 10) {
+        top = rect.top - popRect.height - 8;
+    }
+
+    pop.style.left = `${Math.round(left)}px`;
+    pop.style.top = `${Math.round(top)}px`;
+    pop.style.opacity = '1';
+    pop.style.transform = 'translateY(0)';
+}
+
+function _hideLegendEntityPopover() {
+    const pop = document.getElementById('ts-legend-hover-popover');
+    if (pop) {
+        pop.style.opacity = '0';
+        pop.style.transform = 'translateY(4px)';
+        setTimeout(() => {
+            if (pop && pop.style.opacity === '0') {
+                pop.style.display = 'none';
+            }
+        }, 120);
+    }
+}
 
 function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityMap, chartIdx, animatingEntityName) {
 
@@ -18482,27 +18831,21 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
     };
 
     const scrollable = document.getElementById(scrollableId);
-
     const wrapper = document.getElementById(wrapperId);
-
     if (wrapper) {
-
+        wrapper.style.height = '320px';
+        wrapper.style.minHeight = '320px';
         const activeLabelsCount = isSingleYear ? entities.length : years.length;
-
-        const parentWidth = (scrollable ? scrollable.clientWidth : container.clientWidth) - 15;
-
+        const parentW = (scrollable && scrollable.clientWidth > 50) 
+            ? scrollable.clientWidth 
+            : (container && container.clientWidth > 50 ? container.clientWidth : 800);
+        const parentWidth = parentW - 15;
         const calculatedWidth = activeLabelsCount * 60;
-
         if (calculatedWidth > parentWidth) {
-
             wrapper.style.width = calculatedWidth + 'px';
-
         } else {
-
             wrapper.style.width = '100%';
-
         }
-
     }
 
 
@@ -18521,7 +18864,9 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
     const chartType = isSingleYear ? 'bar' : 'line';
 
-    const isSummaryEntity = ent => ['jumlah', 'total', 'subtotal', 'grand total', 'keseluruhan', 'seluruh'].some(kw => ent.trim().toLowerCase() === kw);
+    const isSummaryEntity = (typeof getSummaryEntityDetector === 'function')
+        ? getSummaryEntityDetector(allEntities)
+        : (ent => ['jumlah', 'total', 'subtotal', 'grand total', 'keseluruhan', 'seluruh'].some(kw => ent.trim().toLowerCase() === kw));
 
 
 
@@ -18605,11 +18950,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
         }
 
-        var hueIdx = allEntities ? allEntities.indexOf(ent) : entIdx;
-
-        var hue = (Math.max(0, hueIdx) * 137.5) % 360;
-
-        const color = `hsl(${hue}, 70%, 50%)`;
+        const color = getTSDistinctColor(ent, entIdx, allEntities);
 
         if (isSingleYear) {
 
@@ -18668,11 +19009,8 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
                 spanGaps: true,
 
                 hidden: isSummaryEntity(ent) || tsHiddenEntities.has(ent)
-
             });
-
         }
-
     });
 
 
@@ -18709,7 +19047,19 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
     if (chartInst) {
 
-        chartInst.destroy();
+        if (chartInst._tracerRafId) {
+
+            cancelAnimationFrame(chartInst._tracerRafId);
+
+            chartInst._tracerRafId = null;
+
+        }
+
+        try {
+
+            chartInst.destroy();
+
+        } catch(e) {}
 
         chartInst = null;
 
@@ -18749,56 +19099,43 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
 
 
+                    if (!chart || !chart.ctx || !chart.canvas || chart.ctx.canvas !== chart.canvas) return;
+
                     const { ctx, chartArea, scales: { x } } = chart;
 
-                    if (!chartArea || !x) return;
-
-
+                    if (!ctx || !chartArea || !x) return;
 
                     const totalLabels = (chart.data.labels || []).length;
-
                     if (totalLabels <= 1) return;
 
-
-
                     const firstTickX = x.getPixelForTick(0);
-
                     const lastTickX = x.getPixelForTick(totalLabels - 1);
+                    if (isNaN(firstTickX) || isNaN(lastTickX)) return;
 
                     const currentX = firstTickX + (lastTickX - firstTickX) * Math.max(0, Math.min(1, p));
 
-
-
-                    ctx.save();
-
-                    ctx.beginPath();
-
-                    ctx.rect(chartArea.left - 25, chartArea.top - 25, Math.max(1, (currentX - chartArea.left + 30)), (chartArea.height + 50));
-
-                    ctx.clip();
-
+                    try {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(chartArea.left - 25, chartArea.top - 25, Math.max(1, (currentX - chartArea.left + 30)), (chartArea.height + 50));
+                        ctx.clip();
+                    } catch(e) {}
                 },
-
                 afterDatasetDraw(chart, args) {
-
                     if (chart.config.type !== 'line') return;
-
                     if (!chart.canvas || !chart.canvas.id || !chart.canvas.id.toLowerCase().includes('timeseries')) return;
 
                     const p = chart._tracerProgress;
-
                     if (p == null || p >= 1) return;
 
                     if (chart._animatingDatasetIndices && !chart._animatingDatasetIndices.has(args.index)) {
-
                         return;
-
                     }
 
-                    chart.ctx.restore();
-
+                    if (chart.ctx) {
+                        try { chart.ctx.restore(); } catch(e) {}
+                    }
                 }
-
             });
 
         }
@@ -18815,11 +19152,14 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     if (!window.tsGrowthBadgeEnabled) return;
 
-                    if (!chart.canvas || !chart.canvas.id || !chart.canvas.id.toLowerCase().includes('timeseries')) return;
+                    if (!chart || !chart.ctx || !chart.canvas || chart.ctx.canvas !== chart.canvas) return;
+
+                    if (!chart.canvas.id || !chart.canvas.id.toLowerCase().includes('timeseries')) return;
 
                     const { ctx, scales: { x, y } } = chart;
+                    if (!ctx || !x || !y) return;
 
-                    if (!x || !y) return;
+                    try {
 
                     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
 
@@ -19087,6 +19427,10 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     });
 
+                    } catch (e) {
+                        // ignore draw errors during quick view-switch or resize
+                    }
+
                 }
 
             });
@@ -19117,7 +19461,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
             legendHtml += `
 
-                <div class="custom-legend-item ts-legend-pill ${isHidden ? 'ts-legend-disabled' : ''}" data-index="${idx}" data-entity="${escHtml(labelText)}" data-chart="${chartIdx || 1}" style="display:flex; align-items:center; gap:6px; cursor:pointer; opacity: ${isHidden ? 0.4 : 1}; user-select:none;" title="${escHtml(labelText)}">
+                <div class="custom-legend-item ts-legend-pill ${isHidden ? 'ts-legend-disabled' : ''}" data-index="${idx}" data-entity="${escHtml(labelText)}" data-chart="${chartIdx || 1}" style="display:flex; align-items:center; gap:6px; cursor:pointer; opacity: ${isHidden ? 0.4 : 1}; user-select:none;">
 
                     <span class="custom-legend-dot" style="width:12px; height:12px; border-radius:50%; background:${color}; display:inline-block; border: 1px solid rgba(0,0,0,0.1);"></span>
 
@@ -19806,19 +20150,61 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
 
                 // Update dropdown counter & checkboxes in buildEntityChecklist
-
                 if (currentTimeSeriesData && currentTimeSeriesData.entityMap) {
-
                     const allEnts = _sortEntitiesWithKabLast(Object.keys(currentTimeSeriesData.entityMap));
-
                     buildEntityChecklist(allEnts);
-
                 }
-
             });
 
-        });
+            item.addEventListener('mouseenter', function() {
+                _cancelHideLegendEntityPopover();
+                const entityName = this.dataset.entity;
+                if (!entityName || tsHiddenEntities.has(entityName)) return;
 
+                let matchedDs = null;
+                let activeLabels = null;
+                [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+                    if (inst && inst.data && inst.data.datasets) {
+                        if (!activeLabels && inst.data.labels) activeLabels = inst.data.labels;
+                        inst.data.datasets.forEach(ds => {
+                            if (ds.entity === entityName) {
+                                if (!matchedDs) matchedDs = ds;
+                                ds.borderWidth = 4.5;
+                                ds.pointRadius = 6.5;
+                                ds.order = -1;
+                            } else {
+                                ds.borderWidth = 1.5;
+                                ds.pointRadius = 3.5;
+                                ds.order = 1;
+                            }
+                        });
+                        inst.update('none');
+                    }
+                });
+
+                if (matchedDs) {
+                    const unitStr = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[selectedVk]) || (typeof unitLabel !== 'undefined' ? unitLabel : '');
+                    _showLegendEntityPopover(this, entityName, activeLabels || years, matchedDs.data, matchedDs.borderColor || matchedDs.backgroundColor, unitStr);
+                }
+            });
+
+            item.addEventListener('mouseleave', function() {
+                _scheduleHideLegendEntityPopover();
+                const entityName = this.dataset.entity;
+                if (!entityName) return;
+
+                [window.timeSeriesChartInstance, window.timeSeriesChart2Instance, window.timeSeriesChart3Instance].forEach(inst => {
+                    if (inst && inst.data && inst.data.datasets) {
+                        inst.data.datasets.forEach(ds => {
+                            ds.borderWidth = 2.5;
+                            ds.pointRadius = 4.5;
+                            ds.order = 0;
+                        });
+                        inst.update('none');
+                    }
+                });
+            });
+        });
     }
 
 
@@ -20093,11 +20479,11 @@ function runTimeSeriesTracerAnimation(charts, duration = 850) {
 
         validCharts.forEach(c => {
 
-            if (!c || !c.ctx) return;
+            if (!c || !c.ctx || !c.canvas || c.ctx.canvas !== c.canvas) return;
 
             c._tracerProgress = progress;
 
-            c.draw();
+            try { c.draw(); } catch(e) {}
 
         });
 
@@ -20113,13 +20499,15 @@ function runTimeSeriesTracerAnimation(charts, duration = 850) {
 
             validCharts.forEach(c => {
 
+                if (!c || !c.ctx || !c.canvas) return;
+
                 c._tracerProgress = 1;
 
                 c._tracerRafId = null;
 
                 c._animatingDatasetIndices = null;
 
-                c.draw();
+                try { c.draw(); } catch(e) {}
 
             });
 
@@ -20179,164 +20567,189 @@ function _syncEntityVisibility(entity, isHidden) {
 
 
 
+let tsCurrentViewMode = 'chart';
+
+function setTimeSeriesViewMode(mode) {
+    tsCurrentViewMode = mode;
+    const secChart = document.getElementById('ts-view-section-chart');
+    const secTable = document.getElementById('ts-view-section-table');
+    const btnChart = document.getElementById('btn-ts-view-chart');
+    const btnTable = document.getElementById('btn-ts-view-table');
+    const btnBoth = document.getElementById('btn-ts-view-both');
+    const hint = document.getElementById('ts-view-mode-hint');
+
+    if (btnChart) btnChart.classList.toggle('active', mode === 'chart');
+    if (btnTable) btnTable.classList.toggle('active', mode === 'table');
+    if (btnBoth) btnBoth.classList.toggle('active', mode === 'both');
+
+    if (mode === 'chart') {
+        if (secChart) secChart.style.display = 'block';
+        if (secTable) secTable.style.display = 'none';
+        if (hint) hint.innerHTML = '<i class="bi bi-graph-up text-primary me-1"></i> Visualisasi grafik deret waktu & analisis tren';
+    } else if (mode === 'table') {
+        if (secChart) secChart.style.display = 'none';
+        if (secTable) secTable.style.display = 'block';
+        if (hint) hint.innerHTML = '<i class="bi bi-table text-success me-1"></i> Matriks data tabular lengkap per tahun';
+    } else { // 'both'
+        if (secChart) secChart.style.display = 'block';
+        if (secTable) secTable.style.display = 'block';
+        if (hint) hint.innerHTML = '<i class="bi bi-layout-split text-info me-1"></i> Mode komparasi: Grafik visual & tabel data';
+    }
+
+    if (mode === 'chart' || mode === 'both') {
+        // Enforce wrapper & canvas height immediately
+        ['ts-chart-wrapper', 'ts-chart-wrapper-2', 'ts-chart-wrapper-3'].forEach(id => {
+            const w = document.getElementById(id);
+            if (w) {
+                w.style.height = '320px';
+                w.style.minHeight = '320px';
+            }
+        });
+        ['timeSeriesChart', 'timeSeriesChart2', 'timeSeriesChart3'].forEach(id => {
+            const c = document.getElementById(id);
+            if (c) {
+                c.style.height = '320px';
+                c.style.minHeight = '320px';
+            }
+        });
+
+        // Trigger resize and re-render if needed
+        setTimeout(() => {
+            if (window.timeSeriesChartInstance && typeof window.timeSeriesChartInstance.resize === 'function') {
+                window.timeSeriesChartInstance.resize();
+            }
+            if (window.timeSeriesChart2Instance && typeof window.timeSeriesChart2Instance.resize === 'function') {
+                window.timeSeriesChart2Instance.resize();
+            }
+            if (window.timeSeriesChart3Instance && typeof window.timeSeriesChart3Instance.resize === 'function') {
+                window.timeSeriesChart3Instance.resize();
+            }
+            // If callback available, invoke it to ensure width and tracer are cleanly calculated with visible DOM dimensions
+            if (typeof tsRenderCallback === 'function') {
+                tsRenderCallback();
+            }
+        }, 50);
+    }
+}
+
 function buildEntityChecklist(allEntities) {
-
-    const container = document.getElementById('ts-entity-checklist');
-
-    if (!container) return;
-
     if (!allEntities || allEntities.length === 0) return;
 
-
-
     const visibleCount = allEntities.filter(e => !tsHiddenEntities.has(e)).length;
-
     const allChecked = visibleCount === allEntities.length;
-
     const toggleAllLabel = allChecked ? 'Semua' : `${visibleCount}/${allEntities.length}`;
 
+    function generateChecklistHtml() {
+        let html = `
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-entity-btn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem; padding:5px 12px; border-radius:8px;">
+                Pilih Entitas <span class="badge bg-secondary ms-1 entity-count-badge">${toggleAllLabel}</span>
+            </button>
+            <div class="dropdown-menu p-2 shadow" style="max-height:300px; width:260px;" onclick="event.stopPropagation();">
+                <div class="px-1 pb-2 mb-1 border-bottom">
+                    <input type="text" class="form-control form-control-sm entity-dropdown-search" placeholder="Cari entitas..." style="font-size:0.78rem;">
+                </div>
+                <div class="d-flex align-items-center gap-2 px-2 py-1 mb-1 border-bottom">
+                    <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-bold text-primary btn-dual-select-all" style="font-size:0.78rem;">Pilih Semua</button>
+                    <span class="text-muted" style="font-size:0.75rem;">|</span>
+                    <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-semibold text-danger btn-dual-clear-all" style="font-size:0.78rem;">Hapus Semua</button>
+                </div>
+                <div class="ts-entity-checklist-scroll" style="max-height:190px; overflow-y:auto;">`;
 
+        allEntities.forEach(ent => {
+            const checked = !tsHiddenEntities.has(ent);
+            html += `<label class="dropdown-item px-1 py-1 ts-entity-dropdown-item" data-name="${ent.toLowerCase()}" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
+                <input type="checkbox" class="ts-entity-cb" data-entity="${escHtml(ent)}" ${checked ? 'checked' : ''} style="width:16px;height:16px;">
+                <span class="text-truncate">${escHtml(ent)}</span>
+            </label>`;
+        });
 
-    let html = `
+        html += `</div></div></div>`;
+        return html;
+    }
 
-    <div class="dropdown">
+    const containers = [
+        document.getElementById('ts-entity-checklist'),
+        document.getElementById('ts-entity-checklist-chart')
+    ].filter(Boolean);
 
-        <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-entity-btn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem; padding:5px 12px; border-radius:8px;">
+    containers.forEach(cont => {
+        cont.innerHTML = generateChecklistHtml();
 
-            Pilih Entitas <span class="badge bg-secondary ms-1">${toggleAllLabel}</span>
-
-        </button>
-
-        <div class="dropdown-menu p-2 shadow" style="max-height:300px; width:260px;">
-
-            <div class="px-1 pb-2 mb-1 border-bottom" onclick="event.stopPropagation();">
-
-                <input type="text" id="ts-entity-dropdown-search" class="form-control form-control-sm" placeholder="” Cari entitas..." style="font-size:0.78rem;">
-
-            </div>
-
-            <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
-
-                <input type="checkbox" id="ts-check-all" ${allChecked ? 'checked' : ''} style="width:16px;height:16px;">
-
-                <span>Pilih Semua</span>
-
-            </label>
-
-            <div class="ts-entity-checklist-scroll" style="max-height:190px; overflow-y:auto;">`;
-
-
-
-    allEntities.forEach(ent => {
-
-        const checked = !tsHiddenEntities.has(ent);
-
-        html += `<label class="dropdown-item px-1 py-1 ts-entity-dropdown-item" data-name="${ent.toLowerCase()}" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
-
-            <input type="checkbox" class="ts-entity-cb" data-entity="${ent}" ${checked ? 'checked' : ''} style="width:16px;height:16px;">
-
-            <span class="text-truncate">${ent}</span>
-
-        </label>`;
-
-    });
-
-
-
-    html += `</div></div></div>`;
-
-
-
-    container.innerHTML = html;
-
-
-
-    // Live search event listener inside main entity dropdown
-
-    const searchInp = document.getElementById('ts-entity-dropdown-search');
-
-    if (searchInp) {
-
-        searchInp.addEventListener('input', function(e) {
-
-            e.stopPropagation();
-
-            const kw = this.value.trim().toLowerCase();
-
-            container.querySelectorAll('.ts-entity-dropdown-item').forEach(item => {
-
-                const name = item.dataset.name || '';
-
-                item.style.display = (!kw || name.includes(kw)) ? 'flex' : 'none';
-
+        const searchInp = cont.querySelector('.entity-dropdown-search');
+        if (searchInp) {
+            searchInp.addEventListener('input', function(e) {
+                e.stopPropagation();
+                const kw = this.value.trim().toLowerCase();
+                cont.querySelectorAll('.ts-entity-dropdown-item').forEach(item => {
+                    const name = item.dataset.name || '';
+                    item.style.display = (!kw || name.includes(kw)) ? 'flex' : 'none';
+                });
             });
+            searchInp.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
 
+        cont.querySelectorAll('.ts-entity-cb').forEach(cb => {
+            cb.onchange = function(e) {
+                if (e) e.stopPropagation();
+                const isHidden = !this.checked;
+                const ent = this.getAttribute('data-entity');
+                if (isHidden) {
+                    tsHiddenEntities.add(ent);
+                } else {
+                    tsHiddenEntities.delete(ent);
+                }
+
+                // Dual sync across all entity filter containers!
+                containers.forEach(otherCont => {
+                    otherCont.querySelectorAll('.ts-entity-cb').forEach(ocb => {
+                        if (ocb.getAttribute('data-entity') === ent) {
+                            ocb.checked = !isHidden;
+                        }
+                    });
+                });
+
+                if (tsRenderCallback) tsRenderCallback(!isHidden ? ent : null);
+                _syncEntityVisibility(ent, isHidden);
+
+                const newVisCount = allEntities.filter(x => !tsHiddenEntities.has(x)).length;
+                const newLabel = (newVisCount === allEntities.length) ? 'Semua' : `${newVisCount}/${allEntities.length}`;
+                document.querySelectorAll('.entity-count-badge').forEach(b => {
+                    b.textContent = newLabel;
+                });
+            };
         });
 
-        searchInp.addEventListener('click', function(e) {
-
-            e.stopPropagation();
-
-        });
-
-    }
-
-
-
-    container.querySelectorAll('.ts-entity-cb').forEach(cb => {
-
-        cb.addEventListener('change', function() {
-
-            const isHidden = !this.checked;
-
-            const ent = this.dataset.entity;
-
-            if (isHidden) {
-
-                tsHiddenEntities.add(ent);
-
-            } else {
-
-                tsHiddenEntities.delete(ent);
-
-            }
-
-            if (tsRenderCallback) tsRenderCallback(!isHidden ? ent : null);
-
-            _syncEntityVisibility(ent, isHidden);
-
-        });
-
-    });
-
-
-
-    const checkAll = document.getElementById('ts-check-all');
-
-    if (checkAll) {
-
-        checkAll.addEventListener('change', function() {
-
-            const allHidden = !this.checked;
-
-            if (allHidden) {
-
-                allEntities.forEach(e => tsHiddenEntities.add(e));
-
-            } else {
-
+        const btnSelectAll = cont.querySelector('.btn-dual-select-all');
+        if (btnSelectAll) {
+            btnSelectAll.onclick = function(e) {
+                if (e) e.stopPropagation();
                 tsHiddenEntities.clear();
+                document.querySelectorAll('.ts-entity-cb').forEach(cb => cb.checked = true);
+                if (tsRenderCallback) tsRenderCallback(null);
+                allEntities.forEach(x => _syncEntityVisibility(x, false));
+                document.querySelectorAll('.entity-count-badge').forEach(b => {
+                    b.textContent = 'Semua';
+                });
+            };
+        }
 
-            }
-
-            if (tsRenderCallback) tsRenderCallback(null);
-
-            allEntities.forEach(e => _syncEntityVisibility(e, allHidden));
-
-        });
-
-    }
-
+        const btnClearAll = cont.querySelector('.btn-dual-clear-all');
+        if (btnClearAll) {
+            btnClearAll.onclick = function(e) {
+                if (e) e.stopPropagation();
+                allEntities.forEach(x => tsHiddenEntities.add(x));
+                document.querySelectorAll('.ts-entity-cb').forEach(cb => cb.checked = false);
+                if (tsRenderCallback) tsRenderCallback(null);
+                allEntities.forEach(x => _syncEntityVisibility(x, true));
+                document.querySelectorAll('.entity-count-badge').forEach(b => {
+                    b.textContent = `0/${allEntities.length}`;
+                });
+            };
+        }
+    });
 }
 
 
@@ -21341,7 +21754,7 @@ async function openTableSnippet(tableId) {
 
 
 
-        let headHtml = '<tr><th class="text-muted text-center" style="width:40px;">#</th>';
+        let headHtml = '<tr><th class="text-muted text-center" style="width:40px;">No.</th>';
 
         (data.headers || []).forEach((h, i) => {
 
@@ -21959,6 +22372,27 @@ function toggleSidebar() {
 
 }
 
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    if (!sidebar || !overlay) return;
+
+    const isOpen = sidebar.classList.contains('mobile-open');
+    if (isOpen) {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+        document.body.style.overflow = '';
+    } else {
+        overlay.style.display = 'block';
+        requestAnimationFrame(() => {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+        });
+        document.body.style.overflow = 'hidden';
+    }
+}
+
 
 
 function initSidebarState() {
@@ -22062,12 +22496,21 @@ function initFlyoutPopovers() {
 
 
             popover.style.position = 'fixed';
-
-            popover.style.top = rect.top + 'px';
-
-            popover.style.left = (sidebarRect.right + 8) + 'px';
-
             popover.style.display = 'block';
+
+            // Hitung titik tengah vertikal icon dan popover agar center sempurna
+            const iconCenterY = rect.top + (rect.height / 2);
+            const popoverH = popover.offsetHeight || popover.getBoundingClientRect().height || 260;
+            let targetTop = iconCenterY - (popoverH / 2);
+
+            // Viewport clamping (minimal 10px dari atas dan bawah layar)
+            if (targetTop < 10) targetTop = 10;
+            if (targetTop + popoverH > window.innerHeight - 10) {
+                targetTop = window.innerHeight - popoverH - 10;
+            }
+
+            popover.style.top = Math.round(targetTop) + 'px';
+            popover.style.left = (sidebarRect.right + 8) + 'px';
 
 
 

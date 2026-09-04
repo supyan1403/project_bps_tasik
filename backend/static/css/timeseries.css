@@ -276,9 +276,11 @@
     background-color: var(--bg-card);
     border: 1px solid var(--border) !important;
     border-radius: var(--border-radius-lg);
-    padding: 14px 18px;
+    padding: 16px 20px;
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
+    min-height: 94px;
+    height: 100%;
 }
 .ts-insight-card:hover {
     transform: translateY(-2px);
@@ -397,6 +399,22 @@ button.ts-insight-select.dropdown-toggle::after {
     border: 1px solid var(--border) !important;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-card);
+}
+
+.ts-chart-wrapper,
+#ts-chart-wrapper,
+#ts-chart-wrapper-2,
+#ts-chart-wrapper-3 {
+    position: relative;
+    height: 320px !important;
+    min-height: 320px !important;
+}
+
+#timeSeriesChart,
+#timeSeriesChart2,
+#timeSeriesChart3 {
+    height: 320px !important;
+    min-height: 320px !important;
 }
 
 /* Wizard Selection Boxes */
@@ -518,11 +536,21 @@ button.ts-insight-select.dropdown-toggle::after {
     font-weight: 600;
 }
 .ts-variant-chip input[type="radio"] {
-    width: 14px;
-    height: 14px;
-    margin: 0;
-    accent-color: var(--primary);
-    cursor: pointer;
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    max-width: 15px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    accent-color: var(--primary) !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 /* ===================== TS CUSTOM CHART LEGEND PILLS ===================== */
@@ -613,42 +641,305 @@ button.ts-insight-select.dropdown-toggle::after {
 
 /* ===== TREND INSIGHTS BANNER ===== */
 .ts-trend-banner {
-    background: var(--primary);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--border-radius-lg);
-    padding: 16px 22px;
+    padding: 14px 22px;
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
 }
 .ts-trend-banner:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.28);
+    border-color: rgba(255, 255, 255, 0.24);
 }
 .ts-trend-banner:active {
     transform: translateY(0);
 }
-.ts-trend-banner-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    color: var(--warning-accent);
-    flex-shrink: 0;
-}
 .ts-trend-banner-cta {
-    background: rgba(255,255,255,0.2);
-    padding: 6px 14px;
-    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 7px 18px;
+    border-radius: 50px;
     white-space: nowrap;
-    transition: background 0.2s ease;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .ts-trend-banner:hover .ts-trend-banner-cta {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateX(3px);
+}
+
+/* --- Legend Hover Popover Custom Dark Scrollbar --- */
+.ts-popover-scroll {
+    max-height: 82px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+    padding-right: 8px;
+}
+.ts-popover-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+.ts-popover-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.ts-popover-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+}
+.ts-popover-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+/* --- Executive Segmented Control Switcher --- */
+.ts-view-mode-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary, #64748b);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 6px;
+    user-select: none;
+}
+
+.ts-segmented-control {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    gap: 4px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ts-segmented-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #64748b;
+    border-radius: 9px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    line-height: 1.25;
+    position: relative;
+    user-select: none;
+}
+
+.ts-segmented-btn i {
+    font-size: 0.95rem;
+    transition: transform 0.2s ease;
+}
+
+.ts-segmented-btn.active {
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ts-view-mode-hint-badge {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary, #64748b);
+    background: var(--bg-page, #f8fafc);
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border, #e2e8f0);
+    display: inline-flex;
+    align-items: center;
+}
+
+#ts-view-mode-bar {
+    padding: 10px 20px !important;
+}
+
+[data-bs-theme="dark"] #ts-view-mode-bar {
+    background: var(--bg-card, #0f172a) !important;
+    border-color: #334155 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-bs-theme="dark"] .ts-view-mode-label {
+    color: #94a3b8;
+}
+
+[data-bs-theme="dark"] .ts-segmented-control {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .ts-segmented-btn {
+    color: #94a3b8;
+}
+
+[data-bs-theme="dark"] .ts-segmented-btn:hover {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .ts-segmented-btn.active {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+[data-bs-theme="dark"] .ts-view-mode-hint-badge {
+    color: #94a3b8;
+    background: #1e293b;
+    border-color: #334155;
+}
+
+/* ==========================================================================
+   TS Unified Export Dropdown Styling
+   ========================================================================== */
+#ts-unified-export-dropdown .dropdown-menu {
+    padding: 10px 8px !important;
+    min-width: 290px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+}
+
+#ts-unified-export-dropdown .dropdown-header-custom {
+    padding: 8px 14px 4px 14px !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    user-select: none;
+}
+
+#ts-unified-export-dropdown .dropdown-item {
+    padding: 9px 14px !important;
+    border-radius: 10px !important;
+    transition: all 0.15s ease-in-out;
+    gap: 12px;
+}
+
+#ts-unified-export-dropdown .dropdown-item:hover {
+    background-color: #f1f5f9;
+}
+
+#ts-unified-export-dropdown .dropdown-divider {
+    margin: 6px 10px !important;
+    border-top: 1px solid #edf2f7 !important;
+    opacity: 1;
+}
+
+[data-bs-theme="dark"] #ts-unified-export-dropdown .dropdown-menu {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-bs-theme="dark"] #ts-unified-export-dropdown .dropdown-header-custom {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] #ts-unified-export-dropdown .dropdown-item:hover {
+    background-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] #ts-unified-export-dropdown .dropdown-divider {
+    border-top-color: #334155 !important;
+}
+
+/* ==========================================================================
+   TS Export Modal Preset Pills (Executive Segmented Control)
+   ========================================================================== */
+.ts-export-preset-group {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    gap: 2px;
+}
+
+.ts-export-preset-btn {
+    border: none !important;
+    background: transparent !important;
+    color: #64748b !important;
+    font-size: 0.77rem !important;
+    font-weight: 500 !important;
+    padding: 5px 13px !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    line-height: 1.25 !important;
+    transition: all 0.15s ease-in-out !important;
+    user-select: none;
+    box-shadow: none !important;
+}
+
+.ts-export-preset-btn:hover {
+    color: #1e293b !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.ts-export-preset-btn.active {
+    background: #ffffff !important;
+    color: #2563eb !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-bs-theme="dark"] .ts-export-preset-group {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .ts-export-preset-btn {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .ts-export-preset-btn:hover {
+    color: #f8fafc !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-bs-theme="dark"] .ts-export-preset-btn.active {
+    background: #1e293b !important;
+    color: #60a5fa !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-bs-theme="dark"] #modal-ts-export-custom .modal-header {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] #modal-ts-export-custom .modal-title {
+    color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] #modal-ts-export-custom .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }

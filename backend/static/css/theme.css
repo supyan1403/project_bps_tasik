@@ -1,0 +1,505 @@
+/* ==========================================================================
+   SIPEDAS Design System — Theme Variables
+   Professional color palette for BPS Kab. Tasikmalaya
+   ========================================================================== */
+
+:root {
+    /* === PRIMARY — Biru BPS (Profesional, Trusted) === */
+    --primary: #1e40af;
+    --primary-hover: #1e3a8a;
+    --primary-light: #3b82f6;
+    --primary-pale: #dbeafe;
+    --primary-faint: #eff6ff;
+
+    /* === SUCCESS — Hijau (Positif, Aman) === */
+    --success: #16a34a;
+    --success-hover: #15803d;
+    --success-light: #dcfce7;
+    --success-dark: #166534;
+
+    /* === DANGER — Merah (Bahaya, Hapus) === */
+    --danger: #dc2626;
+    --danger-hover: #991b1b;
+    --danger-light: #fee2e2;
+    --danger-dark: #7f1d1d;
+
+    /* === WARNING — Kuning/Amber (Peringatan) === */
+    --warning: #d97706;
+    --warning-hover: #92400e;
+    --warning-light: #fef3c7;
+    --warning-dark: #78350f;
+
+    /* === INFO — Biru Muda (Informatif) === */
+    --info: #0284c7;
+    --info-light: #e0f2fe;
+    --info-dark: #0369a1;
+
+    /* === NEUTRAL — Abu-abu (Teks, Border, Background) === */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-tertiary: #475569;
+    --text-light: #94a3b8;
+    --text-muted: #cbd5e1;
+    --text-white: #ffffff;
+
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --border-focus: var(--primary-light);
+
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-hover: #f1f5f9;
+    --bg-active: var(--primary-pale);
+    --bg-input: #ffffff;
+    --bg-subtle: #f8fafc;
+
+    /* === EXTENDED SLATE — For JS template literals === */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    /* === SIDEBAR === */
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-text: #64748b;
+    --sidebar-text-active: var(--primary);
+    --sidebar-bg-active: var(--primary-faint);
+    --sidebar-hover: #f1f5f9;
+
+    /* === SHADOWS === */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+    /* === TRANSITIONS === */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+
+    /* === LAYOUT === */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 68px;
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+
+    /* === FONTS === */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* === BANNER / GLASS === */
+    --banner-gradient-blue: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%);
+    --banner-gradient-ts: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%);
+    --banner-border: 1px solid rgba(255, 255, 255, 0.15);
+    --banner-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.25);
+    --pill-dark-bg: rgba(0, 0, 0, 0.28);
+    --pill-dark-border: 1px solid rgba(255, 255, 255, 0.16);
+
+    /* === DANGER EXTENDED === */
+    --danger-light-bg: #fecaca;
+    --danger-dark: #b91c1c;
+    --danger-text: #b91c1c;
+
+    /* === WARNING EXTENDED === */
+    --warning-text: #b45309;
+    --warning-bg: #fcd34d;
+    --warning-border: #fde047;
+    --warning-light-bg: #fffbeb;
+    --warning-accent: #fbbf24;
+
+    /* === SUCCESS EXTENDED === */
+    --success-emerald: #10b981;
+    --success-light-border: #bbf7d0;
+
+    /* === PURPLE EXTENDED === */
+    --purple-50: #ede9fe;
+    --purple-500: #8b5cf6;
+
+    /* === INDIGO === */
+    --indigo-600: #4f46e5;
+
+    /* === BPS BRAND === */
+    --bps-brand: #002b66;
+
+    /* === SWAL BUTTONS === */
+    --swal-confirm-primary: var(--indigo-600);
+    --swal-confirm-danger: var(--danger);
+    --swal-confirm-success: var(--success-emerald);
+    --swal-cancel: var(--text-muted);
+
+    /* === BADGE COLORS === */
+    --badge-green-bg: #dcfce7;
+    --badge-green-text: #15803d;
+    --badge-blue-bg: #dbeafe;
+    --badge-blue-text: #1d4ed8;
+    --badge-orange-bg: #ffedd5;
+    --badge-orange-text: #c2410c;
+    --badge-purple-bg: #ede9fe;
+    --badge-purple-text: #6d28d9;
+
+    /* === STAT ICON COLORS === */
+    --stat-orange: #f97316;
+    --stat-purple: #8b5cf6;
+    --stat-violet: #7c3aed;
+
+    /* === MODAL === */
+    --modal-gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    --modal-gradient-blue-deep: linear-gradient(135deg, #091e42 0%, #1e3a8a 60%, #2563eb 100%);
+    --modal-gradient-violet: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    --modal-icon-bg: rgba(255, 255, 255, 0.18);
+    --modal-icon-border: 1px solid rgba(255, 255, 255, 0.3);
+    --modal-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.25);
+}
+
+/* ==========================================================================
+   UTILITY CLASSES — Replace Inline Styles
+   ========================================================================== */
+
+/* --- Banner & Glass --- */
+.banner-badge {
+    background: var(--glass-bg);
+    color: var(--text-white);
+    border: var(--glass-border);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+}
+
+.pill-dark {
+    padding: 5px 18px;
+    background: var(--pill-dark-bg);
+    border: var(--pill-dark-border);
+    font-size: 0.76rem;
+}
+
+.pill-dark-sm {
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 0.76rem;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 5px 14px;
+}
+
+.role-badge {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-size: 0.84rem;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.workflow-bar {
+    padding: 8px 22px;
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.83rem;
+    color: rgba(255, 255, 255, 0.95);
+    gap: 14px;
+}
+
+/* --- Brand Text --- */
+.text-brand-sipedas {
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--primary-light);
+    text-shadow: 0 2px 10px rgba(96, 165, 250, 0.4);
+}
+
+.text-brand-ts {
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--primary-light);
+    text-shadow: 0 2px 10px rgba(96, 165, 250, 0.4);
+}
+
+/* --- Status --- */
+.text-online {
+    color: var(--success) !important;
+}
+
+/* --- Stat Badges --- */
+.badge-green {
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+.badge-blue {
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-text);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+.badge-orange {
+    background: var(--badge-orange-bg);
+    color: var(--badge-orange-text);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+.badge-purple {
+    background: var(--badge-purple-bg);
+    color: var(--badge-purple-text);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+/* --- Stat Icons --- */
+.icon-orange { color: var(--stat-orange); }
+.icon-purple { color: var(--stat-purple); }
+
+/* --- Select Inputs --- */
+.select-filter {
+    font-size: 0.72rem;
+    padding: 0.2rem 1.8rem 0.2rem 0.5rem;
+    border-radius: 8px;
+    border-color: var(--border);
+    background-color: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: auto;
+}
+
+/* --- Activity Icon --- */
+.icon-activity {
+    width: 36px;
+    height: 36px;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--info);
+}
+
+/* --- Dropzone Text --- */
+.text-dropzone {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* --- Editor Input --- */
+.input-border {
+    border-style: dashed;
+    border-color: var(--swal-cancel);
+}
+
+/* --- Loading --- */
+.text-loading {
+    padding: 8px;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+/* --- TS Stats --- */
+.text-ts-purple {
+    color: var(--stat-violet);
+}
+
+/* --- Fix Buttons --- */
+.btn-fix-primary {
+    background: var(--swal-confirm-primary);
+    border-color: var(--swal-confirm-primary);
+}
+
+.btn-fix-success {
+    background: var(--swal-confirm-success);
+    border-color: var(--swal-confirm-success);
+}
+
+/* --- Modal Common --- */
+.modal-content-custom {
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--bg-card);
+    box-shadow: var(--modal-shadow);
+}
+
+.modal-title-custom {
+    font-size: 1.25rem;
+    line-height: 1.45;
+    color: var(--text-primary);
+}
+
+.modal-body-light {
+    background: var(--bg-page);
+}
+
+.modal-header-blue {
+    background: var(--modal-gradient-blue);
+    color: white;
+}
+
+.modal-header-blue-deep {
+    background: var(--modal-gradient-blue-deep);
+    color: white;
+}
+
+.modal-header-violet {
+    background: var(--modal-gradient-violet) !important;
+    color: var(--text-white) !important;
+}
+
+.modal-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--modal-icon-bg);
+    border: var(--modal-icon-border);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Anomaly Modal --- */
+.anomaly-banner {
+    background: linear-gradient(135deg, var(--warning-light-bg) 0%, var(--warning-light) 100%);
+    border-radius: 14px;
+    border: 1.5px solid var(--warning-border) !important;
+}
+
+.anomaly-banner-title {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.legend-blue {
+    background: var(--info-light);
+    font-weight: 700;
+    color: var(--info-dark);
+    font-size: 0.75rem;
+}
+
+.legend-yellow {
+    background: var(--warning-bg);
+    font-weight: 700;
+    color: var(--warning-text);
+    font-size: 0.75rem;
+}
+
+/* --- Table Wrapper --- */
+.table-wrapper-border {
+    border-color: var(--border) !important;
+}
+
+/* --- Button Secondary --- */
+.btn-secondary-custom {
+    background: var(--text-secondary);
+    border: none;
+}
+
+/* --- Info Box --- */
+.info-box-blue {
+    background: rgba(37, 99, 235, 0.05);
+    border-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* --- Separator --- */
+.separator-v {
+    width: 1.5px;
+    height: 22px;
+    background-color: var(--swal-cancel);
+    margin: 0 8px;
+}
+
+/* --- White BG --- */
+.bg-white-override {
+    background: var(--bg-card);
+}
+
+/* --- Radio Labels --- */
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Modern Search Bar & Scope Indicator Styles
+   ========================================================================== */
+.modern-search-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.modern-search-input-group {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #ffffff;
+}
+
+.modern-search-input-group:focus-within {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.modern-search-input-group .form-control:focus {
+    box-shadow: none;
+    background: transparent;
+}
+
+#search-scope-indicator .badge {
+    transition: all 0.2s ease;
+    letter-spacing: 0.1px;
+}
+
+.search-result-item-enhanced {
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.18s ease;
+}
+
+.search-result-item-enhanced:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+}
+
+.table-number-wrapper {
+    background: #f8fafc;
+    border-color: #cbd5e1 !important;
+    transition: border-color 0.2s ease;
+}
+
+.table-number-wrapper:focus-within {
+    border-color: #0284c7 !important;
+    background: #ffffff;
+}
+
+
+.table-number-wrapper:focus-within {
+    border-color: #0284c7 !important;
+    background: #ffffff;
+}
+

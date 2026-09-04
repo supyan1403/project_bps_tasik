@@ -698,7 +698,15 @@ def timeseries_data_by_indicators(indicators: str = "", years: str = "", db: Ses
                         "headers": value_cols,
                         "unit": _infer_unit_from_headers_and_table(value_cols, table.table_name),
                         "vk_units": _build_vk_units(value_cols, table.table_name),
-                        "sources": {col: {"table_id": table.id, "table_name": table.table_name, "doc_filename": doc.filename if doc else ""}},
+                        "sources": {
+                            c: {
+                                "table_id": table.id,
+                                "table_name": table.table_name,
+                                "doc_year": doc_year,
+                                "doc_filename": doc.filename if doc else "",
+                                "raw_col": c
+                            } for c in value_cols
+                        },
                         "data": data_rows
                     })
 

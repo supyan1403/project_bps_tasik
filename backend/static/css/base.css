@@ -1,37 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-:root {
-    --primary: #4F46E5;
-    --primary-hover: #4338CA;
-    --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    --text-dark: #1f2937;
-    --text-muted: #6b7280;
-    --danger: #ef4444;
-    --danger-light: #fee2e2;
-    --success: #10b981;
-    --sidebar-width: 260px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ===================== CUSTOM SMOOTH SCROLLBARS ===================== */
-/* Menghilangkan bug glitch/flickering pada Windows 11 Overlay Scrollbar */
 ::-webkit-scrollbar,
 .table-responsive::-webkit-scrollbar,
 .editor-table-wrapper::-webkit-scrollbar,
 .sticky-table-container::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track,
 .table-responsive::-webkit-scrollbar-track,
 .editor-table-wrapper::-webkit-scrollbar-track,
 .sticky-table-container::-webkit-scrollbar-track {
-    background: #e2e8f0 !important;
+    background: var(--border) !important;
     border-radius: 6px;
 }
 
@@ -39,26 +22,26 @@
 .table-responsive::-webkit-scrollbar-thumb,
 .editor-table-wrapper::-webkit-scrollbar-thumb,
 .sticky-table-container::-webkit-scrollbar-thumb {
-    background: #94a3b8 !important;
+    background: var(--text-light) !important;
     border-radius: 6px;
-    border: 3px solid #e2e8f0 !important;
+    border: 2px solid var(--border) !important;
 }
 
 ::-webkit-scrollbar-thumb:hover,
 .table-responsive::-webkit-scrollbar-thumb:hover,
 .editor-table-wrapper::-webkit-scrollbar-thumb:hover,
 .sticky-table-container::-webkit-scrollbar-thumb:hover {
-    background: #64748b !important;
+    background: var(--text-secondary) !important;
 }
 
 ::-webkit-scrollbar-corner,
 .table-responsive::-webkit-scrollbar-corner {
-    background: #cbd5e1 !important;
+    background: var(--border) !important;
 }
 
 * {
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 #e2e8f0;
+    scrollbar-color: var(--text-light) var(--border);
 }
 
 html, body {
@@ -70,34 +53,9 @@ html, body {
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-gradient);
-    color: var(--text-dark);
+    font-family: var(--font-family);
+    background: var(--bg-page);
+    color: var(--text-primary);
     display: flex;
     font-size: 14px;
 }
-
-/* ===================== UNIFIED SYNCHRONIZED THEME TRANSITIONS ===================== */
-body,
-.sidebar,
-.main-content,
-.glass-panel,
-.card,
-.modal-content,
-.table,
-.table td,
-.table th,
-.form-control,
-.form-select,
-.nav-link,
-.btn,
-.admin-overview-card,
-.sidebar-floating-popover,
-.sipedas-brand-lockup,
-.sidebar-divider {
-    transition: background-color 0.22s cubic-bezier(0.4, 0, 0.2, 1), 
-                border-color 0.22s cubic-bezier(0.4, 0, 0.2, 1), 
-                color 0.22s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
-

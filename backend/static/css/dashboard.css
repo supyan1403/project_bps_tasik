@@ -1,64 +1,26 @@
-/* ===================== STAT CARD MOTIFS & TEXTURES ===================== */
+/* ===================== STAT CARDS (Simplified) ===================== */
 .stat-card-glass {
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-radius: 14px;
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    border-radius: var(--border-radius-lg);
 }
 .stat-card-glass:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-lg);
 }
-.stat-card-pattern {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(0, 0, 0, 0.035) 1.1px, transparent 1.1px);
-    background-size: 14px 14px;
-    pointer-events: none;
-    z-index: 1;
-}
-.stat-card-glow-emerald {
-    background: radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.09) 0%, rgba(255, 255, 255, 0) 65%), #ffffff !important;
-}
-.stat-card-glow-blue {
-    background: radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.09) 0%, rgba(255, 255, 255, 0) 65%), #ffffff !important;
-}
-.stat-card-glow-orange {
-    background: radial-gradient(circle at 100% 100%, rgba(249, 115, 22, 0.09) 0%, rgba(255, 255, 255, 0) 65%), #ffffff !important;
-}
-.stat-card-glow-purple {
-    background: radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.09) 0%, rgba(255, 255, 255, 0) 65%), #ffffff !important;
-}
-.stat-card-watermark {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 145px;
-    height: 90px;
-    opacity: 0.22;
-    pointer-events: none;
-    z-index: 1;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.stat-card-glass:hover .stat-card-watermark {
-    opacity: 0.45;
-    transform: scale(1.04) translateY(-1px);
-}
+.stat-card-pattern { display: none; }
+.stat-card-glow-emerald { background: var(--bg-card) !important; }
+.stat-card-glow-blue { background: var(--bg-card) !important; }
+.stat-card-glow-orange { background: var(--bg-card) !important; }
+.stat-card-glow-purple { background: var(--bg-card) !important; }
+.stat-card-watermark { display: none; }
 
 /* Custom Slim Scrollbar for Sidebar */
-.sidebar::-webkit-scrollbar {
-    width: 4px;
-}
-.sidebar::-webkit-scrollbar-track {
-    background: transparent;
-}
-.sidebar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-.sidebar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
 
 .sidebar-title {
     font-size: 1.2rem;
@@ -69,7 +31,6 @@
     letter-spacing: -0.02em;
 }
 
-
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
     flex: 1;
@@ -79,14 +40,8 @@
     min-width: 0;
 }
 
-.page-section {
-    display: none;
-}
-.page-section.active {
-    display: block;
-    animation: none;
-    transform: none;
-}
+.page-section { display: none; }
+.page-section.active { display: block; }
 
 /* ===================== WIDGETS (Dashboard) ===================== */
 .widget-grid {
@@ -97,66 +52,61 @@
 }
 
 .widget {
-    background: white;
-    border-radius: 14px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
     padding: 1.25rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow-card);
     border-left: 4px solid var(--primary);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .widget:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-lg);
 }
 
 .widget.danger { border-left-color: var(--danger); }
-.widget.danger:hover {
-    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.18);
-}
-.widget-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;}
-.widget-value { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
+.widget.danger:hover { box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.15); }
+.widget-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
+.widget-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
 
-
-/* ===================== ENHANCED CHART GLASS PANELS ===================== */
+/* ===================== CHART PANELS ===================== */
 .chart-card-glass {
     position: relative;
     overflow: hidden;
-    background-color: #ffffff;
-    background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1.1px, transparent 1.1px);
-    background-size: 16px 16px;
-    border-radius: 14px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--transition-normal);
 }
 .chart-card-glass:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-md);
 }
 
-/* ===================== MODERN INTERACTIVE DROPZONE ===================== */
+/* ===================== DROPZONE ===================== */
 .dropzone-modern {
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    border: 2px dashed var(--border);
+    border-radius: var(--border-radius-lg);
     padding: 30px 18px;
     min-height: 200px;
     text-align: center;
     cursor: pointer;
-    background: #f8fafc;
+    background: var(--bg-page);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
 .dropzone-modern:hover {
-    border-color: #3b82f6;
-    background: #f0f7ff;
+    border-color: var(--primary-light);
+    background: var(--primary-faint);
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(59, 130, 246, 0.08);
 }
 .dropzone-modern.dragover {
-    border-color: #2563eb;
-    background: #eff6ff;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    border-color: var(--primary);
+    background: var(--primary-pale);
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.12);
     transform: scale(1.01);
 }
 .dropzone-icon {
@@ -169,114 +119,123 @@
     transform: translateY(-3px) scale(1.08);
 }
 
-/* ===================== RECENT DOC LIST ITEM ===================== */
+/* ===================== RECENT DOC LIST ===================== */
 .recent-doc-item {
-    transition: all 0.2s ease;
-    border: 1px solid #f1f5f9;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--bg-hover);
 }
 .recent-doc-item:hover {
-    background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
+    background-color: var(--bg-page) !important;
+    border-color: var(--border) !important;
     transform: translateX(3px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-sm);
 }
 
 /* ===================== TIMESERIES QUICK INSIGHTS ===================== */
 .ts-insight-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 14px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
 }
-.ts-insight-card-glow {
-    position: absolute;
-    right: -10px;
-    bottom: -10px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    filter: blur(15px);
-    opacity: 0.2;
-    pointer-events: none;
-}
+.ts-insight-card-glow { display: none; }
 
 /* ===================== ADMIN OVERVIEW CARDS ===================== */
 .admin-overview-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-lg);
     padding: 14px 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-card);
+    transition: transform var(--transition-normal);
 }
 
-/* ===================== DOCUMENT & PUBLICATION BROWSER CARDS ===================== */
+/* ===================== DOCUMENT & PUBLICATION CARDS ===================== */
 .doc-breadcrumb {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    transition: all var(--transition-normal);
 }
 
 .doc-folder-card {
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-normal);
 }
 
 .doc-folder-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border-color: #cbd5e1;
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border);
+}
+
+.doc-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.1rem auto;
+    border-radius: 16px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+}
+
+.doc-folder-card:hover .doc-icon-wrapper,
+.doc-chapter-card:hover .doc-icon-wrapper {
+    background: var(--primary-pale);
+    border-color: var(--primary-light);
+    transform: scale(1.05);
 }
 
 .doc-chapter-card {
-    border: 1px solid #cbd5e1;
-    background: linear-gradient(145deg, #ffffff, #f8fafc);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
 }
 
 .doc-chapter-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.08);
-    border-color: #94a3b8;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--text-light);
 }
 
 .doc-card-title {
-    color: #1e293b;
-    transition: color 0.2s ease;
+    color: var(--text-primary);
+    transition: color var(--transition-normal);
 }
 
 .doc-card-badge {
-    color: #64748b;
-    background: #f1f5f9;
+    color: var(--text-secondary);
+    background: var(--bg-hover);
 }
 
 .doc-card-subtitle {
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .doc-table-list-wrapper {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
 }
 
 .doc-table-list-item {
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-normal);
 }
 
 .doc-table-list-item:hover {
-    background-color: #f8fafc;
+    background-color: var(--bg-page);
 }
 
 .doc-empty-state {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    color: #64748b;
+    background: var(--bg-page);
+    border: 1px dashed var(--border);
+    color: var(--text-secondary);
 }
-

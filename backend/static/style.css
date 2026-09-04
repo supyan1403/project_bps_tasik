@@ -1,12 +1,11 @@
 /* ==========================================================================
-   SIPEDAS — Sistem Integrasi, Pencarian, dan Analisis Data Statistik
-   Master Entry Stylesheet (Imports modular stylesheets)
+   SIPEDAS — Master Entry Stylesheet
    ========================================================================== */
 
-@import url('/static/css/base.css?v=20260827_1');
-@import url('/static/css/sidebar.css?v=20260827_1');
-@import url('/static/css/dashboard.css?v=20260827_1');
-@import url('/static/css/components.css?v=20260827_1');
-@import url('/static/css/tables.css?v=20260827_1');
-@import url('/static/css/timeseries.css?v=20260827_1');
-@import url('/static/css/darkmode.css?v=20260827_1');
+@import url('/static/css/theme.css?v=20260828_51');
+@import url('/static/css/base.css?v=20260828_51');
+@import url('/static/css/sidebar.css?v=20260828_51');
+@import url('/static/css/dashboard.css?v=20260828_51');
+@import url('/static/css/components.css?v=20260828_51');
+@import url('/static/css/tables.css?v=20260828_51');
+@import url('/static/css/timeseries.css?v=20260828_51');

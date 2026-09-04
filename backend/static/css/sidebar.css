@@ -1,4 +1,28 @@
 /* ===================== SIDEBAR ===================== */
+
+/* --- Operator Header (non-admin, sidebar hidden) --- */
+.operator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    min-height: 52px;
+    margin: -3px -12px 12px -12px;
+    border-radius: 0;
+}
+
+/* --- Hide sidebar for non-admin --- */
+body.role-pegawai .sidebar {
+    display: none !important;
+}
+
+body.role-pegawai .main-content {
+    width: 100% !important;
+    max-width: 100% !important;
+}
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
@@ -6,16 +30,16 @@
     max-height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border-right: 1px solid #e2e8f0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
     padding: 1.5rem 12px 1.25rem 12px !important;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
     position: relative;
     contain: layout;
-    transition: width 0.15s ease-out, min-width 0.15s ease-out, background-color 0.22s ease, border-color 0.22s ease;
+    transition: width 0.15s ease-out, min-width 0.15s ease-out;
 }
 
 .sipedas-brand-lockup {
@@ -32,7 +56,7 @@
     text-decoration: none;
     width: 100%;
     box-sizing: border-box !important;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--sidebar-border);
 }
 
 .sipedas-brand-main {
@@ -89,10 +113,6 @@
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.theme-switch-box {
-    cursor: pointer;
-}
-
 .nav-link i,
 .theme-mode-icon,
 #btn-admin-login i,
@@ -110,6 +130,8 @@
     padding: 0 !important;
     line-height: 1 !important;
     text-align: center !important;
+    color: var(--sidebar-text) !important;
+    transition: color var(--transition-fast) !important;
 }
 
 .nav-link i::before,
@@ -144,10 +166,14 @@
     margin-right: 14px;
 }
 
+.theme-switch-box {
+    cursor: pointer;
+}
+
 .theme-switch-pill {
     width: 36px;
     height: 20px;
-    background: #cbd5e1;
+    background: var(--border);
     border-radius: 20px;
     position: relative;
     flex-shrink: 0;
@@ -157,15 +183,10 @@
     transition: background-color 0.15s ease, opacity 0.12s ease-out, max-width 0.15s ease-out, width 0.15s ease-out;
 }
 
-[data-bs-theme="dark"] .theme-switch-pill,
-body.dark-mode .theme-switch-pill {
-    background: #2563eb !important;
-}
-
 .theme-switch-knob {
     width: 16px;
     height: 16px;
-    background: #ffffff;
+    background: var(--text-white);
     border-radius: 50%;
     position: absolute;
     top: 2px;
@@ -174,22 +195,102 @@ body.dark-mode .theme-switch-pill {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-[data-bs-theme="dark"] .theme-switch-knob,
-body.dark-mode .theme-switch-knob {
-    transform: translateX(16px);
-}
-
 /* Sidebar Divider Line */
 .sidebar-divider {
     height: 1px;
     width: 100%;
-    background-color: #e2e8f0;
+    background-color: var(--sidebar-border);
     margin: 0.65rem 0;
 }
 
-[data-bs-theme="dark"] .sidebar-divider,
-body.dark-mode .sidebar-divider {
-    background-color: #334155 !important;
+/* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */
+body:not(.sidebar-collapsed) .sidebar-floating-popover {
+    display: none !important;
+}
+
+/* ===================== FLOATING FLYOUT POPOVER ===================== */
+.sidebar-floating-popover {
+    display: none;
+    z-index: 9999;
+    min-width: 200px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(6px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.sidebar-floating-popover.popover-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+}
+
+body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover,
+body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
+    display: block;
+}
+
+.sidebar-floating-popover .popover-header {
+    background: var(--bg-page);
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-floating-popover .popover-body {
+    padding: 6px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popover-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px !important;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.12s ease, color 0.12s ease;
+    white-space: nowrap;
+}
+
+.popover-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.popover-item i {
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+}
+
+/* Caret/arrow triangle */
+.sidebar-floating-popover::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: -6px;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transform: rotate(45deg);
 }
 
 /* ===================== COLLAPSED SIDEBAR STATE ===================== */
@@ -200,7 +301,6 @@ body.sidebar-collapsed .sidebar {
     overflow-y: hidden !important;
 }
 
-/* Bagian tulisan tertutup cepat dan ringan */
 body.sidebar-collapsed .bps-brand-text,
 body.sidebar-collapsed .nav-link-text,
 body.sidebar-collapsed .sidebar-btn-text,
@@ -236,7 +336,6 @@ body.sidebar-collapsed #admin-submenu {
     pointer-events: none !important;
 }
 
-/* Seluruh Icon Tetap Diam di Posisi Asal */
 body.sidebar-collapsed .sipedas-brand-lockup {
     height: 62px !important;
     min-height: 62px !important;
@@ -300,131 +399,7 @@ body.sidebar-collapsed #btn-admin-logout i {
     flex-shrink: 0 !important;
 }
 
-/* ===================== FLOATING FLYOUT POPOVER (Sidebar Tertutup) ===================== */
-.sidebar-floating-popover {
-    display: none; /* Hidden by default; shown via JS/hover when sidebar is collapsed */
-    position: absolute;
-    left: calc(100% + 8px);
-    top: 0;
-    z-index: 9999;
-    min-width: 200px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    /* pop-in animation */
-    opacity: 0;
-    transform: translateX(6px) scale(0.97);
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.sidebar-floating-popover.popover-visible {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    pointer-events: auto;
-}
-
-/* Only allow the popover to appear when sidebar is actually collapsed */
-body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover,
-body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
-    display: block;
-}
-
-.sidebar-floating-popover .popover-header {
-    background: #f8fafc;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px !important;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.sidebar-floating-popover .popover-body {
-    padding: 6px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.popover-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px !important;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    color: #475569;
-    transition: background 0.12s ease, color 0.12s ease;
-    white-space: nowrap;
-}
-
-.popover-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-}
-
-.popover-item i {
-    width: 18px;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 0.95rem;
-}
-
-/* Dark mode */
-[data-bs-theme="dark"] .sidebar-floating-popover,
-body.dark-mode .sidebar-floating-popover {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-[data-bs-theme="dark"] .sidebar-floating-popover .popover-header,
-body.dark-mode .sidebar-floating-popover .popover-header {
-    background: #0f172a !important;
-    border-color: #334155 !important;
-    color: #f1f5f9 !important;
-}
-
-[data-bs-theme="dark"] .popover-item,
-body.dark-mode .popover-item {
-    color: #cbd5e1 !important;
-}
-
-[data-bs-theme="dark"] .popover-item:hover,
-body.dark-mode .popover-item:hover {
-    background: #334155 !important;
-    color: #f8fafc !important;
-}
-
-/* Small triangle/caret pointing left */
-.sidebar-floating-popover::before {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: -6px;
-    width: 10px;
-    height: 10px;
-    background: #ffffff;
-    border-left: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    transform: rotate(45deg);
-}
-
-[data-bs-theme="dark"] .sidebar-floating-popover::before,
-body.dark-mode .sidebar-floating-popover::before {
-    background: #0f172a !important;
-    border-color: #334155 !important;
-}
-
-
-/* ===================== SIPEDAS BRAND LOCKUP ===================== */
+/* ===================== BRAND LOCKUP ===================== */
 .sipedas-brand-lockup {
     user-select: none;
     text-decoration: none;
@@ -436,11 +411,11 @@ body.dark-mode .sidebar-floating-popover::before {
 }
 
 .sipedas-logo-icon {
-    filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.18));
+    filter: drop-shadow(0 2px 5px rgba(30, 64, 175, 0.18));
 }
 
 .sipedas-brand-acronym {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-family);
     font-weight: 900;
     font-size: 1.2rem;
     letter-spacing: -0.5px;
@@ -449,18 +424,17 @@ body.dark-mode .sidebar-floating-popover::before {
 .sipedas-brand-sub {
     font-size: 0.68rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--text-secondary);
     letter-spacing: -0.1px;
 }
 
 .sipedas-brand-inst {
     font-size: 0.62rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-light);
     font-style: italic;
 }
 
-/* ===================== BPS BRAND LOCKUP ===================== */
 .bps-brand-lockup {
     display: flex;
     align-items: center;
@@ -485,26 +459,25 @@ body.dark-mode .sidebar-floating-popover::before {
 }
 
 .bps-brand-title {
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font-family);
     font-weight: 800;
     font-style: italic;
     font-size: 0.76rem;
-    color: #0f172a; /* Default: Gelap di background terang */
+    color: var(--text-primary);
     letter-spacing: -0.2px;
     white-space: nowrap;
 }
 
 .bps-brand-subtitle {
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font-family);
     font-weight: 800;
     font-style: italic;
     font-size: 0.68rem;
-    color: #0f172a; /* Default: Gelap di background terang */
+    color: var(--text-primary);
     letter-spacing: -0.2px;
     white-space: nowrap;
 }
 
-/* Otomatis teks Putih saat berada di background gelap / dark theme */
 .bps-brand-lockup.text-light .bps-brand-title,
 .bps-brand-lockup.text-light .bps-brand-subtitle,
 .bg-dark .bps-brand-lockup .bps-brand-title,
@@ -512,10 +485,8 @@ body.dark-mode .sidebar-floating-popover::before {
 .bg-primary .bps-brand-lockup .bps-brand-title,
 .bg-primary .bps-brand-lockup .bps-brand-subtitle,
 .welcome-banner .bps-brand-lockup .bps-brand-title,
-.welcome-banner .bps-brand-lockup .bps-brand-subtitle,
-[data-bs-theme="dark"] .bps-brand-lockup .bps-brand-title,
-[data-bs-theme="dark"] .bps-brand-lockup .bps-brand-subtitle {
-    color: #ffffff !important;
+.welcome-banner .bps-brand-lockup .bps-brand-subtitle {
+    color: var(--text-white) !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -529,47 +500,55 @@ body.dark-mode .sidebar-floating-popover::before {
     border-radius: 10px;
     cursor: pointer;
     font-weight: 500;
-    color: #64748b !important;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    color: var(--sidebar-text) !important;
+    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
     font-size: 0.85rem;
     border: 1px solid transparent;
 }
 
 .nav-link:not(.active):hover {
-    background: #f8fafc !important;
-    color: #1e293b !important;
+    background: var(--sidebar-hover) !important;
+    color: var(--text-primary) !important;
     transform: translateX(4px);
 }
 
-/* 1. Active Primary Top-level Nav (tanpa submenu) */
+/* Active Primary Top-level Nav (tanpa submenu) */
 .nav-link:not(.subnav-link).active {
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-    color: #ffffff !important;
+    background: var(--primary) !important;
+    color: var(--text-white) !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.32) !important;
+    box-shadow: var(--shadow-md) !important;
     border-color: transparent !important;
 }
 .nav-link:not(.subnav-link).active i,
 .nav-link:not(.subnav-link).active span {
-    color: #ffffff !important;
+    color: var(--text-white) !important;
 }
 
-/* 2. Active Parent Nav dengan Submenu (#nav-tabel, #nav-admin) */
+/* Active Parent Nav dengan Submenu */
 #nav-tabel.active,
 #nav-admin.active {
-    background: #eef2ff !important;
-    color: #4338ca !important;
+    background: var(--sidebar-bg-active) !important;
+    color: var(--primary) !important;
     font-weight: 600 !important;
-    border: 1px solid #c7d2fe !important;
-    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.1) !important;
+    border: 1px solid var(--primary-pale) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 #nav-tabel.active i,
 #nav-admin.active i {
-    color: #4f46e5 !important;
+    color: var(--primary) !important;
+}
+
+/* Submenu icons inherit same color as parent text */
+.subnav-link i {
+    color: var(--sidebar-text) !important;
+}
+.subnav-link.active i {
+    color: var(--text-white) !important;
 }
 #nav-tabel.active span,
 #nav-admin.active span {
-    color: #4338ca !important;
+    color: var(--primary) !important;
 }
 
 .submenu-arrow {
@@ -582,45 +561,45 @@ body.dark-mode .sidebar-floating-popover::before {
     transform: rotate(90deg);
 }
 
-/* 3. Submenu Links */
+/* Submenu Links */
 .subnav-link {
     font-size: 0.8rem;
     padding: 0.45rem 0.85rem 0.45rem 1.75rem !important;
     margin-bottom: 0.2rem;
     border-radius: 8px;
     border: 1px solid transparent;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease;
+    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .subnav-link:not(.active):hover {
-    background: #f1f5f9 !important;
-    color: #1e293b !important;
+    background: var(--sidebar-hover) !important;
+    color: var(--text-primary) !important;
     transform: translateX(4px);
 }
 
 .subnav-link.active {
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-    color: #ffffff !important;
+    background: var(--primary) !important;
+    color: var(--text-white) !important;
     font-weight: 600 !important;
-    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28) !important;
+    box-shadow: var(--shadow-md) !important;
     border-color: transparent !important;
 }
 .subnav-link.active i {
-    color: #ffffff !important;
+    color: var(--text-white) !important;
 }
 
 #admin-submenu,
 #tabel-submenu {
     padding: 0.25rem 0 0.35rem 0.5rem;
-    border-left: 2.5px solid #818cf8;
+    border-left: 2.5px solid var(--primary-light);
     margin: 0.15rem 0 0.5rem 1rem;
 }
 
-/* Nav Editor: hidden by default, shown when editor is open */
+/* Nav Editor */
 #nav-editor {
     display: none;
     margin-top: 0.5rem;
-    border-top: 1px dashed #cbd5e1;
+    border-top: 1px dashed var(--border);
     padding-top: 0.9rem;
     position: relative;
 }
@@ -628,13 +607,27 @@ body.dark-mode .sidebar-floating-popover::before {
     display: block;
 }
 #nav-editor:not(.active) {
-    color: #f59e0b;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
+    color: var(--warning);
+    background: var(--warning-light);
+    border: 1px solid var(--warning-accent);
 }
 #nav-editor:not(.active):hover {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--warning-light);
+    color: var(--warning-hover);
     box-shadow: none;
 }
 
+/* Custom Slim Scrollbar for Sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-light);
+}

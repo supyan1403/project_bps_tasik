@@ -14,7 +14,10 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 # Configuration paths
 _CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-os.makedirs(_CONFIG_DIR, exist_ok=True)
+try:
+    os.makedirs(_CONFIG_DIR, exist_ok=True)
+except Exception:
+    pass
 _AUTH_CONFIG_FILE = os.path.join(_CONFIG_DIR, "auth_credentials.json")
 
 SESSION_MAX_AGE_HOURS = 8

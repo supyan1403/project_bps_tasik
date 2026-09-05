@@ -27,8 +27,11 @@ _BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
 UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
 EXTRACT_DIR = os.path.join(_BPS_DATA_ROOT, "hasil_ekstraksi_web")
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(EXTRACT_DIR, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(EXTRACT_DIR, exist_ok=True)
+except Exception:
+    pass
 
 class ExtractRequest(BaseModel):
     start_page: int

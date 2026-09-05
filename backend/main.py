@@ -441,9 +441,12 @@ EXTRACT_DIR = os.path.join(_BPS_DATA_ROOT, "hasil_ekstraksi_web")
 # Backup database .sql disimpan di folder backups/ dalam project (di luar hasil_ekstraksi_web)
 BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(EXTRACT_DIR, exist_ok=True)
-os.makedirs(BACKUP_DIR, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(EXTRACT_DIR, exist_ok=True)
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+except Exception as _e:
+    pass
 
 @app.get("/")
 def read_root(request: Request):

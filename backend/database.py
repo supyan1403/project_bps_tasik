@@ -4,6 +4,9 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Production: wajib set env DATABASE_URL. Development: default MySQL lokal XAMPP.
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "mysql+pymysql://root:@127.0.0.1:3306/bps_tasikmalaya")
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 _is_production = bool(os.environ.get("SIPEDAS_DOMAIN"))
 
 if _is_production and "root:@" in SQLALCHEMY_DATABASE_URL:

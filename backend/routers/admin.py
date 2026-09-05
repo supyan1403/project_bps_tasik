@@ -14,8 +14,10 @@ from routers.auth import require_admin, log_activity
 router = APIRouter(prefix="/api/admin", tags=["Admin & Backups"])
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
-os.makedirs(BACKUP_DIR, exist_ok=True)
+try:
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+except Exception:
+    pass
 
 def cleanup_old_backups(keep: int = 10):
     """Hapus backup lama, sisakan N terbaru berdasarkan waktu modifikasi."""

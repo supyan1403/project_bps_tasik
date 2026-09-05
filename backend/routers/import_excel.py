@@ -21,7 +21,10 @@ router = APIRouter(prefix="/api/import", tags=["Excel Import"])
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
 UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except Exception:
+    pass
 
 _HEADER_FILL = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
 _HEADER_FONT = Font(name="Calibri", bold=True, color="FFFFFF", size=11)

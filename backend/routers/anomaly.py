@@ -28,7 +28,10 @@ router = APIRouter(prefix="/api", tags=["Anomaly & Data Quality"])
 
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _DATA_DIR = os.path.join(_BASE_DIR, "data")
-os.makedirs(_DATA_DIR, exist_ok=True)
+try:
+    os.makedirs(_DATA_DIR, exist_ok=True)
+except Exception:
+    pass
 _TS_SAFE_PATH = os.path.join(_DATA_DIR, "safe_timeseries_anomalies.json")
 _MASTER_DICT_PATH = os.path.join(_DATA_DIR, "master_dictionary.json")
 _DISMISSED_PATH = os.path.join(_DATA_DIR, "dismissed_column_anomalies.json")

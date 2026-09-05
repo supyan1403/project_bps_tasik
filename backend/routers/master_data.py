@@ -23,7 +23,10 @@ router = APIRouter(prefix="/api", tags=["Master Columns & Dictionaries"])
 
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _DATA_DIR = os.path.join(_BASE_DIR, "data")
-os.makedirs(_DATA_DIR, exist_ok=True)
+try:
+    os.makedirs(_DATA_DIR, exist_ok=True)
+except Exception:
+    pass
 MASTER_COLUMNS_FILE = os.path.join(_DATA_DIR, "master_columns.json")
 
 MONTH_PATTERN = r'(?:Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Ag(?:ustus)?t?|Sep(?:tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)?)'

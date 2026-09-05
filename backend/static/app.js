@@ -5382,6 +5382,8 @@ async function populateDocumentList() {
 
 
 
+    container.innerHTML = "";
+
     // ===================== NAV BAR: Breadcrumb + Action Buttons =====================
 
     const navBar = document.createElement("div");
@@ -5587,6 +5589,8 @@ async function populateDocumentList() {
                 card.style.justifyContent = "space-between";
 
                 card.style.alignItems = "center";
+
+                card.style.minHeight = "230px";
 
                 card.onclick = () => {
                     showLoadingModal("Membuka Publikasi...", "Memuat bab dan daftar tabel publikasi...");

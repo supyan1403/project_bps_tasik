@@ -5,11 +5,12 @@ import csv
 import json
 import zipfile
 import subprocess
+import threading
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
 import openpyxl
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -201,20 +202,36 @@ def get_documents(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
         })
     return docs_out
 
+# In-memory TTL cache for document TOC (15 minutes)
+_TOC_CACHE = {}
+_TOC_CACHE_LOCK = threading.Lock()
+
 @router.get("/documents/{doc_id}/toc")
-def get_document_toc(doc_id: int, db: Session = Depends(get_db)):
+def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+    
+    with _TOC_CACHE_LOCK:
+        if doc_id in _TOC_CACHE:
+            return _TOC_CACHE[doc_id]
+
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     
     doc_dir = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
-    os.makedirs(doc_dir, exist_ok=True)
+    try:
+        os.makedirs(doc_dir, exist_ok=True)
+    except Exception:
+        pass
+        
     toc_path = os.path.join(doc_dir, "toc.json")
     if os.path.exists(toc_path):
         try:
             with open(toc_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if data and len(data) > 0:
+                    with _TOC_CACHE_LOCK:
+                        _TOC_CACHE[doc_id] = data
                     return data
         except Exception:
             pass
@@ -254,6 +271,8 @@ def get_document_toc(doc_id: int, db: Session = Depends(get_db)):
                 json.dump(auto_toc, f, indent=4)
         except Exception:
             pass
+        with _TOC_CACHE_LOCK:
+            _TOC_CACHE[doc_id] = auto_toc
         return auto_toc
 
     return []
@@ -345,8 +364,18 @@ def extract_document(doc_id: int, req: ExtractRequest, background_tasks: Backgro
     background_tasks.add_task(run_extraction, doc.id, file_path, output_path, req.start_page, req.end_page)
     return {"message": "Extraction started in background"}
 
+# In-memory TTL cache for document tables (15 minutes)
+_DOC_TABLES_CACHE = {}
+_DOC_TABLES_CACHE_LOCK = threading.Lock()
+
 @router.get("/documents/{doc_id}/tables", response_model=List[schemas.ExtractedTableOut])
-def get_document_tables(doc_id: int, db: Session = Depends(get_db)):
+def get_document_tables(doc_id: int, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+    
+    with _DOC_TABLES_CACHE_LOCK:
+        if doc_id in _DOC_TABLES_CACHE:
+            return _DOC_TABLES_CACHE[doc_id]
+
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     table_ids = [t.id for t in tables]
     if table_ids:
@@ -359,4 +388,8 @@ def get_document_tables(doc_id: int, db: Session = Depends(get_db)):
         loaded_table_ids = set()
     for t in tables:
         t.has_db_data = t.id in loaded_table_ids
+
+    with _DOC_TABLES_CACHE_LOCK:
+        _DOC_TABLES_CACHE[doc_id] = tables
+
     return tables

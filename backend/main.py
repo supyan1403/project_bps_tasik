@@ -921,7 +921,8 @@ def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db), ad
 
 # Get table data from DB with CSV header metadata (unit, year) for unified rendering
 @app.get("/api/tables/{table_id}/data")
-def get_table_data(table_id: int, db: Session = Depends(get_db)):
+def get_table_data(table_id: int, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=120, stale-while-revalidate=300"
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).order_by(models.TableRow.sort_order.asc(), models.TableRow.id.asc()).all()
     

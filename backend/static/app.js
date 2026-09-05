@@ -244,10 +244,32 @@ function showToast(icon, title, text, timer = 3000) {
 
             setTimeout(() => toast.remove(), 250);
 
-        }, timer);
+}
 
-    }
+// Universal Premium Loading Modal
+function showLoadingModal(title = "Memuat Data...", message = "Mohon tunggu sejenak, sistem sedang menyiapkan data...") {
+    Swal.fire({
+        title: title,
+        html: `
+            <div class="d-flex flex-column align-items-center justify-content-center py-2">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem; border-width: 0.25em;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary, #64748b); text-align: center;">${message}</div>
+            </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        backdrop: 'rgba(15, 23, 42, 0.45)',
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0 p-3'
+        }
+    });
+}
 
+function hideLoadingModal() {
+    Swal.close();
 }
 
 
@@ -5225,32 +5247,50 @@ let viewState = {
 
 
 // Page 3: Tabel Data (CRUD)
-
 async function populateDocumentList() {
-
-    const res = await fetch(`${API_BASE}/documents`);
-
-    const docs = await res.json();
-
+    let docs = window.__cachedDocsList;
     const container = document.getElementById("document-list-container");
+    if (!container) return;
 
-    container.innerHTML = "";
+    if (!docs) {
+        try {
+            const cachedDocsStr = localStorage.getItem('sipedas_docs_cache');
+            if (cachedDocsStr) {
+                docs = JSON.parse(cachedDocsStr);
+                window.__cachedDocsList = docs;
+            }
+        } catch (e) {}
+    }
 
-    
+    // Jalankan fetch docs, toc, dan tables secara paralel jika doc dipilih
+    const fetchPromises = [
+        fetch(`${API_BASE}/documents`).then(r => r.ok ? r.json() : []).catch(() => [])
+    ];
 
     let docChapters = {};
+    let preloadedTables = null;
 
     if (viewState.selectedDocId) {
+        fetchPromises.push(
+            fetch(`${API_BASE}/documents/${viewState.selectedDocId}/toc`).then(r => r.ok ? r.json() : []).catch(() => [])
+        );
+        fetchPromises.push(
+            fetch(`${API_BASE}/documents/${viewState.selectedDocId}/tables`).then(r => r.ok ? r.json() : []).catch(() => [])
+        );
+    }
 
-        try {
+    const results = await Promise.all(fetchPromises);
+    const freshDocs = results[0];
+    if (freshDocs && freshDocs.length > 0) {
+        docs = freshDocs;
+        window.__cachedDocsList = docs;
+        try { localStorage.setItem('sipedas_docs_cache', JSON.stringify(docs)); } catch (e) {}
+    }
 
-            const tocRes = await fetch(`${API_BASE}/documents/${viewState.selectedDocId}/toc`);
-
-            if (tocRes.ok) {
-
-                const tocData = await tocRes.json();
-
-                tocData.forEach(item => {
+    if (viewState.selectedDocId) {
+        const tocData = results[1] || [];
+        preloadedTables = results[2] || [];
+        tocData.forEach(item => {
 
                     // Cari pola "Bab" diikuti angka biasa atau romawi
 
@@ -5289,20 +5329,9 @@ async function populateDocumentList() {
                         
 
                         docChapters[num] = name;
-
                     }
-
                 });
-
             }
-
-        } catch (err) {
-
-            console.error("Gagal memuat TOC dinamis:", err);
-
-        }
-
-    }
 
 
 
@@ -5558,11 +5587,11 @@ async function populateDocumentList() {
 
                 card.style.alignItems = "center";
 
-                card.style.minHeight = "230px";
-
-                card.onclick = () => { viewState.selectedDocId = d.id; populateDocumentList(); };
-
-                
+                card.onclick = () => {
+                    showLoadingModal("Membuka Publikasi...", "Memuat bab dan daftar tabel publikasi...");
+                    viewState.selectedDocId = d.id;
+                    populateDocumentList().finally(() => hideLoadingModal());
+                };
 
                 let loadingBadge = '';
 
@@ -5648,33 +5677,24 @@ async function populateDocumentList() {
 
         
 
-        const loadingDiv = document.createElement("div");
+        let tables = preloadedTables;
+        if (!tables) {
+            const loadingDiv = document.createElement("div");
+            loadingDiv.id = "tables-loading-spinner";
+            loadingDiv.style.textAlign = "center";
+            loadingDiv.style.padding = "4rem 2rem";
+            loadingDiv.innerHTML = `
+                <div class="spinner-border text-primary" role="status" style="width:2.5rem; height:2.5rem; border-width: 0.22em;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="text-muted small mt-3" style="font-weight:500; letter-spacing: 0.5px;">Memuat daftar tabel...</div>
+            `;
+            container.appendChild(loadingDiv);
 
-        loadingDiv.id = "tables-loading-spinner";
-
-        loadingDiv.style.textAlign = "center";
-
-        loadingDiv.style.padding = "4rem 2rem";
-
-        loadingDiv.innerHTML = `
-
-            <div class="spinner-border text-primary" role="status" style="width:2.5rem; height:2.5rem; border-width: 0.22em;">
-
-                <span class="visually-hidden">Loading...</span>
-
-            </div>
-
-            <div class="text-muted small mt-3" style="font-weight:500; letter-spacing: 0.5px;">Memuat daftar tabel...</div>
-
-        `;
-
-        container.appendChild(loadingDiv);
-
-
-
-        const tRes = await fetch(`${API_BASE}/documents/${d.id}/tables`);
-
-        const tables = await tRes.json();
+            const tRes = await fetch(`${API_BASE}/documents/${d.id}/tables`);
+            tables = await tRes.json();
+            loadingDiv.remove();
+        }
 
         
 
@@ -5807,13 +5827,10 @@ async function populateDocumentList() {
                 
 
                 card.onclick = (e) => {
-
                     if(e.target.tagName.toLowerCase() === 'button') return;
-
+                    showLoadingModal("Membuka Bab...", `Menyiapkan daftar tabel ${bab.name}...`);
                     viewState.selectedBabNum = bab.num;
-
-                    populateDocumentList();
-
+                    populateDocumentList().finally(() => hideLoadingModal());
                 };
 
                 
@@ -6144,13 +6161,11 @@ async function _loadDbIntoEditor(tableId, tableName) {
     const tbody = document.getElementById("data-grid-body");
 
     thead.innerHTML = "<tr><th colspan='20' style='color:var(--text-secondary, #64748b);'>Memuat data dari database...</th></tr>";
-
     tbody.innerHTML = "";
 
-
+    showLoadingModal("Membuka Data Tabel...", "Memuat data baris dan struktur kolom...");
 
     try {
-
         const res = await fetch(`${API_BASE}/tables/${tableId}/data`);
 
         const payload = await res.json();
@@ -6254,17 +6269,13 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
 
             tr.innerHTML = html;
-
             tbody.appendChild(tr);
-
         });
-
     } catch(err) {
-
         thead.innerHTML = `<tr><th style="color:red">Error: ${err.message}</th></tr>`;
-
+    } finally {
+        hideLoadingModal();
     }
-
 }
 
 
@@ -14433,7 +14444,7 @@ function updateRoleUI(role) {
 
         tsShowSources = false;
 
-        if (btnLogin) btnLogin.style.setProperty('display', 'none', 'important');
+        if (btnLogin) btnLogin.style.setProperty('display', 'flex', 'important');
         if (userWidget) userWidget.style.setProperty('display', 'none', 'important');
 
         if (btnLogout) btnLogout.style.setProperty('display', 'none', 'important');
@@ -14736,14 +14747,15 @@ function adminLogout() {
     }).then(async (result) => {
 
         if (result.isConfirmed) {
-
-            fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'same-origin' }).catch(()=>{});
+            showLoadingModal("Logging out...", "Menghapus sesi dan beralih ke mode publik...");
+            try {
+                await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'same-origin' });
+            } catch(e) {}
 
             // Cross-tab sync: notify other tabs about logout
             try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'logout', ts: Date.now() })); } catch(e) {}
 
-            window.location.href = '/?_t=' + Date.now();
-
+            window.location.href = '/?_public=1&_t=' + Date.now();
         }
 
     });

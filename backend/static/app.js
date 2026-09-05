@@ -5699,10 +5699,6 @@ async function populateDocumentList() {
 
         
 
-        loadingDiv.remove();
-
-        
-
         if (d.status.startsWith('extracting')) {
 
             const loadingBanner = document.createElement("div");

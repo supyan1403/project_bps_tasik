@@ -243,7 +243,8 @@ function showToast(icon, title, text, timer = 3000) {
             toast.style.transform = 'translateX(30px)';
 
             setTimeout(() => toast.remove(), 250);
-
+        }, timer);
+    }
 }
 
 // Universal Premium Loading Modal

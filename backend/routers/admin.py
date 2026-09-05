@@ -239,3 +239,73 @@ def delete_backup_file(filename: str, admin: dict = Depends(require_admin)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# =====================================================================
+# SYSTEM INFO
+# =====================================================================
+
+import time as _time
+import platform
+
+_server_start_time = _time.time()
+
+_app_version = "2.0.0"
+
+@router.get("/system-info")
+def get_system_info(admin: dict = Depends(require_admin)):
+    """Info sistem: versi, DB stats, uptime, dll."""
+    from database import engine
+    from sqlalchemy import text
+
+    info = {
+        "version": _app_version,
+        "total_tables": 0,
+        "total_rows": 0,
+        "total_docs": 0,
+        "db_size": "-",
+        "uptime": "-",
+        "python_version": platform.python_version(),
+        "fastapi_version": "-",
+    }
+
+    try:
+        db = next(get_db())
+        info["total_tables"] = db.query(models.ExtractedTable).count()
+        info["total_rows"] = db.query(models.TableRow).count()
+        info["total_docs"] = db.query(models.Document).count()
+
+        # DB size (MySQL)
+        try:
+            result = db.execute(text(
+                "SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb "
+                "FROM information_schema.tables WHERE table_schema = DATABASE()"
+            )).fetchone()
+            if result and result[0]:
+                info["db_size"] = f"{result[0]} MB"
+        except Exception:
+            info["db_size"] = "N/A"
+
+        db.close()
+    except Exception:
+        pass
+
+    # Uptime
+    uptime_sec = int(_time.time() - _server_start_time)
+    days = uptime_sec // 86400
+    hours = (uptime_sec % 86400) // 3600
+    mins = (uptime_sec % 3600) // 60
+    if days > 0:
+        info["uptime"] = f"{days} hari {hours} jam {mins} menit"
+    elif hours > 0:
+        info["uptime"] = f"{hours} jam {mins} menit"
+    else:
+        info["uptime"] = f"{mins} menit"
+
+    # FastAPI version
+    try:
+        import fastapi
+        info["fastapi_version"] = fastapi.__version__
+    except Exception:
+        pass
+
+    return info

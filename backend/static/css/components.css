@@ -1,3 +1,30 @@
+/* ===================== ADMIN SUBTAB ===================== */
+.admin-subtab {
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-lg);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.admin-subtab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--primary-light);
+}
+.admin-subtab.active {
+    background: var(--primary-faint);
+    color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 600;
+}
+
 /* ===================== GLASS PANELS (Simplified) ===================== */
 .glass-panel {
     background: var(--bg-card);
@@ -55,6 +82,10 @@ input:focus, select:focus, textarea:focus {
 .btn-success { background: var(--success); color: white; }
 .btn-success:hover { background: var(--success-hover); box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); }
 .btn-small { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+.btn-outline-primary { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn-outline-primary:hover { background: var(--primary-faint); color: var(--primary); box-shadow: none; }
+.btn-outline-success { background: transparent; color: var(--success); border: 1.5px solid var(--success); }
+.btn-outline-success:hover { background: var(--success-light); color: var(--success); box-shadow: none; }
 
 .btn-table-action {
     display: inline-flex;
@@ -726,6 +757,25 @@ body.role-pegawai #btn-admin-login {
     box-shadow: 0 2px 8px rgba(30, 64, 175, 0.35) !important;
 }
 
+/* ===================== FLATPICKR SIZE OVERRIDE ===================== */
+.flatpickr-calendar {
+    width: 305px !important;
+    max-width: 305px !important;
+}
+.flatpickr-day {
+    height: 30px !important;
+    line-height: 30px !important;
+    font-size: 0.78rem;
+}
+.flatpickr-months {
+    height: 38px !important;
+}
+.flatpickr-current-month {
+    font-size: 0.85rem;
+    height: 38px !important;
+    line-height: 38px;
+}
+
 /* ===================== TOGGLE SWITCH ===================== */
 .custom-switch-wrapper {
     display: inline-flex;
@@ -745,8 +795,8 @@ body.role-pegawai #btn-admin-login {
 }
 
 .custom-switch-track {
-    width: 44px;
-    height: 24px;
+    width: 36px;
+    height: 20px;
     background-color: var(--border);
     border-radius: 999px;
     position: relative;
@@ -760,8 +810,8 @@ body.role-pegawai #btn-admin-login {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     background-color: var(--text-white);
     border-radius: 50%;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -774,7 +824,7 @@ body.role-pegawai #btn-admin-login {
 }
 
 .custom-switch-input:checked + .custom-switch-track::after {
-    transform: translateX(20px);
+    transform: translateX(16px);
 }
 
 /* ===================== DOWNLOAD BUTTONS ===================== */

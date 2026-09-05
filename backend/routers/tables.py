@@ -110,7 +110,7 @@ def get_table_snippet(table_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/tables")
-def create_new_table(req: schemas.CreateTableRequest, db: Session = Depends(get_db)):
+def create_new_table(req: schemas.CreateTableRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == req.document_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan.")
@@ -184,7 +184,7 @@ def create_new_table(req: schemas.CreateTableRequest, db: Session = Depends(get_
     return {"message": "Tabel berhasil dibuat", "table_id": new_table.id, "table_name": new_table.table_name}
 
 @router.delete("/tables/{table_id}")
-def delete_single_table(table_id: int, db: Session = Depends(get_db)):
+def delete_single_table(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -360,7 +360,7 @@ class CSVRowUpdate(BaseModel):
     data: List[str]
 
 @router.put("/tables/{table_id}/csv/row/{row_index}")
-def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Session = Depends(get_db)):
+def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -380,7 +380,7 @@ def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Ses
     return {"message": "Row updated successfully"}
 
 @router.delete("/tables/{table_id}/csv/row/{row_index}")
-def delete_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db)):
+def delete_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -393,7 +393,7 @@ def delete_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db))
     return {"message": "Row deleted successfully"}
 
 @router.post("/tables/{table_id}/csv/insert_row/{row_index}")
-def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db)):
+def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -419,7 +419,7 @@ def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db))
     return {"message": "Row inserted successfully", "insert_index": row_index}
 
 @router.post("/tables/{table_id}/csv/row")
-def add_csv_row(table_id: int, db: Session = Depends(get_db)):
+def add_csv_row(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     return insert_csv_row(table_id, 0, db)
 
 class CSVColumnAdd(BaseModel):
@@ -427,7 +427,7 @@ class CSVColumnAdd(BaseModel):
     position: Any = "end"
 
 @router.post("/tables/{table_id}/csv/column")
-def add_csv_column(table_id: int, payload: CSVColumnAdd, db: Session = Depends(get_db)):
+def add_csv_column(table_id: int, payload: CSVColumnAdd, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -481,7 +481,7 @@ def add_csv_column(table_id: int, payload: CSVColumnAdd, db: Session = Depends(g
     return {"message": "Column added successfully", "insert_index": insert_idx}
 
 @router.delete("/tables/{table_id}/csv/column/{col_index}")
-def delete_csv_column(table_id: int, col_index: int, db: Session = Depends(get_db)):
+def delete_csv_column(table_id: int, col_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -507,7 +507,7 @@ class TableRenamePayload(BaseModel):
     new_name: str
 
 @router.put("/tables/{table_id}/rename")
-def rename_table(table_id: int, payload: TableRenamePayload, db: Session = Depends(get_db)):
+def rename_table(table_id: int, payload: TableRenamePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Table not found")
@@ -520,7 +520,7 @@ class ColumnRenamePayload(BaseModel):
     new_name: str
 
 @router.put("/tables/{table_id}/csv/rename_column")
-def rename_csv_column(table_id: int, payload: ColumnRenamePayload, db: Session = Depends(get_db)):
+def rename_csv_column(table_id: int, payload: ColumnRenamePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -556,7 +556,7 @@ class CSVSavePayload(BaseModel):
     rows: List[List[str]]
 
 @router.put("/tables/{table_id}/csv/save")
-def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Depends(get_db)):
+def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")

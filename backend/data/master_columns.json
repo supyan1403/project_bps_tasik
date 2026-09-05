@@ -6,7 +6,8 @@
     {
       "id": 1,
       "standard": "Kecamatan",
-      "count": 208
+      "count": 208,
+      "unit": ""
     },
     {
       "id": 2,
@@ -54,12 +55,6 @@
       "standard": "Produk Domestik Regional Bruto Atas Dasar Harga Berlaku",
       "count": 30,
       "unit": "juta rupiah"
-    },
-    {
-      "id": 12,
-      "standard": "Hasil Produksi Peternakan",
-      "count": 8,
-      "unit": "ton"
     },
     {
       "id": 13,
@@ -2134,12 +2129,6 @@
       "unit": "%"
     },
     {
-      "id": 389,
-      "standard": "Jumlah Angkatan Kerja/Economically Active - Bekerja dan Pengangguran",
-      "count": 4,
-      "unit": "orang"
-    },
-    {
       "id": 390,
       "standard": "Jumlah Desa Mempunyai Sarana Kesehatan - Rumah Sakit Bersalin/Maternity Hospital",
       "count": 6,
@@ -2800,12 +2789,6 @@
     {
       "id": 499,
       "standard": "Luas Panen Lobak/ Radish",
-      "unit": "ha",
-      "count": 0
-    },
-    {
-      "id": 500,
-      "standard": "Luas Panen Melon",
       "unit": "ha",
       "count": 0
     },

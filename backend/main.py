@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import models
 import schemas
-from database import engine, get_db
+from database import engine, get_db, SessionLocal
 # ... [imports and utility functions] ...
 from pipeline import detect_and_clean_metadata, deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS, parse_indonesian_number
 
@@ -264,9 +264,15 @@ def reset_stuck_extractions():
     except Exception as e:
         print(f"Gagal me-reset status ekstraksi terhenti: {e}")
 
+_PROD_DOMAIN = os.environ.get("SIPEDAS_DOMAIN", "")
+if _PROD_DOMAIN:
+    _CORS_ORIGINS = [f"https://{_PROD_DOMAIN}", f"http://{_PROD_DOMAIN}"]
+else:
+    _CORS_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?:\/\/.*$",
+    allow_origins=_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -279,23 +285,111 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 async def add_cache_control_header(request: Request, call_next):
     response = await call_next(request)
     if request.url.path.startswith("/static/"):
-        response.headers["Cache-Control"] = "public, max-age=86400"
+        response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
     return response
 
 # =====================================================================
-# MAINTENANCE MODE — Set env var SIPEDAS_MAINTENANCE=1 untuk aktif
+# MAINTENANCE MODE — database-backed via SystemConfig table
+# Key: "maintenance_mode" = "1"|"0", "maintenance_end" = ISO timestamp
+# Auto-disable saat maintenance_end lewat.
+# Admin yang sudah login tetap bisa akses selama maintenance.
 # =====================================================================
-MAINTENANCE_MODE = os.environ.get("SIPEDAS_MAINTENANCE", "0") == "1"
+
+_maintenance_cache = {"active": False, "end": "", "ts": 0}
+_CACHE_TTL = 5  # detik
+
+def _is_maintenance():
+    now = time.time()
+    if now - _maintenance_cache["ts"] < _CACHE_TTL:
+        return _maintenance_cache["active"]
+    try:
+        db = SessionLocal()
+        row = db.query(models.SystemConfig).filter(models.SystemConfig.key == "maintenance_mode").first()
+        val = row.value.strip() if row else "0"
+        end_row = db.query(models.SystemConfig).filter(models.SystemConfig.key == "maintenance_end").first()
+        end_val = end_row.value.strip() if end_row else ""
+        db.close()
+        # Auto-disable jika maintenance_end sudah lewat
+        if val == "1" and end_val:
+            from datetime import datetime, timedelta
+            try:
+                clean_val = end_val.replace('Z', '').split('+')[0].split('.')[0]
+                end_dt = datetime.fromisoformat(clean_val)
+                # Jika punya Z/offset → UTC. Jika tidak → asumsi local time
+                is_utc = 'Z' in end_val or '+' in end_val or (len(end_val) > 19 and end_val[19] in '+-')
+                now_dt = datetime.utcnow() if is_utc else datetime.now()
+                if now_dt >= end_dt:
+                    val = "0"
+                    _update_maintenance_db("0", "")
+            except Exception:
+                pass
+        _maintenance_cache["active"] = (val == "1")
+        _maintenance_cache["end"] = end_val
+        _maintenance_cache["ts"] = now
+    except Exception:
+        pass
+    return _maintenance_cache["active"]
+
+def _maintenance_end():
+    if _maintenance_cache["ts"] and (time.time() - _maintenance_cache["ts"] < _CACHE_TTL):
+        return _maintenance_cache["end"]
+    _is_maintenance()  # refresh cache
+    return _maintenance_cache["end"]
+
+def _update_maintenance_db(mode, end_time=""):
+    try:
+        db = SessionLocal()
+        for k, v in [("maintenance_mode", mode), ("maintenance_end", end_time)]:
+            row = db.query(models.SystemConfig).filter(models.SystemConfig.key == k).first()
+            if row:
+                row.value = v
+            else:
+                db.add(models.SystemConfig(key=k, value=v))
+        db.commit()
+        db.close()
+    except Exception:
+        pass
+        pass
+    _maintenance_cache["ts"] = 0
 
 @app.middleware("http")
 async def maintenance_middleware(request: Request, call_next):
-    if MAINTENANCE_MODE:
+    if _is_maintenance():
         path = request.url.path
+        # Static files tetap jalan
         if path.startswith("/static/") or path == "/favicon.ico":
             return await call_next(request)
+
+        # Login page & login API harus tetap bisa diakses
+        # Supaya admin bisa login → lalu bypass maintenance
+        if path == "/login" or path.startswith("/api/auth/login"):
+            return await call_next(request)
+
+        # Force maintenance dari cross-tab sync: skip admin bypass
+        force_maintenance = '_force_maintenance=1' in str(request.url.query)
+
+        # Cek apakah user adalah admin yang sudah login (skip jika force)
+        if not force_maintenance:
+            session_id = request.cookies.get("sipedas_session")
+            if session_id:
+                db = next(get_db())
+                try:
+                    sess = db.query(models.UserSession).filter(
+                        models.UserSession.id == session_id,
+                        models.UserSession.role == "admin"
+                    ).first()
+                    if sess:
+                        return await call_next(request)
+                finally:
+                    db.close()
+
+        # Non-admin → maintenance page
         if path.startswith("/api/"):
             return JSONResponse(status_code=503, content={"detail": "Sistem sedang dalam pemeliharaan. Silakan coba lagi nanti."})
-        return templates.TemplateResponse(request=request, name="maintenance.html", status_code=503)
+        return templates.TemplateResponse(
+            request=request, name="maintenance.html", status_code=503,
+            context={"maintenance_end": _maintenance_end()}
+        )
     return await call_next(request)
 
 # =====================================================================
@@ -350,12 +444,6 @@ BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
 os.makedirs(BACKUP_DIR, exist_ok=True)
-
-# Mount folder uploads dari lokasi baru (luar project)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-
-# Mount folder backups agar file .sql bisa di-download langsung dari browser
-app.mount("/backups", StaticFiles(directory=BACKUP_DIR), name="backups")
 
 @app.get("/")
 def read_root(request: Request):
@@ -644,7 +732,7 @@ def parse_csv_for_db(safe_path: str) -> tuple:
     return headers, records, units, years
 
 @app.post("/api/tables/{table_id}/load")
-def load_table_csv(table_id: int, db: Session = Depends(get_db)):
+def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Table not found")
@@ -778,7 +866,7 @@ def get_table_info(table_id: int, db: Session = Depends(get_db)):
     }
 
 @app.put("/api/tables/{table_id}/db_rows")
-def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db)):
+def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     """Batch update database rows from edit mode."""
     rows = payload.get("rows", [])
     for row_data in rows:
@@ -811,7 +899,7 @@ def get_table_data(table_id: int, db: Session = Depends(get_db)):
     }
 
 @app.put("/api/data/{row_id}")
-def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db)):
+def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -821,7 +909,7 @@ def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db)):
     return {"message": "Updated successfully"}
 
 @app.put("/api/data/{row_id}/safe")
-def mark_row_safe(row_id: int, db: Session = Depends(get_db)):
+def mark_row_safe(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -830,14 +918,14 @@ def mark_row_safe(row_id: int, db: Session = Depends(get_db)):
     return {"message": "Row marked as safe"}
 
 @app.put("/api/tables/{table_id}/safe-all")
-def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db)):
+def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     db.query(models.TableRow).filter(models.TableRow.table_id == table_id).update({"is_anomaly": False})
     db.commit()
     log_activity(db, "safe_anomaly", f"table_id={table_id}")
     return {"message": "All rows marked as safe"}
 
 @app.delete("/api/data/{row_id}")
-def delete_row(row_id: int, db: Session = Depends(get_db)):
+def delete_row(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -1110,7 +1198,7 @@ def clear_loaded_data(db: Session = Depends(get_db), admin: dict = Depends(requi
         raise HTTPException(status_code=500, detail=f"Failed to clear data: {str(e)}")
 
 @app.post("/api/documents/{doc_id}/load-all")
-def load_all_document_tables(doc_id: int, db: Session = Depends(get_db)):
+def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     loaded_count = 0
     errors = 0
@@ -1139,7 +1227,7 @@ def load_all_document_tables(doc_id: int, db: Session = Depends(get_db)):
     return {"message": f"Berhasil me-load {loaded_count} tabel ke database. Gagal: {errors} tabel."}
 
 @app.post("/api/documents/{doc_id}/bab/{bab_num}/load-all")
-def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get_db)):
+def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     loaded_count = 0
     errors = 0
@@ -1304,4 +1392,4 @@ def catch_all(request: Request, path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

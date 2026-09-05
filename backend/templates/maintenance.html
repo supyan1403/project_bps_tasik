@@ -25,39 +25,86 @@
             top:50%;
             left:50%;
             transform:translate(-50%, -50%);
-            width:500px;
-            height:500px;
+            width:380px;
+            height:380px;
             object-fit:contain;
-            opacity:0.07;
-            filter:blur(40px);
+            opacity:0.25;
             pointer-events:none;
             z-index:0;
+            filter: drop-shadow(0 0 8px  rgba(59,130,246,0.6))
+                    drop-shadow(0 0 20px rgba(59,130,246,0.4))
+                    drop-shadow(0 0 40px rgba(59,130,246,0.2));
+            animation: neonPulse 3s ease-in-out infinite alternate;
         }
-        .content { position:relative; z-index:1; text-align:center; }
-        .error-icon { font-size:40px; margin-bottom:16px; }
-        .badge-maintenance {
-            display:inline-block;
-            padding:6px 16px;
-            background:#fef3c7;
-            color:#92400e;
-            font-size:12px;
-            font-weight:600;
-            border-radius:20px;
-            border:1px solid #fde68a;
-            margin-bottom:16px;
+        @keyframes neonPulse {
+            0%   { filter: drop-shadow(0 0 8px  rgba(59,130,246,0.5))
+                           drop-shadow(0 0 20px rgba(59,130,246,0.3))
+                           drop-shadow(0 0 40px rgba(59,130,246,0.15)); }
+            100% { filter: drop-shadow(0 0 12px rgba(59,130,246,0.7))
+                           drop-shadow(0 0 28px rgba(59,130,246,0.5))
+                           drop-shadow(0 0 50px rgba(59,130,246,0.25)); }
         }
-        .error-title {
-            font-size:18px;
+        .content {
+            position:relative;
+            z-index:1;
+            text-align:center;
+        }
+        .title {
+            font-size:20px;
             font-weight:700;
             color:#0f172a;
             margin-bottom:10px;
         }
-        .error-desc {
+        .desc {
             font-size:14px;
             color:#64748b;
-            line-height:1.6;
-            max-width:360px;
+            line-height:1.7;
+            max-width:380px;
             margin:0 auto 28px;
+        }
+        .countdown {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+        }
+        .countdown-item {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            min-width:52px;
+        }
+        .countdown-item span {
+            font-size:24px;
+            font-weight:700;
+            color:#1e40af;
+            background:#eef2ff;
+            border-radius:8px;
+            padding:6px 10px;
+            min-width:44px;
+            text-align:center;
+            font-variant-numeric:tabular-nums;
+        }
+        .countdown-item small {
+            font-size:10px;
+            color:#94a3b8;
+            margin-top:4px;
+            font-weight:500;
+        }
+        .countdown-sep {
+            font-size:20px;
+            font-weight:700;
+            color:#94a3b8;
+            padding-bottom:16px;
+        }
+        .countdown-done {
+            padding:8px 20px;
+            background:#dcfce7;
+            color:#166534;
+            font-size:13px;
+            font-weight:600;
+            border-radius:10px;
+            border:1px solid #bbf7d0;
         }
         .footer-text {
             position:fixed;
@@ -71,14 +118,70 @@
 <body>
     <img src="/static/logo_sipedas.png" alt="" class="bg-logo">
     <div class="content">
-        <div class="error-icon">&#9881;&#65039;</div>
-        <div class="badge-maintenance">PEMELIHARAAN</div>
-        <div class="error-title">SIPEDAS Sedang Dalam Pemeliharaan</div>
-        <div class="error-desc">
+        <div class="title">SIPEDAS Sedang Dalam Pemeliharaan</div>
+        <div class="desc">
             Sistem sedang dalam pemeliharaan terjadwal untuk peningkatan kualitas layanan.
             Silakan coba kembali beberapa saat lagi.
         </div>
+        {% if maintenance_end %}
+        <div class="countdown" id="countdown">
+            <div class="countdown-item"><span id="c-d">00</span><small>Hari</small></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-item"><span id="c-h">00</span><small>Jam</small></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-item"><span id="c-m">00</span><small>Menit</small></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-item"><span id="c-s">00</span><small>Detik</small></div>
+        </div>
+        {% endif %}
     </div>
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
+    <script>
+    // Cross-tab: when admin disables maintenance in another tab, reload
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'sipedas_maintenance_event' && e.newValue) {
+            try {
+                localStorage.removeItem('sipedas_maintenance_event');
+                window.location.href = '/?_t=' + Date.now();
+            } catch(err) {}
+        }
+    });
+    </script>
+    {% if maintenance_end %}
+    <script>
+    (function() {
+        var endStr = "{{ maintenance_end }}";
+        var endTime = new Date(endStr).getTime();
+        if (isNaN(endTime)) return;
+
+        var cdEl = document.getElementById('countdown');
+        var dEl = document.getElementById('c-d');
+        var hEl = document.getElementById('c-h');
+        var mEl = document.getElementById('c-m');
+        var sEl = document.getElementById('c-s');
+
+        function pad(n) { return n < 10 ? '0' + n : n; }
+
+        function tick() {
+            var diff = endTime - Date.now();
+            if (diff <= 0) {
+                cdEl.outerHTML = '<div class="countdown-done">Pemeliharaan selesai. Memuat ulang halaman...</div>';
+                setTimeout(function() { window.location.href = '/?_public=1&_t=' + Date.now(); }, 2000);
+                return;
+            }
+            var sec = Math.floor(diff / 1000);
+            var d = Math.floor(sec / 86400); sec %= 86400;
+            var h = Math.floor(sec / 3600); sec %= 3600;
+            var m = Math.floor(sec / 60); sec %= 60;
+            dEl.textContent = pad(d);
+            hEl.textContent = pad(h);
+            mEl.textContent = pad(m);
+            sEl.textContent = pad(sec);
+            setTimeout(tick, 1000);
+        }
+        tick();
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>

@@ -329,7 +329,8 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     }
 
     body.sidebar-collapsed #tabel-submenu,
-    body.sidebar-collapsed #admin-submenu {
+    body.sidebar-collapsed #admin-submenu,
+    body.sidebar-collapsed #sistem-submenu {
         max-height: 0 !important;
         opacity: 0 !important;
         display: none !important;
@@ -532,7 +533,8 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
 
 /* Active Parent Nav dengan Submenu */
 #nav-tabel.active,
-#nav-admin.active {
+#nav-admin.active,
+#nav-sistem.active {
     background: var(--sidebar-bg-active) !important;
     color: var(--primary) !important;
     font-weight: 600 !important;
@@ -540,7 +542,8 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     box-shadow: var(--shadow-sm) !important;
 }
 #nav-tabel.active i,
-#nav-admin.active i {
+#nav-admin.active i,
+#nav-sistem.active i {
     color: var(--primary) !important;
 }
 
@@ -552,7 +555,8 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     color: var(--text-white) !important;
 }
 #nav-tabel.active span,
-#nav-admin.active span {
+#nav-admin.active span,
+#nav-sistem.active span {
     color: var(--primary) !important;
 }
 
@@ -594,7 +598,8 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
 }
 
 #admin-submenu,
-#tabel-submenu {
+#tabel-submenu,
+#sistem-submenu {
     padding: 0.25rem 0 0.35rem 0.5rem;
     border-left: 2.5px solid var(--primary-light);
     margin: 0.15rem 0 0.5rem 1rem;

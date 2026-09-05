@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="Database" />
   <img src="https://img.shields.io/badge/Frontend-Vanilla%20SPA%20%26%20Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Frontend" />
   <img src="https://img.shields.io/badge/Charts-Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js" />
-  <img src="https://img.shields.io/badge/Status-Beta%20v4.0-F59E0B?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Status-Beta%20Preview-F59E0B?style=flat-square" alt="Status" />
 </p>
 
 <p align="center">
@@ -61,7 +61,8 @@ Publikasi data statistik berkala resmi, seperti buku **Kabupaten Dalam Angka (DD
   - **Mode Publik / Pegawai**: Akses cepat pencarian indikator, penelusuran tabel, dan grafik deret waktu tanpa menu sensitif.
   - **Mode Administrator**: Kontrol penuh pengelolaan basis data, impor, koreksi kolom, hingga backup sistem.
   - Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak 16-byte, serta proteksi pembatasan percobaan gagal (*Anti-Brute Force Lockout* 5 menit).
-- **Ekstraksi PDF Cerdas**: Ekstraksi otomatis nomor tabel, judul publikasi, satuan unit, dan multi-level header menggunakan integrasi PyMuPDF & pdfplumber.
+- **Mode Pemeliharaan (Maintenance Mode) & Sistem**: Kontrol status pemeliharaan sistem dengan countdown timer otomatis, pelacakan log aktivitas admin, dan pembersihan berkas cache/sampah langsung dari antarmuka atau `start.bat`.
+- **Ekstraksi PDF Cerdas**: Ekstraksi otomatis nomor tabel, judul publikasi, satuan unit, dan multi-level header menggunakan integrasi pdfplumber & pypdf.
 - **Sinkronisasi & Parser Excel**: Dukungan impor berkas lembar kerja spreadsheet Excel (`.xlsx` / `.xls`) langsung ke dalam basis data relasional.
 - **Data Table Explorer & Live Cell Editor**: Penelusuran data tabel per bab/kategori, pencarian cepat pada tingkat kolom maupun baris, serta fitur pengeditan sel nilai data langsung di browser.
 - **Modul Analisis Deret Waktu (Time Series Engine)**: Pelacakan tren statistik lintas tahun secara dinamis, penyaringan indikator tunggal/gabungan, visualisasi grafik garis & batang interaktif, serta ekspor laporan kustom (PDF, PNG, CSV, Excel).
@@ -102,38 +103,36 @@ cd project_bps_tasik
 
 ### Langkah 3: Buat Virtual Environment
 
+Virtual environment direkomendasikan dibuat di dalam direktori `backend/` agar selaras dengan skrip otomatis `start.bat`:
+
 ```bash
+cd backend
 python -m venv venv
 ```
 
-### Langkah 4: Aktifkan Virtual Environment
+### Langkah 4: Aktifkan Virtual Environment & Instal Dependensi
 
 **Windows (PowerShell):**
 ```powershell
 venv\Scripts\activate
+pip install -r ../requirements.txt
 ```
 
 **Windows (Command Prompt):**
 ```cmd
 venv\Scripts\activate.bat
+pip install -r ..\requirements.txt
 ```
 
 **Linux / macOS:**
 ```bash
 source venv/bin/activate
+pip install -r ../requirements.txt
 ```
 
 > **Tanda berhasil**: Prompt terminal akan menampilkan `(venv)` di awal baris.
 
-### Langkah 5: Instal Dependensi
-
-```bash
-pip install -r requirements.txt
-```
-
-Tunggu hingga proses instalasi selesai. Pastikan tidak ada error.
-
-### Langkah 6: Konfigurasi Database
+### Langkah 5: Konfigurasi Database
 
 SIPEDAS mendukung dua mode database. Pilih **salah satu**:
 
@@ -168,34 +167,40 @@ set DATABASE_URL=sqlite:///./bps_dashboard.db
 export DATABASE_URL="sqlite:///./bps_dashboard.db"
 ```
 
-### Langkah 7: Jalankan Server
+### Langkah 6: Jalankan Server
 
 **Cara 1: Menggunakan Start Script (Windows - Direkomendasikan)**
 
-Klik dua kali berkas `start.bat` di folder root proyek.
+Kembali ke root proyek lalu klik dua kali berkas `start.bat` (atau jalankan `.\start.bat` di terminal):
+- Pilih opsi `1` untuk Normal Mode
+- Pilih opsi `2` untuk Maintenance Mode (bisa menentukan target waktu selesai)
+- Pilih opsi `3` untuk Menonaktifkan Maintenance
 
 **Cara 2: Melalui Terminal**
 
+Dari dalam folder `backend/` dengan venv aktif:
+
 ```bash
-python backend/run_server.py
+python run_server.py
 ```
 
-### Langkah 8: Akses Aplikasi
+### Langkah 7: Akses Aplikasi
 
 Buka peramban (browser) dan akses:
 
 **http://127.0.0.1:8000**
 
-### Langkah 9: Login Admin
+### Langkah 8: Login Admin
 
 1. Klik tombol **"Login Admin"** di pojok kiri bawah sidebar
-2. Masukkan password admin
-   - Password default: sesuai yang sudah diatur di `backend/data/auth_credentials.json`
+2. Masukkan password admin:
+   - **Password Default Awal**: `ganti_password_saya` (atau sesuai nilai variabel lingkungan `SIPEDAS_ADMIN_PASSWORD` pada `.env`).
+   - Setelah login pertama kali, sangat disarankan segera mengganti password melalui menu **Manajemen Database > Ganti Password**.
 3. Klik **"Masuk Sekarang"**
 
-### Langkah 10: Isi Data
+### Langkah 9: Isi Data
 
-Setelah login, Anda memiliki dua cara untuk mengisi data:
+Setelah login, Anda memiliki tiga cara untuk mengisi data:
 
 #### Cara A: Upload & Ekstrak PDF Publikasi
 
@@ -240,8 +245,9 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjal
 | `/api/stats` | `stats.py` | KPI agregat statistik untuk dashboard |
 | `/api/master-data` | `master_data.py` | Standarisasi master kolom dan kamus indikator |
 | `/api/anomaly` | `anomaly.py` | Deteksi dan resolusi anomali struktur kolom |
-| `/api/admin` | `admin.py` | Pencadangan dan pemulihan database |
-| `/api/auth` | `auth.py` | Otentikasi admin dan penggantian password |
+| `/api/admin` | `admin.py` | Pencadangan, pemulihan database, maintenance, dan logs |
+| `/api/auth` | `auth.py` | Otentikasi admin, manajemen sesi, dan ganti password |
+| `/api/import` | `import_excel.py` | Template parser dan pengunggahan data lembar kerja Excel |
 
 ---
 
@@ -251,9 +257,9 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjal
 | :--- | :--- | :--- |
 | **Error: Address already in use (Port 8000)** | Proses Python lain masih berjalan di port 8000 | Jalankan `start.bat` (otomatis membersihkan port), atau matikan proses manual lewat Task Manager |
 | **Error: Can't connect to MySQL server (10061)** | Layanan MySQL di XAMPP belum menyala | Buka XAMPP Control Panel, klik **Start** pada modul **MySQL**, atau gunakan [Mode SQLite](#opsi-b-sqlite-tanpa-xampp) |
-| **ModuleNotFoundError: No module named 'xxx'** | Dependensi belum terinstal | Jalankan ulang `pip install -r requirements.txt` |
+| **ModuleNotFoundError: No module named 'xxx'** | Dependensi belum terinstal | Jalankan ulang `pip install -r requirements.txt` di dalam venv |
 | **Ekstraksi PDF tidak membaca angka** | PDF merupakan hasil scan gambar, bukan teks digital | Pastikan menggunakan PDF resmi BPS yang teksnya bisa diseleksi/disalin |
-| **Lupa password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk reset ke default |
+| **Lupa password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk kembali ke default (`ganti_password_saya`) |
 | **Database tidak terkoneksi** | MySQL belum jalan atau DATABASE_URL salah | Cek apakah XAMPP MySQL sudah running, atau set `DATABASE_URL` untuk SQLite |
 
 ---
@@ -263,10 +269,12 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjal
 ```text
 project_bps_tasik/
 │
-├── start.bat                   # Skrip otomatis runner server (Windows)
+├── start.bat                   # Skrip otomatis runner server (Normal & Maintenance Mode)
+├── start_maintenance.bat       # Skrip cepat aktifasi mode pemeliharaan
 ├── requirements.txt            # Daftar dependensi paket Python
 ├── README.md                   # Dokumentasi resmi sistem
-├── .gitignore                  # File yang diabaikan Git
+├── .env.example                # Templat variabel lingkungan (production/keamanan)
+├── .gitignore                  # Berkas pengecualian Git
 ├── table_mods.json             # Konfigurasi penggabungan tabel PDF multi-halaman
 │
 ├── pipeline/                   # Pipeline inti pemrosesan & ekstraksi dokumen
@@ -278,6 +286,7 @@ project_bps_tasik/
 ├── backups/                    # Direktori penyimpanan file cadangan database (.sql)
 │
 └── backend/                    # Core backend server (FastAPI)
+    ├── venv/                   # Python Virtual Environment
     ├── main.py                 # Titik masuk utama & konfigurasi FastAPI
     ├── database.py             # Konfigurasi koneksi SQLAlchemy ORM
     ├── models.py               # Definisi skema tabel basis data relasional
@@ -285,17 +294,18 @@ project_bps_tasik/
     ├── run_server.py           # Runner server backend
     │
     ├── routers/                # Modul router endpoint API terpisah
-    │   ├── admin.py            # Manajemen backup, restore & activity logs
+    │   ├── admin.py            # Manajemen backup, restore, maintenance & activity logs
     │   ├── anomaly.py          # Deteksi & resolusi anomali kolom
     │   ├── auth.py             # Otentikasi admin, PBKDF2 hash & lockout
     │   ├── documents.py        # Pengelolaan dokumen & ekstraksi PDF
+    │   ├── import_excel.py     # Parser & import berkas spreadsheet Excel
     │   ├── master_data.py      # Master kamus kolom statistik
     │   ├── stats.py            # KPI & metrik agregasi dashboard
     │   ├── tables.py           # Penelusuran data tabel & live editor
     │   └── timeseries.py       # Analisis deret waktu multi-tahun
     │
     ├── data/                   # Berkas konfigurasi JSON & kredensial
-    │   ├── auth_credentials.json
+    │   ├── auth_credentials.json (auto-generated saat runtime)
     │   ├── master_columns.json
     │   └── master_dictionary.json
     │
@@ -313,8 +323,11 @@ project_bps_tasik/
     │       ├── tables.css      # Table styling
     │       └── timeseries.css  # Time series wizard & charts
     │
-    └── templates/              # Antarmuka template HTML
-        └── index.html          # Halaman utama aplikasi SIPEDAS
+    └── templates/              # Antarmuka template HTML & Error Pages
+        ├── index.html          # Halaman utama aplikasi SIPEDAS
+        ├── maintenance.html    # Halaman interaktif status pemeliharaan
+        ├── 404.html            # Halaman kesalahan 404 Not Found
+        └── 500.html            # Halaman kesalahan 500 Server Error
 ```
 
 ---

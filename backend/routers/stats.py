@@ -1,5 +1,7 @@
 import re
-from fastapi import APIRouter, Depends, HTTPException
+import threading
+import time
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from collections import defaultdict
@@ -8,6 +10,17 @@ import models
 from database import get_db
 
 router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
+
+_CHART_CACHE = None
+_CHART_CACHE_TIME = 0
+_CHART_TTL = 300  # 5 minutes
+_CHART_CACHE_LOCK = threading.Lock()
+
+def invalidate_chart_cache():
+    global _CHART_CACHE, _CHART_CACHE_TIME
+    with _CHART_CACHE_LOCK:
+        _CHART_CACHE = None
+        _CHART_CACHE_TIME = 0
 
 @router.get("")
 def get_dashboard_stats(db: Session = Depends(get_db)):
@@ -56,7 +69,15 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     }
 
 @router.get("/chart")
-def get_chart_stats(db: Session = Depends(get_db)):
+def get_chart_stats(response: Response, db: Session = Depends(get_db)):
+    global _CHART_CACHE, _CHART_CACHE_TIME
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+
+    now = time.time()
+    with _CHART_CACHE_LOCK:
+        if _CHART_CACHE is not None and (now - _CHART_CACHE_TIME) < _CHART_TTL:
+            return _CHART_CACHE
+
     results = db.query(
         models.Document.year,
         func.count(models.ExtractedTable.id)
@@ -137,15 +158,22 @@ def get_chart_stats(db: Session = Depends(get_db)):
         .join(models.Document, models.ExtractedTable.document_id == models.Document.id)
         .all()
     )
+
+    # Batch fetch all table rows once to eliminate 505 sequential queries
+    table_rows_map = defaultdict(list)
+    all_table_rows = db.query(models.TableRow.table_id, models.TableRow.data).all()
+    for tr_tid, tr_data in all_table_rows:
+        table_rows_map[tr_tid].append(tr_data)
     
+    EMPTY_MARKERS_PTS = {'', '-', '--', '...', 'nan', 'none', 'null'}
+    LABEL_KEYS_PTS = {'Kecamatan', 'No / Uraian', 'Uraian', 'No', 'Desa', 'Kelurahan', 'Desa/Kelurahan'}
+
     for tid, ty, dy in tabs:
-        rows = db.query(models.TableRow).filter(models.TableRow.table_id == tid).all()
-        if not rows:
+        rows_data = table_rows_map.get(tid, [])
+        if not rows_data:
             continue
-        r_count = len(rows)
-        EMPTY_MARKERS_PTS = {'', '-', '--', '...', 'nan', 'none', 'null'}
-        LABEL_KEYS_PTS = {'Kecamatan', 'No / Uraian', 'Uraian', 'No', 'Desa', 'Kelurahan', 'Desa/Kelurahan'}
-        t_points = sum(len([v for k, v in (r.data or {}).items() if k not in LABEL_KEYS_PTS and v is not None and str(v).strip().lower() not in EMPTY_MARKERS_PTS]) for r in rows if r.data)
+        r_count = len(rows_data)
+        t_points = sum(len([v for k, v in (r or {}).items() if k not in LABEL_KEYS_PTS and v is not None and str(v).strip().lower() not in EMPTY_MARKERS_PTS]) for r in rows_data if r)
         if dy:
             doc_points_dict[str(dy)] += t_points
         
@@ -226,7 +254,7 @@ def get_chart_stats(db: Session = Depends(get_db)):
         ]
     }
 
-    return {
+    res_chart = {
         "bar_chart": {
             "labels": years,
             "datasets": [
@@ -299,3 +327,9 @@ def get_chart_stats(db: Session = Depends(get_db)):
             }
         ]
     }
+
+    with _CHART_CACHE_LOCK:
+        _CHART_CACHE = res_chart
+        _CHART_CACHE_TIME = time.time()
+
+    return res_chart

@@ -2334,32 +2334,36 @@ async function loadDashboardStats() {
 
 
 
+    // Stale-While-Revalidate: render kartu analitik langsung dari localStorage cache jika ada
     try {
-
-        const res = await fetch(`${API_BASE}/stats`);
-
-        if(res.ok) {
-
-            const stats = await res.json();
-
-            // Populate 4 kartu ANALITIK DATA ENGINE (ID: stat-*)
-
+        const cachedStats = localStorage.getItem('sipedas_dashboard_stats_cache');
+        if (cachedStats) {
+            const stats = JSON.parse(cachedStats);
             const ptsEl = document.getElementById('stat-total-pts');
-
             const tablesEl = document.getElementById('stat-total-tables');
-
             const rowsEl = document.getElementById('stat-total-rows');
-
             const docsEl = document.getElementById('stat-total-docs');
+            if (ptsEl && stats.total_data_points !== undefined) ptsEl.textContent = stats.total_data_points.toLocaleString('id-ID');
+            if (tablesEl && stats.total_tables !== undefined) tablesEl.textContent = stats.total_tables.toLocaleString('id-ID');
+            if (rowsEl && stats.total_rows !== undefined) rowsEl.textContent = stats.total_rows.toLocaleString('id-ID');
+            if (docsEl && stats.total_docs !== undefined) docsEl.textContent = stats.total_docs.toLocaleString('id-ID');
+        }
+    } catch (e) {}
 
+    try {
+        const res = await fetch(`${API_BASE}/stats`);
+        if(res.ok) {
+            const stats = await res.json();
+            try { localStorage.setItem('sipedas_dashboard_stats_cache', JSON.stringify(stats)); } catch (e) {}
+            // Populate 4 kartu ANALITIK DATA ENGINE (ID: stat-*)
+            const ptsEl = document.getElementById('stat-total-pts');
+            const tablesEl = document.getElementById('stat-total-tables');
+            const rowsEl = document.getElementById('stat-total-rows');
+            const docsEl = document.getElementById('stat-total-docs');
             if (ptsEl) ptsEl.textContent = (stats.total_data_points || 0).toLocaleString('id-ID');
-
             if (tablesEl) tablesEl.textContent = (stats.total_tables || 0).toLocaleString('id-ID');
-
             if (rowsEl) rowsEl.textContent = (stats.total_rows || 0).toLocaleString('id-ID');
-
             if (docsEl) docsEl.textContent = (stats.total_docs || 0).toLocaleString('id-ID');
-
         }
 
         

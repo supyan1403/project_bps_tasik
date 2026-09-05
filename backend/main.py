@@ -248,10 +248,16 @@ except Exception as e:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    _db = next(get_db())
-    _clean_expired_sessions(_db)
-    _db.close()
-    reset_stuck_extractions()
+    try:
+        _db = next(get_db())
+        _clean_expired_sessions(_db)
+        _db.close()
+    except Exception as _e:
+        pass
+    try:
+        reset_stuck_extractions()
+    except Exception as _e:
+        pass
     yield
 
 app = FastAPI(title="BPS Extraction Dashboard API", lifespan=lifespan)

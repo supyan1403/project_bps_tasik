@@ -1016,28 +1016,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateRoleUI('pegawai');
     }
 
-    // Terapkan default UI role pegawai secara instan sebelum async session check
+    // Terapkan default UI role pegawai / cached role secara instan tanpa menunggu network
+    const cachedRole = (!_isPostMaintenance && localStorage.getItem('sipedas_user_role')) || 'pegawai';
+    currentUserRole = cachedRole;
+    window.currentUserRole = cachedRole;
+    updateRoleUI(cachedRole);
 
-    updateRoleUI('pegawai');
-
-
-
-    // Check auth session dari backend (cookie-based)
-
-    const role = _isPostMaintenance ? 'pegawai' : await checkAuthSession();
-
-    
-
-    // Default landing page berdasarkan role
-
-    if (role === 'admin') {
-
+    // Default landing page langsung dirender instan (0 milidetik)
+    if (cachedRole === 'admin') {
         navigate('dashboard', document.getElementById('nav-dashboard'));
-
     } else {
-
         navigate('timeseries', document.getElementById('nav-timeseries'));
+    }
 
+    // Check auth session di latar belakang (asinkron tanpa memblokir tampilan awal)
+    if (!_isPostMaintenance) {
+        checkAuthSession().then(liveRole => {
+            if (liveRole !== cachedRole) {
+                localStorage.setItem('sipedas_user_role', liveRole);
+                if (liveRole === 'admin' && cachedRole !== 'admin') {
+                    navigate('dashboard', document.getElementById('nav-dashboard'));
+                } else if (liveRole !== 'admin' && cachedRole === 'admin') {
+                    navigate('timeseries', document.getElementById('nav-timeseries'));
+                }
+            }
+        });
     }
 
     // Handle /login path — trigger login modal otomatis
@@ -14509,21 +14512,16 @@ async function checkAuthSession() {
             window.currentUserRole = data.role;
 
             updateRoleUI(data.role);
-
+            try { localStorage.setItem('sipedas_user_role', data.role); } catch(e) {}
             return data.role;
-
         }
-
     } catch(e) {}
 
     currentUserRole = "pegawai";
-
     window.currentUserRole = "pegawai";
-
     updateRoleUI("pegawai");
-
+    try { localStorage.setItem('sipedas_user_role', 'pegawai'); } catch(e) {}
     return "pegawai";
-
 }
 
 

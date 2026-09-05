@@ -14,6 +14,10 @@ from routers.auth import require_admin, log_activity
 router = APIRouter(prefix="/api/admin", tags=["Admin & Backups"])
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
+if not os.path.exists(os.path.dirname(BACKUP_DIR)):
+    BACKUP_DIR = "/tmp/backups" if os.environ.get("VERCEL") else BACKUP_DIR
+
 try:
     os.makedirs(BACKUP_DIR, exist_ok=True)
 except Exception:

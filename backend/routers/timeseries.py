@@ -4,11 +4,13 @@ import csv
 import io
 import json
 from typing import List, Dict, Any, Optional
+import threading
+import time
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -588,8 +590,28 @@ def timeseries_table_details(table_prefix: str, db: Session = Depends(get_db)):
     result = [{"name": col_name, "years": sorted(list(yrs))} for col_name, yrs in all_indicators.items()]
     return {"status": "success", "indicators": result}
 
+# In-memory TTL cache for indicator-years (15 minutes)
+_INDICATOR_YEARS_CACHE = None
+_INDICATOR_YEARS_CACHE_TIME = 0
+_INDICATOR_YEARS_TTL = 900  # 15 minutes
+_INDICATOR_CACHE_LOCK = threading.Lock()
+
+def invalidate_indicator_cache():
+    global _INDICATOR_YEARS_CACHE, _INDICATOR_YEARS_CACHE_TIME
+    with _INDICATOR_CACHE_LOCK:
+        _INDICATOR_YEARS_CACHE = None
+        _INDICATOR_YEARS_CACHE_TIME = 0
+
 @router.get("/timeseries/indicator-years")
-def timeseries_indicator_years(db: Session = Depends(get_db)):
+def timeseries_indicator_years(response: Response, db: Session = Depends(get_db)):
+    global _INDICATOR_YEARS_CACHE, _INDICATOR_YEARS_CACHE_TIME
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+
+    now = time.time()
+    with _INDICATOR_CACHE_LOCK:
+        if _INDICATOR_YEARS_CACHE is not None and (now - _INDICATOR_YEARS_CACHE_TIME) < _INDICATOR_YEARS_TTL:
+            return {"status": "success", "indicators": _INDICATOR_YEARS_CACHE}
+
     tables = db.query(models.ExtractedTable).all()
     if not tables:
         return {"status": "success", "indicators": []}
@@ -627,6 +649,11 @@ def timeseries_indicator_years(db: Session = Depends(get_db)):
             "order": info["order"]
         })
     result.sort(key=lambda x: (x["order"][0], x["order"][1], x["name"]))
+
+    with _INDICATOR_CACHE_LOCK:
+        _INDICATOR_YEARS_CACHE = result
+        _INDICATOR_YEARS_CACHE_TIME = time.time()
+
     return {"status": "success", "indicators": result}
 
 @router.get("/timeseries/data-by-indicators")

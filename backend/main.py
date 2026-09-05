@@ -476,8 +476,28 @@ def get_favicon():
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
 
+# In-memory TTL cache for dashboard stats (5 minutes)
+_STATS_CACHE = None
+_STATS_CACHE_TIME = 0
+_STATS_TTL = 300  # 5 minutes
+_STATS_CACHE_LOCK = threading.Lock()
+
+def invalidate_stats_cache():
+    global _STATS_CACHE, _STATS_CACHE_TIME
+    with _STATS_CACHE_LOCK:
+        _STATS_CACHE = None
+        _STATS_CACHE_TIME = 0
+
 @app.get("/api/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
+    global _STATS_CACHE, _STATS_CACHE_TIME
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+
+    now = time.time()
+    with _STATS_CACHE_LOCK:
+        if _STATS_CACHE is not None and (now - _STATS_CACHE_TIME) < _STATS_TTL:
+            return _STATS_CACHE
+
     total_docs = db.query(models.Document).count()
     total_tables = db.query(models.ExtractedTable).count()
     total_rows = db.query(models.TableRow).count()
@@ -513,7 +533,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             detected_babs.add(int(m.group(1)))
     total_babs = len(detected_babs) if detected_babs else 13
 
-    return {
+    res_data = {
         "total_docs": total_docs,
         "total_tables": total_tables,
         "total_rows": total_rows,
@@ -524,6 +544,12 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "total_babs": total_babs,
         "year_range": year_range
     }
+
+    with _STATS_CACHE_LOCK:
+        _STATS_CACHE = res_data
+        _STATS_CACHE_TIME = time.time()
+
+    return res_data
 
 # =====================================================================
 # ADMIN & BACKUP ROUTER

@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import models
 from database import get_db
+from routers.auth import require_admin
 from routers.tables import get_table_headers
 from routers.timeseries import (
     get_clean_table_name,
@@ -325,7 +326,7 @@ def search_rows_all_tables(q: str = "", limit_tables: int = 50, limit_rows: int 
     }
 
 @router.post("/master/regenerate-columns")
-def regenerate_master_columns(document_id: int, db: Session = Depends(get_db)):
+def regenerate_master_columns(document_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == document_id).first()
     if not doc:
         raise HTTPException(404, "Document not found")
@@ -393,6 +394,39 @@ def get_master_columns(db: Session = Depends(get_db)):
         pass
     return data
 
+@router.delete("/master/columns")
+def delete_all_master_columns(admin: dict = Depends(require_admin)):
+    data = _load_master_columns()
+    data["columns"] = []
+    data["next_id"] = 1
+    _save_master_columns(data)
+    return {"message": "Semua master kolom dihapus"}
+
+@router.post("/master/columns/add-from-table")
+def add_master_columns_from_table(body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    table_id = body.get("table_id")
+    selected = body.get("columns", [])
+    if not table_id or not selected:
+        raise HTTPException(400, "table_id dan columns wajib diisi")
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Tabel tidak ditemukan")
+    data = _load_master_columns()
+    existing = {c["standard"].lower().strip() for c in data.get("columns", [])}
+    added = []
+    for col_name in selected:
+        name = (col_name or "").strip()
+        if not name or name.lower() in existing:
+            continue
+        next_id = data.get("next_id", len(data.get("columns", [])) + 1)
+        new_col = {"id": next_id, "standard": name, "count": 0}
+        data["columns"].append(new_col)
+        data["next_id"] = next_id + 1
+        existing.add(name.lower())
+        added.append(name)
+    _save_master_columns(data)
+    return {"message": f"{len(added)} kolom ditambahkan", "added": added, "skipped": len(selected) - len(added)}
+
 @router.get("/tables/{table_id}/master-suggestions")
 def get_table_master_suggestions(table_id: int, db: Session = Depends(get_db)):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
@@ -401,7 +435,7 @@ def get_table_master_suggestions(table_id: int, db: Session = Depends(get_db)):
     return {"suggestions": suggest_master_columns(db, table)}
 
 @router.post("/tables/{table_id}/apply-master-mapping")
-def apply_master_mapping(table_id: int, body: dict, db: Session = Depends(get_db)):
+def apply_master_mapping(table_id: int, body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     mapping = body.get("mapping", {})
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
@@ -458,3 +492,49 @@ def lookup_master_column_unit(column_name: str):
         if name_lower == std or name_lower in aliases:
             return {"column": column_name, "standard": col.get("standard"), "unit": col.get("unit", "")}
     return {"column": column_name, "standard": None, "unit": ""}
+
+@router.put("/master/columns/{col_id}")
+def update_master_column(col_id: int, body: dict, admin: dict = Depends(require_admin)):
+    data = _load_master_columns()
+    columns = data.get("columns", [])
+    col = next((c for c in columns if c["id"] == col_id), None)
+    if not col:
+        raise HTTPException(404, "Master column not found")
+    if "standard" in body and body["standard"]:
+        col["standard"] = body["standard"]
+    if "unit" in body:
+        col["unit"] = body["unit"]
+    _save_master_columns(data)
+    return {"message": "Master column updated", "column": col}
+
+@router.delete("/master/columns/{col_id}")
+def delete_master_column(col_id: int, admin: dict = Depends(require_admin)):
+    data = _load_master_columns()
+    columns = data.get("columns", [])
+    new_columns = [c for c in columns if c["id"] != col_id]
+    if len(new_columns) == len(columns):
+        raise HTTPException(404, "Master column not found")
+    data["columns"] = new_columns
+    _save_master_columns(data)
+    return {"message": "Master column deleted"}
+
+@router.post("/master/columns/add")
+def add_master_column(body: dict, admin: dict = Depends(require_admin)):
+    standard = (body.get("standard") or "").strip()
+    if not standard:
+        raise HTTPException(400, "Nama header wajib diisi")
+    unit = (body.get("unit") or "").strip()
+    data = _load_master_columns()
+    columns = data.get("columns", [])
+    exists = any(c["standard"].lower().strip() == standard.lower() for c in columns)
+    if exists:
+        raise HTTPException(409, "Header sudah ada di master kolom")
+    next_id = data.get("next_id", len(columns) + 1)
+    new_col = {"id": next_id, "standard": standard, "count": 0}
+    if unit:
+        new_col["unit"] = unit
+    columns.append(new_col)
+    data["columns"] = columns
+    data["next_id"] = next_id + 1
+    _save_master_columns(data)
+    return {"message": "Master column added", "column": new_col}

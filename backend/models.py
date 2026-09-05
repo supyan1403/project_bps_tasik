@@ -55,3 +55,10 @@ class ActivityLog(Base):
     action = Column(String(50), index=True)
     target = Column(String(255))
     detail = Column(JSON)
+
+class SystemConfig(Base):
+    __tablename__ = "system_config"
+
+    key = Column(String(100), primary_key=True)
+    value = Column(String(500), nullable=False, default="")
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

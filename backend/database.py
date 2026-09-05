@@ -2,8 +2,12 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Default: MySQL/MariaDB lokal (XAMPP). Bisa di-override dengan env DATABASE_URL.
+# Production: wajib set env DATABASE_URL. Development: default MySQL lokal XAMPP.
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "mysql+pymysql://root:@127.0.0.1:3306/bps_tasikmalaya")
+_is_production = bool(os.environ.get("SIPEDAS_DOMAIN"))
+
+if _is_production and "root:@" in SQLALCHEMY_DATABASE_URL:
+    print("[SECURITY WARNING] Database menggunakan root tanpa password! Segera set DATABASE_URL yang aman.")
 
 engine_kwargs = {"pool_pre_ping": True}
 if "sqlite" not in SQLALCHEMY_DATABASE_URL.lower():

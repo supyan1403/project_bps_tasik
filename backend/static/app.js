@@ -916,6 +916,25 @@ function filterMasterRegistration(q) {
 
 const API_BASE = "/api";
 
+// =====================================================================
+// GLOBAL FETCH INTERCEPTOR — detect 503 maintenance response
+// =====================================================================
+const _originalFetch = window.fetch;
+window.fetch = async function(...args) {
+    const res = await _originalFetch.apply(this, args);
+    if (res.status === 503) {
+        const clone = res.clone();
+        try {
+            const text = await clone.text();
+            if ((text.includes('pemeliharaan') || text.includes('maintenance') || text.includes('sedang dalam')) && window.currentUserRole !== 'admin') {
+                window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                return res;
+            }
+        } catch(e) {}
+    }
+    return res;
+};
+
 
 
 function romanToInt(roman) {
@@ -964,6 +983,16 @@ function romanToInt(roman) {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
+    // Post-maintenance: force public view (after countdown selesai)
+    const _urlParams = new URLSearchParams(window.location.search);
+    const _isPostMaintenance = _urlParams.has('_public');
+    if (_isPostMaintenance) {
+        history.replaceState(null, '', '/');
+        currentUserRole = 'pegawai';
+        window.currentUserRole = 'pegawai';
+        updateRoleUI('pegawai');
+    }
+
     // Terapkan default UI role pegawai secara instan sebelum async session check
 
     updateRoleUI('pegawai');
@@ -972,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Check auth session dari backend (cookie-based)
 
-    const role = await checkAuthSession();
+    const role = _isPostMaintenance ? 'pegawai' : await checkAuthSession();
 
     
 
@@ -1002,6 +1031,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     populateDocumentList();
+
+    // Cross-tab sync: listen for logout/login events from other tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'sipedas_auth_event' && e.newValue) {
+            try {
+                const evt = JSON.parse(e.newValue);
+                localStorage.removeItem('sipedas_auth_event');
+                if (evt.type === 'logout') {
+                    window.location.href = '/?_t=' + Date.now();
+                }
+            } catch(err) {}
+        }
+        // Maintenance mode changed in another tab → reload to show/hide maintenance page
+        if (e.key === 'sipedas_maintenance_event' && e.newValue) {
+            try {
+                const evt = JSON.parse(e.newValue);
+                localStorage.removeItem('sipedas_maintenance_event');
+                if (evt.mode === '1') {
+                    // Maintenance ON → force maintenance view (skip admin bypass)
+                    if (window.currentUserRole !== 'admin') {
+                        window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                    }
+                } else {
+                    // Maintenance OFF → normal reload with cache bust
+                    window.location.href = '/?_t=' + Date.now();
+                }
+            } catch(err) {}
+        }
+    });
+
+    // Maintenance polling untuk semua tab (termasuk publik)
+    // Detect jika admin aktifkan maintenance dari tab lain
+    if (!window._publicMaintenancePolling) {
+        window._publicMaintenancePolling = setInterval(async () => {
+            if (typeof _force_maintenance_1 !== 'undefined') return; // skip jika sudah di halaman maintenance
+            try {
+                const res = await fetch('/api/auth/maintenance', { credentials: 'same-origin' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.mode === '1' && window.currentUserRole !== 'admin') {
+                        window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                    }
+                }
+            } catch(e) {}
+        }, 15000);
+    }
 
     if (typeof setupKeyboardShortcuts === 'function') setupKeyboardShortcuts();
 
@@ -14586,6 +14661,9 @@ async function adminLogin() {
 
         updateRoleUI("admin");
 
+        // Cross-tab sync: notify other tabs about login
+        try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'login', ts: Date.now() })); } catch(e) {}
+
         navigate('dashboard', document.getElementById('nav-dashboard'));
 
         showToast('success', 'Selamat Datang, Admin SIPEDAS!', 'Akses penuh Admin SIPEDAS aktif.', 3000);
@@ -14644,17 +14722,10 @@ function adminLogout() {
 
             fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'same-origin' }).catch(()=>{});
 
-            currentUserRole = "pegawai";
+            // Cross-tab sync: notify other tabs about logout
+            try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'logout', ts: Date.now() })); } catch(e) {}
 
-            window.currentUserRole = "pegawai";
-
-            updateRoleUI("pegawai");
-
-            navigate('timeseries', document.getElementById('nav-timeseries'));
-
-            loadDashboardStats();
-
-            showToast('info', 'Logout Berhasil', 'Anda kembali ke mode Operator SIPEDAS.', 2000);
+            window.location.href = '/?_t=' + Date.now();
 
         }
 
@@ -17008,6 +17079,421 @@ function switchAdminTab(tab) {
 
 
 
+function navigateSistemTab(tab, element) {
+
+    if (!checkRoleAccess('admin')) return;
+
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+    const page = document.getElementById('page-sistem');
+
+    if (page) page.classList.add('active');
+
+    const parent = document.getElementById('nav-sistem');
+
+    if (parent) parent.classList.add('active');
+
+    const el = element || document.getElementById(`nav-sistem-${tab}`);
+
+    if (el) el.classList.add('active');
+
+    const mc = document.querySelector('.main-content');
+
+    if (mc) mc.scrollTop = 0;
+
+    switchSistemTab(tab);
+
+}
+
+
+
+function switchSistemTab(tab) {
+
+    const tabs = { maintenance: 'tab-sistem-maintenance', logs: 'tab-sistem-logs', cache: 'tab-sistem-cache' };
+
+    Object.keys(tabs).forEach(key => {
+
+        const el = document.getElementById(tabs[key]);
+
+        if (el) el.style.display = key === tab ? '' : 'none';
+
+    });
+
+    if (tab === 'maintenance') {
+        _initMaintenanceFlatpickr();
+        if (typeof loadMaintenanceStatus === 'function') loadMaintenanceStatus();
+    }
+
+    if (tab === 'logs' && typeof loadActivityLogs === 'function') loadActivityLogs();
+
+}
+
+
+
+// ===================== SISTEM: MODE PEMELIHARAAN =====================
+
+let _maintenanceFlatpickr = null;
+
+function _initMaintenanceFlatpickr() {
+    if (_maintenanceFlatpickr) return;
+    const el = document.getElementById('maintenance-end-input');
+    if (!el || typeof flatpickr === 'undefined') return;
+    _maintenanceFlatpickr = flatpickr(el, {
+        enableTime: true,
+        dateFormat: 'd/m/Y H:i',
+        minuteIncrement: 5,
+        locale: 'id',
+        defaultDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        altInput: true,
+        altFormat: 'j F Y, H:i',
+        time_24hr: true,
+        monthSelectorType: 'static'
+    });
+}
+
+
+
+let currentMaintenanceMode = '0';
+
+let currentMaintenanceEnd = '';
+
+
+
+async function loadMaintenanceStatus() {
+
+    try {
+
+        const res = await fetch(`${API_BASE}/auth/maintenance`, { credentials: 'same-origin' });
+
+        if (!res.ok) throw new Error('Gagal memuat status');
+
+        const data = await res.json();
+
+        currentMaintenanceMode = data.mode || '0';
+
+        currentMaintenanceEnd = data.end_time || '';
+
+        renderMaintenanceStatus();
+
+        if (!window._maintenancePolling) {
+
+            window._maintenancePolling = setInterval(loadMaintenanceStatus, 30000);
+
+        }
+
+    } catch (e) {
+
+        document.getElementById('maintenance-status-badge').className = 'badge bg-danger';
+
+        document.getElementById('maintenance-status-badge').textContent = 'Gagal memuat';
+
+    }
+
+}
+
+
+
+function renderMaintenanceStatus() {
+
+    const badge = document.getElementById('maintenance-status-badge');
+
+    const toggle = document.getElementById('maintenance-toggle');
+
+    const dtGroup = document.getElementById('maintenance-datetime-group');
+
+    const endInfo = document.getElementById('maintenance-end-info');
+
+    const endDisplay = document.getElementById('maintenance-end-display');
+
+    const isActive = currentMaintenanceMode === '1';
+
+
+
+    if (badge) {
+
+        badge.className = isActive ? 'badge bg-success' : 'badge bg-secondary';
+
+        badge.textContent = isActive ? 'Aktif' : 'Nonaktif';
+
+    }
+
+    if (toggle) toggle.checked = isActive;
+
+    if (dtGroup) dtGroup.style.display = isActive ? 'block' : 'none';
+
+    if (endInfo) endInfo.style.display = isActive && currentMaintenanceEnd ? 'block' : 'none';
+
+    if (endDisplay && currentMaintenanceEnd) {
+
+        try {
+
+            const d = new Date(currentMaintenanceEnd);
+
+            endDisplay.textContent = d.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
+
+        } catch (e) {
+
+            endDisplay.textContent = currentMaintenanceEnd;
+
+        }
+
+    }
+
+    // Set flatpickr date if maintenance is active and has end time
+    if (_maintenanceFlatpickr && isActive && currentMaintenanceEnd) {
+        try {
+            _maintenanceFlatpickr.setDate(new Date(currentMaintenanceEnd), true);
+        } catch(e) {}
+    }
+
+    if (toggle) {
+
+        toggle.onchange = function () {
+
+            dtGroup.style.display = this.checked ? 'block' : 'none';
+
+        };
+
+    }
+
+}
+
+
+
+async function saveMaintenanceMode() {
+
+    const toggle = document.getElementById('maintenance-toggle');
+
+    const endInput = document.getElementById('maintenance-end-input');
+
+    const mode = toggle.checked ? '1' : '0';
+
+    let endTime = '';
+
+    if (mode === '1') {
+
+        if (_maintenanceFlatpickr) {
+            const selectedDates = _maintenanceFlatpickr.selectedDates;
+            endTime = selectedDates && selectedDates.length ? selectedDates[0].toISOString() : '';
+        } else {
+            endTime = endInput ? endInput.value : '';
+            if (endTime) endTime = new Date(endTime).toISOString();
+        }
+
+        if (!endTime) {
+            Swal.fire({ title: 'Peringatan', text: 'Waktu selesai harus diisi saat mengaktifkan maintenance mode.', icon: 'warning', confirmButtonColor: '#2563eb' });
+            return;
+        }
+
+    }
+
+    try {
+
+        const res = await fetch(`${API_BASE}/auth/maintenance`, {
+
+            method: 'POST',
+
+            credentials: 'same-origin',
+
+            headers: { 'Content-Type': 'application/json' },
+
+            body: JSON.stringify({ mode, end_time: endTime })
+
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || 'Gagal menyimpan');
+
+        currentMaintenanceMode = mode;
+
+        currentMaintenanceEnd = endTime;
+
+        renderMaintenanceStatus();
+
+        // Cross-tab: notify other tabs to reload (maintenance status changed)
+        try { localStorage.setItem('sipedas_maintenance_event', JSON.stringify({ mode, ts: Date.now() })); } catch(e) {}
+
+        Swal.fire({ title: 'Tersimpan!', text: data.message || 'Maintenance mode berhasil diupdate.', icon: 'success', confirmButtonColor: '#2563eb', timer: 2000 });
+
+    } catch (e) {
+
+        Swal.fire({ title: 'Gagal', text: e.message, icon: 'error', confirmButtonColor: '#2563eb' });
+
+    }
+
+}
+
+
+
+// ===================== SISTEM: LOG AKTIVITAS =====================
+
+
+
+let sistemLogsPage = 1;
+
+const sistemLogsLimit = 20;
+
+
+
+async function loadActivityLogs(page) {
+
+    sistemLogsPage = page || 1;
+
+    const tbody = document.getElementById('sistem-logs-tbody');
+
+    const info = document.getElementById('sistem-logs-info');
+
+    const prevBtn = document.getElementById('sistem-logs-prev');
+
+    const nextBtn = document.getElementById('sistem-logs-next');
+
+    if (!tbody) return;
+
+
+
+    try {
+
+        const res = await fetch(`${API_BASE}/admin/activity-logs?page=${sistemLogsPage}&limit=${sistemLogsLimit}`, { credentials: 'same-origin' });
+
+        if (!res.ok) throw new Error('Gagal memuat log');
+
+        const data = await res.json();
+
+        const logs = data.logs || [];
+
+        const total = data.total || 0;
+
+        const pages = data.pages || 1;
+
+
+
+        const actionLabels = {
+
+            backup: '<i class="bi bi-shield-check-fill text-success"></i> Backup',
+
+            restore: '<i class="bi bi-clock-history text-warning"></i> Restore',
+
+            delete_table: '<i class="bi bi-trash-fill text-danger"></i> Hapus Tabel',
+
+            fix_names: '<i class="bi bi-pencil-fill text-primary"></i> Fix Nama',
+
+            change_admin_password: '<i class="bi bi-key-fill text-info"></i> Ganti Password',
+
+            toggle_maintenance: '<i class="bi bi-tools text-warning"></i> Maintenance'
+
+        };
+
+        const actionColors = {
+
+            backup: '#16a34a',
+
+            restore: '#d97706',
+
+            delete_table: '#dc2626',
+
+            fix_names: '#2563eb',
+
+            change_admin_password: '#0284c7',
+
+            toggle_maintenance: '#d97706'
+
+        };
+
+
+
+        if (logs.length === 0) {
+
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Belum ada log aktivitas.</td></tr>';
+
+        } else {
+
+            tbody.innerHTML = logs.map(l => {
+
+                const label = actionLabels[l.action] || ('<i class="bi bi-activity"></i> ' + l.action);
+
+                const ts = new Date(l.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+                const detail = l.detail ? JSON.stringify(l.detail) : '-';
+
+                return `<tr>
+
+                    <td class="small">${ts}</td>
+
+                    <td>${label}</td>
+
+                    <td class="small">${escHtml(l.target || '-')}</td>
+
+                    <td class="small text-muted" style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escHtml(detail)}">${escHtml(detail)}</td>
+
+                </tr>`;
+
+            }).join('');
+
+        }
+
+
+
+        if (info) info.textContent = `Halaman ${sistemLogsPage} dari ${pages} (${total} log)`;
+
+        if (prevBtn) prevBtn.disabled = sistemLogsPage <= 1;
+
+        if (nextBtn) nextBtn.disabled = sistemLogsPage >= pages;
+
+    } catch (e) {
+
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-3">${e.message}</td></tr>`;
+
+    }
+
+}
+
+
+
+// ===================== SISTEM: BERSIHKAN CACHE =====================
+
+
+
+function clearBrowserCache() {
+
+    try {
+
+        localStorage.clear();
+
+        sessionStorage.clear();
+
+        document.getElementById('cache-clear-result').style.display = 'block';
+
+        document.getElementById('cache-clear-result').innerHTML = '<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle-fill me-1"></i>Cache browser berhasil dibersihkan!</div>';
+
+        setTimeout(() => { document.getElementById('cache-clear-result').style.display = 'none'; }, 3000);
+
+    } catch (e) {
+
+        document.getElementById('cache-clear-result').style.display = 'block';
+
+        document.getElementById('cache-clear-result').innerHTML = '<div class="alert alert-danger py-2 mb-0"><i class="bi bi-x-circle-fill me-1"></i>Gagal membersihkan cache.</div>';
+
+    }
+
+}
+
+
+
+function hardReload() {
+
+    localStorage.clear();
+
+    sessionStorage.clear();
+
+    window.location.reload(true);
+
+}
+
+
+
 function switchDataAnomaliSubTab(type) {
 
     const btnTs = document.getElementById('btn-subtab-ts-anom');
@@ -17022,9 +17508,9 @@ function switchDataAnomaliSubTab(type) {
 
     if (type === 'ts') {
 
-        if (btnTs) btnTs.className = 'btn btn-sm btn-primary fw-medium px-3 py-2';
+        if (btnTs) btnTs.className = 'admin-subtab active';
 
-        if (btnCell) btnCell.className = 'btn btn-sm btn-outline-secondary fw-medium px-3 py-2';
+        if (btnCell) btnCell.className = 'admin-subtab';
 
         if (pnlTs) pnlTs.style.display = 'block';
 
@@ -17034,9 +17520,9 @@ function switchDataAnomaliSubTab(type) {
 
     } else {
 
-        if (btnTs) btnTs.className = 'btn btn-sm btn-outline-secondary fw-medium px-3 py-2';
+        if (btnTs) btnTs.className = 'admin-subtab';
 
-        if (btnCell) btnCell.className = 'btn btn-sm btn-primary fw-medium px-3 py-2';
+        if (btnCell) btnCell.className = 'admin-subtab active';
 
         if (pnlTs) pnlTs.style.display = 'none';
 
@@ -17681,6 +18167,24 @@ function toggleAdminSubmenu() {
     const sub = document.getElementById('admin-submenu');
 
     const icon = document.getElementById('admin-submenu-icon');
+
+    if (!sub) return;
+
+    const open = sub.style.display !== 'none';
+
+    sub.style.display = open ? 'none' : 'block';
+
+    if (icon) icon.classList.toggle('open', !open);
+
+}
+
+
+
+function toggleSistemSubmenu() {
+
+    const sub = document.getElementById('sistem-submenu');
+
+    const icon = document.getElementById('sistem-submenu-icon');
 
     if (!sub) return;
 

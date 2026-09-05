@@ -42,6 +42,7 @@
 
 .page-section { display: none; }
 .page-section.active { display: block; }
+.page-section.active { margin-top: 0.5rem; }
 
 /* ===================== WIDGETS (Dashboard) ===================== */
 .widget-grid {

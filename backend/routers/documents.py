@@ -18,7 +18,7 @@ import models
 import schemas
 from database import get_db
 from pipeline import get_toc
-from routers.auth import log_activity
+from routers.auth import log_activity, require_admin
 
 router = APIRouter(prefix="/api", tags=["Documents & Excel Import"])
 
@@ -127,11 +127,16 @@ async def upload_document(
     background_tasks: BackgroundTasks,
     year: int = Form(...),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin)
 ):
+    MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100MB
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File terlalu besar. Maksimal 100MB.")
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as f:
-        f.write(await file.read())
+        f.write(content)
     
     db_doc = models.Document(filename=file.filename, year=year, status="ready")
     db.add(db_doc)
@@ -144,7 +149,7 @@ async def upload_document(
     return db_doc
 
 @router.post("/documents/create", response_model=schemas.DocumentOut)
-def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends(get_db)):
+def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     clean_filename = (doc_in.filename or "").strip()
     if not clean_filename:
         raise HTTPException(status_code=400, detail="Nama publikasi wajib diisi.")
@@ -251,7 +256,7 @@ def get_document_toc(doc_id: int, db: Session = Depends(get_db)):
     return []
 
 @router.post("/documents/{doc_id}/detect_toc")
-def detect_document_toc(doc_id: int, db: Session = Depends(get_db)):
+def detect_document_toc(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -272,7 +277,7 @@ def detect_document_toc(doc_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Gagal melakukan deteksi bab: {str(e)}")
 
 @router.post("/documents/{doc_id}/toc")
-def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depends(get_db)):
+def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -289,7 +294,7 @@ def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depend
         raise HTTPException(status_code=500, detail=f"Failed to save TOC: {str(e)}")
 
 @router.delete("/documents/{doc_id}")
-def delete_document(doc_id: int, db: Session = Depends(get_db)):
+def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     from routers.admin import backup_database
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
@@ -327,7 +332,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db)):
     return {"message": "Document deleted"}
 
 @router.post("/documents/{doc_id}/extract")
-def extract_document(doc_id: int, req: ExtractRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def extract_document(doc_id: int, req: ExtractRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")

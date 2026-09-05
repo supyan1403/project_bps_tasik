@@ -24,6 +24,13 @@ _login_attempts = {}
 MAX_FAILED_ATTEMPTS = 5
 LOCKOUT_DURATION_SECONDS = 300  # 5 menit
 
+def _get_client_ip(request: Request) -> str:
+    """Ambil IP asli dari X-Forwarded-For (reverse proxy) atau direct connection."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
 def _hash_password(plain_password: str, salt: bytes = None) -> tuple[str, str]:
     """Mengenkripsi password menggunakan PBKDF2-HMAC-SHA256 dengan random salt 16-byte."""
     if salt is None:
@@ -51,8 +58,11 @@ def _get_or_create_admin_credentials():
         except Exception:
             pass
 
-    # Inisialisasi default dari environment atau 'bps2025'
-    default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD", "bps2025")
+    # Wajib set env var SIPEDAS_ADMIN_PASSWORD di production
+    default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD")
+    if not default_plain:
+        print("[WARNING] SIPEDAS_ADMIN_PASSWORD belum di-set. Menggunakan default sementara.")
+        default_plain = "ganti_password_saya"
     p_hash, salt = _hash_password(default_plain)
     try:
         with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -113,7 +123,7 @@ def log_activity(db: Session, action: str, target: str = "", detail: dict = None
 
 @router.post("/login")
 def auth_login(payload: dict, request: Request, response: Response, db: Session = Depends(get_db)):
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     now_ts = time.time()
 
     # 1. Periksa Lockout Rate Limiter
@@ -150,6 +160,7 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
         key="sipedas_session",
         value=sid,
         httponly=True,
+        secure=bool(os.environ.get("SIPEDAS_DOMAIN")),
         samesite="lax",
         max_age=SESSION_MAX_AGE_HOURS * 3600,
         path="/",
@@ -189,3 +200,35 @@ def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = 
     _update_admin_password(new_password)
     log_activity(db, "change_admin_password", "Admin mengganti password sistem")
     return {"message": "Password admin berhasil diperbarui dengan aman."}
+
+# =====================================================================
+# MAINTENANCE MODE TOGGLE — hanya admin
+# =====================================================================
+
+@router.post("/maintenance")
+def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Aktifkan/nonaktifkan maintenance mode. Hanya admin."""
+    from main import _update_maintenance_db, _maintenance_cache
+
+    mode = str(payload.get("mode", "")).strip()
+    end_time = str(payload.get("end_time", "")).strip()
+
+    if mode not in ("1", "0"):
+        raise HTTPException(status_code=400, detail="mode harus '1' (aktif) atau '0' (nonaktif)")
+
+    if mode == "1" and not end_time:
+        raise HTTPException(status_code=400, detail="end_time wajib diisi saat mengaktifkan maintenance (ISO format)")
+
+    _update_maintenance_db(mode, end_time)
+    _maintenance_cache["ts"] = 0  # force refresh
+
+    log_activity(db, "toggle_maintenance", f"Mode: {'ON' if mode == '1' else 'OFF'}", {"end_time": end_time})
+    return {"mode": mode, "end_time": end_time, "message": "Maintenance mode berhasil diupdate."}
+
+@router.get("/maintenance")
+def get_maintenance_status(db: Session = Depends(get_db)):
+    """Cek status maintenance mode (public — untuk halaman maintenance)."""
+    from main import _is_maintenance, _maintenance_cache, _maintenance_end
+    _maintenance_cache["ts"] = 0
+    is_maint = _is_maintenance()
+    return {"mode": "1" if is_maint else "0", "end_time": _maintenance_end()}

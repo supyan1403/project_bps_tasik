@@ -106,7 +106,7 @@ def _load_master_columns():
         return json.load(f)
 
 @router.get("/admin/timeseries-anomalies")
-def get_timeseries_anomalies(refresh: bool = False, db: Session = Depends(get_db)):
+def get_timeseries_anomalies(refresh: bool = False, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     """Scan and return all time-series anomalies in multi-year tables across the database."""
     cache_key = "timeseries-anomalies"
     if refresh:
@@ -209,7 +209,7 @@ def get_timeseries_anomalies(refresh: bool = False, db: Session = Depends(get_db
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/admin/timeseries-anomalies/mark-safe")
-def mark_timeseries_anomaly_safe(payload: dict = Body(...), db: Session = Depends(get_db)):
+def mark_timeseries_anomaly_safe(payload: dict = Body(...), db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     key = payload.get("key")
     table_id = payload.get("table_id")
     row_id = payload.get("row_id")
@@ -237,7 +237,7 @@ def mark_timeseries_anomaly_safe(payload: dict = Body(...), db: Session = Depend
     return {"status": "success", "message": "Anomali berhasil ditandai aman."}
 
 @router.post("/admin/timeseries-anomalies/mark-all-safe")
-def mark_all_timeseries_anomalies_safe(db: Session = Depends(get_db)):
+def mark_all_timeseries_anomalies_safe(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     res = get_timeseries_anomalies(db=db)
     anomalies = res.get("anomalies", [])
     safe_keys = _load_ts_safe()
@@ -323,7 +323,7 @@ def get_master_dictionary():
     return _load_master_dict()
 
 @router.post("/master-dictionary/words")
-def add_master_words(body: dict):
+def add_master_words(body: dict, admin: dict = Depends(require_admin)):
     words = body.get("words", [])
     data = _load_master_dict()
     existing = set(w.lower() for w in data["words"])
@@ -338,7 +338,7 @@ def add_master_words(body: dict):
     return {"message": f"Added {len(added)} words", "added": added}
 
 @router.delete("/master-dictionary/words/{word}")
-def delete_master_word(word: str):
+def delete_master_word(word: str, admin: dict = Depends(require_admin)):
     data = _load_master_dict()
     before = len(data["words"])
     data["words"] = [w for w in data["words"] if w.lower() != word.lower()]
@@ -350,7 +350,7 @@ def get_dismissed_anomalies():
     return _load_dismissed()
 
 @router.post("/dismiss-column-anomaly")
-def dismiss_column_anomaly(body: dict):
+def dismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
     key = body.get("key", "")
     data = _load_dismissed()
     if key not in data["dismissed"]:
@@ -359,7 +359,7 @@ def dismiss_column_anomaly(body: dict):
     return {"message": "Dismissed"}
 
 @router.post("/undismiss-column-anomaly")
-def undismiss_column_anomaly(body: dict):
+def undismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
     key = body.get("key", "")
     data = _load_dismissed()
     data["dismissed"] = [k for k in data["dismissed"] if k != key]
@@ -472,7 +472,7 @@ def get_column_anomalies(table_id: int, db: Session = Depends(get_db)):
     return {"anomalies": anomalies, "headers": headers}
 
 @router.post("/tables/{table_id}/apply-column-fix")
-def apply_column_fix(table_id: int, body: dict, db: Session = Depends(get_db)):
+def apply_column_fix(table_id: int, body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     col_index = body.get("col_index")
     new_name = body.get("new_name", "").strip()
     if col_index is None or not new_name:

@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-from routers.auth import log_activity
+from routers.auth import log_activity, require_admin
 
 router = APIRouter(prefix="/api/import", tags=["Excel Import"])
 
@@ -227,6 +227,7 @@ def import_excel_files(
     files: list[UploadFile] = File(...),
     year: Optional[int] = Form(None),
     db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin)
 ):
     if not files:
         raise HTTPException(status_code=400, detail="Tidak ada file yang diunggah.")

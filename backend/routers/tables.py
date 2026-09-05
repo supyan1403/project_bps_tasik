@@ -7,7 +7,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -79,7 +79,8 @@ def normalize_record_first_col(record: dict, headers: list):
         record[first_key] = str(val).strip()
 
 @router.get("/tables/{table_id}/snippet")
-def get_table_snippet(table_id: int, db: Session = Depends(get_db)):
+def get_table_snippet(table_id: int, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")

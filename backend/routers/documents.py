@@ -177,7 +177,8 @@ def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends
     return db_doc
 
 @router.get("/documents", response_model=List[schemas.DocumentOut])
-def get_documents(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_documents(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     results = (
         db.query(
             models.Document,

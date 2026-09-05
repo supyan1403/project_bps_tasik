@@ -6155,22 +6155,33 @@ async function viewDataEditor(tableId, tableName = "") {
 
 
 
+window.__tableDataCache = window.__tableDataCache || {};
+
 async function _loadDbIntoEditor(tableId, tableName) {
-
     const thead = document.getElementById("data-grid-head");
-
     const tbody = document.getElementById("data-grid-body");
 
-    thead.innerHTML = "<tr><th colspan='20' style='color:var(--text-secondary, #64748b);'>Memuat data dari database...</th></tr>";
-    tbody.innerHTML = "";
+    let payload = window.__tableDataCache[tableId];
 
-    showLoadingModal("Membuka Data Tabel...", "Memuat data baris dan struktur kolom...");
+    if (!payload) {
+        showLoadingModal("Membuka Data Tabel...", "Memuat data baris dan struktur kolom...");
+        thead.innerHTML = "<tr><th colspan='20' style='color:var(--text-secondary, #64748b);'>Memuat data dari database...</th></tr>";
+        tbody.innerHTML = "";
+
+        try {
+            const res = await fetch(`${API_BASE}/tables/${tableId}/data`);
+            payload = await res.json();
+            window.__tableDataCache[tableId] = payload;
+        } catch(err) {
+            thead.innerHTML = `<tr><th style="color:red">Error: ${err.message}</th></tr>`;
+            hideLoadingModal();
+            return;
+        } finally {
+            hideLoadingModal();
+        }
+    }
 
     try {
-        const res = await fetch(`${API_BASE}/tables/${tableId}/data`);
-
-        const payload = await res.json();
-
         const rows = payload.rows || [];
 
         const headers = (payload.headers && payload.headers.length > 0)

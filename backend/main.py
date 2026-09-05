@@ -220,7 +220,10 @@ def get_safe_windows_path(path: str) -> str:
     return path
 
 
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"[db] Peringatan create_all dilewati atau izin terbatas: {e}")
 
 # ===== MIGRASI KOLOM BARU (idempoten) =====
 def migrate_db_columns():

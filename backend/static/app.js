@@ -9295,38 +9295,51 @@ async function initTimeSeriesWizard() {
 
     
 
-    kolomDiv.innerHTML = '<div style="padding:4px;color:#94a3b8;font-size:0.85rem;"><i>Memuat master kolom...</i></div>';
+    // Stale-While-Revalidate: render immediately from localStorage cache if available
+    const cachedIndicators = localStorage.getItem('sipedas_indicators_cache');
+    let hasRenderedFromCache = false;
+    if (cachedIndicators) {
+        try {
+            const parsed = JSON.parse(cachedIndicators);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                tsIndicatorsList = parsed;
+                renderTSIndicatorsCheckboxes(tsIndicatorsList);
+                hasRenderedFromCache = true;
+            }
+        } catch (e) {
+            console.warn("Gagal parse cache indikator:", e);
+        }
+    }
 
-    
+    if (!hasRenderedFromCache) {
+        kolomDiv.innerHTML = '<div style="padding:4px;color:#94a3b8;font-size:0.85rem;"><i>Memuat master kolom...</i></div>';
+    }
 
     try {
-
         const res = await fetch(`${API_BASE}/timeseries/indicator-years`);
-
         const data = await res.json();
-
-        tsIndicatorsList = data.indicators || [];
-
-        tsIndicatorsList.sort((a, b) => {
-
+        const freshList = data.indicators || [];
+        freshList.sort((a, b) => {
             const oa = Array.isArray(a.order) ? a.order : [9999, 9999];
-
             const ob = Array.isArray(b.order) ? b.order : [9999, 9999];
-
             return (oa[0] - ob[0]) || (oa[1] - ob[1]) || (a.name || '').localeCompare(b.name || '');
-
         });
 
-        
+        // Always update localStorage cache
+        try {
+            localStorage.setItem('sipedas_indicators_cache', JSON.stringify(freshList));
+        } catch (e) {}
 
-        renderTSIndicatorsCheckboxes(tsIndicatorsList);
-
+        // If list changed or wasn't rendered yet, update DOM
+        if (!hasRenderedFromCache || JSON.stringify(freshList) !== cachedIndicators) {
+            tsIndicatorsList = freshList;
+            renderTSIndicatorsCheckboxes(tsIndicatorsList);
+        }
     } catch (err) {
-
         console.error("Gagal inisialisasi wizard:", err);
-
-        kolomDiv.innerHTML = '<span class="text-danger" style="font-size:0.75rem;">Gagal memuat master kolom</span>';
-
+        if (!hasRenderedFromCache) {
+            kolomDiv.innerHTML = '<span class="text-danger" style="font-size:0.75rem;">Gagal memuat master kolom</span>';
+        }
     }
 
 

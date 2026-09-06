@@ -13,17 +13,29 @@ router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
 
 _CHART_CACHE = None
 _CHART_CACHE_TIME = 0
-_CHART_TTL = 300  # 5 minutes
+_OVERVIEW_CACHE = None
+_OVERVIEW_CACHE_TIME = 0
+_STATS_TTL = 3600  # 1 hour
 _CHART_CACHE_LOCK = threading.Lock()
 
 def invalidate_chart_cache():
-    global _CHART_CACHE, _CHART_CACHE_TIME
+    global _CHART_CACHE, _CHART_CACHE_TIME, _OVERVIEW_CACHE, _OVERVIEW_CACHE_TIME
     with _CHART_CACHE_LOCK:
         _CHART_CACHE = None
         _CHART_CACHE_TIME = 0
+        _OVERVIEW_CACHE = None
+        _OVERVIEW_CACHE_TIME = 0
 
 @router.get("")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
+    global _OVERVIEW_CACHE, _OVERVIEW_CACHE_TIME
+    response.headers["Cache-Control"] = "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800"
+
+    now = time.time()
+    with _CHART_CACHE_LOCK:
+        if _OVERVIEW_CACHE is not None and (now - _OVERVIEW_CACHE_TIME) < _STATS_TTL:
+            return _OVERVIEW_CACHE
+
     total_docs = db.query(models.Document).count()
     total_tables = db.query(models.ExtractedTable).count()
     total_rows = db.query(models.TableRow).count()
@@ -56,7 +68,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             detected_babs.add(int(m.group(1)))
     total_babs = len(detected_babs) if detected_babs else 13
 
-    return {
+    data = {
         "total_docs": total_docs,
         "total_tables": total_tables,
         "total_rows": total_rows,
@@ -68,14 +80,20 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "year_range": year_range
     }
 
+    with _CHART_CACHE_LOCK:
+        _OVERVIEW_CACHE = data
+        _OVERVIEW_CACHE_TIME = now
+
+    return data
+
 @router.get("/chart")
 def get_chart_stats(response: Response, db: Session = Depends(get_db)):
     global _CHART_CACHE, _CHART_CACHE_TIME
-    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+    response.headers["Cache-Control"] = "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800"
 
     now = time.time()
     with _CHART_CACHE_LOCK:
-        if _CHART_CACHE is not None and (now - _CHART_CACHE_TIME) < _CHART_TTL:
+        if _CHART_CACHE is not None and (now - _CHART_CACHE_TIME) < _STATS_TTL:
             return _CHART_CACHE
 
     results = db.query(

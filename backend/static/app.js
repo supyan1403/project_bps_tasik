@@ -2362,6 +2362,64 @@ async function loadDashboardStats() {
 
 
 
+    // Helper render feed publikasi terbaru
+    function renderRecentDocsList(docs) {
+        const recentListEl = document.getElementById('recent-docs-list');
+        if (!recentListEl || !docs) return;
+        if (docs.length === 0) {
+            recentListEl.innerHTML = `<div class="text-center py-4 text-muted small">Belum ada publikasi terbit di sistem.</div>`;
+            return;
+        }
+        const sortedDocs = [...docs].sort((a, b) => (b.year || 0) - (a.year || 0) || b.id - a.id);
+        recentListEl.innerHTML = sortedDocs.map(d => {
+            const isExcel = (d.filename || '').toLowerCase().endsWith('.xlsx') || d.status === 'ready_excel';
+            const pubTitle = d.year ? `Publikasi ${d.year}` : (d.filename || '').replace(/\.(pdf|xlsx)$/i, '');
+            const iconHtml = isExcel 
+                ? `<div class="rounded-3 bg-success bg-opacity-10 text-success flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                       <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                   </div>`
+                : `<div class="rounded-3 bg-danger bg-opacity-10 text-danger flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                       <i class="bi bi-file-earmark-pdf"></i>
+                   </div>`;
+            return `
+                <div class="recent-doc-item d-flex align-items-center justify-content-between rounded-3 border shadow-2xs" style="padding: 0.95rem 1.25rem;">
+                    <div class="d-flex align-items-center min-w-0" style="gap: 16px;">
+                        ${iconHtml}
+                        <div class="min-w-0 pe-2">
+                            <div class="fw-bold recent-doc-title text-truncate" style="font-size: 0.92rem; letter-spacing: -0.01em;" title="${d.filename}">
+                                ${pubTitle}
+                            </div>
+                            <div class="d-flex align-items-center gap-2 recent-doc-subtext mt-1" style="font-size: 0.76rem;">
+                                <span class="d-inline-flex align-items-center"><i class="bi bi-calendar-event me-2 text-secondary"></i>Data ${d.year ? d.year - 1 : '-'}</span>
+                                <span class="opacity-40">•</span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem; padding: 2.5px 8.5px; border-radius: 6px; font-weight: 600;">
+                                    ${d.table_count || 0} Tabel
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="viewState.selectedDocId=${d.id}; viewState.selectedBabNum=null; navigateDataTabelTab('publikasi');" class="btn btn-sm btn-outline-primary py-1.5 px-3 rounded-2 flex-shrink-0" style="font-size: 0.78rem; font-weight: 600;">
+                        Buka <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Render feed publikasi seketika (0 ms) dari memory/localStorage jika ada
+    if (window.__cachedDocsList && window.__cachedDocsList.length > 0) {
+        renderRecentDocsList(window.__cachedDocsList);
+    } else {
+        try {
+            const cachedDocs = localStorage.getItem('sipedas_docs_cache');
+            if (cachedDocs) {
+                const parsed = JSON.parse(cachedDocs);
+                window.__cachedDocsList = parsed;
+                renderRecentDocsList(parsed);
+            }
+        } catch(e) {}
+    }
+
     // Stale-While-Revalidate: render kartu analitik langsung dari localStorage cache jika ada
     try {
         const cachedStats = localStorage.getItem('sipedas_dashboard_stats_cache');
@@ -2377,6 +2435,15 @@ async function loadDashboardStats() {
             if (docsEl && stats.total_docs !== undefined) docsEl.textContent = stats.total_docs.toLocaleString('id-ID');
         }
     } catch (e) {}
+
+    // Fetch dokumen di latar belakang dan perbarui feed
+    fetch(`${API_BASE}/documents`).then(r => r.ok ? r.json() : null).then(docs => {
+        if (docs && docs.length > 0) {
+            window.__cachedDocsList = docs;
+            try { localStorage.setItem('sipedas_docs_cache', JSON.stringify(docs)); } catch (e) {}
+            renderRecentDocsList(docs);
+        }
+    }).catch(() => {});
 
     try {
         const res = await fetch(`${API_BASE}/stats`);
@@ -2718,94 +2785,9 @@ async function loadDashboardStats() {
 
 
 
-            // 5. Load Feed Publikasi Terbaru
-
-            const docsRes = await fetch(`${API_BASE}/documents`);
-
-            const recentListEl = document.getElementById('recent-docs-list');
-
-            if (docsRes.ok && recentListEl) {
-
-                const docs = await docsRes.json();
-
-                if (!docs || docs.length === 0) {
-
-                    recentListEl.innerHTML = `<div class="text-center py-4 text-muted small">Belum ada publikasi terbit di sistem.</div>`;
-
-                } else {
-
-                    const sortedDocs = [...docs].sort((a, b) => (b.year || 0) - (a.year || 0) || b.id - a.id);
-
-                    recentListEl.innerHTML = sortedDocs.map(d => {
-
-                        const isExcel = (d.filename || '').toLowerCase().endsWith('.xlsx') || d.status === 'ready_excel';
-
-                        const pubTitle = d.year ? `Publikasi ${d.year}` : d.filename.replace(/\.(pdf|xlsx)$/i, '');
-
-                        const iconHtml = isExcel 
-
-                            ? `<div class="rounded-3 bg-success bg-opacity-10 text-success flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; font-size: 1.2rem;">
-
-                                   <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-
-                               </div>`
-
-                            : `<div class="rounded-3 bg-danger bg-opacity-10 text-danger flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; font-size: 1.2rem;">
-
-                                   <i class="bi bi-file-earmark-pdf"></i>
-
-                               </div>`;
-
-
-
-                        return `
-
-                            <div class="recent-doc-item d-flex align-items-center justify-content-between rounded-3 border shadow-2xs" style="padding: 0.95rem 1.25rem;">
-
-                                <div class="d-flex align-items-center min-w-0" style="gap: 16px;">
-
-                                    ${iconHtml}
-
-                                    <div class="min-w-0 pe-2">
-
-                                        <div class="fw-bold recent-doc-title text-truncate" style="font-size: 0.92rem; letter-spacing: -0.01em;" title="${d.filename}">
-
-                                            ${pubTitle}
-
-                                        </div>
-
-                                        <div class="d-flex align-items-center gap-2 recent-doc-subtext mt-1" style="font-size: 0.76rem;">
-
-                                            <span class="d-inline-flex align-items-center"><i class="bi bi-calendar-event me-2 text-secondary"></i>Data ${d.year ? d.year - 1 : '-'}</span>
-
-                                            <span class="opacity-40">•</span>
-
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem; padding: 2.5px 8.5px; border-radius: 6px; font-weight: 600;">
-
-                                                ${d.table_count || 0} Tabel
-
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                                <button onclick="viewState.selectedDocId=${d.id}; viewState.selectedBabNum=null; navigateDataTabelTab('publikasi');" class="btn btn-sm btn-outline-primary py-1.5 px-3 rounded-2 flex-shrink-0" style="font-size: 0.78rem; font-weight: 600;">
-
-                                    Buka <i class="bi bi-arrow-right-short"></i>
-
-                                </button>
-
-                            </div>
-
-                        `;
-
-                    }).join('');
-
-                }
-
+            // 5. Feed publikasi terbaru sudah dirender seketika di awal via renderRecentDocsList
+            if (window.__cachedDocsList) {
+                renderRecentDocsList(window.__cachedDocsList);
             }
 
         } catch (chartErr) {

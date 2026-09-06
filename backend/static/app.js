@@ -247,30 +247,60 @@ function showToast(icon, title, text, timer = 3000) {
     }
 }
 
-// Universal Premium Loading Modal
-function showLoadingModal(title = "Memuat Data...", message = "Mohon tunggu sejenak, sistem sedang menyiapkan data...") {
-    Swal.fire({
-        title: title,
-        html: `
-            <div class="d-flex flex-column align-items-center justify-content-center py-2">
-                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem; border-width: 0.25em;" role="status">
-                    <span class="visually-hidden">Loading...</span>
+// Universal Premium Smart Loading Modal (Debounced)
+// Jika request selesai sangat cepat (<250ms), modal tidak pernah muncul sama sekali (mencegah flicker).
+// Jika request memakan waktu lebih lama (>250ms), modal elegan baru ditampilkan ke pengguna.
+let _sipedasLoadingTimer = null;
+let _sipedasLoadingShown = false;
+
+function showLoadingModal(title = "Memuat Data...", message = "Mohon tunggu sejenak, sistem sedang menyiapkan data...", immediate = false) {
+    // Batalkan timer antrean sebelumnya jika ada
+    if (_sipedasLoadingTimer) {
+        clearTimeout(_sipedasLoadingTimer);
+        _sipedasLoadingTimer = null;
+    }
+
+    const renderModal = () => {
+        _sipedasLoadingShown = true;
+        Swal.fire({
+            title: title,
+            html: `
+                <div class="d-flex flex-column align-items-center justify-content-center py-2">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem; border-width: 0.25em;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div style="font-size: 0.88rem; color: var(--text-secondary, #64748b); text-align: center;">${message}</div>
                 </div>
-                <div style="font-size: 0.88rem; color: var(--text-secondary, #64748b); text-align: center;">${message}</div>
-            </div>
-        `,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        backdrop: 'rgba(15, 23, 42, 0.45)',
-        customClass: {
-            popup: 'rounded-4 shadow-lg border-0 p-3'
-        }
-    });
+            `,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            backdrop: 'rgba(15, 23, 42, 0.45)',
+            customClass: {
+                popup: 'rounded-4 shadow-lg border-0 p-3'
+            }
+        });
+    };
+
+    if (immediate) {
+        renderModal();
+    } else {
+        // Beri jeda 250ms: jika fetch selesai sebelum 250ms, modal TIDAK AKAN PERNAH muncul
+        _sipedasLoadingTimer = setTimeout(renderModal, 250);
+    }
 }
 
 function hideLoadingModal() {
-    Swal.close();
+    // Jika timer masih berjalan (request selesai <250ms), batalkan sehingga modal tidak pernah muncul
+    if (_sipedasLoadingTimer) {
+        clearTimeout(_sipedasLoadingTimer);
+        _sipedasLoadingTimer = null;
+    }
+    // Jika modal sudah terlanjur muncul karena request lama, tutup sekarang
+    if (_sipedasLoadingShown) {
+        _sipedasLoadingShown = false;
+        Swal.close();
+    }
 }
 
 
@@ -1013,31 +1043,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         history.replaceState(null, '', '/');
         currentUserRole = 'pegawai';
         window.currentUserRole = 'pegawai';
+        try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
         updateRoleUI('pegawai');
     }
 
-    // Terapkan default UI role pegawai / cached role secara instan tanpa menunggu network
-    const cachedRole = (!_isPostMaintenance && localStorage.getItem('sipedas_user_role')) || 'pegawai';
+    // Periksa apakah cookie sesi admin 'sipedas_session' benar-benar ada di browser
+    const _hasSessionCookie = document.cookie.split(';').some(c => c.trim().startsWith('sipedas_session='));
+    let cachedRole = (!_isPostMaintenance && _hasSessionCookie && localStorage.getItem('sipedas_user_role')) || 'pegawai';
+    
+    // Jika cookie sesi tidak ada tapi cache lokal masih tertinggal 'admin', langsung bersihkan!
+    if (!_hasSessionCookie && localStorage.getItem('sipedas_user_role') === 'admin') {
+        try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
+        cachedRole = 'pegawai';
+    }
+
     currentUserRole = cachedRole;
     window.currentUserRole = cachedRole;
     updateRoleUI(cachedRole);
 
-    // Default landing page langsung dirender instan (0 milidetik)
+    // Default landing page: Admin ke Dashboard, Publik/Pegawai ke Analisis Deret Waktu (Timeseries)
     if (cachedRole === 'admin') {
         navigate('dashboard', document.getElementById('nav-dashboard'));
     } else {
         navigate('timeseries', document.getElementById('nav-timeseries'));
     }
 
-    // Check auth session di latar belakang (asinkron tanpa memblokir tampilan awal)
+    // Check auth session di latar belakang (validasi langsung ke server)
     if (!_isPostMaintenance) {
         checkAuthSession().then(liveRole => {
             if (liveRole !== cachedRole) {
-                localStorage.setItem('sipedas_user_role', liveRole);
-                if (liveRole === 'admin' && cachedRole !== 'admin') {
+                if (liveRole === 'admin') {
+                    try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(e) {}
                     navigate('dashboard', document.getElementById('nav-dashboard'));
-                } else if (liveRole !== 'admin' && cachedRole === 'admin') {
-                    navigate('timeseries', document.getElementById('nav-timeseries'));
+                } else {
+                    // Sesi admin sudah habis atau tidak valid -> bersihkan cache dan kembali ke publik
+                    try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
+                    if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
+                        navigate('timeseries', document.getElementById('nav-timeseries'));
+                    }
                 }
             }
         });
@@ -14482,21 +14525,18 @@ function updateRoleUI(role) {
 
 
 async function checkAuthSession() {
-
     try {
-
         const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'same-origin' });
-
         if (res.ok) {
-
             const data = await res.json();
-
             currentUserRole = data.role;
-
             window.currentUserRole = data.role;
-
             updateRoleUI(data.role);
-            try { localStorage.setItem('sipedas_user_role', data.role); } catch(e) {}
+            if (data.role === 'admin') {
+                try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(e) {}
+            } else {
+                try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
+            }
             return data.role;
         }
     } catch(e) {}
@@ -14504,7 +14544,7 @@ async function checkAuthSession() {
     currentUserRole = "pegawai";
     window.currentUserRole = "pegawai";
     updateRoleUI("pegawai");
-    try { localStorage.setItem('sipedas_user_role', 'pegawai'); } catch(e) {}
+    try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
     return "pegawai";
 }
 

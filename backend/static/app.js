@@ -1090,12 +1090,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (window.location.pathname === '/login') {
         if (currentUserRole === 'admin') {
             // Sudah admin, redirect ke root
-            history.replaceState(null, '', '/');
+            window.location.href = '/';
         } else {
             // Belum login, trigger modal login setelah DOM siap
             setTimeout(() => {
                 adminLogin().then(() => {
-                    history.replaceState(null, '', '/');
+                    if (window.location.pathname === '/login') {
+                        history.replaceState(null, '', '/');
+                    }
                 });
             }, 300);
         }
@@ -1111,6 +1113,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.removeItem('sipedas_auth_event');
                 if (evt.type === 'logout') {
                     window.location.href = '/?_t=' + Date.now();
+                } else if (evt.type === 'login') {
+                    // Update tab lain yang sedang terbuka saat admin login di tab baru
+                    currentUserRole = 'admin';
+                    window.currentUserRole = 'admin';
+                    try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(err) {}
+                    updateRoleUI('admin');
                 }
             } catch(err) {}
         }
@@ -14715,22 +14723,22 @@ async function adminLogin() {
 
 
     if (isSuccess) {
-
         currentUserRole = "admin";
-
         window.currentUserRole = "admin";
-
+        try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(e) {}
         updateRoleUI("admin");
 
         // Cross-tab sync: notify other tabs about login
         try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'login', ts: Date.now() })); } catch(e) {}
 
+        if (window.location.pathname === '/login') {
+            window.location.href = '/?_t=' + Date.now();
+            return;
+        }
+
         navigate('dashboard', document.getElementById('nav-dashboard'));
-
         showToast('success', 'Selamat Datang, Admin SIPEDAS!', 'Akses penuh Admin SIPEDAS aktif.', 3000);
-
     }
-
 }
 
 

@@ -14,15 +14,23 @@
 }
 
 /* --- Non-admin (Pegawai): Tidak ada sidebar dan tidak ada hamburger menu --- */
-body.role-pegawai .sidebar {
+body.role-pegawai:not(.role-admin) .sidebar {
     display: none !important;
 }
 
-body.role-pegawai .mobile-menu-toggle {
+html.is-admin-early body .sidebar {
+    display: flex !important;
+}
+
+html.is-admin-early body #operator-header {
     display: none !important;
 }
 
-body.role-pegawai .main-content {
+body.role-pegawai:not(.role-admin) .mobile-menu-toggle {
+    display: none !important;
+}
+
+body.role-pegawai:not(.role-admin) .main-content {
     width: 100% !important;
     max-width: 100% !important;
 }

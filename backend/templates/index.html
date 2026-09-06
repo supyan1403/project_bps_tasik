@@ -22,9 +22,20 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        (function() {
+            try {
+                // Sinkronisasi instan sebelum rendering pertama agar tidak ada kedipan sekejap mata
+                var hasCookie = document.cookie.indexOf('sipedas_session=') !== -1;
+                var role = localStorage.getItem('sipedas_user_role');
+                if (hasCookie && role === 'admin') {
+                    document.documentElement.classList.add('is-admin-early');
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
-<body class="role-pegawai">
+<body class="role-{{ initial_role | default('pegawai') }}">
     <!-- Mobile Overlay -->
     <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -2602,7 +2613,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260906_10" defer></script>
+    <script src="/static/app.js?v=20260906_11" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

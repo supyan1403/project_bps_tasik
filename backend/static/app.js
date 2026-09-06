@@ -1128,15 +1128,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
                 const evt = JSON.parse(e.newValue);
                 if (evt.type === 'logout') {
-                    // Logout dari tab lain: hanya ubah state jika tab ini sebelumnya admin
+                    // Logout dari tab lain: hanya ubah state, jangan navigate agar tab lain tidak ikut berubah
                     if (currentUserRole === 'admin') {
                         currentUserRole = 'pegawai';
                         window.currentUserRole = 'pegawai';
                         try { localStorage.removeItem('sipedas_user_role'); } catch(err) {}
                         updateRoleUI('pegawai');
-                        if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
-                            navigate('timeseries', document.getElementById('nav-timeseries'));
-                        }
                     }
                 } else if (evt.type === 'login') {
                     // Login dari tab lain: hanya perbarui tab jika sebelumnya bukan admin
@@ -10904,7 +10901,9 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
     let existingBanner = document.getElementById('ts-anomaly-banner');
 
-    if (detectedAnomalies && detectedAnomalies.length > 0) {
+    const isAdminAnom = (currentUserRole === 'admin' || window.currentUserRole === 'admin');
+
+    if (isAdminAnom && detectedAnomalies && detectedAnomalies.length > 0) {
 
         let anomListHtml = detectedAnomalies.slice(0, 4).map(a => `<li style="margin-bottom:2px;"><b>${escHtml(a.entitas)} (${a.year}):</b> ${escHtml(a.message)}</li>`).join('');
 

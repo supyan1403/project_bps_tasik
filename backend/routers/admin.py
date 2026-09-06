@@ -4,6 +4,7 @@ import subprocess
 from datetime import datetime
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.engine import make_url
 
@@ -254,6 +255,19 @@ def list_backups(admin: dict = Depends(require_admin)):
         return {"backups": files, "dir": BACKUP_DIR}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/backups/{filename}")
+def download_backup_file(filename: str, admin: dict = Depends(require_admin)):
+    """Unduh file backup .sql langsung dari server."""
+    safe_fn = os.path.basename(filename)
+    target_path = os.path.join(BACKUP_DIR, safe_fn)
+    if not os.path.exists(target_path) or not os.path.isfile(target_path):
+        raise HTTPException(status_code=404, detail=f"File {safe_fn} tidak ditemukan di server.")
+    return FileResponse(
+        path=target_path,
+        filename=safe_fn,
+        media_type="application/sql"
+    )
 
 @router.post("/restore")
 def restore_existing_backup(req: RestoreRequest, admin: dict = Depends(require_admin), db: Session = Depends(get_db)):

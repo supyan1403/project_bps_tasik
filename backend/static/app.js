@@ -2205,9 +2205,8 @@ async function backupDatabase(evt) {
         if (res.ok) {
             const data = await res.json();
             showToast('success', 'Backup Berhasil', `File: ${data.file}`);
-            const base = API_BASE.replace(/\/api\/?$/, '');
             const a = document.createElement('a');
-            a.href = `${base}/backups/${encodeURIComponent(data.file)}`;
+            a.href = `${API_BASE}/admin/backups/${encodeURIComponent(data.file)}`;
             a.download = data.file;
             document.body.appendChild(a);
             a.click();
@@ -14908,10 +14907,8 @@ async function loadAdminBackups() {
 
                         <div class="d-inline-flex gap-1">
 
-                            <a href="${base}/backups/${encodeURIComponent(f.file)}" download="${escHtml(f.file)}" class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem;" title="Unduh file SQL ini ke komputer">
-
+                            <a href="${API_BASE}/admin/backups/${encodeURIComponent(f.file)}" download="${escHtml(f.file)}" class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem;" title="Unduh file SQL ini ke komputer">
                                 <i class="bi bi-download"></i> Unduh
-
                             </a>
 
                             <button onclick="restoreBackup('${fnEsc}')" class="btn btn-sm btn-outline-teal py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem; border-color:#0d9488; color:#0d9488;" title="Pulihkan database dari file ini">
@@ -15232,9 +15229,8 @@ async function createAdminBackup() {
         if (res.ok) {
             const data = await res.json();
             showToast('success', 'Backup Berhasil', `File: ${data.file}`);
-            const base = API_BASE.replace(/\/api\/?$/, '');
             const a = document.createElement('a');
-            a.href = `${base}/backups/${encodeURIComponent(data.file)}`;
+            a.href = `${API_BASE}/admin/backups/${encodeURIComponent(data.file)}`;
             a.download = data.file;
             document.body.appendChild(a);
             a.click();

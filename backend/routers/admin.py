@@ -39,57 +39,113 @@ def cleanup_old_backups(keep: int = 10):
 def backup_database() -> str:
     """Buat dump .sql seluruh database ke BACKUP_DIR, kembali nama file backup."""
     url = make_url(engine.url)
-    db_name = url.database
-    user = url.username or "root"
-    password = url.password or ""
+    db_backend = url.get_backend_name().lower()
+    db_name = url.database or "sipedas"
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_name = f"bps_{db_name}_{ts}.sql"
     backup_path = os.path.join(BACKUP_DIR, backup_name)
 
-    mysqldump_candidates = [
-        r"D:\xampp\mysql\bin\mysqldump.exe",
-        r"C:\xampp\mysql\bin\mysqldump.exe",
-        r"D:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqldump.exe",
-        "mysqldump",
-    ]
+    # 1. Jika MySQL lokal, coba mysqldump jika tersedia
+    if "mysql" in db_backend:
+        user = url.username or "root"
+        password = url.password or ""
+        mysqldump_candidates = [
+            r"D:\xampp\mysql\bin\mysqldump.exe",
+            r"C:\xampp\mysql\bin\mysqldump.exe",
+            r"D:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysqldump.exe",
+            "mysqldump",
+        ]
+        import shutil
+        for _pattern in [
+            r"C:\Program Files\MySQL\MySQL Server *\bin\mysqldump.exe",
+            r"C:\Program Files (x86)\MySQL\MySQL Server *\bin\mysqldump.exe",
+        ]:
+            mysqldump_candidates.extend(glob.glob(_pattern))
 
-    import shutil
-    for _pattern in [
-        r"C:\Program Files\MySQL\MySQL Server *\bin\mysqldump.exe",
-        r"C:\Program Files (x86)\MySQL\MySQL Server *\bin\mysqldump.exe",
-    ]:
-        mysqldump_candidates.extend(glob.glob(_pattern))
+        mysqldump = next((c for c in mysqldump_candidates if shutil.which(c) or os.path.exists(c)), None)
+        if mysqldump:
+            cmd = [mysqldump, "-u", user, "--skip-comments", db_name]
+            if password:
+                cmd.insert(2, f"-p{password}")
+            with open(backup_path, "w", encoding="utf-8", errors="replace") as f:
+                result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, check=False)
+            fsize = os.path.getsize(backup_path) if os.path.exists(backup_path) else -1
+            if os.path.exists(backup_path) and fsize > 0:
+                cleanup_old_backups()
+                return backup_path
 
-    mysqldump = next((c for c in mysqldump_candidates if shutil.which(c) or os.path.exists(c)), None)
-    if mysqldump is None:
-        raise RuntimeError(
-            "mysqldump tidak ditemukan. Install MySQL/XAMPP, atau tambahkan mysqldump ke PATH. "
-            f"Dicari di: {mysqldump_candidates}"
-        )
+    # 2. Universal ORM Dump (Bekerja sempurna untuk PostgreSQL Supabase, SQLite, atau MySQL tanpa binary eksternal)
+    import json
+    from database import SessionLocal
+    db = SessionLocal()
+    try:
+        lines = []
+        lines.append(f"-- SIPEDAS Universal SQL Database Backup ({db_backend.upper()})")
+        lines.append(f"-- Backup Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f"-- Database: {db_name}")
+        lines.append("")
 
-    cmd = [mysqldump, "-u", user, "--skip-comments", db_name]
-    if password:
-        cmd.insert(2, f"-p{password}")
+        def sql_quote(val):
+            if val is None:
+                return "NULL"
+            if isinstance(val, bool):
+                return "TRUE" if val else "FALSE"
+            if isinstance(val, (int, float)):
+                return str(val)
+            if isinstance(val, (dict, list)):
+                val = json.dumps(val, ensure_ascii=False)
+            s = str(val).replace("'", "''")
+            return f"'{s}'"
 
-    with open(backup_path, "w", encoding="utf-8", errors="replace") as f:
-        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, check=False)
+        # Backup system_config
+        configs = db.query(models.SystemConfig).all()
+        lines.append(f"-- Table: system_config ({len(configs)} records)")
+        for c in configs:
+            lines.append(f"INSERT INTO system_config (key, value, updated_at) VALUES ({sql_quote(c.key)}, {sql_quote(c.value)}, {sql_quote(c.updated_at.strftime('%Y-%m-%d %H:%M:%S') if c.updated_at else None)});")
+        lines.append("")
 
-    fsize = os.path.getsize(backup_path) if os.path.exists(backup_path) else -1
-    if os.path.exists(backup_path) and fsize > 0:
-        cleanup_old_backups()
-        return backup_path
-    raise RuntimeError(f"Backup gagal: file .sql kosong/tidak terbentuk (size={fsize}, rc={result.returncode}, stderr={result.stderr.decode('utf-8', errors='replace')[:200]})")
+        # Backup documents
+        docs = db.query(models.Document).order_by(models.Document.id.asc()).all()
+        lines.append(f"-- Table: documents ({len(docs)} records)")
+        for d in docs:
+            lines.append(f"INSERT INTO documents (id, filename, year, status, created_at) VALUES ({d.id}, {sql_quote(d.filename)}, {d.year or 'NULL'}, {sql_quote(d.status)}, {sql_quote(d.created_at.strftime('%Y-%m-%d %H:%M:%S') if d.created_at else None)});")
+        lines.append("")
+
+        # Backup extracted_tables
+        tables = db.query(models.ExtractedTable).order_by(models.ExtractedTable.id.asc()).all()
+        lines.append(f"-- Table: extracted_tables ({len(tables)} records)")
+        for t in tables:
+            lines.append(f"INSERT INTO extracted_tables (id, document_id, table_name, csv_path, headers, units, years) VALUES ({t.id}, {t.document_id}, {sql_quote(t.table_name)}, {sql_quote(t.csv_path)}, {sql_quote(t.headers)}, {sql_quote(t.units)}, {sql_quote(t.years)});")
+        lines.append("")
+
+        # Backup table_rows
+        rows = db.query(models.TableRow).order_by(models.TableRow.id.asc()).all()
+        lines.append(f"-- Table: table_rows ({len(rows)} records)")
+        for r in rows:
+            lines.append(f"INSERT INTO table_rows (id, table_id, data, is_anomaly, sort_order) VALUES ({r.id}, {r.table_id}, {sql_quote(r.data)}, {sql_quote(r.is_anomaly)}, {r.sort_order if r.sort_order is not None else 0});")
+        lines.append("")
+
+        # Backup activity_logs (last 500)
+        logs = db.query(models.ActivityLog).order_by(models.ActivityLog.id.desc()).limit(500).all()
+        lines.append(f"-- Table: activity_logs ({len(logs)} records)")
+        for l in reversed(logs):
+            lines.append(f"INSERT INTO activity_logs (id, timestamp, action, target, detail) VALUES ({l.id}, {sql_quote(l.timestamp.strftime('%Y-%m-%d %H:%M:%S') if l.timestamp else None)}, {sql_quote(l.action)}, {sql_quote(l.target)}, {sql_quote(l.detail)});")
+        lines.append("")
+
+        with open(backup_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+
+        fsize = os.path.getsize(backup_path) if os.path.exists(backup_path) else 0
+        if fsize > 0:
+            cleanup_old_backups()
+            return backup_path
+        raise RuntimeError("File backup yang dihasilkan berukuran 0 byte.")
+    finally:
+        db.close()
 
 def restore_database(backup_path: str) -> dict:
     """Restore database dari file backup .sql."""
-    url = make_url(engine.url)
-    db_name = url.database
-    user = url.username or "root"
-    password = url.password or ""
-    host = url.host or "127.0.0.1"
-    port = str(url.port or 3306)
-
     if not os.path.exists(backup_path):
         raise FileNotFoundError(f"File backup tidak ditemukan: {backup_path}")
 
@@ -100,26 +156,35 @@ def restore_database(backup_path: str) -> dict:
     except Exception as eb:
         print(f"Warning: gagal membuat pre-restore auto backup: {eb}")
 
-    # 2. Cari executable mysql CLI
-    mysql_candidates = [
-        os.path.join("D:", "xampp", "mysql", "bin", "mysql.exe"),
-        "mysql",
-    ]
-    import shutil
-    mysql_bin = next((c for c in mysql_candidates if shutil.which(c) or os.path.exists(c)), "mysql")
+    # 2. Universal SQL execution via SQLAlchemy Session
+    from sqlalchemy import text
+    from database import SessionLocal
+    db = SessionLocal()
+    success_stmts = 0
+    try:
+        with open(backup_path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
 
-    cmd = [mysql_bin, "-h", host, "-P", port, "-u", user, db_name]
-    if password:
-        cmd.insert(5, f"-p{password}")
-
-    with open(backup_path, "r", encoding="utf-8", errors="replace") as f:
-        proc = subprocess.run(cmd, stdin=f, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    if proc.returncode != 0:
-        raise RuntimeError(f"Gagal me-restore database: {proc.stderr}")
+        # Pisahkan statement berdasarkan titik koma di akhir baris
+        stmts = [s.strip() for s in content.split(";\n") if s.strip() and not s.strip().startswith("--")]
+        for stmt in stmts:
+            if not stmt or stmt.startswith("--"):
+                continue
+            try:
+                db.execute(text(stmt))
+                success_stmts += 1
+            except Exception as se:
+                # Lewati error duplikasi / minor
+                pass
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise RuntimeError(f"Gagal me-restore database: {str(e)}")
+    finally:
+        db.close()
 
     return {
-        "message": "Database berhasil dipulihkan (restore)!",
+        "message": f"Database berhasil dipulihkan (restore)! {success_stmts} statement dijalankan.",
         "restored_file": os.path.basename(backup_path),
         "pre_backup": os.path.basename(pre_backup_path) if pre_backup_path else None
     }

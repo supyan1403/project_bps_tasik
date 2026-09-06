@@ -6195,7 +6195,7 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
     if (!payload) {
         showLoadingModal("Membuka Data Tabel...", "Memuat data baris dan struktur kolom...");
-        thead.innerHTML = "<tr><th colspan='20' style='color:var(--text-secondary, #64748b);'>Memuat data dari database...</th></tr>";
+        thead.innerHTML = "<tr><th colspan='20' style='color:var(--text-secondary, #64748b); text-align:center; padding:1.25rem;'><span class='spinner-border spinner-border-sm text-primary me-2' role='status'></span>Memuat data dari database...</th></tr>";
         tbody.innerHTML = "";
 
         try {
@@ -14800,7 +14800,7 @@ function adminLogout() {
 
 async function loadAdminTables() {
     const list = document.getElementById("admin-table-list");
-    list.innerHTML = `<div class="text-center text-muted py-3">Memuat data...</div>`;
+    list.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Memuat data inventaris database...</td></tr>`;
     loadAdminSummary();
     try {
         const res = await fetch(`${API_BASE}/admin/tables`);
@@ -14809,7 +14809,7 @@ async function loadAdminTables() {
         window.__adminTables = tables;
         renderAdminTables();
     } catch(e) {
-        list.innerHTML = `<div class="text-center text-danger py-3">Error: ${e.message}</div>`;
+        list.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-3">Error: ${e.message}</td></tr>`;
     }
 }
 
@@ -21738,15 +21738,12 @@ async function addColFromMaster(tableId, tableName) {
         }
 
         const result = await addRes.json();
-
-        let detailText = `${result.added.length} kolom berhasil didaftarkan sebagai Master Kolom.`;
-
-        if (result.already_exists.length > 0) {
-
-            detailText += `\n${result.already_exists.length} kolom sudah ada sebelumnya: ${result.already_exists.slice(0, 5).join(', ')}${result.already_exists.length > 5 ? '...' : ''}`;
-
+        const addedList = Array.isArray(result.added) ? result.added : [];
+        const existsList = Array.isArray(result.already_exists) ? result.already_exists : [];
+        let detailText = `${addedList.length} kolom berhasil didaftarkan sebagai Master Kolom.`;
+        if (existsList.length > 0) {
+            detailText += `\n${existsList.length} kolom sudah ada sebelumnya: ${existsList.slice(0, 5).join(', ')}${existsList.length > 5 ? '...' : ''}`;
         }
-
         await showToast('success', 'Berhasil!', detailText, 2500);
 
     } catch(e) {

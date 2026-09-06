@@ -26,7 +26,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, func
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -1206,10 +1206,12 @@ def admin_get_tables(db: Session = Depends(get_db), admin: dict = Depends(requir
         models.Document.filename
     ).join(models.Document, models.ExtractedTable.document_id == models.Document.id).all()
     
+    counts_query = db.query(models.TableRow.table_id, func.count(models.TableRow.id)).group_by(models.TableRow.table_id).all()
+    counts_map = {t_id: count for t_id, count in counts_query}
     result = []
     for t in tables:
         # Hitung jumlah baris data yang SUDAH di-load ke database (TableRow)
-        row_count = db.query(models.TableRow).filter(models.TableRow.table_id == t.id).count()
+        row_count = counts_map.get(t.id, 0)
         table_name_str = t.table_name or ""
         m = re.search(r'Tabel[\s_]*(\d+)', table_name_str, re.IGNORECASE)
         result.append({

@@ -458,15 +458,27 @@ except Exception as _e:
     pass
 
 @app.get("/")
-def read_root(request: Request):
-    response = templates.TemplateResponse(request=request, name="index.html", context={})
-    response.headers["Cache-Control"] = "no-store"
+def read_root(request: Request, db: Session = Depends(get_db)):
+    role = "pegawai"
+    session_id = request.cookies.get("sipedas_session")
+    if session_id:
+        sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
+        if sess and sess.role == "admin":
+            role = "admin"
+    response = templates.TemplateResponse(request=request, name="index.html", context={"initial_role": role})
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
 
 @app.get("/login")
-def login_page(request: Request):
-    response = templates.TemplateResponse(request=request, name="index.html", context={})
-    response.headers["Cache-Control"] = "no-store"
+def login_page(request: Request, db: Session = Depends(get_db)):
+    role = "pegawai"
+    session_id = request.cookies.get("sipedas_session")
+    if session_id:
+        sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
+        if sess and sess.role == "admin":
+            role = "admin"
+    response = templates.TemplateResponse(request=request, name="index.html", context={"initial_role": role})
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
 
 @app.get("/favicon.ico", include_in_schema=False)

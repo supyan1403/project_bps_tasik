@@ -1047,12 +1047,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateRoleUI('pegawai');
     }
 
+    // Prioritaskan role dari body class yang disiapkan server (zero-flicker SSR)
+    const _serverBodyRole = document.body.classList.contains('role-admin') ? 'admin' : (document.body.classList.contains('role-pegawai') ? 'pegawai' : '');
+
     // Periksa apakah cookie sesi admin 'sipedas_session' benar-benar ada di browser
     const _hasSessionCookie = document.cookie.split(';').some(c => c.trim().startsWith('sipedas_session='));
-    let cachedRole = (!_isPostMaintenance && _hasSessionCookie && localStorage.getItem('sipedas_user_role')) || 'pegawai';
+    let cachedRole = _serverBodyRole || (!_isPostMaintenance && _hasSessionCookie && localStorage.getItem('sipedas_user_role')) || 'pegawai';
     
     // Jika cookie sesi tidak ada tapi cache lokal masih tertinggal 'admin', langsung bersihkan!
-    if (!_hasSessionCookie && localStorage.getItem('sipedas_user_role') === 'admin') {
+    if (!_hasSessionCookie && (localStorage.getItem('sipedas_user_role') === 'admin' || cachedRole === 'admin')) {
         try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
         cachedRole = 'pegawai';
     }
@@ -1105,16 +1108,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     populateDocumentList();
 
-    // Cross-tab sync: listen for logout/login events from other tabs
+    // Cross-tab sync: dengarkan perubahan sesi tanpa me-refresh tab secara paksa
     window.addEventListener('storage', (e) => {
         if (e.key === 'sipedas_auth_event' && e.newValue) {
             try {
                 const evt = JSON.parse(e.newValue);
-                localStorage.removeItem('sipedas_auth_event');
                 if (evt.type === 'logout') {
-                    window.location.href = '/?_t=' + Date.now();
+                    // Logout dari tab lain: update state lokal ke pegawai tanpa reload halaman utuh
+                    currentUserRole = 'pegawai';
+                    window.currentUserRole = 'pegawai';
+                    try { localStorage.removeItem('sipedas_user_role'); } catch(err) {}
+                    updateRoleUI('pegawai');
+                    if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
+                        navigate('timeseries', document.getElementById('nav-timeseries'));
+                    }
                 } else if (evt.type === 'login') {
-                    // Update tab lain yang sedang terbuka saat admin login di tab baru
+                    // Login dari tab lain: update tab yang sedang terbuka ke admin tanpa reload
                     currentUserRole = 'admin';
                     window.currentUserRole = 'admin';
                     try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(err) {}

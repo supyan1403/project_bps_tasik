@@ -15,6 +15,51 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 
+// === LIVE UPDATE: Cross-tab data notification ===
+function notifyDataChange(type) {
+    try {
+        localStorage.setItem('sipedas_data_event', JSON.stringify({
+            type: type,
+            timestamp: Date.now()
+        }));
+    } catch(e) {}
+}
+
+// === LIVE UPDATE: Handle data change from another tab ===
+function handleDataChange(type) {
+    try {
+        switch(type) {
+            case 'document':
+                if (typeof loadDocuments === 'function') loadDocuments();
+                if (typeof populateDocumentList === 'function') populateDocumentList();
+                if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                break;
+            case 'table':
+                if (typeof populateDocumentList === 'function') populateDocumentList();
+                if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                break;
+            case 'table_data':
+                if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                break;
+            case 'master':
+                if (typeof renderMasterColumns === 'function') renderMasterColumns();
+                break;
+            case 'anomaly':
+                if (typeof loadTimeSeriesAnomalies === 'function') loadTimeSeriesAnomalies(false);
+                if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                break;
+            case 'backup':
+                if (typeof loadAdminBackups === 'function') loadAdminBackups();
+                if (typeof loadDashboardBackupInfo === 'function') loadDashboardBackupInfo();
+                break;
+            case 'dashboard':
+                if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                break;
+        }
+    } catch(e) {}
+}
+
+
 function cssVar(name) {
 
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -1183,6 +1228,63 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (typeof setupKeyboardShortcuts === 'function') setupKeyboardShortcuts();
 
+    // === LIVE UPDATE: Cross-tab data sync via localStorage events ===
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'sipedas_data_event' && e.newValue) {
+            try {
+                const evt = JSON.parse(e.newValue);
+                handleDataChange(evt.type);
+            } catch(err) {}
+        }
+    });
+
+    // === LIVE UPDATE: Polling fallback (untuk sesi berbeda / laptop berbeda) ===
+    // Dashboard stats: setiap 30 detik
+    if (!window._liveUpdateDashboard) {
+        window._liveUpdateDashboard = setInterval(() => {
+            if (currentUserRole !== 'admin') return;
+            if (typeof currentTab !== 'undefined' && currentTab === 'dashboard') {
+                try { loadDashboardStats(); } catch(e) {}
+            }
+        }, 30000);
+    }
+
+    // Data Tabel list: setiap 15 detik
+    if (!window._liveUpdateTables) {
+        window._liveUpdateTables = setInterval(() => {
+            if (currentUserRole !== 'admin') return;
+            if (typeof currentTab !== 'undefined' && currentTab === 'pdf') {
+                try { populateDocumentList(); } catch(e) {}
+            }
+        }, 15000);
+    }
+
+    // Master kolom: setiap 30 detik
+    if (!window._liveUpdateMaster) {
+        window._liveUpdateMaster = setInterval(() => {
+            if (currentUserRole !== 'admin') return;
+            if (typeof currentTab !== 'undefined' && currentTab === 'admin') {
+                const masterTab = document.getElementById('page-master-columns');
+                if (masterTab && masterTab.classList.contains('active')) {
+                    try { renderMasterColumns(); } catch(e) {}
+                }
+            }
+        }, 30000);
+    }
+
+    // Anomali: setiap 30 detik
+    if (!window._liveUpdateAnomaly) {
+        window._liveUpdateAnomaly = setInterval(() => {
+            if (currentUserRole !== 'admin') return;
+            if (typeof currentTab !== 'undefined' && currentTab === 'admin') {
+                const anomTab = document.getElementById('page-admin-anomalies');
+                if (anomTab && anomTab.classList.contains('active')) {
+                    try { loadTimeSeriesAnomalies(false); } catch(e) {}
+                }
+            }
+        }, 30000);
+    }
+
     
 
     setupDropZone('pdf-drop-zone', 'pdf-file', (file) => {
@@ -1320,6 +1422,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 await loadDocuments();
 
                 await populateDocumentList();
+                notifyDataChange('document');
 
                 Swal.fire("Berhasil", "Upload sukses! Silakan masukkan rentang halaman lalu klik Ekstrak.", "success");
 
@@ -4681,6 +4784,7 @@ async function importUploadExcel() {
         loadImportedExcelPublications();
 
         if (typeof populateDocumentList === 'function') populateDocumentList();
+        notifyDataChange('document');
 
     } catch (err) {
 
@@ -5069,6 +5173,7 @@ async function openTocEditor(docId, filename) {
                     populateBabDropdown(docId);
 
                     populateDocumentList();
+                    notifyDataChange('document');
 
                 } else {
 
@@ -5159,6 +5264,7 @@ async function extractPages(docId) {
             showToast("info", "Informasi", "Mengekstrak halaman di background...", 2000);
 
             await loadDocuments();
+            notifyDataChange('document');
 
         } else {
 
@@ -5211,6 +5317,7 @@ function deleteBab(docId, babNum, babName) {
                 await loadDocuments();
 
                 await populateDocumentList();
+                notifyDataChange('document');
 
                 return await res.json();
 
@@ -5271,6 +5378,7 @@ function deleteDocument(docId) {
                 await loadDocuments();
 
                 await populateDocumentList();
+                notifyDataChange('document');
 
             } catch (error) {
 
@@ -6123,6 +6231,7 @@ function deleteTable(tableId) {
                 if (!res.ok) throw new Error("Gagal menghapus");
 
                 await populateDocumentList();
+                notifyDataChange('document');
 
             } catch (error) {
 
@@ -6181,6 +6290,7 @@ async function loadToDatabase(tableId) {
             Swal.close();
 
             viewDataEditor(tableId);
+            notifyDataChange('table');
 
         } else {
 
@@ -6506,6 +6616,7 @@ async function markRowSafe(rowId, tableId, tableName) {
             }
 
             await loadDashboardStats();
+            notifyDataChange('table_data');
 
             showToast('success', 'Tandai Aman', 'Baris ini sudah ditandai aman (bukan anomali) dan disimpan.', 2000);
 
@@ -6560,6 +6671,7 @@ async function markAllSafeInTable(tableId, tableName) {
                     _loadDbIntoEditor(tableId, tableName);
 
                     loadDashboardStats();
+                    notifyDataChange('table_data');
 
                 } else {
 
@@ -8207,6 +8319,7 @@ async function saveCsvChangesToServer(tableId) {
             // Beralih kembali ke mode preview
 
             previewCsv(tableId, editorState.tableName);
+            notifyDataChange('table_data');
 
         } else {
 
@@ -15068,6 +15181,7 @@ async function restoreBackup(filename) {
         if (typeof loadDashboardStats === 'function') loadDashboardStats();
 
         if (typeof loadDashboardBackupInfo === 'function') loadDashboardBackupInfo();
+        notifyDataChange('backup');
 
     }
 
@@ -15176,6 +15290,7 @@ async function handleRestoreFileUpload(input) {
         if (typeof loadDashboardStats === 'function') loadDashboardStats();
 
         if (typeof loadDashboardBackupInfo === 'function') loadDashboardBackupInfo();
+        notifyDataChange('backup');
 
     }
 
@@ -15244,6 +15359,7 @@ async function deleteBackup(filename) {
         await loadAdminBackups();
 
         if (typeof loadDashboardBackupInfo === 'function') loadDashboardBackupInfo();
+        notifyDataChange('backup');
 
     }
 
@@ -15272,6 +15388,7 @@ async function createAdminBackup() {
 
             await loadAdminBackups();
             if (typeof loadDashboardBackupInfo === 'function') await loadDashboardBackupInfo();
+            notifyDataChange('backup');
             if (typeof loadDashboardStats === 'function') await loadDashboardStats();
         } else {
             const err = await res.json().catch(() => ({}));
@@ -15566,7 +15683,7 @@ async function deleteTableAdmin(id) {
 
         const res = await fetch(`${API_BASE}/tables/${id}`, { method: 'DELETE' });
 
-        if (res.ok) { showToast('success', 'Terhapus', 'Tabel berhasil dihapus'); loadAdminTables(); loadDashboardStats(); }
+        if (res.ok) { showToast('success', 'Terhapus', 'Tabel berhasil dihapus'); loadAdminTables(); loadDashboardStats(); notifyDataChange('table'); }
 
         else showToast('error', 'Gagal', 'Gagal menghapus');
 
@@ -15755,6 +15872,7 @@ async function clearAllLoadedData() {
             loadDashboardStats();
 
             populateDocumentList();
+            notifyDataChange('document');
 
         } else {
 
@@ -15825,6 +15943,7 @@ async function loadAllCsvForDoc(docId, filename) {
             populateDocumentList();
 
             loadDashboardStats();
+            notifyDataChange('document');
 
         }
 
@@ -15885,6 +16004,7 @@ async function loadAllCsvForBab(docId, babNum) {
             populateDocumentList();
 
             loadDashboardStats();
+            notifyDataChange('document');
 
         }
 
@@ -15947,6 +16067,7 @@ async function deleteAllTablesForDoc(docId, filename) {
             populateDocumentList();
 
             loadDashboardStats();
+            notifyDataChange('document');
 
         }
 
@@ -16009,6 +16130,7 @@ async function deleteAllTablesForBab(docId, babNum) {
             populateDocumentList();
 
             loadDashboardStats();
+            notifyDataChange('document');
 
         }
 
@@ -18196,6 +18318,7 @@ async function markCurrentModalAnomalySafe() {
         loadTimeSeriesAnomalies(true);
 
         if (typeof loadDashboardStats === 'function') loadDashboardStats();
+        notifyDataChange('anomaly');
 
     } catch(err) {
 
@@ -18772,6 +18895,7 @@ async function editMasterColumn(id) {
         }
 
         await renderMasterColumns();
+        notifyDataChange('master');
 
         showToast('success', 'Berhasil', `Header diubah menjadi "${formValues.name}"`, 1500);
 
@@ -18820,6 +18944,7 @@ async function deleteAllMasterColumns() {
         }
 
         await renderMasterColumns();
+        notifyDataChange('master');
 
         showToast('success', 'Berhasil', 'Semua Master Kolom telah dihapus.', 2000);
 
@@ -18868,6 +18993,7 @@ async function deleteMasterColumn(id) {
         }
 
         await renderMasterColumns();
+        notifyDataChange('master');
 
         showToast('success', 'Dihapus', '', 1500);
 
@@ -18948,6 +19074,7 @@ async function showAddMasterColumn() {
         }
 
         await renderMasterColumns();
+        notifyDataChange('master');
 
         showToast('success', 'Ditambahkan', `Header "${formValues.name}" berhasil ditambahkan`, 1500);
 
@@ -19258,6 +19385,7 @@ async function regenerateMasterColumns() {
         Swal.close();
 
         await renderMasterColumns();
+        notifyDataChange('master');
 
         showToast('success', 'Berhasil', 'Master columns diperbarui dari publikasi 2025.', 2000);
 
@@ -23777,6 +23905,7 @@ async function submitCreateDoc() {
         if (typeof loadDocuments === 'function') loadDocuments();
 
         if (typeof populateDocumentList === 'function') populateDocumentList();
+        notifyDataChange('document');
 
 
 
@@ -24239,6 +24368,7 @@ async function submitCreateTable() {
             // Refresh daftar publikasi / tabel
 
             if (typeof populateDocumentList === 'function') populateDocumentList();
+            notifyDataChange('document');
 
             if (result.isConfirmed) {
 

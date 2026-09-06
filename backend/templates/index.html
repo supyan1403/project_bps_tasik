@@ -55,32 +55,32 @@
             </div>
 
             <ul class="nav flex-column mb-auto gap-1">
-                <li class="nav-item list-unstyled admin-only" style="display:none;">
-                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-dashboard" onclick="navigate('dashboard', this)" title="Dashboard">
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium {% if initial_role == 'admin' %}active{% endif %}" id="nav-dashboard" onclick="navigate('dashboard', this)" title="Dashboard">
                         <i class="bi bi-grid"></i> <span class="nav-link-text">Dashboard</span>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only" style="display:none;">
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-publikasi" onclick="navigate('publikasi', this)" title="Ekstraksi PDF">
                         <i class="bi bi-filetype-pdf"></i> <span class="nav-link-text">Ekstraksi PDF</span>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only" style="display:none;">
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-import" onclick="navigate('import', this)" title="Import Excel">
                         <i class="bi bi-filetype-xlsx"></i> <span class="nav-link-text">Import Excel</span>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only position-relative" style="display:none;">
+                <li class="nav-item list-unstyled admin-only position-relative" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel" onclick="navigate('tabel', this)" title="Data Tabel">
                         <i class="bi bi-table"></i> <span class="nav-link-text">Data Tabel</span>
                     </div>
                 </li>
                 <li class="nav-item list-unstyled">
-                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium active" id="nav-timeseries" onclick="navigate('timeseries', this)" title="Analisis Deret Waktu">
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium {% if initial_role != 'admin' %}active{% endif %}" id="nav-timeseries" onclick="navigate('timeseries', this)" title="Analisis Deret Waktu">
                         <i class="bi bi-graph-up"></i> <span class="nav-link-text">Analisis Deret Waktu</span>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" style="display:none;">
+                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin" onclick="toggleAdminSubmenu()" title="Manajemen Database">
                         <i class="bi bi-database"></i> <span class="nav-link-text">Manajemen Database</span>
                         <span id="admin-submenu-icon" class="submenu-arrow ms-auto">▶</span>
@@ -121,7 +121,7 @@
                         </div>
                     </div>
                 </li>
-                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" style="display:none;">
+                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
                     <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-sistem" onclick="toggleSistemSubmenu()" title="Sistem">
                         <i class="bi bi-gear"></i> <span class="nav-link-text">Sistem</span>
                         <span id="sistem-submenu-icon" class="submenu-arrow ms-auto">▶</span>
@@ -158,12 +158,12 @@
             <!-- Footer Action Button (Di bawah garis pembatas) -->
             <div class="position-relative sidebar-footer-action mt-auto" style="z-index: 2;">
                 <!-- Login Button (Ketika mode Operator / Tamu) -->
-                <button type="button" id="btn-admin-login" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-0" onclick="adminLogin()" title="Login Admin SIPEDAS">
+                <button type="button" id="btn-admin-login" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-0" onclick="adminLogin()" title="Login Admin SIPEDAS" {% if initial_role == 'admin' %}style="display:none !important;"{% endif %}>
                     <i class="bi bi-shield-lock"></i> <span class="sidebar-btn-text">Login Admin SIPEDAS</span>
                 </button>
 
                 <!-- User Account Profile Card & Dropdown (Ketika Mode Admin Aktif) -->
-                <div id="sidebar-user-widget" class="sidebar-user-widget position-relative has-flyout-submenu" style="display:none !important;">
+                <div id="sidebar-user-widget" class="sidebar-user-widget position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none !important;"{% else %}style="display:block !important;"{% endif %}>
                     <div id="sidebar-user-btn" class="sidebar-user-card nav-link d-flex align-items-center justify-content-between p-2 rounded-3 cursor-pointer" onclick="toggleUserMenu(event)" role="button" tabindex="0" title="Akun Administrator">
                         <div class="d-flex align-items-center gap-2 overflow-hidden">
                             <div class="sidebar-user-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
@@ -218,7 +218,7 @@
         <div class="main-content flex-grow-1 px-3 py-3 overflow-auto">
 
             <!-- Operator / Top App Bar (Header Halaman Utama) -->
-            <div id="operator-header" class="operator-header align-items-center justify-content-between">
+            <div id="operator-header" class="operator-header align-items-center justify-content-between" {% if initial_role == 'admin' %}style="display:none !important;"{% endif %}>
                 <!-- Sisi Kiri: Logo + SIPEDAS & Kepanjangannya (Unified Lockup) -->
                 <div class="d-flex align-items-center gap-3">
                     <button id="mobile-menu-toggle" class="mobile-menu-toggle me-1" onclick="toggleMobileSidebar()" aria-label="Buka menu">
@@ -244,7 +244,7 @@
             </div>
 
             <!-- PAGE 1: Dashboard -->
-            <div id="page-dashboard" class="page-section">
+            <div id="page-dashboard" class="page-section {% if initial_role == 'admin' %}active{% endif %}">
                 <div class="welcome-banner text-white px-4 py-4 px-md-5 py-md-5 rounded-4 mb-4 position-relative overflow-hidden d-flex flex-column justify-content-center" style="min-height: 180px; background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
                     <!-- 1. Background Dot Matrix Pattern -->
                     <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.65; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
@@ -924,7 +924,7 @@
             </div>
 
             <!-- PAGE 5: Time Series -->
-            <div id="page-timeseries" class="page-section active">
+            <div id="page-timeseries" class="page-section {% if initial_role != 'admin' %}active{% endif %}">
                 <!-- Hero Banner Analisis Deret Waktu -->
                 <div class="welcome-banner ts-hero-banner text-white p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
                     <!-- 1. Background Dot Matrix Pattern -->
@@ -2613,7 +2613,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260906_11" defer></script>
+    <script src="/static/app.js?v=20260906_12" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

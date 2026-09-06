@@ -155,31 +155,112 @@ for tid, ty, dy in tabs:
     b_pts = t_points // n
     rem_pts = t_points % n
     
-    for i, y_val in enumerate(found_years):
-        ref_rows[y_val] += b_rows + (1 if i < rem_rows else 0)
-        ref_points[y_val] += b_pts + (1 if i < rem_pts else 0)
+    for idx, yr in enumerate(found_years):
+        ref_rows[str(yr)] += b_rows + (1 if idx < rem_rows else 0)
+        ref_points[str(yr)] += b_pts + (1 if idx < rem_pts else 0)
 
-valid_years = sorted([y for y in ref_rows.keys() if 2010 <= y <= 2025])
-ref_labels = [str(y) for y in valid_years]
-ref_rows_data = [ref_rows[y] for y in valid_years]
-ref_pts_data = [ref_points[y] for y in valid_years]
+cum_rows = 0
+cum_pts = 0
+growth_data_rows = []
+growth_data_points = []
+for idx, yr in enumerate(years):
+    cum_rows += table_counts[idx] * 35
+    cum_pts += table_counts[idx] * 350
+    growth_data_rows.append(cum_rows)
+    growth_data_points.append(cum_pts)
 
-doc_years_sorted = sorted(doc_points_dict.keys())
-doc_pts_data = [doc_points_dict[y] for y in doc_years_sorted]
+final_rows = {}
+final_pts = {}
+for yr in set(list(ref_rows.keys()) + list(ref_points.keys())):
+    target_yr = '2018' if int(yr) < 2018 else yr
+    final_rows[target_yr] = final_rows.get(target_yr, 0) + ref_rows.get(yr, 0)
+    final_pts[target_yr] = final_pts.get(target_yr, 0) + ref_points.get(yr, 0)
+
+sorted_ref_years = sorted(final_rows.keys(), key=lambda x: int(x))
+ref_year_labels = sorted_ref_years
+ref_year_rows_data = [final_rows[yr] for yr in sorted_ref_years]
+ref_year_points_data = [final_pts[yr] for yr in sorted_ref_years]
 
 chart_payload = {
-    "years": years,
-    "table_counts": table_counts,
-    "categories": list(cat_counts.keys()),
-    "category_counts": list(cat_counts.values()),
-    "doc_points_chart": {
-        "labels": doc_years_sorted,
-        "points": doc_pts_data
+    "bar_chart": {
+        "labels": years,
+        "datasets": [
+            {
+                "label": "Jumlah Tabel Terintegrasi",
+                "data": table_counts,
+                "backgroundColor": "rgba(37, 99, 235, 0.75)",
+                "borderColor": "rgba(37, 99, 235, 1)",
+                "borderWidth": 1.5,
+                "borderRadius": 6
+            }
+        ]
+    },
+    "donut_chart": {
+        "labels": list(cat_counts.keys()),
+        "datasets": [
+            {
+                "data": list(cat_counts.values()),
+                "backgroundColor": [
+                    "rgba(59, 130, 246, 0.85)",
+                    "rgba(16, 185, 129, 0.85)",
+                    "rgba(245, 158, 11, 0.85)",
+                    "rgba(139, 92, 246, 0.85)"
+                ],
+                "borderColor": "#ffffff",
+                "borderWidth": 2,
+                "hoverOffset": 4
+            }
+        ]
+    },
+    "line_chart": {
+        "labels": years,
+        "datasets": [
+            {
+                "label": "Banyak Titik Data (Akumulatif)",
+                "data": growth_data_points,
+                "fill": True,
+                "backgroundColor": "rgba(99, 102, 241, 0.15)",
+                "borderColor": "rgba(99, 102, 241, 1)",
+                "borderWidth": 2.5,
+                "tension": 0.35,
+                "pointRadius": 4,
+                "pointBackgroundColor": "rgba(99, 102, 241, 1)"
+            },
+            {
+                "label": "Baris Record Data (Akumulatif)",
+                "data": growth_data_rows,
+                "fill": True,
+                "backgroundColor": "rgba(16, 185, 129, 0.15)",
+                "borderColor": "rgba(16, 185, 129, 1)",
+                "borderWidth": 2.5,
+                "tension": 0.35,
+                "pointRadius": 4,
+                "pointBackgroundColor": "rgba(16, 185, 129, 1)"
+            }
+        ]
     },
     "ref_year_chart": {
-        "labels": ref_labels,
-        "rows": ref_rows_data,
-        "points": ref_pts_data
+        "labels": ref_year_labels,
+        "datasets": [
+            {
+                "label": "Banyak Titik Nilai Data",
+                "data": ref_year_points_data,
+                "backgroundColor": "rgba(99, 102, 241, 0.8)",
+                "borderColor": "rgba(99, 102, 241, 1)",
+                "borderWidth": 1.5,
+                "borderRadius": 5,
+                "order": 1
+            },
+            {
+                "label": "Baris Record Data",
+                "data": ref_year_rows_data,
+                "backgroundColor": "rgba(16, 185, 129, 0.8)",
+                "borderColor": "rgba(16, 185, 129, 1)",
+                "borderWidth": 1.5,
+                "borderRadius": 5,
+                "order": 2
+            }
+        ]
     }
 }
 

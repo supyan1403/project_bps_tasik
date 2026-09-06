@@ -1045,14 +1045,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Handle /login path — trigger login modal otomatis
     if (window.location.pathname === '/login') {
-        if (role === 'admin') {
+        if (currentUserRole === 'admin') {
             // Sudah admin, redirect ke root
             history.replaceState(null, '', '/');
         } else {
-            // Belum login, trigger modal login
-            adminLogin().then(() => {
-                history.replaceState(null, '', '/');
-            });
+            // Belum login, trigger modal login setelah DOM siap
+            setTimeout(() => {
+                adminLogin().then(() => {
+                    history.replaceState(null, '', '/');
+                });
+            }, 300);
         }
     }
 

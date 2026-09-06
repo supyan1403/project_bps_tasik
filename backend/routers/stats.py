@@ -9,6 +9,8 @@ from collections import defaultdict
 import models
 from database import get_db
 
+from sqlalchemy import func, text
+
 router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
 
 _CHART_CACHE = None
@@ -35,6 +37,18 @@ def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
     with _CHART_CACHE_LOCK:
         if _OVERVIEW_CACHE is not None and (now - _OVERVIEW_CACHE_TIME) < _STATS_TTL:
             return _OVERVIEW_CACHE
+
+    # 1. Coba baca dari tabel pre-calculated dashboard_cache (Instan < 50ms)
+    try:
+        row = db.execute(text("SELECT payload FROM dashboard_cache WHERE cache_key = 'stats_overview'")).fetchone()
+        if row and row[0]:
+            payload = row[0]
+            with _CHART_CACHE_LOCK:
+                _OVERVIEW_CACHE = payload
+                _OVERVIEW_CACHE_TIME = now
+            return payload
+    except Exception:
+        pass
 
     total_docs = db.query(models.Document).count()
     total_tables = db.query(models.ExtractedTable).count()
@@ -95,6 +109,18 @@ def get_chart_stats(response: Response, db: Session = Depends(get_db)):
     with _CHART_CACHE_LOCK:
         if _CHART_CACHE is not None and (now - _CHART_CACHE_TIME) < _STATS_TTL:
             return _CHART_CACHE
+
+    # 1. Coba baca dari tabel pre-calculated dashboard_cache (Instan < 50ms)
+    try:
+        row = db.execute(text("SELECT payload FROM dashboard_cache WHERE cache_key = 'stats_chart'")).fetchone()
+        if row and row[0]:
+            payload = row[0]
+            with _CHART_CACHE_LOCK:
+                _CHART_CACHE = payload
+                _CHART_CACHE_TIME = now
+            return payload
+    except Exception:
+        pass
 
     results = db.query(
         models.Document.year,

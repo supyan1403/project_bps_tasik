@@ -1065,16 +1065,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateRoleUI(cachedRole);
 
     // Default landing page: Admin ke Dashboard, Publik/Pegawai ke Analisis Deret Waktu (Timeseries)
-    if (cachedRole === 'admin') {
-        navigate('dashboard', document.getElementById('nav-dashboard'));
+    const targetPageId = cachedRole === 'admin' ? 'dashboard' : 'timeseries';
+    const targetNavId = cachedRole === 'admin' ? 'nav-dashboard' : 'nav-timeseries';
+    const activePage = document.querySelector('.page-section.active');
+
+    if (activePage && activePage.id === `page-${targetPageId}`) {
+        // Halaman yang benar sudah aktif langsung dari server SSR (Zero-flicker)
+        currentTab = targetPageId;
+        const navEl = document.getElementById(targetNavId);
+        if (navEl && !navEl.classList.contains('active')) {
+            navEl.classList.add('active');
+        }
+        if (targetPageId === 'dashboard') loadDashboardStats();
+        if (targetPageId === 'timeseries') initTimeSeriesWizard();
     } else {
-        navigate('timeseries', document.getElementById('nav-timeseries'));
+        navigate(targetPageId, document.getElementById(targetNavId));
     }
 
     // Check auth session di latar belakang (validasi langsung ke server)
     if (!_isPostMaintenance) {
         checkAuthSession().then(liveRole => {
             if (liveRole !== cachedRole) {
+                currentUserRole = liveRole;
+                window.currentUserRole = liveRole;
+                updateRoleUI(liveRole);
                 if (liveRole === 'admin') {
                     try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(e) {}
                     navigate('dashboard', document.getElementById('nav-dashboard'));
@@ -1114,20 +1128,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
                 const evt = JSON.parse(e.newValue);
                 if (evt.type === 'logout') {
-                    // Logout dari tab lain: update state lokal ke pegawai tanpa reload halaman utuh
-                    currentUserRole = 'pegawai';
-                    window.currentUserRole = 'pegawai';
-                    try { localStorage.removeItem('sipedas_user_role'); } catch(err) {}
-                    updateRoleUI('pegawai');
-                    if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
-                        navigate('timeseries', document.getElementById('nav-timeseries'));
+                    // Logout dari tab lain: hanya ubah state jika tab ini sebelumnya admin
+                    if (currentUserRole === 'admin') {
+                        currentUserRole = 'pegawai';
+                        window.currentUserRole = 'pegawai';
+                        try { localStorage.removeItem('sipedas_user_role'); } catch(err) {}
+                        updateRoleUI('pegawai');
+                        if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
+                            navigate('timeseries', document.getElementById('nav-timeseries'));
+                        }
                     }
                 } else if (evt.type === 'login') {
-                    // Login dari tab lain: update tab yang sedang terbuka ke admin tanpa reload
-                    currentUserRole = 'admin';
-                    window.currentUserRole = 'admin';
-                    try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(err) {}
-                    updateRoleUI('admin');
+                    // Login dari tab lain: hanya perbarui tab jika sebelumnya bukan admin
+                    if (currentUserRole !== 'admin') {
+                        currentUserRole = 'admin';
+                        window.currentUserRole = 'admin';
+                        try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(err) {}
+                        updateRoleUI('admin');
+                    }
                 }
             } catch(err) {}
         }

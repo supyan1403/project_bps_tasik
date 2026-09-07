@@ -380,6 +380,10 @@
     color: var(--text-primary) !important;
     transition: none !important;
 }
+#ts-insight-select-year-start,
+#ts-insight-select-year-end {
+    min-width: 135px !important;
+}
 .ts-insight-select:hover {
     border-color: var(--primary-light) !important;
     transform: none !important;

@@ -7,7 +7,7 @@ import zipfile
 import subprocess
 import threading
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 import openpyxl
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, Response
@@ -42,6 +42,13 @@ class TOCItem(BaseModel):
     title: str
     start_page: int
     end_page: int
+
+class UpdateDocumentRequest(BaseModel):
+    year: Optional[int] = None
+    filename: Optional[str] = None
+
+class UpdateBabRequest(BaseModel):
+    title: str
 
 def get_safe_windows_path(path: str) -> str:
     if not path:
@@ -352,7 +359,125 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
         
     db.delete(doc)
     db.commit()
+
+    with _DOC_TABLES_CACHE_LOCK:
+        _DOC_TABLES_CACHE.pop(doc_id, None)
+    with _TOC_CACHE_LOCK:
+        _TOC_CACHE.pop(doc_id, None)
+
     return {"message": "Document deleted"}
+
+@router.put("/documents/{doc_id}")
+def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
+    if req.year is not None:
+        doc.year = req.year
+    if req.filename is not None and req.filename.strip():
+        doc.filename = req.filename.strip()
+    db.commit()
+    db.refresh(doc)
+    return {
+        "status": "success",
+        "message": "Publikasi berhasil diperbarui",
+        "document": {"id": doc.id, "year": doc.year, "filename": doc.filename}
+    }
+
+@router.put("/documents/{doc_id}/bab/{bab_num}")
+def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
+    
+    new_title = req.title.strip()
+    if not new_title:
+        raise HTTPException(status_code=400, detail="Judul bab tidak boleh kosong")
+
+    doc_dir = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
+    os.makedirs(doc_dir, exist_ok=True)
+    toc_path = os.path.join(doc_dir, "toc.json")
+    
+    toc_data = []
+    if os.path.exists(toc_path):
+        try:
+            with open(toc_path, "r", encoding="utf-8") as f:
+                toc_data = json.load(f)
+        except Exception:
+            toc_data = []
+            
+    updated = False
+    for item in toc_data:
+        m = re.search(r'Bab\s*(\d+)', item.get("title", ""), re.IGNORECASE)
+        if m and int(m.group(1)) == bab_num:
+            item["title"] = f"Bab {bab_num} - {new_title}" if not new_title.lower().startswith("bab") else new_title
+            updated = True
+            break
+            
+    if not updated:
+        formatted_title = f"Bab {bab_num} - {new_title}" if not new_title.lower().startswith("bab") else new_title
+        toc_data.append({
+            "title": formatted_title,
+            "start_page": 1,
+            "end_page": 1
+        })
+        
+    try:
+        with open(toc_path, "w", encoding="utf-8") as f:
+            json.dump(toc_data, f, indent=4)
+        with _TOC_CACHE_LOCK:
+            _TOC_CACHE.pop(doc_id, None)
+        return {"status": "success", "message": f"Judul Bab {bab_num} berhasil diperbarui", "title": new_title}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {str(e)}")
+
+@router.delete("/documents/{doc_id}/bab/{bab_num}")
+def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)):
+    doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
+        
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    deleted_tables = 0
+    
+    for t in tables:
+        m = re.search(r'Tabel[\s_]*(\d+)', t.table_name, re.IGNORECASE)
+        if m and int(m.group(1)) == bab_num:
+            db.query(models.TableRow).filter(models.TableRow.table_id == t.id).delete()
+            if t.csv_path:
+                try:
+                    p = get_safe_windows_path(t.csv_path)
+                    if os.path.exists(p):
+                        os.remove(p)
+                except Exception:
+                    pass
+            db.delete(t)
+            deleted_tables += 1
+            
+    # Hapus dari toc.json jika ada
+    doc_dir = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
+    toc_path = os.path.join(doc_dir, "toc.json")
+    if os.path.exists(toc_path):
+        try:
+            with open(toc_path, "r", encoding="utf-8") as f:
+                toc_data = json.load(f)
+            toc_data = [
+                item for item in toc_data 
+                if not (re.search(r'Bab\s*(\d+)', item.get("title", ""), re.IGNORECASE) and 
+                        int(re.search(r'Bab\s*(\d+)', item.get("title", ""), re.IGNORECASE).group(1)) == bab_num)
+            ]
+            with open(toc_path, "w", encoding="utf-8") as f:
+                json.dump(toc_data, f, indent=4)
+        except Exception:
+            pass
+            
+    db.commit()
+    with _DOC_TABLES_CACHE_LOCK:
+        _DOC_TABLES_CACHE.pop(doc_id, None)
+    with _TOC_CACHE_LOCK:
+        _TOC_CACHE.pop(doc_id, None)
+        
+    return {"status": "success", "message": f"Berhasil menghapus Bab {bab_num} ({deleted_tables} tabel terhapus)."}
 
 @router.post("/documents/{doc_id}/extract")
 def extract_document(doc_id: int, req: ExtractRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):

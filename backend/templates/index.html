@@ -1390,25 +1390,25 @@
                                                  </div>
                                              </div>
 
-                                             <!-- 4 & 5. Tahun Awal & Tahun Akhir (Selalu Sejajar Berdampingan 50%-50%) -->
-                                             <div class="col-12 col-sm-8 col-md-4 col-lg-3">
-                                                 <div class="row g-2">
-                                                     <!-- Tahun Awal -->
-                                                     <div class="col-6">
-                                                         <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
-                                                             Tahun Awal:
-                                                         </label>
-                                                         <select id="ts-insight-select-year-start" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                                     </div>
-                                                     <!-- Tahun Akhir -->
-                                                     <div class="col-6">
-                                                         <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
-                                                             Tahun Akhir:
-                                                         </label>
-                                                         <select id="ts-insight-select-year-end" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
-                                                     </div>
-                                                 </div>
-                                             </div>
+                                            <!-- 4 & 5. Tahun Awal & Tahun Akhir (Selalu Sejajar Berdampingan dengan Jarak Lega) -->
+                                            <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+                                                <div class="row gx-3 gy-2">
+                                                    <!-- Tahun Awal -->
+                                                    <div class="col-6">
+                                                        <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
+                                                            Tahun Awal:
+                                                        </label>
+                                                        <select id="ts-insight-select-year-start" class="ts-insight-select w-100" style="min-width: 135px;" onchange="onInsightFilterChanged()"></select>
+                                                    </div>
+                                                    <!-- Tahun Akhir -->
+                                                    <div class="col-6">
+                                                        <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
+                                                            Tahun Akhir:
+                                                        </label>
+                                                        <select id="ts-insight-select-year-end" class="ts-insight-select w-100" style="min-width: 135px;" onchange="onInsightFilterChanged()"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
                                             <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">

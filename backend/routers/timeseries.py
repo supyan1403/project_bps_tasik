@@ -171,7 +171,27 @@ _KECAMATAN_SET = set(_KECAMATAN_TASIK)
 def normalize_entity_name(raw: str) -> str:
     if not raw:
         return raw
-    s = raw.strip()
+    s_raw = str(raw).strip()
+    _EDU_CODE_MAP = {
+        "0": "≤ Sekolah Dasar (SD)",
+        "1": "SMP / Sederajat",
+        "2": "SMA / SMK / Sederajat",
+        "3": "Perguruan Tinggi",
+    }
+    if s_raw in _EDU_CODE_MAP:
+        return _EDU_CODE_MAP[s_raw]
+
+    s_lower = s_raw.lower()
+    if any(k in s_lower for k in ["sekolah dasar", "≤ sd", "<= sd", "sd / sederajat", "≤ sekolah dasar"]):
+        return "≤ Sekolah Dasar (SD)"
+    if "smp" in s_lower:
+        return "SMP / Sederajat"
+    if "sma" in s_lower or "smk" in s_lower:
+        return "SMA / SMK / Sederajat"
+    if "perguruan tinggi" in s_lower or "universitas" in s_lower or "diploma" in s_lower:
+        return "Perguruan Tinggi"
+
+    s = s_raw
     s = re.sub(r'^\d+[\s\.]+', '', s)
     s = re.sub(r'\s*\([^)]*\)', '', s)
     s = s.strip()
@@ -694,7 +714,7 @@ def timeseries_data_by_indicators(indicators: str = "", years: str = "", db: Ses
         if not all_rows:
             continue
 
-        headers = list(all_rows[0].data.keys()) if all_rows[0].data else []
+        headers = get_table_headers(db, table)
         entity_key = headers[0] if headers else "Kecamatan"
         
         # Filter hanya kolom indikator yang dicentang/diminta oleh user
@@ -761,7 +781,7 @@ def timeseries_browse_data(table_id: int, db: Session = Depends(get_db)):
     if not all_rows:
         return {"status": "success", "data": []}
 
-    headers = list(all_rows[0].data.keys()) if all_rows[0].data else []
+    headers = get_table_headers(db, table)
     entity_key = headers[0] if headers else "Kecamatan"
     value_cols = [c for c in headers if c != entity_key]
     data_rows = []
@@ -797,10 +817,7 @@ def timeseries_table_columns(table_ids: str, db: Session = Depends(get_db)):
     entity_key = ""
     all_cols = {}
     for table in tables:
-        row = db.query(models.TableRow).filter(models.TableRow.table_id == table.id).first()
-        if not row or not row.data:
-            continue
-        headers = list(row.data.keys())
+        headers = get_table_headers(db, table)
         if not headers:
             continue
         if not entity_key:

@@ -10435,27 +10435,32 @@ function selectTableGroupForTimeSeries(tableIdsStr, keyword) {
 
 
 function _sortEntitiesWithKabLast(arr) {
+    var eduRank = function(name) {
+        if (!name) return 999;
+        var s = String(name).toLowerCase();
+        if (s.includes('sekolah dasar') || s.includes('≤ sd') || s.includes('<= sd') || s.includes('sd /')) return 1;
+        if (s.includes('smp')) return 2;
+        if (s.includes('sma') || s.includes('smk')) return 3;
+        if (s.includes('perguruan tinggi') || s.includes('diploma') || s.includes('universitas')) return 4;
+        return 999;
+    };
 
     return arr.sort(function(a, b) {
-
         var aa = a === 'Kabupaten Tasikmalaya', bb = b === 'Kabupaten Tasikmalaya';
-
         if (aa && !bb) return 1;
-
         if (!aa && bb) return -1;
 
+        var rA = eduRank(a), rB = eduRank(b);
+        if (rA !== 999 || rB !== 999) {
+            if (rA !== rB) return rA - rB;
+        }
+
         var ma = a.match(/^(\d+)/), mb = b.match(/^(\d+)/);
-
         if (ma && mb) return parseInt(ma[1],10) - parseInt(mb[1],10) || a.localeCompare(b);
-
         if (ma) return -1;
-
         if (mb) return 1;
-
         return a.localeCompare(b);
-
     });
-
 }
 
 

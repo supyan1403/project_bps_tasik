@@ -50,9 +50,16 @@ backend/logs.txt
 nul
 NUL
 
-# File temp
+# File temp & audit (jangan di-commit!)
 scan_all_results.json
 modifications_example.json
+audit_results.json
+backend/audit_results.json
+detected_table_pages.json
+*audit*.py
+*audit*.json
+fix_fasilitas.py
+patch_*.py
 
 # Preview asset dev
 backend/static/preview/

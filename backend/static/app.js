@@ -5393,28 +5393,137 @@ function deleteDocument(docId) {
     }).then((result) => {
 
         if (result.isConfirmed) {
-
             Swal.fire('Terhapus!', 'Publikasi berhasil dihapus.', 'success');
-
         }
-
     });
-
 }
 
+function _escJs(str) {
+    if (!str) return '';
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
 
+async function openEditDocModal(docId, currentYear, currentFilename) {
+    const { value: formValues } = await Swal.fire({
+        title: 'Edit Publikasi',
+        html: `
+            <div class="text-start mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.85rem;">Tahun Publikasi</label>
+                <input id="swal-edit-doc-year" type="number" class="form-control" value="${currentYear || ''}" placeholder="Contoh: 2026">
+            </div>
+            <div class="text-start">
+                <label class="form-label fw-semibold" style="font-size:0.85rem;">Nama File / Judul Dokumen</label>
+                <input id="swal-edit-doc-name" type="text" class="form-control" value="${(currentFilename || '').replace(/"/g, '&quot;')}" placeholder="Contoh: Kabupaten Tasikmalaya Dalam Angka 2026.pdf">
+            </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: cssVar('--primary') || '#2563eb',
+        preConfirm: () => {
+            const yearVal = document.getElementById('swal-edit-doc-year').value;
+            const nameVal = document.getElementById('swal-edit-doc-name').value;
+            if (!nameVal.trim()) {
+                Swal.showValidationMessage('Nama file / judul publikasi tidak boleh kosong');
+                return false;
+            }
+            return {
+                year: yearVal ? parseInt(yearVal, 10) : null,
+                filename: nameVal.trim()
+            };
+        }
+    });
+
+    if (formValues) {
+        try {
+            const res = await fetch(`${API_BASE}/documents/${docId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formValues)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || "Gagal memperbarui publikasi");
+
+            showToast("success", "Berhasil", data.message || "Publikasi berhasil diperbarui");
+            await loadDocuments();
+            await populateDocumentList();
+            notifyDataChange('document');
+        } catch (err) {
+            Swal.fire('Gagal', err.message, 'error');
+        }
+    }
+}
+
+async function editBabTitle(docId, babNum, currentTitle) {
+    const { value: newTitle } = await Swal.fire({
+        title: `Edit Judul Bab ${babNum}`,
+        input: 'text',
+        inputValue: currentTitle || '',
+        inputLabel: 'Nama / Topik Bab',
+        inputPlaceholder: 'Contoh: Sosial dan Kependudukan',
+        showCancelButton: true,
+        confirmButtonText: 'Simpan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: cssVar('--primary') || '#2563eb',
+        inputValidator: (value) => {
+            if (!value || !value.trim()) {
+                return 'Judul bab tidak boleh kosong!';
+            }
+        }
+    });
+
+    if (newTitle !== undefined && newTitle.trim() !== '') {
+        try {
+            const res = await fetch(`${API_BASE}/documents/${docId}/bab/${babNum}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: newTitle.trim() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || "Gagal memperbarui bab");
+
+            showToast("success", "Berhasil", data.message || `Judul Bab ${babNum} berhasil diperbarui`);
+            await populateDocumentList();
+            notifyDataChange('document');
+        } catch (err) {
+            Swal.fire('Gagal', err.message, 'error');
+        }
+    }
+}
+
+function renderDocLevelSkeleton(title = "") {
+    const container = document.getElementById("document-list-container");
+    if (!container) return;
+    container.innerHTML = `
+        <div class="doc-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-3 rounded-3" style="background:var(--bg-card); border:1px solid var(--border);">
+            <div class="d-flex align-items-center gap-2" style="font-size:0.95rem; font-weight:600;">
+                <span class="text-primary" style="cursor:pointer;" onclick="viewState.selectedDocId=null; viewState.selectedBabNum=null; populateDocumentList();">
+                    <i class="bi bi-folder2 me-1"></i> Semua Dokumen
+                </span>
+                <span class="text-muted">/</span>
+                <span class="text-secondary">${title || 'Memuat...'}</span>
+            </div>
+        </div>
+        <div class="top-progress-bar"></div>
+        <div class="skeleton-grid">
+            ${Array(6).fill(0).map(() => `
+                <div class="skeleton-card">
+                    <div class="skeleton-box" style="width: 70px; height: 24px; border-radius: 20px;"></div>
+                    <div class="skeleton-box" style="width: 80%; height: 20px; border-radius: 6px;"></div>
+                    <div class="skeleton-box" style="width: 40%; height: 16px; border-radius: 6px;"></div>
+                    <div class="skeleton-box" style="width: 60%; height: 30px; border-radius: 20px; margin-top: 6px;"></div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
 
 // State untuk navigasi drill-down (Folder Explorer)
-
 let viewState = {
-
     selectedDocId: null,
-
     selectedBabNum: null
-
 };
-
-
 
 // Page 3: Tabel Data (CRUD)
 async function populateDocumentList() {
@@ -5432,24 +5541,54 @@ async function populateDocumentList() {
         } catch (e) {}
     }
 
-    // Jalankan fetch docs, toc, dan tables secara paralel jika doc dipilih
-    const fetchPromises = [
-        fetch(`${API_BASE}/documents`).then(r => r.ok ? r.json() : []).catch(() => [])
-    ];
+    const fetchWithTimeout = (url, timeoutMs = 8000) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        return fetch(url, { signal: controller.signal })
+            .then(r => { clearTimeout(timer); return r.ok ? r.json() : []; })
+            .catch(err => {
+                clearTimeout(timer);
+                throw err;
+            });
+    };
 
     let docChapters = {};
     let preloadedTables = null;
+    let results;
 
-    if (viewState.selectedDocId) {
-        fetchPromises.push(
-            fetch(`${API_BASE}/documents/${viewState.selectedDocId}/toc`).then(r => r.ok ? r.json() : []).catch(() => [])
-        );
-        fetchPromises.push(
-            fetch(`${API_BASE}/documents/${viewState.selectedDocId}/tables`).then(r => r.ok ? r.json() : []).catch(() => [])
-        );
+    try {
+        const fetchPromises = [
+            fetchWithTimeout(`${API_BASE}/documents`)
+        ];
+        if (viewState.selectedDocId) {
+            fetchPromises.push(fetchWithTimeout(`${API_BASE}/documents/${viewState.selectedDocId}/toc`));
+            fetchPromises.push(fetchWithTimeout(`${API_BASE}/documents/${viewState.selectedDocId}/tables`));
+        }
+        results = await Promise.all(fetchPromises);
+    } catch (netErr) {
+        console.warn("[populateDocumentList] Jaringan lambat/terputus:", netErr);
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <div class="mb-3 text-warning">
+                    <i class="bi bi-wifi-off" style="font-size: 3rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Koneksi Lambat atau Terputus</h5>
+                <p class="text-muted mb-4" style="max-width: 480px; margin: 0 auto; font-size: 0.9rem;">
+                    Gagal memuat data karena batas waktu tunggu (8 detik) habis. Pastikan koneksi internet Anda aktif.
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-primary rounded-pill px-4" onclick="populateDocumentList()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Coba Lagi
+                    </button>
+                    <button class="btn btn-outline-secondary rounded-pill px-4" onclick="viewState.selectedDocId=null; viewState.selectedBabNum=null; populateDocumentList();">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Dokumen
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
     }
 
-    const results = await Promise.all(fetchPromises);
     const freshDocs = results[0];
     if (freshDocs && freshDocs.length > 0) {
         docs = freshDocs;
@@ -5761,64 +5900,51 @@ async function populateDocumentList() {
 
                 card.style.minHeight = "230px";
 
-                card.onclick = () => {
-                    showLoadingModal("Membuka Publikasi...", "Memuat bab dan daftar tabel publikasi...");
+                card.onclick = (e) => {
+                    if (e.target.closest('.doc-action-btn') || e.target.closest('button')) return;
                     viewState.selectedDocId = d.id;
-                    populateDocumentList().finally(() => hideLoadingModal());
+                    viewState.selectedBabNum = null;
+                    renderDocLevelSkeleton(d.year ? `Publikasi ${d.year}` : d.filename);
+                    populateDocumentList();
                 };
 
                 let loadingBadge = '';
-
                 if (d.status.startsWith('extracting')) {
-
                     loadingBadge = `
-
                         <div style="position:absolute; top:15px; right:15px; display:flex; align-items:center; gap:6px; background:#fffbeb; color:#b45309; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:700; border:1px solid #fcd34d; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-
                             <div style="width:12px; height:12px; border:2px solid #fcd34d; border-top-color:#b45309; border-radius:50%; animation:spin 1s linear infinite;"></div>
-
                             <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
-
                             Mengekstrak...
-
                         </div>`;
-
                 }
 
-                
+                const actionButtons = `
+                    <div class="doc-card-actions" style="position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:5;" onclick="event.stopPropagation()">
+                        <button class="doc-action-btn btn-edit" title="Edit Publikasi" onclick="openEditDocModal(${d.id}, ${d.year || "null"}, '${_escJs(d.filename || '')}')">
+                            <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
+                        </button>
+                        <button class="doc-action-btn btn-delete" title="Hapus Publikasi" onclick="deleteDocument(${d.id})">
+                            <i class="bi bi-trash" style="font-size:0.8rem;"></i>
+                        </button>
+                    </div>
+                `;
 
                 const pubTitle = d.year ? `Publikasi ${d.year}` : d.filename;
-
                 const tableBadge = d.table_count !== undefined 
-
                     ? `<span style="color:var(--info, #2563eb); font-weight:600; font-size:0.78rem; background:#eff6ff; border:1px solid #bfdbfe; padding:3px 8px; border-radius:20px; white-space:nowrap;">${d.table_count} Tabel</span>` 
-
                     : '';
 
-
-
                 card.innerHTML = `
-
-                    ${loadingBadge}
-
+                    ${loadingBadge ? loadingBadge : actionButtons}
                     <div style="text-align:center; width:100%;">
-
                         <div class="doc-icon-wrapper"><i class="bi bi-folder2-open text-primary" style="font-size:2rem;"></i></div>
-
                         <h3 class="doc-card-title" style="margin:0 0 0.6rem 0; font-size:1.25rem; font-weight:700; word-break:break-word; line-height:1.4;">${pubTitle}</h3>
-
                     </div>
-
                     <div style="display:flex; justify-content:center; align-items:center; gap:5px; flex-wrap:nowrap; margin-top:12px; width:100%;">
-
                         <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#e0e7ff; color:#3730a3; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
-
                         <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${d.year ? d.year - 1 : '-'}</span>
-
                         ${tableBadge}
-
                     </div>
-
                 `;
 
                 grid.appendChild(card);
@@ -5987,44 +6113,50 @@ async function populateDocumentList() {
                 const card = document.createElement("div");
 
                 card.className = "doc-chapter-card";
-
                 card.style.borderRadius = "16px";
-
-                card.style.padding = "1.75rem 1.5rem";
-
+                card.style.padding = "1.5rem 1.25rem";
                 card.style.cursor = "pointer";
-
-                
+                card.style.display = "flex";
+                card.style.flexDirection = "column";
+                card.style.justifyContent = "space-between";
+                card.style.minHeight = "190px";
 
                 card.onclick = (e) => {
-                    if(e.target.tagName.toLowerCase() === 'button') return;
-                    showLoadingModal("Membuka Bab...", `Menyiapkan daftar tabel ${bab.name}...`);
+                    if (e.target.closest('button') || e.target.closest('.btn')) return;
                     viewState.selectedBabNum = bab.num;
-                    populateDocumentList().finally(() => hideLoadingModal());
+                    populateDocumentList();
                 };
 
-                
+                let cleanTitle = bab.name;
+                const mBab = cleanTitle.match(/^Bab\s+\d+\s*[-–—:]\s*(.+)$/i);
+                if (mBab) cleanTitle = mBab[1].trim();
+                const safeTitle = _escJs(cleanTitle || bab.name);
 
                 let cardHTML = `
-
-                    <div class="doc-icon-wrapper"><i class="bi bi-collection text-primary" style="font-size:1.8rem;"></i></div>
-
-                    <h4 class="doc-card-title" style="margin:0 0 0.75rem 0; font-size:1.15rem; font-weight:700; text-align:center; line-height:1.4;">${bab.name}</h4>
-
-                    <p class="doc-card-subtitle" style="margin:0 0 1.25rem 0; text-align:center; font-size:0.9rem; font-weight:500;">${bab.tables.length} Tabel</p>
-
+                    <div>
+                        <div class="d-flex justify-content-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-bold" style="font-size:0.8rem; letter-spacing:0.5px;">
+                                Bab ${bab.num}
+                            </span>
+                        </div>
+                        <h4 class="doc-card-title" style="margin:0 0 0.5rem 0; font-size:1.05rem; font-weight:700; text-align:center; line-height:1.4;">${cleanTitle}</h4>
+                        <p class="doc-card-subtitle" style="margin:0 0 1rem 0; text-align:center; font-size:0.85rem; font-weight:500; color:var(--text-muted);">${bab.tables.length} Tabel</p>
+                    </div>
                 `;
 
-                
+                const actionBtns = `
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-auto" onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" style="font-size:0.8rem; font-weight:600;" onclick="editBabTitle(${d.id}, ${bab.num}, '${safeTitle}')">
+                            <i class="bi bi-pencil me-1"></i> Edit Bab
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1" style="font-size:0.8rem; font-weight:600;" onclick="deleteBab(${d.id}, ${bab.num}, '${safeTitle}')">
+                            <i class="bi bi-trash me-1"></i> Hapus
+                        </button>
+                    </div>
+                `;
 
-                const deleteBtn = `<div style="text-align:center;"><button style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:6px 16px; font-size:0.8rem; border-radius:20px; font-weight:600; cursor:pointer; transition:all 0.2s;" onclick="deleteBab(${d.id}, ${bab.num}, '${bab.name}')" onmouseenter="this.style.background=cssVar('--danger') || '#ef4444'; this.style.color='white'" onmouseleave="this.style.background='transparent'; this.style.color=cssVar('--danger') || '#ef4444'">Hapus Bab</button></div>`;
-
-                
-
-                card.innerHTML = cardHTML + deleteBtn;
-
+                card.innerHTML = cardHTML + actionBtns;
                 grid.appendChild(card);
-
             });
 
             container.appendChild(grid);

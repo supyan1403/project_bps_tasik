@@ -6389,9 +6389,8 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
             
 
-            const unit = units[idx] ? units[idx].trim() : "";
-
-            const year = years[idx] ? years[idx].trim() : "";
+            const unit = units[idx] != null ? String(units[idx]).trim() : "";
+            const year = years[idx] != null ? String(years[idx]).trim() : "";
 
             
 
@@ -7009,9 +7008,8 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false, highli
 
                 thead.innerHTML = `<tr>${data.headers.map((h, idx) => {
 
-                    const unit = data.units && data.units[idx] ? data.units[idx].trim() : "";
-
-                    const year = data.years && data.years[idx] ? data.years[idx].trim() : "";
+                    const unit = data.units && data.units[idx] != null ? String(data.units[idx]).trim() : "";
+                    const year = data.years && data.years[idx] != null ? String(data.years[idx]).trim() : "";
 
                     var anomalyInfo = getAnomalyInfo(idx);
 

@@ -553,6 +553,19 @@ def _dedup_timeseries_results(results):
                     "sources": merged_sources,
                     "data": data_rows
                 })
+
+    # Prioritaskan tabel berdimensi lengkap: jika sudah ada tabel rincian multi-baris (misal per pendidikan/kecamatan),
+    # maka tabel agregat 1 baris dengan entity_key generik ('Rincian'/'Uraian') yang isinya cuma 'Kabupaten Tasikmalaya' dieliminasi
+    has_rich_breakdown = any(len(t.get("data", [])) > 1 and t.get("entity_key", "").lower() not in ["rincian", "uraian"] for t in deduped)
+    if has_rich_breakdown:
+        deduped = [
+            t for t in deduped
+            if not (
+                t.get("entity_key", "").lower() in ["rincian", "uraian"] and 
+                len(t.get("data", [])) <= 1 and 
+                all(r.get("entitas") in ["Kabupaten Tasikmalaya", "Total"] for r in t.get("data", []))
+            )
+        ]
     return deduped
 
 class TimeSeriesExportRequest(BaseModel):
@@ -699,6 +712,9 @@ def timeseries_data_by_indicators(indicators: str = "", years: str = "", db: Ses
     doc_ids = [t.document_id for t in tables]
     docs = db.query(models.Document).filter(models.Document.id.in_(doc_ids)).all()
     doc_map = {d.id: d for d in docs}
+
+    # Urutkan tabel berdasarkan tahun publikasi (doc_year) menurun: publikasi 2026 dicek terlebih dahulu, lalu mundur ke 2025, 2024, dst.
+    tables.sort(key=lambda t: (doc_map.get(t.document_id).year if doc_map.get(t.document_id) and doc_map.get(t.document_id).year else 0), reverse=True)
 
     matched_results = []
     for table in tables:

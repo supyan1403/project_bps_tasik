@@ -9,6 +9,7 @@ class Document(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String(255), index=True)
     year = Column(Integer)
+    data_year = Column(Integer, nullable=True)
     status = Column(String(50), default="ready")  # ready, extracting, error
     created_at = Column(DateTime, default=datetime.utcnow)
 

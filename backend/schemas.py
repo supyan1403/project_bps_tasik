@@ -5,6 +5,7 @@ from datetime import datetime
 class DocumentBase(BaseModel):
     filename: str
     year: int
+    data_year: Optional[int] = None
 
 class DocumentCreate(DocumentBase):
     pass

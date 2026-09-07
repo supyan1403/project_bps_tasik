@@ -5403,13 +5403,28 @@ function _escJs(str) {
     return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-async function openEditDocModal(docId, currentYear, currentFilename) {
+async function openEditDocModal(docId, currentYear, currentDataYear, currentFilename) {
+    const defaultDataYear = currentDataYear !== null && currentDataYear !== undefined 
+        ? currentDataYear 
+        : (currentYear ? currentYear - 1 : '');
+
     const { value: formValues } = await Swal.fire({
         title: 'Edit Publikasi',
         html: `
-            <div class="text-start mb-3">
-                <label class="form-label fw-semibold" style="font-size:0.85rem;">Tahun Publikasi</label>
-                <input id="swal-edit-doc-year" type="number" class="form-control" value="${currentYear || ''}" placeholder="Contoh: 2026">
+            <div class="row g-2 mb-3 text-start">
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.85rem;">Tahun Publikasi</label>
+                    <input id="swal-edit-doc-year" type="number" class="form-control" value="${currentYear || ''}" placeholder="Contoh: 2026">
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-semibold" style="font-size:0.85rem;">Tahun Data</label>
+                    <input id="swal-edit-doc-datayear" type="number" class="form-control" value="${defaultDataYear}" placeholder="Contoh: 2025">
+                </div>
+                <div class="col-12 mt-1">
+                    <small class="text-muted" style="font-size:0.75rem; line-height:1.2; display:block;">
+                        *Tahun data otomatis dihitung (Tahun Publikasi - 1), atau ubah manual jika ada pengecualian.
+                    </small>
+                </div>
             </div>
             <div class="text-start">
                 <label class="form-label fw-semibold" style="font-size:0.85rem;">Nama File / Judul Dokumen</label>
@@ -5421,8 +5436,27 @@ async function openEditDocModal(docId, currentYear, currentFilename) {
         confirmButtonText: 'Simpan',
         cancelButtonText: 'Batal',
         confirmButtonColor: cssVar('--primary') || '#2563eb',
+        didOpen: () => {
+            const pubYearInp = document.getElementById('swal-edit-doc-year');
+            const dataYearInp = document.getElementById('swal-edit-doc-datayear');
+            let userCustomizedDataYear = false;
+
+            dataYearInp.addEventListener('input', () => {
+                userCustomizedDataYear = true;
+            });
+
+            pubYearInp.addEventListener('input', () => {
+                if (!userCustomizedDataYear) {
+                    const py = parseInt(pubYearInp.value, 10);
+                    if (!isNaN(py) && py > 1900) {
+                        dataYearInp.value = py - 1;
+                    }
+                }
+            });
+        },
         preConfirm: () => {
             const yearVal = document.getElementById('swal-edit-doc-year').value;
+            const dataYearVal = document.getElementById('swal-edit-doc-datayear').value;
             const nameVal = document.getElementById('swal-edit-doc-name').value;
             if (!nameVal.trim()) {
                 Swal.showValidationMessage('Nama file / judul publikasi tidak boleh kosong');
@@ -5430,6 +5464,7 @@ async function openEditDocModal(docId, currentYear, currentFilename) {
             }
             return {
                 year: yearVal ? parseInt(yearVal, 10) : null,
+                data_year: dataYearVal ? parseInt(dataYearVal, 10) : (yearVal ? parseInt(yearVal, 10) - 1 : null),
                 filename: nameVal.trim()
             };
         }
@@ -5920,7 +5955,7 @@ async function populateDocumentList() {
 
                 const actionButtons = `
                     <div class="doc-card-actions" style="position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:5;" onclick="event.stopPropagation()">
-                        <button class="doc-action-btn btn-edit" title="Edit Publikasi" onclick="openEditDocModal(${d.id}, ${d.year || "null"}, '${_escJs(d.filename || '')}')">
+                        <button class="doc-action-btn btn-edit" title="Edit Publikasi" onclick="openEditDocModal(${d.id}, ${d.year || "null"}, ${d.data_year !== null && d.data_year !== undefined ? d.data_year : "null"}, '${_escJs(d.filename || '')}')">
                             <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
                         </button>
                         <button class="doc-action-btn btn-delete" title="Hapus Publikasi" onclick="deleteDocument(${d.id})">
@@ -5934,6 +5969,8 @@ async function populateDocumentList() {
                     ? `<span style="color:var(--info, #2563eb); font-weight:600; font-size:0.78rem; background:#eff6ff; border:1px solid #bfdbfe; padding:3px 8px; border-radius:20px; white-space:nowrap;">${d.table_count} Tabel</span>` 
                     : '';
 
+                const dataYearVal = (d.data_year !== null && d.data_year !== undefined) ? d.data_year : (d.year ? d.year - 1 : '-');
+
                 card.innerHTML = `
                     ${loadingBadge ? loadingBadge : actionButtons}
                     <div style="text-align:center; width:100%;">
@@ -5942,7 +5979,7 @@ async function populateDocumentList() {
                     </div>
                     <div style="display:flex; justify-content:center; align-items:center; gap:5px; flex-wrap:nowrap; margin-top:12px; width:100%;">
                         <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#e0e7ff; color:#3730a3; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
-                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${d.year ? d.year - 1 : '-'}</span>
+                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${dataYearVal}</span>
                         ${tableBadge}
                     </div>
                 `;
@@ -6114,7 +6151,7 @@ async function populateDocumentList() {
 
                 card.className = "doc-chapter-card";
                 card.style.borderRadius = "16px";
-                card.style.padding = "1.5rem 1.25rem";
+                card.style.padding = "1.75rem 1.5rem";
                 card.style.cursor = "pointer";
                 card.style.display = "flex";
                 card.style.flexDirection = "column";
@@ -6127,20 +6164,12 @@ async function populateDocumentList() {
                     populateDocumentList();
                 };
 
-                let cleanTitle = bab.name;
-                const mBab = cleanTitle.match(/^Bab\s+\d+\s*[-–—:]\s*(.+)$/i);
-                if (mBab) cleanTitle = mBab[1].trim();
-                const safeTitle = _escJs(cleanTitle || bab.name);
+                const safeTitle = _escJs(bab.name);
 
                 let cardHTML = `
-                    <div>
-                        <div class="d-flex justify-content-center mb-2">
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-bold" style="font-size:0.8rem; letter-spacing:0.5px;">
-                                Bab ${bab.num}
-                            </span>
-                        </div>
-                        <h4 class="doc-card-title" style="margin:0 0 0.5rem 0; font-size:1.05rem; font-weight:700; text-align:center; line-height:1.4;">${cleanTitle}</h4>
-                        <p class="doc-card-subtitle" style="margin:0 0 1rem 0; text-align:center; font-size:0.85rem; font-weight:500; color:var(--text-muted);">${bab.tables.length} Tabel</p>
+                    <div style="text-align:center; width:100%;">
+                        <h4 class="doc-card-title" style="margin:0 0 0.65rem 0; font-size:1.15rem; font-weight:700; text-align:center; line-height:1.4;">${bab.name}</h4>
+                        <p class="doc-card-subtitle" style="margin:0 0 1.25rem 0; text-align:center; font-size:0.9rem; font-weight:500;">${bab.tables.length} Tabel</p>
                     </div>
                 `;
 

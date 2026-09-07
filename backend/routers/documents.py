@@ -45,6 +45,7 @@ class TOCItem(BaseModel):
 
 class UpdateDocumentRequest(BaseModel):
     year: Optional[int] = None
+    data_year: Optional[int] = None
     filename: Optional[str] = None
 
 class UpdateBabRequest(BaseModel):
@@ -204,6 +205,7 @@ def get_documents(response: Response, skip: int = 0, limit: int = 100, db: Sessi
             "id": doc.id,
             "filename": doc.filename,
             "year": doc.year,
+            "data_year": doc.data_year,
             "status": doc.status,
             "created_at": doc.created_at,
             "table_count": count
@@ -374,6 +376,10 @@ def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depen
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
     if req.year is not None:
         doc.year = req.year
+    if req.data_year is not None:
+        doc.data_year = req.data_year
+    elif req.year is not None and doc.data_year is None:
+        doc.data_year = req.year - 1
     if req.filename is not None and req.filename.strip():
         doc.filename = req.filename.strip()
     db.commit()
@@ -381,7 +387,7 @@ def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depen
     return {
         "status": "success",
         "message": "Publikasi berhasil diperbarui",
-        "document": {"id": doc.id, "year": doc.year, "filename": doc.filename}
+        "document": {"id": doc.id, "year": doc.year, "data_year": doc.data_year, "filename": doc.filename}
     }
 
 @router.put("/documents/{doc_id}/bab/{bab_num}")

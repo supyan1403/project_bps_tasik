@@ -585,3 +585,26 @@
         margin-bottom: 0.5rem !important;
     }
 }
+
+/* ===================== TREND COLLAPSIBLE — DARK THEME ===================== */
+.ts-trend-collapsible {
+    background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+    border: 1px solid #334155 !important;
+    border-radius: var(--border-radius-lg, 12px) !important;
+}
+
+.ts-trend-header {
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+}
+
+.ts-trend-collapsible[open] > .ts-trend-header::after {
+    color: #94a3b8 !important;
+}
+
+.ts-trend-collapsible .ts-collapsible-body {
+    background: var(--bg-card, #ffffff) !important;
+    border-radius: 0 0 var(--border-radius-lg, 12px) var(--border-radius-lg, 12px) !important;
+}

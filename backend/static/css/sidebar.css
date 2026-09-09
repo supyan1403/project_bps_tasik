@@ -59,7 +59,10 @@ html.no-sidebar-transition .bps-brand-text,
 html.no-sidebar-transition .nav-link-text,
 html.no-sidebar-transition .sidebar-btn-text,
 html.no-sidebar-transition .theme-mode-label,
-html.no-sidebar-transition .submenu-arrow {
+html.no-sidebar-transition .submenu-arrow,
+html.no-sidebar-transition .sidebar-user-card,
+html.no-sidebar-transition .sidebar-user-chevron,
+html.no-sidebar-transition .sidebar-user-info {
     transition: none !important;
 }
 
@@ -894,6 +897,7 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
 }
 
 /* Collapsed Sidebar User Widget Support */
+html.sidebar-collapsed-early body #sidebar-user-widget,
 body.sidebar-collapsed #sidebar-user-widget {
     width: 100% !important;
     display: flex !important;
@@ -903,6 +907,8 @@ body.sidebar-collapsed #sidebar-user-widget {
     margin: 0 !important;
 }
 
+html.sidebar-collapsed-early body #sidebar-user-btn,
+html.sidebar-collapsed-early body .sidebar-user-card,
 body.sidebar-collapsed #sidebar-user-btn,
 body.sidebar-collapsed .sidebar-user-card {
     justify-content: center !important;
@@ -920,6 +926,7 @@ body.sidebar-collapsed .sidebar-user-card {
     overflow: hidden !important;
 }
 
+html.sidebar-collapsed-early body #sidebar-user-btn > div,
 body.sidebar-collapsed #sidebar-user-btn > div {
     display: flex !important;
     align-items: center !important;
@@ -931,6 +938,9 @@ body.sidebar-collapsed #sidebar-user-btn > div {
     padding: 0 !important;
 }
 
+html.sidebar-collapsed-early body .sidebar-user-info,
+html.sidebar-collapsed-early body .sidebar-user-chevron,
+html.sidebar-collapsed-early body #sidebar-user-btn .sidebar-user-chevron,
 body.sidebar-collapsed .sidebar-user-info,
 body.sidebar-collapsed .sidebar-user-chevron,
 body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
@@ -944,6 +954,7 @@ body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
     padding: 0 !important;
 }
 
+html.sidebar-collapsed-early body .sidebar-user-avatar,
 body.sidebar-collapsed .sidebar-user-avatar {
     width: 30px !important;
     height: 30px !important;
@@ -952,6 +963,7 @@ body.sidebar-collapsed .sidebar-user-avatar {
     flex-shrink: 0 !important;
 }
 
+html.sidebar-collapsed-early body .sidebar-user-dropdown,
 body.sidebar-collapsed .sidebar-user-dropdown {
     display: none !important;
 }

@@ -1316,9 +1316,12 @@
                             </div>
                             </details>
 
+                            <!-- Chart Title (Outside Glass Panel) -->
+                            <div id="ts-chart-title-1" class="mb-2" style="font-size:1.05rem; font-weight:700; color:var(--text-primary, #1e293b); display:none; letter-spacing:0.2px;"></div>
+
                             <!-- Time Series Chart Area -->
                             <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
-                                <div id="ts-chart-title-1" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;display:none;"></div>
+                                
                                 
                                 <!-- Kustom Legenda (Scrollable Ringkas) -->
                                 <div id="ts-custom-legend" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
@@ -1357,19 +1360,11 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Trend Insights Banner -->
-                        <div class="ts-trend-banner mb-3" onclick="toggleTimeSeriesInsights()" role="button" tabindex="0">
-                            <div>
-                                <div class="fw-bold text-white" style="font-size:0.95rem; letter-spacing:0.2px;">Wawasan Tren & Pertumbuhan</div>
-                                <div style="color: #94a3b8; font-size:0.78rem;">Analisis pertumbuhan, tren wilayah, dan perbandingan antar kecamatan</div>
-                            </div>
-                            <div class="ts-trend-banner-cta">
-                                <span>Lihat Analisis</span> <i class="bi bi-arrow-right"></i>
-                            </div>
-                        </div>
-
-                        <!-- Expandable Trend & Growth Insights Drawer -->
-                        <div id="ts-insights-drawer" class="ts-insights-drawer mb-3" style="display: none;">
+                        <!-- Trend Insights — Collapsible -->
+                        <details class="ts-collapsible-mobile ts-trend-collapsible" open>
+                        <summary class="ts-collapsible-header ts-trend-header">Wawasan Tren & Pertumbuhan</summary>
+                        <div class="ts-collapsible-body">
+                        <div id="ts-insights-drawer" class="ts-insights-drawer mb-3">
                             <div class="ts-insights-card p-3 p-md-4 rounded-3 border shadow-sm">
                                 <!-- Header Panel -->
                                 <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
@@ -1377,9 +1372,6 @@
                                         <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.96rem;">Analisis Pertumbuhan & Tren Wilayah</h6>
                                         <small class="text-muted" id="ts-insights-subtitle" style="font-size: 0.77rem;">Berdasarkan perubahan data antar tahun observasi</small>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-link p-1 text-muted text-decoration-none" onclick="toggleTimeSeriesInsights(false)" title="Tutup Panel" style="font-size: 1.1rem; line-height: 1;">
-                                        <i class="bi bi-x-circle-fill"></i>
-                                    </button>
                                 </div>
 
                                 <!-- 3 Highlight Metric Cards -->
@@ -1545,6 +1537,7 @@
                             </div>
                         </div>
                         </div>
+                        </details>
 
                         <!-- SECTION 2: TABLE VIEW (Fokus Data Tabular & Ekspor) -->
                         <div id="ts-view-section-table" style="display:none;">

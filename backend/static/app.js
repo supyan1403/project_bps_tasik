@@ -12178,47 +12178,18 @@ let tsInsightSearchKeyword = '';
 
 function toggleTimeSeriesInsights(forceState) {
 
-    if (typeof forceState === 'boolean') {
-
-        tsInsightsExpanded = forceState;
-
-    } else {
-
-        tsInsightsExpanded = !tsInsightsExpanded;
-
-    }
-
-
-
     const drawer = document.getElementById('ts-insights-drawer');
+    if (!drawer) return;
+    const detailsEl = drawer.closest('details.ts-trend-collapsible');
+    if (!detailsEl) return;
 
-    const chevron = document.getElementById('ts-insights-chevron');
-
-    const btn = document.getElementById('btn-ts-toggle-insights');
-
-
-
-    if (drawer) {
-
-        drawer.style.display = tsInsightsExpanded ? 'block' : 'none';
-
+    if (typeof forceState === 'boolean') {
+        detailsEl.open = forceState;
+        tsInsightsExpanded = forceState;
+    } else {
+        detailsEl.open = !detailsEl.open;
+        tsInsightsExpanded = detailsEl.open;
     }
-
-    if (chevron) {
-
-        chevron.className = tsInsightsExpanded ? 'bi bi-chevron-up ms-1' : 'bi bi-chevron-down ms-1';
-
-    }
-
-    if (btn) {
-
-        btn.classList.toggle('btn-primary', tsInsightsExpanded);
-
-        btn.classList.toggle('btn-outline-primary', !tsInsightsExpanded);
-
-    }
-
-
 
     if (tsInsightsExpanded) {
         initInsightFilterOptions();

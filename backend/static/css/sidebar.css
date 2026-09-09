@@ -779,49 +779,78 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
 }
 
 /* ===================== SIDEBAR USER ACCOUNT WIDGET ===================== */
+.sidebar-user-widget {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .sidebar-user-card {
     background: var(--bg-page);
     border: 1px solid var(--border);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
     user-select: none;
-    min-height: 44px;
-    height: 44px;
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0 12px !important;
+    justify-content: flex-start !important;
+    padding: 0 8px !important;
+    margin: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
 }
 
 .sidebar-user-card:hover {
     background: var(--sidebar-hover);
     border-color: var(--primary-pale);
-    transform: translateY(-1px);
+    transform: none !important;
+}
+
+#sidebar-user-btn > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
 }
 
 .sidebar-user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
     color: #ffffff !important;
-    font-size: 1rem;
+    font-size: 0.95rem;
     position: relative;
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
 }
 
 .sidebar-user-avatar i,
 .sidebar-user-card .sidebar-user-avatar i,
 body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
     color: #ffffff !important;
-    font-size: 1.05rem !important;
+    font-size: 0.95rem !important;
     line-height: 1 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25)) !important;
 }
 
@@ -829,11 +858,27 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
     position: absolute;
     bottom: -1px;
     right: -1px;
-    width: 8.5px;
-    height: 8.5px;
+    width: 7.5px;
+    height: 7.5px;
     border-radius: 50%;
     background: #22c55e;
-    border: 2px solid var(--bg-card);
+    border: 1.5px solid var(--bg-card);
+}
+
+.sidebar-user-info {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    opacity: 1;
+    max-width: 140px;
+    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, margin-left 0.15s ease-out !important;
+}
+
+.sidebar-user-chevron {
+    margin-left: auto !important;
+    opacity: 1;
+    font-size: 0.75rem !important;
+    flex-shrink: 0 !important;
+    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, transform 0.2s ease !important;
 }
 
 .sidebar-user-card.active .sidebar-user-chevron {
@@ -900,9 +945,7 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
 html.sidebar-collapsed-early body #sidebar-user-widget,
 body.sidebar-collapsed #sidebar-user-widget {
     width: 100% !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    display: block !important;
     padding: 0 !important;
     margin: 0 !important;
 }
@@ -911,17 +954,15 @@ html.sidebar-collapsed-early body #sidebar-user-btn,
 html.sidebar-collapsed-early body .sidebar-user-card,
 body.sidebar-collapsed #sidebar-user-btn,
 body.sidebar-collapsed .sidebar-user-card {
-    justify-content: center !important;
+    justify-content: flex-start !important;
     align-items: center !important;
-    padding: 0 !important;
-    width: 44px !important;
+    padding: 0 8px !important;
+    width: 100% !important;
     height: 44px !important;
-    min-width: 44px !important;
-    max-width: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
     border-radius: 10px !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
 }
@@ -930,7 +971,7 @@ html.sidebar-collapsed-early body #sidebar-user-btn > div,
 body.sidebar-collapsed #sidebar-user-btn > div {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     width: 100% !important;
     height: 100% !important;
     gap: 0 !important;
@@ -947,6 +988,7 @@ body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+    max-width: 0 !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -956,10 +998,12 @@ body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
 
 html.sidebar-collapsed-early body .sidebar-user-avatar,
 body.sidebar-collapsed .sidebar-user-avatar {
-    width: 30px !important;
-    height: 30px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
     font-size: 0.95rem !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     flex-shrink: 0 !important;
 }
 

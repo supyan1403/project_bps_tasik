@@ -20,7 +20,7 @@ from openpyxl.utils import get_column_letter
 from typing import List, Dict, Any, Union, Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, Request, Body, Response, Cookie
-from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.templating import Jinja2Templates
@@ -483,17 +483,15 @@ def read_root(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/login")
 def login_page(request: Request, db: Session = Depends(get_db)):
-    role = "pegawai"
     session_id = request.cookies.get("sipedas_session")
     if session_id:
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
         if sess and sess.role == "admin":
-            role = "admin"
-    is_sidebar_collapsed = request.cookies.get("sipedas_sidebar_collapsed") == "true"
+            return RedirectResponse(url="/", status_code=303)
     response = templates.TemplateResponse(
         request=request,
-        name="index.html",
-        context={"initial_role": role, "initial_sidebar_collapsed": is_sidebar_collapsed}
+        name="login.html",
+        context={}
     )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response

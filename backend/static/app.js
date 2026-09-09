@@ -19942,6 +19942,10 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
         const _chartH = window.innerWidth <= 576 ? 200 : 320;
         wrapper.style.height = _chartH + 'px';
         wrapper.style.minHeight = _chartH + 'px';
+        if (scrollable) {
+            scrollable.style.height = (_chartH + 30) + 'px';
+            scrollable.style.minHeight = (_chartH + 30) + 'px';
+        }
         const activeLabelsCount = isSingleYear ? entities.length : years.length;
         const parentW = (scrollable && scrollable.clientWidth > 50) 
             ? scrollable.clientWidth 
@@ -21723,6 +21727,14 @@ function setTimeSeriesViewMode(mode) {
                 const _chartH = window.innerWidth <= 576 ? 200 : 320;
                 w.style.height = _chartH + 'px';
                 w.style.minHeight = _chartH + 'px';
+            }
+        });
+        ['ts-chart-scrollable', 'ts-chart-scrollable-2', 'ts-chart-scrollable-3'].forEach(id => {
+            const s = document.getElementById(id);
+            if (s) {
+                const _chartH = window.innerWidth <= 576 ? 200 : 320;
+                s.style.height = (_chartH + 30) + 'px';
+                s.style.minHeight = (_chartH + 30) + 'px';
             }
         });
         ['timeSeriesChart', 'timeSeriesChart2', 'timeSeriesChart3'].forEach(id => {

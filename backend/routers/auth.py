@@ -168,6 +168,16 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
         max_age=SESSION_MAX_AGE_HOURS * 3600,
         path="/",
     )
+    # Companion cookie non-HttpOnly untuk sinkronisasi instan frontend (zero-flicker SSR)
+    response.set_cookie(
+        key="sipedas_role",
+        value="admin",
+        httponly=False,
+        secure=bool(os.environ.get("SIPEDAS_DOMAIN")),
+        samesite="lax",
+        max_age=SESSION_MAX_AGE_HOURS * 3600,
+        path="/",
+    )
     return {"role": "admin", "message": "Login admin berhasil.", "session_expires_in_hours": SESSION_MAX_AGE_HOURS}
 
 @router.post("/logout")
@@ -176,6 +186,7 @@ def auth_logout(request: Request, response: Response, db: Session = Depends(get_
     if session_id:
         destroy_session(session_id, db)
     response.delete_cookie("sipedas_session", path="/")
+    response.delete_cookie("sipedas_role", path="/")
     return {"role": "pegawai", "message": "Logout berhasil."}
 
 @router.get("/me")

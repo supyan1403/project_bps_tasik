@@ -1095,14 +1095,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Prioritaskan role dari body class yang disiapkan server (zero-flicker SSR)
     const _serverBodyRole = document.body.classList.contains('role-admin') ? 'admin' : (document.body.classList.contains('role-pegawai') ? 'pegawai' : '');
 
-    // Periksa apakah cookie sesi admin 'sipedas_session' benar-benar ada di browser
-    const _hasSessionCookie = document.cookie.split(';').some(c => c.trim().startsWith('sipedas_session='));
-    let cachedRole = _serverBodyRole || (!_isPostMaintenance && _hasSessionCookie && localStorage.getItem('sipedas_user_role')) || 'pegawai';
-    
-    // Jika cookie sesi tidak ada tapi cache lokal masih tertinggal 'admin', langsung bersihkan!
-    if (!_hasSessionCookie && (localStorage.getItem('sipedas_user_role') === 'admin' || cachedRole === 'admin')) {
-        try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
-        cachedRole = 'pegawai';
+    // Periksa apakah cookie role admin 'sipedas_role' atau localStorage menandakan admin
+    const _hasAdminCookie = document.cookie.split(';').some(c => c.trim().startsWith('sipedas_role=admin'));
+    const _hasAdminStorage = localStorage.getItem('sipedas_user_role') === 'admin';
+
+    let cachedRole = 'pegawai';
+    if (!_isPostMaintenance) {
+        if (_serverBodyRole === 'admin' || _hasAdminCookie || _hasAdminStorage) {
+            cachedRole = 'admin';
+        }
     }
 
     currentUserRole = cachedRole;
@@ -1140,6 +1141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } else {
                     // Sesi admin sudah habis atau tidak valid -> bersihkan cache dan kembali ke publik
                     try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
+                    document.cookie = "sipedas_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
                     if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
                         navigate('timeseries', document.getElementById('nav-timeseries'));
                     }
@@ -2803,161 +2805,34 @@ async function loadDashboardStats() {
             const statsData = await chartDataPromise;
 
             if (statsData) {
+                const isTabRevisit = !!(window.dashboardBarChartInstance && window.dashboardTrendChartInstance && window.dashboardRefYearChartInstance);
 
                 // 1. Bar Chart: Sebaran Tabel per Tahun
-
                 const barCanvas = document.getElementById('dashboardBarChart');
-
                 if (barCanvas && statsData.bar_chart) {
-
                     window.cachedBarChartData = JSON.parse(JSON.stringify(statsData.bar_chart));
-
-                    const ctx = barCanvas.getContext('2d');
-
-                    if (window.dashboardBarChartInstance) window.dashboardBarChartInstance.destroy();
-
-                    window.dashboardBarChartInstance = new Chart(ctx, {
-
-                        type: 'bar',
-
-                        data: statsData.bar_chart,
-
-                        options: {
-
-                            responsive: true,
-
-                            maintainAspectRatio: false,
-
-                            maxBarThickness: 55,
-
-                            barPercentage: 0.75,
-
-                            categoryPercentage: 0.8,
-
-                            animations: {
-
-                                y: {
-
-                                    type: 'number',
-
-                                    easing: 'easeOutQuart',
-
-                                    duration: 750,
-
-                                    from: (ctx) => {
-
-                                        if (typeof ctx.dataIndex === 'number' && ctx.chart && ctx.chart.scales && ctx.chart.scales.y) {
-
-                                            return ctx.chart.scales.y.getPixelForValue(0);
-
-                                        }
-
-                                    },
-
-                                    delay: (ctx) => {
-
-                                        if (typeof ctx.dataIndex === 'number') {
-
-                                            return ctx.dataIndex * 150;
-
-                                        }
-
-                                        return 0;
-
-                                    }
-
-                                }
-
-                            },
-
-                            plugins: {
-
-                                legend: { display: false },
-
-                                tooltip: {
-
-                                    callbacks: {
-
-                                        label: (ctx) => ` ${ctx.raw} Tabel Data Terintegrasi`
-
-                                    }
-
-                                }
-
-                            },
-
-                            scales: {
-
-                                y: {
-
-                                    beginAtZero: true,
-
-                                    grid: { color: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' },
-
-                                    ticks: { color: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b', font: { family: "'Inter', sans-serif", size: 10 } }
-
-                                },
-
-                                x: {
-
-                                    grid: { display: false },
-
-                                    ticks: { color: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b', font: { family: "'Inter', sans-serif", size: 10 } }
-
-                                }
-
-                            }
-
-                        }
-
-                    });
-
-                    if (window.cachedBarChartData && window.cachedBarChartData.labels.length > 10) {
-
-                        const _sel = document.getElementById('barChartYearFilter');
-
-                        if (_sel) { _sel.value = '10'; filterBarChart('10'); }
-
-                    }
-
+                    const _sel = document.getElementById('barChartYearFilter');
+                    const defaultRange = (_sel && _sel.value) ? _sel.value : (window.cachedBarChartData.labels.length > 10 ? '10' : 'all');
+                    if (_sel && !_sel.value) _sel.value = defaultRange;
+                    filterBarChart(defaultRange, !isTabRevisit);
                 }
 
-
-
-
-
-
-
-                // 3. Line/Area Chart: Tren Akumulasi Volume Data (Simpan cache data & inisialisasi render)
-
+                // 3. Line/Area Chart: Tren Akumulasi Volume Data
                 if (statsData.line_chart) {
-
                     window.cachedTrendChartData = statsData.line_chart;
-
-                    renderTrendChartMode(window.currentTrendChartMode || 'points');
-
+                    renderTrendChartMode(window.currentTrendChartMode || 'points', !isTabRevisit);
                 }
-
-
 
                 // 4. Bar Chart: Simpan cache data tahun referensi & inisialisasi render
-
                 if (statsData.ref_year_chart) {
-
                     window.cachedRefChartData = statsData.ref_year_chart;
-
-                    renderRefChartMode(window.currentRefChartMode || 'points');
-
-                    if (window.cachedRefChartData.labels.length > 10) {
-
-                        const _sel = document.getElementById('refChartYearFilter');
-
-                        if (_sel) { _sel.value = '10'; filterRefChart('10'); }
-
+                    const _sel = document.getElementById('refChartYearFilter');
+                    if (_sel && !window.currentRefYearFilter && window.cachedRefChartData.labels.length > 10) {
+                        _sel.value = '10';
+                        window.currentRefYearFilter = '10';
                     }
-
+                    renderRefChartMode(window.currentRefChartMode || 'points', !isTabRevisit);
                 }
-
             }
 
 
@@ -3054,23 +2929,14 @@ function openDocFromDashboard(id) {
 // Fungsi Switch Tampilan Grafik Tren Pertumbuhan Akumulasi Volume (Titik Data vs Baris Record)
 
 function switchTrendChartView(mode) {
-
     window.currentTrendChartMode = mode;
-
-    renderTrendChartMode(mode);
-
+    renderTrendChartMode(mode, true);
 }
 
-
-
-function renderTrendChartMode(mode) {
-
+function renderTrendChartMode(mode, animate = true) {
     if (!window.cachedTrendChartData) return;
-
     const canvas = document.getElementById('dashboardTrendChart');
-
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
 
     
@@ -3120,6 +2986,21 @@ function renderTrendChartMode(mode) {
     
 
     const dataset = isPoints ? window.cachedTrendChartData.datasets[0] : window.cachedTrendChartData.datasets[1];
+    
+    if (window.dashboardTrendChartInstance && !animate) {
+        window.dashboardTrendChartInstance.data.labels = window.cachedTrendChartData.labels;
+        window.dashboardTrendChartInstance.data.datasets = [{
+            ...dataset,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 8,
+            pointHitRadius: 35,
+            pointHoverBorderWidth: 2,
+            borderWidth: 0
+        }];
+        window.dashboardTrendChartInstance.update('none');
+        return;
+    }
 
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
 
@@ -3164,12 +3045,9 @@ function renderTrendChartMode(mode) {
 
 
             const isDarkTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-
             const now = performance.now();
-
             const elapsed = now - animStartTime;
-
-            const progress = Math.min(Math.max(elapsed / totalAnimTime, 0), 1);
+            const progress = animate ? Math.min(Math.max(elapsed / totalAnimTime, 0), 1) : 1;
 
             const activeProgress = progress * totalSegs; // rentang 0.0 sampai totalSegs
 
@@ -3567,9 +3445,8 @@ function renderTrendChartMode(mode) {
 
 
 
-            // Loop frame animasi jika belum selesai
-
-            if (progress < 1) {
+            // Loop frame animasi jika belum selesai dan animate diaktifkan
+            if (progress < 1 && animate) {
 
                 window._trendAnimRafId = requestAnimationFrame(() => {
 
@@ -3698,137 +3575,89 @@ function renderTrendChartMode(mode) {
 
 
 // Fungsi Year Filter untuk Bar Chart Sebaran Tabel
-
-function filterBarChart(range) {
-
+function filterBarChart(range, animate = true) {
     if (!window.cachedBarChartData) return;
-
     const src = window.cachedBarChartData;
-
     const n = range === 'all' ? src.labels.length : parseInt(range);
-
     const labels = src.labels.slice(-n);
-
     const datasets = src.datasets.map(d => ({ ...d, data: d.data.slice(-n) }));
 
+    if (window.dashboardBarChartInstance && !animate) {
+        window.dashboardBarChartInstance.data.labels = labels;
+        window.dashboardBarChartInstance.data.datasets = datasets;
+        window.dashboardBarChartInstance.update('none');
+        return;
+    }
+
     if (window.dashboardBarChartInstance) window.dashboardBarChartInstance.destroy();
-
     const ctx = document.getElementById('dashboardBarChart').getContext('2d');
-
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
 
     window.dashboardBarChartInstance = new Chart(ctx, {
-
         type: 'bar',
-
         data: { labels, datasets },
-
         options: {
-
             responsive: true,
-
             maintainAspectRatio: false,
-
             maxBarThickness: 55,
-
             barPercentage: 0.75,
-
             categoryPercentage: 0.8,
-
+            animations: animate ? {
+                y: {
+                    type: 'number',
+                    easing: 'easeOutQuart',
+                    duration: 750,
+                    from: (ctx) => {
+                        if (typeof ctx.dataIndex === 'number' && ctx.chart && ctx.chart.scales && ctx.chart.scales.y) {
+                            return ctx.chart.scales.y.getPixelForValue(0);
+                        }
+                    },
+                    delay: (ctx) => (typeof ctx.dataIndex === 'number') ? ctx.dataIndex * 150 : 0
+                }
+            } : false,
             plugins: {
-
                 legend: { display: false },
-
                 tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} Tabel Data Terintegrasi` } }
-
             },
-
             scales: {
-
                 y: { beginAtZero: true, grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }, ticks: { color: isDark ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b', font: { family: "'Inter', sans-serif", size: 10 } } },
-
                 x: { grid: { display: false }, ticks: { color: isDark ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b', font: { family: "'Inter', sans-serif", size: 10 } } }
-
             }
-
         }
-
     });
-
 }
-
-
 
 // Fungsi Year Filter untuk Bar Chart Ref Year
-
 function filterRefChart(range) {
-
     window.currentRefYearFilter = range;
-
-    renderRefChartMode(window.currentRefChartMode || 'points');
-
+    renderRefChartMode(window.currentRefChartMode || 'points', true);
 }
-
-
 
 // Fungsi Switch Tampilan Grafik Titik Nilai Data vs Baris Record Data
-
 function switchRefChartView(mode) {
-
     window.currentRefChartMode = mode;
-
-    renderRefChartMode(mode);
-
+    renderRefChartMode(mode, true);
 }
 
-
-
-function renderRefChartMode(mode) {
-
+function renderRefChartMode(mode, animate = true) {
     if (!window.cachedRefChartData) return;
-
     const canvas = document.getElementById('dashboardRefYearChart');
-
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
-
     
-
     const btnPts = document.getElementById('btn-chart-view-points');
-
     const btnRows = document.getElementById('btn-chart-view-rows');
-
     const titleEl = document.getElementById('ref-chart-title');
-
     const subTitleEl = document.getElementById('ref-chart-subtitle');
-
     
-
     const isPoints = mode === 'points';
-
     
-
     if (btnPts && btnRows) {
-
         btnPts.classList.toggle('active', isPoints);
-
         btnRows.classList.toggle('active', !isPoints);
-
     }
-
     
-
     if (titleEl && subTitleEl) {
-
-        const _refRange = window.currentRefYearFilter || 'all';
-
-        const _refN = _refRange === 'all' ? window.cachedRefChartData.labels.length : parseInt(_refRange);
-
-        const _filteredData0 = window.cachedRefChartData.datasets[0].data.slice(-_refN);
-
-        const _filteredData1 = window.cachedRefChartData.datasets[1].data.slice(-_refN);
-
         if (isPoints) {
             titleEl.textContent = 'Sebaran Banyak Titik Nilai Data per Tahun';
             subTitleEl.textContent = 'Distribusi titik nilai sel data statistik berdasarkan tahun kejadian riil';
@@ -3836,133 +3665,72 @@ function renderRefChartMode(mode) {
             titleEl.textContent = 'Sebaran Baris Record Data per Tahun';
             subTitleEl.textContent = 'Distribusi baris entitas observasi per tahun kejadian riil';
         }
-
     }
-
     
-
     const dataset = isPoints ? window.cachedRefChartData.datasets[0] : window.cachedRefChartData.datasets[1];
-
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-
     const tickColor = isDark ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b';
-
     const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
 
-
-
     // Apply year filter
-
     const _refRange = window.currentRefYearFilter || 'all';
-
     const _refN = _refRange === 'all' ? window.cachedRefChartData.labels.length : parseInt(_refRange);
-
     const _refLabels = window.cachedRefChartData.labels.slice(-_refN);
-
     const _refData = dataset.data.slice(-_refN);
-
     const _filteredDataset = { ...dataset, data: _refData };
 
-
+    if (window.dashboardRefYearChartInstance && !animate) {
+        window.dashboardRefYearChartInstance.data.labels = _refLabels;
+        window.dashboardRefYearChartInstance.data.datasets = [_filteredDataset];
+        window.dashboardRefYearChartInstance.update('none');
+        return;
+    }
 
     if (window.dashboardRefYearChartInstance) window.dashboardRefYearChartInstance.destroy();
 
     window.dashboardRefYearChartInstance = new Chart(ctx, {
-
         type: 'bar',
-
         data: {
-
             labels: _refLabels,
-
             datasets: [_filteredDataset]
-
         },
-
         options: {
-
             responsive: true,
-
             maintainAspectRatio: false,
-
-            animations: {
-
+            animations: animate ? {
                 y: {
-
                     type: 'number',
-
                     easing: 'easeOutQuart',
-
                     duration: 750,
-
                     from: (ctx) => {
-
                         if (typeof ctx.dataIndex === 'number' && ctx.chart && ctx.chart.scales && ctx.chart.scales.y) {
-
                             return ctx.chart.scales.y.getPixelForValue(0);
-
                         }
-
                     },
-
-                    delay: (ctx) => {
-
-                        if (typeof ctx.dataIndex === 'number') {
-
-                            return ctx.dataIndex * 120;
-
-                        }
-
-                        return 0;
-
-                    }
-
+                    delay: (ctx) => (typeof ctx.dataIndex === 'number') ? ctx.dataIndex * 120 : 0
                 }
-
-            },
-
+            } : false,
             plugins: {
-
                 legend: { display: false },
-
                 tooltip: {
-
                     callbacks: {
-
                         label: (ctx) => ` ${dataset.label}: ${ctx.raw.toLocaleString('id-ID')} ${isPoints ? 'Titik Nilai Data' : 'Baris Record'}`
-
                     }
-
                 }
-
             },
-
             scales: {
-
                 y: { 
-
                     beginAtZero: true, 
-
                     grid: { color: gridColor }, 
-
                     ticks: { color: tickColor, font: { family: "'Inter', sans-serif", size: 10 } } 
-
                 },
-
                 x: { 
-
                     grid: { display: false }, 
-
                     ticks: { color: tickColor, font: { family: "'Inter', sans-serif", size: 10 } } 
-
                 }
-
             }
-
         }
-
     });
-
 }
 
 

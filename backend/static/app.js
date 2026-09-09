@@ -2505,7 +2505,17 @@ function showDashboardChartLoading() {
     });
 }
 
-async function loadDashboardStats() {
+async function loadDashboardStats(isManual = false) {
+
+    const refreshBtn = document.getElementById('btn-refresh-dashboard');
+    const refreshIcon = document.getElementById('icon-refresh-dashboard') || (refreshBtn ? refreshBtn.querySelector('.bi-arrow-clockwise') : null);
+    const refreshText = document.getElementById('text-refresh-dashboard') || (refreshBtn ? refreshBtn.querySelector('span') : null);
+
+    if (isManual && refreshBtn) {
+        refreshBtn.disabled = true;
+        if (refreshIcon) refreshIcon.classList.add('spin-fast');
+        if (refreshText) refreshText.textContent = 'Memperbarui...';
+    }
 
     const adminView = document.getElementById('dashboard-admin-view');
 
@@ -2514,8 +2524,8 @@ async function loadDashboardStats() {
     
 
     // Fetch chart data secara paralel di awal agar instan
-
-    const chartDataPromise = fetch(`${API_BASE}/stats/chart`).then(r => r.ok ? r.json() : null).catch(() => null);
+    const chartUrl = isManual ? `${API_BASE}/stats/chart?_t=${Date.now()}` : `${API_BASE}/stats/chart`;
+    const chartDataPromise = fetch(chartUrl).then(r => r.ok ? r.json() : null).catch(() => null);
 
     
 
@@ -2649,7 +2659,8 @@ async function loadDashboardStats() {
     }).catch(() => {});
 
     try {
-        const res = await fetch(`${API_BASE}/stats`);
+        const statsUrl = isManual ? `${API_BASE}/stats?force=1&_t=${Date.now()}` : `${API_BASE}/stats`;
+        const res = await fetch(statsUrl);
         if(res.ok) {
             const stats = await res.json();
             try { localStorage.setItem('sipedas_dashboard_stats_cache', JSON.stringify(stats)); } catch (e) {}
@@ -2880,6 +2891,27 @@ async function loadDashboardStats() {
 
         console.error("Gagal memuat statistik dashboard:", err);
 
+    } finally {
+        if (isManual) {
+            // Beri efek animasi segar pada kartu metrik statistik
+            const statCards = document.querySelectorAll('#dashboard-admin-view .stat-card-glass');
+            statCards.forEach(card => {
+                card.classList.remove('stat-card-refreshed');
+                void card.offsetWidth;
+                card.classList.add('stat-card-refreshed');
+                setTimeout(() => card.classList.remove('stat-card-refreshed'), 600);
+            });
+
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                if (refreshIcon) refreshIcon.classList.remove('spin-fast');
+                if (refreshText) refreshText.textContent = 'Perbarui';
+            }
+
+            if (typeof showToast === 'function') {
+                showToast('success', 'Statistik Diperbarui', 'Data metrik database berhasil disinkronkan langsung.');
+            }
+        }
     }
 
 }

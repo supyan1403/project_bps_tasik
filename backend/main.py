@@ -523,14 +523,17 @@ def invalidate_stats_cache():
         _STATS_CACHE_TIME = 0
 
 @app.get("/api/stats")
-def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
+def get_dashboard_stats(response: Response, force: bool = False, db: Session = Depends(get_db)):
     global _STATS_CACHE, _STATS_CACHE_TIME
-    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
-
-    now = time.time()
-    with _STATS_CACHE_LOCK:
-        if _STATS_CACHE is not None and (now - _STATS_CACHE_TIME) < _STATS_TTL:
-            return _STATS_CACHE
+    if force:
+        invalidate_stats_cache()
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    else:
+        response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
+        now = time.time()
+        with _STATS_CACHE_LOCK:
+            if _STATS_CACHE is not None and (now - _STATS_CACHE_TIME) < _STATS_TTL:
+                return _STATS_CACHE
 
     total_docs = db.query(models.Document).count()
     total_tables = db.query(models.ExtractedTable).count()

@@ -320,18 +320,22 @@ def _is_maintenance():
         db.close()
         # Auto-disable jika maintenance_end sudah lewat
         if val == "1" and end_val:
-            from datetime import datetime, timedelta
+            from datetime import datetime, timezone
             try:
-                clean_val = end_val.replace('Z', '').split('+')[0].split('.')[0]
-                end_dt = datetime.fromisoformat(clean_val)
-                # Jika punya Z/offset → UTC. Jika tidak → asumsi local time
-                is_utc = 'Z' in end_val or '+' in end_val or (len(end_val) > 19 and end_val[19] in '+-')
-                now_dt = datetime.utcnow() if is_utc else datetime.now()
+                iso_clean = end_val.strip()
+                if iso_clean.endswith('Z'):
+                    iso_clean = iso_clean[:-1] + '+00:00'
+                end_dt = datetime.fromisoformat(iso_clean)
+                if end_dt.tzinfo is not None:
+                    now_dt = datetime.now(timezone.utc)
+                else:
+                    now_dt = datetime.now()
+
                 if now_dt >= end_dt:
                     val = "0"
-                    _update_maintenance_db("0", "")
-            except Exception:
-                pass
+                    _update_maintenance_db("0", "", log_reason=f"Waktu selesai pemeliharaan telah tercapai ({end_val})")
+            except Exception as e:
+                print(f"[MAINTENANCE] Gagal mem-parse waktu pemeliharaan '{end_val}': {e}")
         _maintenance_cache["active"] = (val == "1")
         _maintenance_cache["end"] = end_val
         _maintenance_cache["ts"] = now
@@ -345,7 +349,7 @@ def _maintenance_end():
     _is_maintenance()  # refresh cache
     return _maintenance_cache["end"]
 
-def _update_maintenance_db(mode, end_time=""):
+def _update_maintenance_db(mode, end_time="", log_reason=""):
     try:
         db = SessionLocal()
         for k, v in [("maintenance_mode", mode), ("maintenance_end", end_time)]:
@@ -354,11 +358,17 @@ def _update_maintenance_db(mode, end_time=""):
                 row.value = v
             else:
                 db.add(models.SystemConfig(key=k, value=v))
+        if log_reason:
+            log = models.ActivityLog(
+                action="toggle_maintenance",
+                target="Mode: AUTO_OFF",
+                detail={"reason": log_reason, "mode": mode}
+            )
+            db.add(log)
         db.commit()
         db.close()
-    except Exception:
-        pass
-        pass
+    except Exception as e:
+        print(f"[MAINTENANCE] Gagal mengupdate konfigurasi pemeliharaan: {e}")
     _maintenance_cache["ts"] = 0
 
 @app.middleware("http")

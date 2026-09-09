@@ -223,6 +223,7 @@ def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = 
 def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     """Aktifkan/nonaktifkan maintenance mode. Hanya admin."""
     from main import _update_maintenance_db, _maintenance_cache
+    from datetime import datetime, timezone
 
     mode = str(payload.get("mode", "")).strip()
     end_time = str(payload.get("end_time", "")).strip()
@@ -230,8 +231,29 @@ def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict
     if mode not in ("1", "0"):
         raise HTTPException(status_code=400, detail="mode harus '1' (aktif) atau '0' (nonaktif)")
 
-    if mode == "1" and not end_time:
-        raise HTTPException(status_code=400, detail="end_time wajib diisi saat mengaktifkan maintenance (ISO format)")
+    if mode == "1":
+        if not end_time:
+            raise HTTPException(status_code=400, detail="Waktu selesai wajib diisi saat mengaktifkan mode pemeliharaan.")
+        try:
+            iso_clean = end_time.strip()
+            if iso_clean.endswith('Z'):
+                iso_clean = iso_clean[:-1] + '+00:00'
+            end_dt = datetime.fromisoformat(iso_clean)
+            if end_dt.tzinfo is not None:
+                now_dt = datetime.now(timezone.utc)
+            else:
+                now_dt = datetime.now()
+
+            diff_seconds = (end_dt - now_dt).total_seconds()
+            if diff_seconds < 60:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Waktu selesai pemeliharaan harus di masa depan (minimal 2 menit dari sekarang agar tidak langsung kedaluwarsa)."
+                )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Format waktu selesai tidak valid: {e}")
 
     _update_maintenance_db(mode, end_time)
     _maintenance_cache["ts"] = 0  # force refresh

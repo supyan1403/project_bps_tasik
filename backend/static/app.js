@@ -17525,6 +17525,7 @@ function _initMaintenanceFlatpickr() {
         dateFormat: 'd/m/Y H:i',
         minuteIncrement: 5,
         locale: 'id',
+        minDate: new Date(Date.now() + 3 * 60 * 1000),
         defaultDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
         altInput: true,
         altFormat: 'j F Y, H:i',
@@ -17664,6 +17665,17 @@ async function saveMaintenanceMode() {
 
         if (!endTime) {
             Swal.fire({ title: 'Peringatan', text: 'Waktu selesai harus diisi saat mengaktifkan maintenance mode.', icon: 'warning', confirmButtonColor: '#2563eb' });
+            return;
+        }
+
+        const targetMs = new Date(endTime).getTime();
+        if (targetMs - Date.now() < 2 * 60 * 1000) {
+            Swal.fire({
+                title: 'Waktu Terlalu Singkat',
+                text: 'Waktu selesai pemeliharaan minimal 3–5 menit ke depan dari waktu sekarang agar tidak langsung kedaluwarsa saat berpindah halaman.',
+                icon: 'warning',
+                confirmButtonColor: '#2563eb'
+            });
             return;
         }
 

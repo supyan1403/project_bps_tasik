@@ -27,9 +27,9 @@
         (function() {
             try {
                 // Sinkronisasi instan sebelum rendering pertama agar tidak ada kedipan sekejap mata
-                var hasCookie = document.cookie.indexOf('sipedas_session=') !== -1;
+                var hasCookie = document.cookie.indexOf('sipedas_role=admin') !== -1;
                 var role = localStorage.getItem('sipedas_user_role');
-                if (hasCookie && role === 'admin') {
+                if (hasCookie || role === 'admin') {
                     document.documentElement.classList.add('is-admin-early');
                 }
             } catch(e) {}

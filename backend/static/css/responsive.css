@@ -600,6 +600,14 @@
     letter-spacing: 0.3px !important;
 }
 
+.ts-trend-subtitle {
+    font-size: 0.74rem !important;
+    font-weight: 400 !important;
+    color: #94a3b8 !important;
+    margin-top: 2px !important;
+    letter-spacing: 0.1px !important;
+}
+
 .ts-trend-collapsible[open] > .ts-trend-header::after {
     color: #94a3b8 !important;
 }

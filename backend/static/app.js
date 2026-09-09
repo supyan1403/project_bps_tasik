@@ -5293,21 +5293,32 @@ async function openEditDocModal(docId, currentYear, currentDataYear, currentFile
 }
 
 async function editBabTitle(docId, babNum, currentTitle) {
-    const cleanCurrentTitle = (currentTitle || '').replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
+    let cleanCurrentTitle = (currentTitle || '').replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
+    if (!cleanCurrentTitle || cleanCurrentTitle.toLowerCase() === `bab ${babNum}`) {
+        cleanCurrentTitle = getBpsStandardTitle(babNum) || '';
+    }
+
     const { value: newTitle } = await Swal.fire({
         title: `Edit Judul Bab ${babNum}`,
-        input: 'text',
-        inputValue: cleanCurrentTitle || '',
-        inputLabel: 'Nama / Topik Bab',
-        inputPlaceholder: 'Contoh: Sosial dan Kependudukan',
+        html: `
+            <div class="text-start mb-2 px-1">
+                <label class="form-label small fw-semibold text-dark mb-1">Nama / Topik Bab <span class="text-danger">*</span></label>
+                <input id="swal-edit-bab-title" type="text" class="form-control" value="${escHtml(cleanCurrentTitle)}" placeholder="Contoh: Sosial dan Kependudukan">
+                <div class="form-text text-muted mt-1" style="font-size:0.75rem;">Ubah nama topik data untuk Bab ${babNum}.</div>
+            </div>
+        `,
+        focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: 'Simpan',
         cancelButtonText: 'Batal',
         confirmButtonColor: cssVar('--primary') || '#2563eb',
-        inputValidator: (value) => {
-            if (!value || !value.trim()) {
-                return 'Judul bab tidak boleh kosong!';
+        preConfirm: () => {
+            const val = document.getElementById('swal-edit-bab-title')?.value;
+            if (!val || !val.trim()) {
+                Swal.showValidationMessage('Judul / nama bab tidak boleh kosong!');
+                return false;
             }
+            return val.trim();
         }
     });
 
@@ -5942,10 +5953,13 @@ async function populateDocumentList() {
                 if (!isNaN(bNum)) {
                     let chapterTitle = getChapterTitle(bNum) || "";
                     chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
+                    if (!chapterTitle || chapterTitle.toLowerCase() === `bab ${bNum}`) {
+                        chapterTitle = getBpsStandardTitle(bNum) || `Bab ${bNum}`;
+                    }
                     const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
                     grouped[bNum] = { 
                         name: `Bab ${bNum}${chapterSuffix}`, 
-                        cleanTitle: chapterTitle || `Bab ${bNum}`, 
+                        cleanTitle: chapterTitle, 
                         num: bNum, 
                         tables: [] 
                     };
@@ -5963,9 +5977,12 @@ async function populateDocumentList() {
                 babNum = parseInt(match[1], 10);
                 let chapterTitle = getChapterTitle(babNum) || "";
                 chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
+                if (!chapterTitle || chapterTitle.toLowerCase() === `bab ${babNum}`) {
+                    chapterTitle = getBpsStandardTitle(babNum) || `Bab ${babNum}`;
+                }
                 const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
                 babName = `Bab ${babNum}${chapterSuffix}`;
-                cleanTitle = chapterTitle || `Bab ${babNum}`;
+                cleanTitle = chapterTitle;
             }
             if (!grouped[babNum]) grouped[babNum] = { name: babName, cleanTitle: cleanTitle, num: babNum, tables: [] };
             grouped[babNum].tables.push(t);
@@ -6007,12 +6024,13 @@ async function populateDocumentList() {
 
                 card.className = "doc-chapter-card";
                 card.style.borderRadius = "16px";
-                card.style.padding = "1.75rem 1.5rem";
+                card.style.padding = "1.5rem 1.25rem";
                 card.style.cursor = "pointer";
                 card.style.display = "flex";
                 card.style.flexDirection = "column";
                 card.style.justifyContent = "space-between";
-                card.style.minHeight = "190px";
+                card.style.alignItems = "center";
+                card.style.minHeight = "215px";
 
                 card.onclick = (e) => {
                     if (e.target.closest('button') || e.target.closest('.btn')) return;
@@ -6023,14 +6041,14 @@ async function populateDocumentList() {
                 const safeTitle = _escJs(bab.cleanTitle || bab.name);
 
                 let cardHTML = `
-                    <div style="text-align:center; width:100%;">
-                        <div class="doc-bab-badge mb-1.5" style="font-size: 0.82rem; font-weight: 700; letter-spacing: 0.4px; color: var(--primary, #2563eb); text-transform: uppercase;">
+                    <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center;">
+                        <div class="doc-bab-badge mb-1" style="font-size: 0.84rem; font-weight: 600; color: var(--primary, #2563eb);">
                             Bab ${bab.num}
                         </div>
-                        <h4 class="doc-card-title mb-2" style="font-size: 1.12rem; font-weight: 700; color: var(--text-primary, #0f172a); line-height: 1.35; min-height: 2.6rem; display: flex; align-items: center; justify-content: center; word-break: break-word;">
+                        <h4 class="doc-card-title mb-2" style="font-size: 1.08rem; font-weight: 700; color: var(--text-primary, #0f172a); line-height: 1.35; height: 2.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; text-align: center;" title="${escHtml(bab.cleanTitle || bab.name)}">
                             ${escHtml(bab.cleanTitle || bab.name)}
                         </h4>
-                        <div class="mb-3">
+                        <div>
                             <span class="badge bg-light text-secondary border fw-medium px-2.5 py-1 rounded-pill" style="font-size: 0.74rem;">
                                 ${bab.tables.length} Tabel
                             </span>
@@ -6039,7 +6057,7 @@ async function populateDocumentList() {
                 `;
 
                 const actionBtns = `
-                    <div class="d-flex justify-content-center align-items-center gap-2 mt-auto" onclick="event.stopPropagation()">
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-auto w-100" onclick="event.stopPropagation()">
                         <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" style="font-size:0.8rem; font-weight:600;" onclick="editBabTitle(${d.id}, ${bab.num}, '${safeTitle}')">
                             <i class="bi bi-pencil me-1"></i> Edit Bab
                         </button>

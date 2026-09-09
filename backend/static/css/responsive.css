@@ -506,6 +506,13 @@
     }
 
     /* Chart height reduction for small phones */
+    #ts-chart-scrollable,
+    #ts-chart-scrollable-2,
+    #ts-chart-scrollable-3 {
+        height: 230px !important;
+        min-height: 230px !important;
+    }
+
     #ts-chart-wrapper,
     #ts-chart-wrapper-2,
     #ts-chart-wrapper-3 {

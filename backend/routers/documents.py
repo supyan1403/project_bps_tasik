@@ -51,6 +51,10 @@ class UpdateDocumentRequest(BaseModel):
 class UpdateBabRequest(BaseModel):
     title: str
 
+class CreateBabRequest(BaseModel):
+    num: int
+    title: str
+
 def get_safe_windows_path(path: str) -> str:
     if not path:
         return path
@@ -138,6 +142,7 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
 async def upload_document(
     background_tasks: BackgroundTasks,
     year: int = Form(...),
+    data_year: Optional[int] = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
@@ -150,14 +155,15 @@ async def upload_document(
     with open(file_path, "wb") as f:
         f.write(content)
     
-    db_doc = models.Document(filename=file.filename, year=year, status="ready")
+    final_data_year = data_year if data_year is not None else (year - 1 if year else None)
+    db_doc = models.Document(filename=file.filename, year=year, data_year=final_data_year, status="ready")
     db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
     
     output_path = os.path.join(EXTRACT_DIR, f"doc_{db_doc.id}")
     background_tasks.add_task(run_extract_toc, db_doc.id, file_path, output_path)
-    log_activity(db, "upload", file.filename, {"year": year, "doc_id": db_doc.id})
+    log_activity(db, "upload", file.filename, {"year": year, "data_year": final_data_year, "doc_id": db_doc.id})
     return db_doc
 
 @router.post("/documents/create", response_model=schemas.DocumentOut)
@@ -175,7 +181,8 @@ def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends
     if existing:
         raise HTTPException(status_code=400, detail=f"Publikasi '{clean_filename}' ({doc_in.year}) sudah terdaftar.")
 
-    db_doc = models.Document(filename=clean_filename, year=doc_in.year, status="ready")
+    final_data_year = doc_in.data_year if doc_in.data_year is not None else (doc_in.year - 1 if doc_in.year else None)
+    db_doc = models.Document(filename=clean_filename, year=doc_in.year, data_year=final_data_year, status="ready")
     db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
@@ -428,14 +435,23 @@ def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Se
             "end_page": 1
         })
         
+    def _bab_sort_key(it):
+        m = re.search(r'Bab\s*(\d+)', it.get("title", ""), re.IGNORECASE)
+        return int(m.group(1)) if m else 999
+    toc_data.sort(key=_bab_sort_key)
+
     try:
         with open(toc_path, "w", encoding="utf-8") as f:
             json.dump(toc_data, f, indent=4)
         with _TOC_CACHE_LOCK:
             _TOC_CACHE.pop(doc_id, None)
-        return {"status": "success", "message": f"Judul Bab {bab_num} berhasil diperbarui", "title": new_title}
+        return {"status": "success", "message": f"Bab {bab_num} berhasil disimpan", "title": new_title}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {str(e)}")
+
+@router.post("/documents/{doc_id}/bab")
+def create_document_bab(doc_id: int, req: CreateBabRequest, db: Session = Depends(get_db)):
+    return update_document_bab(doc_id=doc_id, bab_num=req.num, req=UpdateBabRequest(title=req.title), db=db)
 
 @router.delete("/documents/{doc_id}/bab/{bab_num}")
 def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)):

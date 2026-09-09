@@ -743,10 +743,18 @@
                         <div class="glass-panel">
                             <h5 class="fw-semibold">Upload Publikasi Baru</h5>
                             <form id="upload-form">
-                                <div class="mb-2">
-                                    <label class="form-label small fw-semibold text-muted">Tahun Publikasi (Buku)</label>
-                                    <input type="number" id="pdf-year" name="year" class="form-control form-control-sm" placeholder="e.g. 2026" required>
-                                    <div class="form-text" style="font-size:0.72rem;"><i class="bi bi-lightbulb text-warning"></i> Sesuai standar BPS, Publikasi 2026 menyajikan Data Tahun 2025 (T-1).</div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-muted mb-1">Tahun Publikasi (Buku) <span class="text-danger">*</span></label>
+                                        <input type="number" id="pdf-year" name="year" class="form-control form-control-sm" placeholder="e.g. 2026" required oninput="if(document.getElementById('pdf-data-year') && !document.getElementById('pdf-data-year').dataset.edited){document.getElementById('pdf-data-year').value = this.value ? parseInt(this.value)-1 : '';}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-muted mb-1">Tahun Data (Riil)</label>
+                                        <input type="number" id="pdf-data-year" name="data_year" class="form-control form-control-sm" placeholder="e.g. 2025" oninput="this.dataset.edited='true'">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-text text-muted mt-0.5" style="font-size:0.72rem;">Sesuai standar BPS, Publikasi 2026 menyajikan Data Tahun 2025 (T-1).</div>
+                                    </div>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-semibold text-muted">File PDF</label>
@@ -2301,8 +2309,8 @@
                             <div class="col-md-6 col-12">
                                 <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
                                     <label class="form-label small fw-semibold text-dark mb-0">1. Publikasi Induk <span class="text-danger">*</span></label>
-                                    <a href="javascript:void(0)" onclick="openCreateDocModal(true)" class="badge bg-primary-subtle text-primary text-decoration-none border border-primary border-opacity-25 px-2.5 py-1 d-inline-flex align-items-center gap-1 rounded-pill" style="font-size:0.7rem; cursor:pointer;" title="Tambah buku publikasi baru jika belum terdaftar">
-                                        <i class="bi bi-plus-circle-fill"></i> Publikasi Baru
+                                    <a href="javascript:void(0)" onclick="openCreateDocModal(true)" class="badge bg-primary-subtle text-primary text-decoration-none border border-primary border-opacity-25 px-2.5 py-1 d-inline-flex align-items-center rounded-pill" style="font-size:0.7rem; cursor:pointer;" title="Tambah buku publikasi baru jika belum terdaftar">
+                                        + Publikasi Baru
                                     </a>
                                 </div>
                                 <select id="create-table-doc-id" class="form-select" required onchange="updateCreateTableBabOptions()">
@@ -2313,6 +2321,9 @@
                             <div class="col-md-6 col-12">
                                 <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
                                     <label class="form-label small fw-semibold text-dark mb-0">2. Bab Dokumen <span class="text-danger">*</span></label>
+                                    <a href="javascript:void(0)" onclick="openCreateBabModalFromTable()" class="badge bg-primary-subtle text-primary text-decoration-none border border-primary border-opacity-25 px-2.5 py-1 d-inline-flex align-items-center rounded-pill" style="font-size:0.7rem; cursor:pointer;" title="Tambah bab baru jika belum ada">
+                                        + Tambah Bab
+                                    </a>
                                 </div>
                                 <select id="create-table-bab-num" class="form-select" required onchange="updateCreateTableNumberPrefix()">
                                     <option value="1">Bab 1: Geografi & Iklim</option>
@@ -2329,7 +2340,7 @@
                                     <option value="12">Bab 12: PDRB Lapangan Usaha</option>
                                     <option value="13">Bab 13: Perbandingan Antar Kab/Kota</option>
                                 </select>
-                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Bab isi publikasi sesuai format resmi BPS.</div>
+                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Bab isi publikasi tempat tabel berada.</div>
                             </div>
                         </div>
 
@@ -2351,8 +2362,7 @@
                         </div>
 
                         <div class="rounded-3 bg-light border" style="padding: 1.1rem 1.25rem !important; margin-bottom: 1.25rem !important;">
-                            <div class="fw-semibold small text-dark mb-2.5 d-flex align-items-center" style="gap: 0.65rem;">
-                                <i class="bi bi-layout-three-columns text-primary fs-5"></i>
+                            <div class="fw-semibold small text-dark mb-2.5">
                                 <span>5. Struktur Kolom Awal</span>
                             </div>
                             <div class="row g-2.5">
@@ -2382,7 +2392,7 @@
                             </label>
                             <div class="flex-grow-1">
                                 <label class="form-check-label fw-semibold text-dark small d-block cursor-pointer mb-1" for="create-table-auto-kecamatan" style="font-size:0.85rem;">
-                                    <i class="bi bi-geo-alt text-primary"></i> Isi Otomatis dengan 39 Kecamatan di Kabupaten Tasikmalaya
+                                    Isi Otomatis dengan 39 Kecamatan di Kabupaten Tasikmalaya
                                 </label>
                                 <div class="text-muted" id="create-table-auto-desc" style="font-size: 0.74rem; line-height: 1.45;">
                                     Membuat 39 baris rincian standar wilayah Kabupaten Tasikmalaya (Cipatujah s/d Sukaresik & Total Kabupaten) secara otomatis.
@@ -2394,8 +2404,8 @@
 
                 <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between align-items-center">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-4 py-2" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" onclick="submitCreateTable()">
-                        <i class="bi bi-check-circle-fill"></i> Buat & Buka Editor
+                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold shadow-sm" onclick="submitCreateTable()">
+                        Buat & Buka Editor
                     </button>
                 </div>
             </div>
@@ -2408,56 +2418,55 @@
             <div class="modal-content shadow-lg border-0" style="border-radius: 18px; overflow: hidden;">
                 <!-- Header -->
                 <div class="modal-header border-bottom px-4 py-3.5 modal-header-blue-deep">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center flex-shrink-0 modal-icon-box">
-                            <i class="bi bi-journal-plus fs-5 text-white"></i>
-                        </div>
-                        <div>
-                            <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.05rem;">Tambah Publikasi Baru</h5>
-                            <div class="text-white text-opacity-80 small mt-0.5" style="font-size: 0.75rem;">Daftarkan buku dokumen publikasi BPS baru ke dalam sistem basis data</div>
-                        </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.05rem;">Tambah Publikasi Baru</h5>
+                        <div class="text-white text-opacity-80 small mt-0.5" style="font-size: 0.75rem;">Daftarkan buku dokumen publikasi BPS baru ke dalam sistem basis data</div>
                     </div>
                     <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body p-4" style="background: var(--bs-body-bg, #ffffff);">
                     <form id="form-create-doc" onsubmit="event.preventDefault(); submitCreateDoc();">
-                        <div class="row g-3" style="margin-bottom: 1.35rem !important;">
-                            <div class="col-md-4 col-12">
-                                <label class="form-label small fw-semibold text-dark mb-1.5">Tahun Publikasi <span class="text-danger">*</span></label>
+                        <div class="row g-2.5" style="margin-bottom: 1.25rem !important;">
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Tahun Publikasi <span class="text-danger">*</span></label>
                                 <input type="number" id="create-doc-year" class="form-control" value="2027" min="1990" max="2100" required oninput="onDocYearChange()">
-                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Tahun buku publikasi BPS diterbitkan.</div>
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Tahun rilis/terbit buku.</div>
                             </div>
-                            <div class="col-md-8 col-12">
-                                <label class="form-label small fw-semibold text-dark mb-1.5">Nama / Judul Dokumen Publikasi <span class="text-danger">*</span></label>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Tahun Data <span class="text-danger">*</span></label>
+                                <input type="number" id="create-doc-data-year" class="form-control" value="2026" min="1990" max="2100" required oninput="this.dataset.userEdited='true'">
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Tahun kejadian riil data.</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <label class="form-label small fw-semibold text-dark mb-1">Nama / Judul Dokumen Publikasi <span class="text-danger">*</span></label>
                                 <input type="text" id="create-doc-filename" class="form-control" placeholder="Contoh: Kabupaten Tasikmalaya Dalam Angka 2027" required>
-                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Nama buku publikasi resmi BPS yang mewadahi tabel.</div>
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Judul resmi buku publikasi BPS.</div>
                             </div>
                         </div>
 
-                        <!-- Quick Template Chips dengan Padding Pas & Rapi -->
-                        <div class="rounded-3 bg-light border" style="padding: 0.85rem 1.1rem !important; margin-bottom: 1.35rem !important;">
-                            <div class="text-muted fw-semibold mb-2.5 d-flex align-items-center" style="font-size: 0.75rem; gap: 0.45rem;">
-                                <i class="bi bi-lightning-charge-fill text-warning fs-6"></i>
-                                <span>Pilihan Cepat Format Judul Resmi BPS:</span>
+                        <!-- Quick Template Chips Minimalis & Rapi -->
+                        <div class="rounded-3 bg-light border" style="padding: 0.85rem 1.1rem !important; margin-bottom: 1.25rem !important;">
+                            <div class="text-muted fw-semibold mb-2" style="font-size: 0.74rem;">
+                                <span>Pilihan Cepat Format Judul:</span>
                             </div>
                             <div class="d-flex flex-wrap" style="gap: 0.45rem;">
-                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2.5 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kabupaten Tasikmalaya Dalam Angka')">
-                                    <i class="bi bi-book text-primary"></i> Kabupaten Tasikmalaya Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kabupaten Tasikmalaya Dalam Angka')">
+                                    Kabupaten Tasikmalaya Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2.5 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Statistik Daerah Kabupaten Tasikmalaya')">
-                                    <i class="bi bi-bar-chart text-primary"></i> Statistik Daerah Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Statistik Daerah Kabupaten Tasikmalaya')">
+                                    Statistik Daerah Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2.5 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kecamatan Dalam Angka')">
-                                    <i class="bi bi-house text-success"></i> Kecamatan Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kecamatan Dalam Angka')">
+                                    Kecamatan Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2.5 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('PDRB Kabupaten Tasikmalaya Menurut Lapangan Usaha')">
-                                    <i class="bi bi-graph-up text-info"></i> PDRB Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('PDRB Kabupaten Tasikmalaya Menurut Lapangan Usaha')">
+                                    PDRB Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Mode Pembuatan (Manual / Upload PDF) dengan Padding Pas & Rapi -->
+                        <!-- Mode Pembuatan (Manual / Upload PDF) Minimalis -->
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-dark mb-2 d-block" style="font-size: 0.82rem;">
                                 Metode Pembuatan Dokumen
@@ -2467,11 +2476,11 @@
                                 <div class="doc-mode-option border rounded-3 cursor-pointer active d-flex align-items-start" style="padding: 0.75rem 1rem !important; gap: 0.75rem;" id="doc-mode-box-empty" onclick="setDocCreationMode('empty')">
                                     <input class="form-check-input flex-shrink-0 cursor-pointer m-0" type="radio" name="doc-creation-mode" id="doc-mode-empty" value="empty" checked style="width: 1.15rem; height: 1.15rem; margin-top: 0.1rem !important; cursor:pointer;">
                                     <div class="flex-grow-1">
-                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-1" for="doc-mode-empty" style="font-size: 0.84rem;">
-                                            ✨ Buat Publikasi Kosong (Siap untuk Input Manual, Tambah Tabel, & Template Excel)
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-0.5" for="doc-mode-empty" style="font-size: 0.84rem;">
+                                            Buat Publikasi Kosong
                                         </label>
                                         <div class="text-muted" style="font-size: 0.73rem; line-height: 1.35;">
-                                            Membuat entri publikasi baru langsung di basis data tanpa perlu mengunggah berkas PDF.
+                                            Membuat entri publikasi baru langsung di basis data (siap untuk input manual, tambah tabel, atau template Excel).
                                         </div>
                                     </div>
                                 </div>
@@ -2479,8 +2488,8 @@
                                 <div class="doc-mode-option border rounded-3 cursor-pointer d-flex align-items-start" style="padding: 0.75rem 1rem !important; gap: 0.75rem;" id="doc-mode-box-pdf" onclick="setDocCreationMode('pdf')">
                                     <input class="form-check-input flex-shrink-0 cursor-pointer m-0" type="radio" name="doc-creation-mode" id="doc-mode-pdf" value="pdf" style="width: 1.15rem; height: 1.15rem; margin-top: 0.1rem !important; cursor:pointer;">
                                     <div class="flex-grow-1">
-                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-1" for="doc-mode-pdf" style="font-size: 0.84rem;">
-                                            <i class="bi bi-file-earmark-pdf text-danger"></i> Unggah Berkas Buku Publikasi (PDF)
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-0.5" for="doc-mode-pdf" style="font-size: 0.84rem;">
+                                            Unggah Berkas Buku Publikasi (PDF)
                                         </label>
                                         <div class="text-muted" style="font-size: 0.73rem; line-height: 1.35;">
                                             Unggah buku PDF BPS untuk ekstraksi otomatis daftar isi/bab dan tabel statistik.
@@ -2494,15 +2503,15 @@
                         <div id="create-doc-pdf-container" class="mt-3 p-3 bg-light rounded-3 border" style="display: none; padding: 0.85rem 1.1rem !important;">
                             <label class="form-label small fw-semibold text-dark mb-1.5" style="font-size:0.82rem;">Berkas PDF Publikasi</label>
                             <input type="file" id="create-doc-file" class="form-control form-control-sm" accept="application/pdf">
-                            <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Pilih berkas PDF publikasi BPS (maksimal ukuran sesuai kapasitas server).</div>
+                            <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Pilih berkas PDF publikasi BPS.</div>
                         </div>
                     </form>
                 </div>
 
                 <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between align-items-center">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-4 py-2" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" onclick="submitCreateDoc()">
-                        <i class="bi bi-check-circle-fill"></i> Simpan Publikasi
+                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold shadow-sm" onclick="submitCreateDoc()">
+                        Simpan Publikasi
                     </button>
                 </div>
             </div>
@@ -2694,7 +2703,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260909_2" defer></script>
+    <script src="/static/app.js?v=20260909_3" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

@@ -5329,6 +5329,98 @@ async function editBabTitle(docId, babNum, currentTitle) {
     }
 }
 
+async function openCreateBabModal(docId = null) {
+    if (!checkRoleAccess('tabel')) return;
+
+    const targetDocId = docId || viewState.selectedDocId;
+    if (!targetDocId) {
+        showToast('warning', 'Peringatan', 'Silakan pilih publikasi terlebih dahulu sebelum menambah bab!');
+        return null;
+    }
+
+    const { value: formValues } = await Swal.fire({
+        title: 'Tambah Bab Baru',
+        html: `
+            <div class="text-start mb-3">
+                <label class="form-label small fw-semibold text-dark mb-1">Nomor Bab <span class="text-danger">*</span></label>
+                <input id="swal-bab-num" type="number" min="1" max="99" class="form-control" placeholder="Contoh: 14">
+                <div class="form-text text-muted" style="font-size:0.75rem;">Masukkan angka urutan bab (misal: 14).</div>
+            </div>
+            <div class="text-start mb-2">
+                <label class="form-label small fw-semibold text-dark mb-1">Judul / Nama Bab <span class="text-danger">*</span></label>
+                <input id="swal-bab-title" type="text" class="form-control" placeholder="Contoh: Indikator SDGs & Pembangunan Berkelanjutan">
+                <div class="form-text text-muted" style="font-size:0.75rem;">Topik pembahasan data pada bab ini.</div>
+            </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan Bab',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: cssVar('--primary') || '#2563eb',
+        preConfirm: () => {
+            const num = document.getElementById('swal-bab-num')?.value;
+            const title = document.getElementById('swal-bab-title')?.value;
+            if (!num || isNaN(parseInt(num)) || parseInt(num) <= 0) {
+                Swal.showValidationMessage('Nomor bab harus berupa angka bulat positif!');
+                return false;
+            }
+            if (!title || !title.trim()) {
+                Swal.showValidationMessage('Judul / nama bab tidak boleh kosong!');
+                return false;
+            }
+            return {
+                bab_num: parseInt(num),
+                title: title.trim()
+            };
+        }
+    });
+
+    if (formValues) {
+        try {
+            Swal.fire({
+                title: 'Menyimpan Bab...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const res = await fetch(`${API_BASE}/documents/${targetDocId}/bab`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Gagal menambahkan bab');
+
+            Swal.close();
+            showToast('success', 'Berhasil', data.message || `Bab ${formValues.bab_num} berhasil ditambahkan.`);
+
+            await populateDocumentList();
+            notifyDataChange('document');
+            return formValues.bab_num;
+        } catch (err) {
+            Swal.fire('Gagal', err.message, 'error');
+            return null;
+        }
+    }
+    return null;
+}
+
+async function openCreateBabModalFromTable() {
+    const docSelect = document.getElementById('create-table-doc-id');
+    const docId = docSelect ? parseInt(docSelect.value) : null;
+    if (!docId) {
+        showToast('warning', 'Peringatan', 'Silakan pilih publikasi induk terlebih dahulu!');
+        if (docSelect) docSelect.focus();
+        return;
+    }
+
+    const createdBabNum = await openCreateBabModal(docId);
+    if (createdBabNum) {
+        await updateCreateTableBabOptions(createdBabNum);
+    }
+}
+
 function renderDocLevelSkeleton(title = "") {
     const container = document.getElementById("document-list-container");
     if (!container) return;
@@ -5617,76 +5709,40 @@ async function populateDocumentList() {
 
     
 
-    // Tombol "Tambah Tabel Baru" — cerdas auto-detect context
-
-    let addTableOnclick = "openCreateTableModal()";
-
-    let addTableLabel = '<i class="bi bi-plus-circle-fill"></i> Tambah Tabel Baru';
-
-    if (viewState.selectedDocId && doc && viewState.selectedBabNum !== null) {
-
-        addTableOnclick = `openCreateTableModal(${viewState.selectedDocId}, ${viewState.selectedBabNum})`;
-
-        addTableLabel = '<i class="bi bi-plus-circle-fill"></i> Tambah Tabel';
-
-    } else if (viewState.selectedDocId && doc) {
-
-        addTableOnclick = `openCreateTableModal(${viewState.selectedDocId})`;
-
-        addTableLabel = '<i class="bi bi-plus-circle-fill"></i> Tambah Tabel';
-
-    }
-
-    
-
-    bcRight.innerHTML = `
-
-        <button onclick="${addTableOnclick}" class="btn btn-sm fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background:#059669; border-color:#059669; color:white;">
-
-            ${addTableLabel}
-
-        </button>
-
-        <button onclick="openCreateDocModal()" class="btn btn-sm btn-outline-primary fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
-
-            <i class="bi bi-journal-plus"></i> Publikasi Baru
-
-        </button>
-
-    `;
-
-    
-
-    // Tombol "Hapus" — hanya muncul saat di dalam doc/bab
-
-    if (viewState.selectedDocId && doc) {
-
-        if (viewState.selectedBabNum !== null) {
-
-            bcRight.innerHTML += `
-
-                <button onclick="deleteAllTablesForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
-
-                    <i class="bi bi-trash"></i> Hapus Tabel Bab
-
-                </button>
-
-            `;
-
-        } else {
-
-            bcRight.innerHTML += `
-
-                <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
-
-                    <i class="bi bi-trash"></i> Hapus Semua
-
-                </button>
-
-            `;
-
-        }
-
+    // Action buttons context-aware
+    if (viewState.selectedDocId && doc && viewState.selectedBabNum === null) {
+        // LEVEL 2: Di dalam publikasi (melihat Daftar Bab) -> Tambah Bab, Tambah Tabel, Hapus Semua
+        bcRight.innerHTML = `
+            <button onclick="openCreateBabModal(${doc.id})" class="btn btn-sm btn-primary fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm">
+                <i class="bi bi-folder-plus"></i> Tambah Bab
+            </button>
+            <button onclick="openCreateTableModal(${doc.id})" class="btn btn-sm fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background:#059669; border-color:#059669; color:white;">
+                <i class="bi bi-plus-circle-fill"></i> Tambah Tabel
+            </button>
+            <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
+                <i class="bi bi-trash"></i> Hapus Semua
+            </button>
+        `;
+    } else if (viewState.selectedDocId && doc && viewState.selectedBabNum !== null) {
+        // LEVEL 3: Di dalam bab (melihat Daftar Tabel) -> Tambah Tabel, Hapus Tabel Bab
+        bcRight.innerHTML = `
+            <button onclick="openCreateTableModal(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-sm fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background:#059669; border-color:#059669; color:white;">
+                <i class="bi bi-plus-circle-fill"></i> Tambah Tabel
+            </button>
+            <button onclick="deleteAllTablesForBab(${doc.id}, ${viewState.selectedBabNum})" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
+                <i class="bi bi-trash"></i> Hapus Tabel Bab
+            </button>
+        `;
+    } else {
+        // LEVEL 1: Semua Dokumen
+        bcRight.innerHTML = `
+            <button onclick="openCreateTableModal()" class="btn btn-sm fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background:#059669; border-color:#059669; color:white;">
+                <i class="bi bi-plus-circle-fill"></i> Tambah Tabel Baru
+            </button>
+            <button onclick="openCreateDocModal()" class="btn btn-sm btn-outline-primary fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
+                <i class="bi bi-journal-plus"></i> Publikasi Baru
+            </button>
+        `;
     }
 
     
@@ -5875,59 +5931,47 @@ async function populateDocumentList() {
 
         
 
-        if (tables.length === 0) {
-
-            let msg = d.status.startsWith('extracting') ? "Mohon tunggu sebentar, tabel pertama sedang diekstrak..." : "Belum ada tabel yang berhasil diekstrak.";
-
-            const emptyDiv = document.createElement("div");
-
-            emptyDiv.style.textAlign = "center";
-
-            emptyDiv.style.padding = "3rem";
-
-            emptyDiv.className = "doc-empty-state";
-
-            emptyDiv.style.borderRadius = "12px";
-
-            emptyDiv.innerHTML = `<p style="font-style:italic; font-size:1.1rem; margin:0;">${msg}</p>`;
-
-            container.appendChild(emptyDiv);
-
-            return;
-
-        }
-
-        
-
         // Group tables by Bab
-
         const grouped = {};
 
+        // 1. Masukkan bab dari docChapters (TOC dokumen)
+        if (docChapters) {
+            Object.keys(docChapters).forEach(rawNum => {
+                const bNum = parseInt(rawNum, 10);
+                if (!isNaN(bNum)) {
+                    const chapterTitle = getChapterTitle(bNum);
+                    const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
+                    grouped[bNum] = { name: `Bab ${bNum}${chapterSuffix}`, num: bNum, tables: [] };
+                }
+            });
+        }
+
+        // 2. Petakan tabel ke masing-masing bab
         tables.forEach(t => {
-
             const match = t.table_name.match(/Tabel[\s_]*(\d+)/i);
-
             let babName = "Lainnya";
-
             let babNum = 999;
-
             if (match && match[1]) {
-
                 babNum = parseInt(match[1], 10);
-
                 const chapterTitle = getChapterTitle(babNum);
-
                 const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
-
                 babName = `Bab ${babNum}${chapterSuffix}`;
-
             }
-
             if (!grouped[babNum]) grouped[babNum] = { name: babName, num: babNum, tables: [] };
-
             grouped[babNum].tables.push(t);
-
         });
+
+        if (Object.keys(grouped).length === 0) {
+            let msg = d.status.startsWith('extracting') ? "Mohon tunggu sebentar, tabel pertama sedang diekstrak..." : "Belum ada bab atau tabel di publikasi ini. Klik tombol '+ Tambah Bab' atau '+ Tambah Tabel' di atas untuk memulai.";
+            const emptyDiv = document.createElement("div");
+            emptyDiv.style.textAlign = "center";
+            emptyDiv.style.padding = "3rem";
+            emptyDiv.className = "doc-empty-state";
+            emptyDiv.style.borderRadius = "12px";
+            emptyDiv.innerHTML = `<p style="font-style:italic; font-size:1.1rem; margin:0;">${msg}</p>`;
+            container.appendChild(emptyDiv);
+            return;
+        }
 
         
 
@@ -6008,7 +6052,18 @@ async function populateDocumentList() {
 
             }
 
-            
+            if (bab.tables.length === 0) {
+                const emptyBabDiv = document.createElement("div");
+                emptyBabDiv.className = "text-center p-5 rounded-3 border bg-card";
+                emptyBabDiv.innerHTML = `
+                    <div class="text-muted mb-3" style="font-size: 0.95rem;">Belum ada tabel di <strong>${escHtml(bab.name)}</strong>.</div>
+                    <button onclick="openCreateTableModal(${d.id}, ${bab.num})" class="btn btn-sm fw-semibold px-3.5 py-2 rounded-3 d-inline-flex align-items-center gap-2 shadow-sm text-white" style="background:#059669; border-color:#059669;">
+                        <i class="bi bi-plus-circle-fill"></i> Tambah Tabel ke Bab Ini
+                    </button>
+                `;
+                container.appendChild(emptyBabDiv);
+                return;
+            }
 
             const tableListWrapper = document.createElement("div");
 
@@ -23653,396 +23708,205 @@ function openCreateDocModal(fromCreateTable = false) {
 
 
     const yearInput = document.getElementById('create-doc-year');
-
+    const dataYearInput = document.getElementById('create-doc-data-year');
     const filenameInput = document.getElementById('create-doc-filename');
 
-    
-
     const nextYr = new Date().getFullYear() + 1;
-
     const initialYr = nextYr > 2026 ? nextYr : 2027;
-
     if (yearInput) yearInput.value = initialYr;
-
-
+    if (dataYearInput) {
+        dataYearInput.value = initialYr - 1;
+        delete dataYearInput.dataset.userEdited;
+    }
 
     if (filenameInput) filenameInput.value = `Kabupaten Tasikmalaya Dalam Angka ${initialYr}`;
 
-
-
     onDocYearChange();
-
     setDocCreationMode('empty');
 
-
-
     if (fromCreateTable) {
-
         const tableModalEl = document.getElementById('modal-create-table');
-
         if (tableModalEl) {
-
             const tm = bootstrap.Modal.getInstance(tableModalEl);
-
             if (tm) tm.hide();
-
         }
-
     }
-
-
 
     const modalEl = document.getElementById('modal-create-doc');
-
     if (modalEl) {
-
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
         modal.show();
-
     }
-
 }
-
-
 
 function onDocYearChange() {
+    const yrInput = document.getElementById('create-doc-year');
+    const dataYrInput = document.getElementById('create-doc-data-year');
+    const yr = yrInput?.value || '2027';
+    const yrNum = parseInt(yr);
 
-    const yr = document.getElementById('create-doc-year')?.value || '2027';
+    if (dataYrInput && !dataYrInput.dataset.userEdited && !isNaN(yrNum)) {
+        dataYrInput.value = yrNum - 1;
+    }
 
     document.querySelectorAll('.badge-doc-yr').forEach(el => {
-
         el.textContent = yr;
-
     });
-
 }
-
-
 
 function quickSetDocTitle(prefix) {
-
     const yr = document.getElementById('create-doc-year')?.value || '2027';
-
     const filenameInput = document.getElementById('create-doc-filename');
-
     if (filenameInput) {
-
         filenameInput.value = `${prefix} ${yr}`;
-
         filenameInput.focus();
-
     }
-
 }
-
-
 
 function setDocCreationMode(mode) {
-
     const emptyBox = document.getElementById('doc-mode-box-empty');
-
     const pdfBox = document.getElementById('doc-mode-box-pdf');
-
     const pdfRadio = document.getElementById('doc-mode-pdf');
-
     const emptyRadio = document.getElementById('doc-mode-empty');
-
     const pdfContainer = document.getElementById('create-doc-pdf-container');
 
-
-
     if (mode === 'pdf') {
-
         if (pdfRadio) pdfRadio.checked = true;
-
         if (pdfBox) {
-
             pdfBox.classList.add('border-primary');
-
             pdfBox.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
-
         }
-
         if (emptyBox) {
-
             emptyBox.classList.remove('border-primary');
-
             emptyBox.style.backgroundColor = '';
-
         }
-
         if (pdfContainer) pdfContainer.style.display = 'block';
-
     } else {
-
         if (emptyRadio) emptyRadio.checked = true;
-
         if (emptyBox) {
-
             emptyBox.classList.add('border-primary');
-
             emptyBox.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
-
         }
-
         if (pdfBox) {
-
             pdfBox.classList.remove('border-primary');
-
             pdfBox.style.backgroundColor = '';
-
         }
-
         if (pdfContainer) pdfContainer.style.display = 'none';
-
     }
-
 }
 
-
-
 async function submitCreateDoc() {
-
     const yearInput = document.getElementById('create-doc-year');
-
+    const dataYearInput = document.getElementById('create-doc-data-year');
     const filenameInput = document.getElementById('create-doc-filename');
-
     const pdfRadio = document.getElementById('doc-mode-pdf');
-
     const fileInput = document.getElementById('create-doc-file');
 
-
-
     const year = yearInput ? parseInt(yearInput.value) : null;
-
+    const dataYear = dataYearInput && dataYearInput.value ? parseInt(dataYearInput.value) : (year ? year - 1 : null);
     const filename = filenameInput ? filenameInput.value.trim() : '';
-
     const isPdfMode = pdfRadio ? pdfRadio.checked : false;
 
-
-
     if (!year || isNaN(year)) {
-
         showToast('warning', 'Peringatan', 'Silakan masukkan tahun publikasi!');
-
         if (yearInput) yearInput.focus();
-
         return;
-
     }
 
-
+    if (!dataYear || isNaN(dataYear)) {
+        showToast('warning', 'Peringatan', 'Silakan masukkan tahun data!');
+        if (dataYearInput) dataYearInput.focus();
+        return;
+    }
 
     if (!filename) {
-
         showToast('warning', 'Peringatan', 'Nama / judul publikasi wajib diisi!');
-
         if (filenameInput) filenameInput.focus();
-
         return;
-
     }
-
-
 
     if (isPdfMode && (!fileInput || !fileInput.files || fileInput.files.length === 0)) {
-
         showToast('warning', 'Peringatan', 'Silakan pilih berkas PDF publikasi yang ingin diunggah!');
-
         return;
-
     }
 
-
-
     Swal.fire({
-
         title: 'Mendaftarkan Publikasi...',
-
         text: 'Membuat buku publikasi dan menyiapkan ruang basis data.',
-
         allowOutsideClick: false,
-
         didOpen: () => { Swal.showLoading(); }
-
     });
 
-
-
     try {
-
         let createdDoc = null;
 
-
-
         if (isPdfMode) {
-
             const formData = new FormData();
-
             formData.append('year', year);
-
+            if (dataYear) formData.append('data_year', dataYear);
             formData.append('file', fileInput.files[0]);
 
-
-
             const res = await fetch(`${API_BASE}/documents`, {
-
                 method: 'POST',
-
                 body: formData
-
             });
 
-
-
             if (!res.ok) {
-
                 const err = await res.json();
-
                 throw new Error(err.detail || 'Gagal mengunggah dan membuat publikasi.');
-
             }
-
             createdDoc = await res.json();
-
         } else {
-
             const payload = {
-
                 filename: filename,
-
-                year: year
-
+                year: year,
+                data_year: dataYear
             };
 
-
-
             const res = await fetch(`${API_BASE}/documents/create`, {
-
                 method: 'POST',
-
                 headers: { 'Content-Type': 'application/json' },
-
                 body: JSON.stringify(payload)
-
             });
 
-
-
             if (!res.ok) {
-
                 const err = await res.json();
-
                 throw new Error(err.detail || 'Gagal membuat publikasi baru.');
-
             }
-
             createdDoc = await res.json();
-
         }
-
-
 
         // Tutup modal create doc
-
         const modalEl = document.getElementById('modal-create-doc');
-
         if (modalEl) {
-
             const m = bootstrap.Modal.getInstance(modalEl);
-
             if (m) m.hide();
-
         }
-
-
 
         Swal.close();
 
-
-
         // Refresh publikasi di semua tempat
-
         if (typeof loadDocuments === 'function') loadDocuments();
-
         if (typeof populateDocumentList === 'function') populateDocumentList();
         notifyDataChange('document');
 
-
-
         const fromCreateTable = _createDocCallback;
-
         _createDocCallback = false;
 
-
-
         if (fromCreateTable) {
-
-            // Kembali ke modal create table dan langsung pilih publikasi yang baru dibuat
-
             Swal.fire({
-
-                title: '🎉 Publikasi Berhasil Dibuat!',
-
+                title: 'Publikasi Berhasil Dibuat',
                 text: `Publikasi '${filename}' (${year}) siap digunakan. Membuka formulir tambah tabel...`,
-
                 icon: 'success',
-
-                timer: 1600,
-
+                timer: 1800,
                 showConfirmButton: false
-
             });
-
             setTimeout(() => {
-
-                openCreateTableModal(createdDoc.id);
-
-            }, 600);
-
+                openCreateTableModal(createdDoc?.id);
+            }, 400);
         } else {
-
-            Swal.fire({
-
-                title: '🎉 Publikasi Berhasil Ditambahkan!',
-
-                html: `<div class="text-start small text-muted">
-
-                    <p class="mb-1"><b>Nama:</b> ${escHtml(createdDoc.filename)}</p>
-
-                    <p class="mb-2"><b>Tahun:</b> ${createdDoc.year}</p>
-
-                    <p class="text-dark mb-0">Publikasi telah terdaftar. Anda dapat langsung menambahkan tabel baru ke publikasi ini.</p>
-
-                </div>`,
-
-                icon: 'success',
-
-                showCancelButton: true,
-
-                confirmButtonColor: cssVar('--info') || '#2563eb',
-
-                cancelButtonColor: cssVar('--text-secondary') || '#64748b',
-
-                confirmButtonText: '➕ Tambah Tabel ke Publikasi Ini',
-
-                cancelButtonText: 'Tutup'
-
-            }).then((res) => {
-
-                if (res.isConfirmed) {
-
-                    openCreateTableModal(createdDoc.id);
-
-                }
-
-            });
-
+            showToast('success', 'Berhasil', `Publikasi '${filename}' (${year}) berhasil dibuat!`);
         }
-
-
-
     } catch (e) {
 
         Swal.close();
@@ -24156,95 +24020,82 @@ async function openCreateTableModal(defaultDocId = null, defaultBabNum = null) {
                     const pubTitle = d.year ? `Publikasi ${d.year} — ${cleanName}` : cleanName;
 
                     const isSelected = (defaultDocId && d.id === defaultDocId) || (!defaultDocId && d.year === 2026);
-
-                    opts += `<option value="${d.id}" data-year="${d.year || ''}" ${isSelected ? 'selected' : ''}>${escHtml(pubTitle)}</option>`;
-
+                    opts += `<option value="${d.id}" data-year="${d.year || ''}" data-data-year="${d.data_year || ''}" ${isSelected ? 'selected' : ''}>${escHtml(pubTitle)}</option>`;
                 });
-
                 docSelect.innerHTML = opts;
-
             }
-
         } catch (e) {
-
             console.error("Gagal memuat dokumen:", e);
-
             docSelect.innerHTML = '<option value="">Gagal memuat publikasi</option>';
-
         }
-
     }
-
-
 
     if (defaultBabNum && babSelect) {
-
         babSelect.value = String(defaultBabNum);
-
     }
 
-
-
-    updateCreateTableBabOptions();
-
+    await updateCreateTableBabOptions(defaultBabNum);
     updateCreateTableNumberPrefix();
 
-
-
     const modalEl = document.getElementById('modal-create-table');
-
     if (modalEl) {
-
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
         modal.show();
-
     }
-
 }
 
-
-
-function updateCreateTableBabOptions() {
-
+async function updateCreateTableBabOptions(selectBabNum = null) {
     const docSelect = document.getElementById('create-table-doc-id');
-
+    const babSelect = document.getElementById('create-table-bab-num');
     const colYearInput = document.getElementById('create-table-col-year');
-
     if (!docSelect) return;
 
-
-
     const opt = docSelect.options[docSelect.selectedIndex];
-
-    if (opt && opt.dataset.year && colYearInput && !colYearInput.value) {
-
-        colYearInput.value = opt.dataset.year;
-
+    if (opt && colYearInput) {
+        const pubYr = opt.dataset.year ? parseInt(opt.dataset.year) : null;
+        const dataYr = opt.dataset.dataYear ? opt.dataset.dataYear : (pubYr ? String(pubYr - 1) : '');
+        if (dataYr) {
+            colYearInput.value = dataYr;
+        } else if (pubYr) {
+            colYearInput.value = String(pubYr);
+        }
     }
 
+    const docId = docSelect.value ? parseInt(docSelect.value) : null;
+    if (docId && babSelect) {
+        const currentVal = selectBabNum || babSelect.value || "1";
+        try {
+            const res = await fetch(`${API_BASE}/documents/${docId}/toc`);
+            if (res.ok) {
+                const tocData = await res.json();
+                if (tocData && Array.isArray(tocData) && tocData.length > 0) {
+                    let bOpts = '';
+                    tocData.forEach(item => {
+                        const bNum = item.bab_num;
+                        const bTitle = item.title || getChapterTitle(bNum) || '';
+                        const sel = String(bNum) === String(currentVal) ? 'selected' : '';
+                        bOpts += `<option value="${bNum}" ${sel}>Bab ${bNum}: ${escHtml(bTitle)}</option>`;
+                    });
+                    babSelect.innerHTML = bOpts;
+                }
+            }
+        } catch (e) {
+            console.warn("Gagal memuat bab publikasi:", e);
+        }
+    }
+
+    updateCreateTableNumberPrefix();
 }
 
-
-
 function updateCreateTableNumberPrefix() {
-
     const babSelect = document.getElementById('create-table-bab-num');
-
     const numInput = document.getElementById('create-table-number');
-
     if (!babSelect || !numInput) return;
 
-
-
     const bab = babSelect.value || '1';
-
     if (!numInput.value || numInput.value.startsWith('Tabel ')) {
-
         numInput.value = `Tabel ${bab}.1.1`;
-
     }
-
 }
 
 

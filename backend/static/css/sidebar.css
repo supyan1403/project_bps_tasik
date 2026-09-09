@@ -796,12 +796,12 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 0 8px !important;
+    padding: 0 7px !important;
     margin: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
     border-radius: 10px !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 .sidebar-user-card:hover {
@@ -819,7 +819,7 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     padding: 0 !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 .sidebar-user-avatar {
@@ -838,6 +838,7 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     flex-shrink: 0 !important;
     margin: 0 !important;
     border-radius: 50% !important;
+    overflow: visible !important;
 }
 
 .sidebar-user-avatar i,
@@ -856,13 +857,15 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
 
 .sidebar-user-online-dot {
     position: absolute;
-    bottom: -1px;
-    right: -1px;
+    bottom: 0px;
+    right: 0px;
     width: 7.5px;
     height: 7.5px;
     border-radius: 50%;
     background: #22c55e;
     border: 1.5px solid var(--bg-card);
+    z-index: 2;
+}
 }
 
 .sidebar-user-info {
@@ -956,7 +959,7 @@ body.sidebar-collapsed #sidebar-user-btn,
 body.sidebar-collapsed .sidebar-user-card {
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: 0 8px !important;
+    padding: 0 7px !important;
     width: 100% !important;
     height: 44px !important;
     min-height: 44px !important;
@@ -964,7 +967,7 @@ body.sidebar-collapsed .sidebar-user-card {
     border-radius: 10px !important;
     margin: 0 !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 html.sidebar-collapsed-early body #sidebar-user-btn > div,
@@ -977,6 +980,7 @@ body.sidebar-collapsed #sidebar-user-btn > div {
     gap: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
 }
 
 html.sidebar-collapsed-early body .sidebar-user-info,
@@ -1005,6 +1009,7 @@ body.sidebar-collapsed .sidebar-user-avatar {
     font-size: 0.95rem !important;
     margin: 0 !important;
     flex-shrink: 0 !important;
+    overflow: visible !important;
 }
 
 html.sidebar-collapsed-early body .sidebar-user-dropdown,

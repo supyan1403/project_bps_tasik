@@ -1218,6 +1218,9 @@
                         </div>
 
                         <!-- Quick Insights Summary Bar -->
+                        <details class="ts-collapsible-mobile" open>
+                        <summary class="ts-collapsible-header"><i class="bi bi-bar-chart-line text-primary me-2"></i>Ringkasan Data</summary>
+                        <div class="ts-collapsible-body">
                         <div id="ts-quick-summary-container" class="row row-cols-1 row-cols-sm-3 g-3 mb-3 align-items-stretch" style="display:none;">
                             <div class="col d-flex">
                                 <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-center">
@@ -1238,8 +1241,13 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
+                        </details>
 
                         <!-- View Mode Switcher Toolbar (Executive Segmented Control) -->
+                        <details class="ts-collapsible-mobile" open>
+                        <summary class="ts-collapsible-header"><i class="bi bi-layout-text-window-reverse text-primary me-2"></i>Mode Tampilan</summary>
+                        <div class="ts-collapsible-body">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3 px-4 py-2.5 rounded-3" id="ts-view-mode-bar" style="display:none; background: var(--bg-card, #ffffff); border: 1px solid var(--border, #e2e8f0); box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                             <div class="d-flex align-items-center flex-wrap gap-3">
                                 <span class="ts-view-mode-label me-1">
@@ -1263,10 +1271,15 @@
                                 </span>
                             </div>
                         </div>
+                        </div>
+                        </details>
 
                         <!-- SECTION 1: CHART VIEW (Fokus Visual & Analisis Tren) -->
                         <div id="ts-view-section-chart">
                             <!-- Chart Controls Card: Unit Converter + Display Options (Badge & Tooltip) + Entity Filter -->
+                            <details class="ts-collapsible-mobile" open>
+                            <summary class="ts-collapsible-header"><i class="bi bi-funnel-fill text-primary me-2"></i>Filter & Konversi</summary>
+                            <div class="ts-collapsible-body">
                             <div id="ts-chart-control-card" class="ts-data-control-card mb-3 border shadow-sm" style="display:none; background: #ffffff; padding: 18px 22px; border-radius: 12px;">
                                 <!-- Top Row: Unit Converter (Left) & Display Options (Right) -->
                                 <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-chart-top-control-bar">
@@ -1300,6 +1313,8 @@
                                     <div id="ts-entity-checklist-chart" class="d-flex align-items-center"></div>
                                 </div>
                             </div>
+                            </div>
+                            </details>
 
                             <!-- Time Series Chart Area -->
                             <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">

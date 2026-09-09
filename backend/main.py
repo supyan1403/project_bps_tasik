@@ -507,8 +507,8 @@ def get_favicon():
 
 @app.get("/502", include_in_schema=False)
 def preview_502_page(request: Request):
-    """Endpoint untuk pengujian/pratinjau tampilan 502 Bad Gateway."""
-    return templates.TemplateResponse(request=request, name="502.html", status_code=502)
+    """Endpoint untuk pengujian/pratinjau tampilan 502 Bad Gateway (status 200 agar tidak di-intercept Nginx default)."""
+    return templates.TemplateResponse(request=request, name="502.html", status_code=200)
 
 # In-memory TTL cache for dashboard stats (5 minutes)
 _STATS_CACHE = None

@@ -418,6 +418,13 @@ async def internal_error_handler(request: Request, exc):
         return JSONResponse(status_code=500, content={"detail": "Terjadi kesalahan internal server. Silakan coba lagi."})
     return templates.TemplateResponse(request=request, name="500.html", status_code=500)
 
+@app.exception_handler(502)
+async def bad_gateway_handler(request: Request, exc):
+    path = request.url.path
+    if path.startswith("/api/"):
+        return JSONResponse(status_code=502, content={"detail": "Layanan sedang memuat ulang. Silakan coba lagi."})
+    return templates.TemplateResponse(request=request, name="502.html", status_code=502)
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc):
     print(f"[ERROR] Unhandled exception at {request.url.path}: {exc}")
@@ -497,6 +504,11 @@ def get_favicon():
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
+
+@app.get("/502", include_in_schema=False)
+def preview_502_page(request: Request):
+    """Endpoint untuk pengujian/pratinjau tampilan 502 Bad Gateway."""
+    return templates.TemplateResponse(request=request, name="502.html", status_code=502)
 
 # In-memory TTL cache for dashboard stats (5 minutes)
 _STATS_CACHE = None

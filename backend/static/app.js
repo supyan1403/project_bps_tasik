@@ -1091,6 +1091,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
         updateRoleUI('pegawai');
     }
+    // Inisialisasi awal status sidebar selekas mungkin (Zero-flicker guard)
+    if (typeof initSidebarState === 'function') initSidebarState();
 
     // Prioritaskan role dari body class yang disiapkan server (zero-flicker SSR)
     const _serverBodyRole = document.body.classList.contains('role-admin') ? 'admin' : (document.body.classList.contains('role-pegawai') ? 'pegawai' : '');
@@ -14604,11 +14606,27 @@ function updateRoleUI(role) {
     const isAdmin = role === 'admin';
 
     if (document.body) {
+        // Bekukan transisi CSS sementara saat role berubah agar sidebar tidak kejapan membuka/menutup
+        document.documentElement.classList.add('no-sidebar-transition');
 
         document.body.classList.toggle('role-admin', isAdmin);
 
         document.body.classList.toggle('role-pegawai', !isAdmin);
 
+        // Pastikan state sidebar-collapsed langsung terkunci sebelum browser render frame berikutnya
+        const savedState = localStorage.getItem('sipedas_sidebar_collapsed');
+        const hasCookie = document.cookie.indexOf('sipedas_sidebar_collapsed=true') !== -1;
+        const isCollapsed = savedState === 'true' || (savedState === null && hasCookie);
+        if (isCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+            document.documentElement.classList.add('sidebar-collapsed-early');
+        }
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                document.documentElement.classList.remove('no-sidebar-transition');
+            });
+        });
     }
 
     const btnLogin = document.getElementById('btn-admin-login');
@@ -23284,8 +23302,12 @@ function initBannerLiveClock() {
 function toggleSidebar() {
 
     const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+    document.documentElement.classList.toggle('sidebar-collapsed-early', isCollapsed);
 
-    localStorage.setItem('sipedas_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    try {
+        localStorage.setItem('sipedas_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+        document.cookie = `sipedas_sidebar_collapsed=${isCollapsed ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch(e) {}
 
     // Tutup semua popover + re-parent ke <li> asal
 
@@ -23335,15 +23357,19 @@ function toggleMobileSidebar() {
 
 
 function initSidebarState() {
+    try {
+        const savedState = localStorage.getItem('sipedas_sidebar_collapsed');
+        const hasCookie = document.cookie.indexOf('sipedas_sidebar_collapsed=true') !== -1;
+        const isCollapsed = savedState === 'true' || (savedState === null && hasCookie);
 
-    const savedState = localStorage.getItem('sipedas_sidebar_collapsed');
-
-    if (savedState === 'true') {
-
-        document.body.classList.add('sidebar-collapsed');
-
-    }
-
+        if (isCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+            document.documentElement.classList.add('sidebar-collapsed-early');
+        } else if (savedState === 'false') {
+            document.body.classList.remove('sidebar-collapsed');
+            document.documentElement.classList.remove('sidebar-collapsed-early');
+        }
+    } catch(e) {}
 }
 
 

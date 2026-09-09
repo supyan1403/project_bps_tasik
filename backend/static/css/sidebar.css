@@ -53,6 +53,25 @@ body.role-pegawai:not(.role-admin) .main-content {
     transition: width 0.15s ease-out, min-width 0.15s ease-out;
 }
 
+/* Zero-Flicker Transition Freeze during initial load & auth transitions */
+html.no-sidebar-transition .sidebar,
+html.no-sidebar-transition .bps-brand-text,
+html.no-sidebar-transition .nav-link-text,
+html.no-sidebar-transition .sidebar-btn-text,
+html.no-sidebar-transition .theme-mode-label,
+html.no-sidebar-transition .submenu-arrow {
+    transition: none !important;
+}
+
+@media (min-width: 992px) {
+    html.sidebar-collapsed-early body .sidebar {
+        width: 68px !important;
+        min-width: 68px !important;
+        padding: 1.5rem 12px 1.25rem 12px !important;
+        overflow-y: hidden !important;
+    }
+}
+
 .sipedas-brand-lockup {
     height: 62px !important;
     min-height: 62px !important;

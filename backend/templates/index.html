@@ -26,17 +26,45 @@
     <script>
         (function() {
             try {
+                // Bekukan transisi sementara saat initial paint agar tidak ada kejapan animasi
+                document.documentElement.classList.add('no-sidebar-transition');
+
                 // Sinkronisasi instan sebelum rendering pertama agar tidak ada kedipan sekejap mata
                 var hasCookie = document.cookie.indexOf('sipedas_role=admin') !== -1;
                 var role = localStorage.getItem('sipedas_user_role');
                 if (hasCookie || role === 'admin') {
                     document.documentElement.classList.add('is-admin-early');
                 }
+
+                // Sinkronisasi instan state sidebar collapsed (Zero-flicker pre-render guard)
+                var isCollapsedCookie = document.cookie.indexOf('sipedas_sidebar_collapsed=true') !== -1;
+                var isCollapsedStorage = localStorage.getItem('sipedas_sidebar_collapsed') === 'true';
+                if (isCollapsedCookie || isCollapsedStorage) {
+                    document.documentElement.classList.add('sidebar-collapsed-early');
+                }
+
+                // Kembalikan transisi setelah layout frame stabil
+                window.addEventListener('DOMContentLoaded', function() {
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(function() {
+                            document.documentElement.classList.remove('no-sidebar-transition');
+                        });
+                    });
+                });
             } catch(e) {}
         })();
     </script>
 </head>
-<body class="role-{{ initial_role | default('pegawai') }}">
+<body class="role-{{ initial_role | default('pegawai') }}{% if initial_sidebar_collapsed %} sidebar-collapsed{% endif %}">
+    <script>
+        (function() {
+            try {
+                if (document.documentElement.classList.contains('sidebar-collapsed-early') || localStorage.getItem('sipedas_sidebar_collapsed') === 'true') {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <!-- Mobile Overlay -->
     <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 

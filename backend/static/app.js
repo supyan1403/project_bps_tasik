@@ -1021,6 +1021,9 @@ const _originalFetch = window.fetch;
 window.fetch = async function(...args) {
     const res = await _originalFetch.apply(this, args);
     if (res.status === 503) {
+        if (window.location.pathname === '/login') {
+            return res;
+        }
         const clone = res.clone();
         try {
             const text = await clone.text();
@@ -1217,7 +1220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Detect jika admin aktifkan maintenance dari tab lain
     if (!window._publicMaintenancePolling) {
         window._publicMaintenancePolling = setInterval(async () => {
-            if (typeof _force_maintenance_1 !== 'undefined') return; // skip jika sudah di halaman maintenance
+            if (typeof _force_maintenance_1 !== 'undefined' || window.location.pathname === '/login') return; // skip jika sudah di halaman maintenance atau login
             try {
                 const res = await fetch('/api/auth/maintenance', { credentials: 'same-origin' });
                 if (res.ok) {

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Administrator | SIPEDAS</title>
+    <link rel="icon" type="image/png" href="/static/logo_sipedas.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #1e293b;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        .bg-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 420px;
+            height: 420px;
+            object-fit: contain;
+            opacity: 0.18;
+            pointer-events: none;
+            z-index: 0;
+            filter: drop-shadow(0 0 8px rgba(59,130,246,0.5))
+                    drop-shadow(0 0 24px rgba(59,130,246,0.3));
+            animation: neonPulse 3.5s ease-in-out infinite alternate;
+        }
+        @keyframes neonPulse {
+            0% { filter: drop-shadow(0 0 8px rgba(59,130,246,0.4)) drop-shadow(0 0 20px rgba(59,130,246,0.2)); }
+            100% { filter: drop-shadow(0 0 14px rgba(59,130,246,0.65)) drop-shadow(0 0 32px rgba(59,130,246,0.35)); }
+        }
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 36px 32px 30px;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08),
+                        0 20px 40px -15px rgba(59, 130, 246, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+        .logo-img {
+            width: 68px;
+            height: 68px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06));
+        }
+        .login-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.4px;
+            margin-bottom: 6px;
+        }
+        .login-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            width: 18px;
+            height: 18px;
+            color: #94a3b8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-input {
+            width: 100%;
+            padding: 13px 44px 13px 42px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #0f172a;
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            background: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+        .toggle-pw-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: color 0.2s ease;
+        }
+        .toggle-pw-btn:hover {
+            color: #334155;
+        }
+        .alert-error {
+            display: none;
+            padding: 11px 14px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.45;
+            margin-bottom: 18px;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.2s ease;
+        }
+        .alert-error svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px 20px;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+            transition: all 0.2s ease;
+        }
+        .btn-submit:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.38);
+            transform: translateY(-1px);
+        }
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .back-link-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #1e40af;
+        }
+        .footer-text {
+            position: fixed;
+            bottom: 20px;
+            font-size: 11px;
+            color: #94a3b8;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <img src="/static/logo_sipedas.png" alt="" class="bg-logo">
+
+    <div class="login-card">
+        <div class="login-header">
+            <img src="/static/logo_sipedas.png" alt="SIPEDAS Logo" class="logo-img">
+            <h1 class="login-title">Administrator SIPEDAS</h1>
+            <p class="login-desc">Masukkan password untuk mendapatkan hak akses penuh.</p>
+        </div>
+
+        <div id="alert-error" class="alert-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="error-text">Password salah.</span>
+        </div>
+
+        <form id="login-form" autocomplete="off">
+            <div class="form-group">
+                <label for="admin-password" class="form-label">Password Admin</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+                    <input type="password" id="admin-password" class="form-input" placeholder="Masukkan password admin..." required autofocus>
+                    <button type="button" id="toggle-pw" class="toggle-pw-btn" title="Lihat password">
+                        <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn-submit">
+                <span class="spinner" id="spinner"></span>
+                <span id="btn-text">Masuk sebagai Admin</span>
+            </button>
+        </form>
+
+        <div class="back-link-wrapper">
+            <a href="/" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Kembali ke Halaman Utama
+            </a>
+        </div>
+    </div>
+
+    <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
+
+    <script>
+        const pwInput = document.getElementById('admin-password');
+        const toggleBtn = document.getElementById('toggle-pw');
+        const loginForm = document.getElementById('login-form');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnText = document.getElementById('btn-text');
+        const spinner = document.getElementById('spinner');
+        const alertError = document.getElementById('alert-error');
+        const errorText = document.getElementById('error-text');
+
+        // Toggle password visibility
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = pwInput.type === 'password';
+            pwInput.type = isPassword ? 'text' : 'password';
+            toggleBtn.innerHTML = isPassword ? `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            ` : `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            `;
+        });
+
+        // Handle login submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alertError.style.display = 'none';
+
+            const password = pwInput.value.trim();
+            if (!password) {
+                errorText.textContent = 'Silakan masukkan password terlebih dahulu.';
+                alertError.style.display = 'flex';
+                pwInput.focus();
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Memverifikasi...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ password: password })
+                });
+
+                if (res.ok) {
+                    try { localStorage.setItem('sipedas_user_role', 'admin'); } catch(e) {}
+                    try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'login', ts: Date.now() })); } catch(e) {}
+                    btnText.textContent = 'Login berhasil! Mengalihkan...';
+                    setTimeout(() => {
+                        window.location.href = '/?_t=' + Date.now();
+                    }, 400);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    errorText.textContent = err.detail || 'Password salah atau gagal terhubung ke server.';
+                    alertError.style.display = 'flex';
+                    pwInput.focus();
+                    pwInput.select();
+                }
+            } catch (err) {
+                errorText.textContent = 'Gagal terhubung ke server backend SIPEDAS.';
+                alertError.style.display = 'flex';
+            } finally {
+                btnSubmit.disabled = false;
+                spinner.style.display = 'none';
+                if (!btnText.textContent.includes('berhasil')) {
+                    btnText.textContent = 'Masuk sebagai Admin';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

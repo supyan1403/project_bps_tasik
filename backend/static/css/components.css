@@ -728,8 +728,9 @@ body.role-pegawai #btn-admin-login {
 .doc-mode-option {
     transition: all var(--transition-normal);
     background-color: var(--bg-card);
-    border-color: var(--border) !important;
+    border: 1.5px solid var(--border) !important;
     border-radius: var(--border-radius-lg) !important;
+    box-shadow: none !important;
 }
 
 .doc-mode-option:hover {
@@ -739,9 +740,9 @@ body.role-pegawai #btn-admin-login {
 }
 
 .doc-mode-option.active {
-    border-color: var(--primary-light) !important;
+    border-color: var(--primary, #2563eb) !important;
     background-color: rgba(37, 99, 235, 0.08) !important;
-    box-shadow: 0 0 0 1px var(--primary-light);
+    box-shadow: 0 0 0 1px var(--primary, #2563eb) !important;
 }
 
 .btn-preset-entity {

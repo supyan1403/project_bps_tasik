@@ -23773,10 +23773,12 @@ function setDocCreationMode(mode) {
     if (mode === 'pdf') {
         if (pdfRadio) pdfRadio.checked = true;
         if (pdfBox) {
-            pdfBox.classList.add('border-primary');
-            pdfBox.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+            pdfBox.classList.add('active');
+            pdfBox.classList.remove('border-primary');
+            pdfBox.style.backgroundColor = '';
         }
         if (emptyBox) {
+            emptyBox.classList.remove('active');
             emptyBox.classList.remove('border-primary');
             emptyBox.style.backgroundColor = '';
         }
@@ -23784,10 +23786,12 @@ function setDocCreationMode(mode) {
     } else {
         if (emptyRadio) emptyRadio.checked = true;
         if (emptyBox) {
-            emptyBox.classList.add('border-primary');
-            emptyBox.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+            emptyBox.classList.add('active');
+            emptyBox.classList.remove('border-primary');
+            emptyBox.style.backgroundColor = '';
         }
         if (pdfBox) {
+            pdfBox.classList.remove('active');
             pdfBox.classList.remove('border-primary');
             pdfBox.style.backgroundColor = '';
         }

@@ -509,15 +509,20 @@
     #ts-chart-wrapper,
     #ts-chart-wrapper-2,
     #ts-chart-wrapper-3 {
-        height: 240px !important;
-        min-height: 240px !important;
+        height: 200px !important;
+        min-height: 200px !important;
     }
 
     #timeSeriesChart,
     #timeSeriesChart2,
     #timeSeriesChart3 {
-        height: 240px !important;
-        min-height: 240px !important;
+        height: 200px !important;
+        min-height: 200px !important;
+    }
+
+    /* Reduce main content bottom padding */
+    .main-content {
+        padding-bottom: 1rem !important;
     }
 
     /* Table cell spacing */

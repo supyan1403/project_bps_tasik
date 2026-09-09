@@ -19939,12 +19939,12 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
     const scrollable = document.getElementById(scrollableId);
     const wrapper = document.getElementById(wrapperId);
     if (wrapper) {
-        const _chartH = window.innerWidth <= 576 ? 200 : 320;
+        const _chartH = window.innerWidth <= 576 ? 160 : 320;
         wrapper.style.height = _chartH + 'px';
         wrapper.style.minHeight = _chartH + 'px';
         if (scrollable) {
-            scrollable.style.height = (_chartH + 30) + 'px';
-            scrollable.style.minHeight = (_chartH + 30) + 'px';
+            scrollable.style.height = (_chartH + 20) + 'px';
+            scrollable.style.minHeight = (_chartH + 20) + 'px';
         }
         const activeLabelsCount = isSingleYear ? entities.length : years.length;
         const parentW = (scrollable && scrollable.clientWidth > 50) 
@@ -21724,7 +21724,7 @@ function setTimeSeriesViewMode(mode) {
         ['ts-chart-wrapper', 'ts-chart-wrapper-2', 'ts-chart-wrapper-3'].forEach(id => {
             const w = document.getElementById(id);
             if (w) {
-                const _chartH = window.innerWidth <= 576 ? 200 : 320;
+                const _chartH = window.innerWidth <= 576 ? 160 : 320;
                 w.style.height = _chartH + 'px';
                 w.style.minHeight = _chartH + 'px';
             }
@@ -21740,7 +21740,7 @@ function setTimeSeriesViewMode(mode) {
         ['timeSeriesChart', 'timeSeriesChart2', 'timeSeriesChart3'].forEach(id => {
             const c = document.getElementById(id);
             if (c) {
-                const _chartH = window.innerWidth <= 576 ? 200 : 320;
+                const _chartH = window.innerWidth <= 576 ? 160 : 320;
                 c.style.height = _chartH + 'px';
                 c.style.minHeight = _chartH + 'px';
             }

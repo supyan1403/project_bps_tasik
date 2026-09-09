@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>502 — Sedang Menghubungkan Ulang | SIPEDAS</title>
+    <link rel="icon" type="image/png" href="/static/logo_sipedas.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-hover: #1e3a8a;
+            --primary-light: #eff6ff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --amber-bg: #fef3c7;
+            --amber-text: #92400e;
+            --amber-border: #fde68a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Ambient Glow Watermark */
+        .bg-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 440px;
+            height: 440px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.12;
+            filter: drop-shadow(0 0 40px rgba(30, 64, 175, 0.4));
+            animation: breathe 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.09; }
+            100% { transform: translate(-50%, -50%) scale(1.04); opacity: 0.16; }
+        }
+
+        /* Main Error Card */
+        .error-card {
+            position: relative;
+            z-index: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04);
+            border-radius: 24px;
+            padding: 44px 36px 36px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Brand / Logo Row */
+        .brand-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(0, 147, 221, 0.25));
+        }
+
+        .brand-text {
+            text-align: left;
+            line-height: 1.2;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #1e3a8a;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Status Badge with Live Pulse */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--amber-bg);
+            color: var(--amber-text);
+            border: 1px solid var(--amber-border);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #d97706;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: rgba(217, 119, 6, 0.4);
+            animation: pulse 1.6s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.8); opacity: 0; }
+            100% { transform: scale(0.9); opacity: 0; }
+        }
+
+        /* Typography */
+        .error-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .error-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 28px;
+        }
+
+        /* Countdown & Progress Box */
+        .timer-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+        }
+
+        .timer-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .timer-number {
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            width: 100%;
+            border-radius: 9999px;
+            transition: width 0.1s linear;
+        }
+
+        /* Action Buttons */
+        .actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(30, 64, 175, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(30, 64, 175, 0.32);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* Technical Info Accordion */
+        .tech-info {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .tech-toggle {
+            background: none;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .tech-toggle:hover {
+            color: #1e293b;
+            background: #f1f5f9;
+        }
+
+        .tech-details {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            text-align: left;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11px;
+            color: #334155;
+            word-break: break-all;
+        }
+
+        .tech-details.open {
+            display: block;
+        }
+
+        /* Footer */
+        .footer-note {
+            margin-top: 24px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            z-index: 1;
+            text-align: center;
+        }
+
+        /* Spin animation for button on reload */
+        .spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .error-card {
+                padding: 32px 20px 24px;
+                border-radius: 18px;
+            }
+            .error-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Glow -->
+    <img src="/static/logo_sipedas.svg" onerror="this.src='/static/logo_sipedas.png'" alt="" class="bg-watermark">
+
+    <!-- Card Main Container -->
+    <div class="error-card">
+        
+        <!-- Brand Header -->
+        <div class="brand-row">
+            <img src="/static/logo_sipedas.svg" onerror="this.src='/static/logo_sipedas.png'" alt="SIPEDAS" class="brand-logo">
+            <div class="brand-text">
+                <div class="brand-name">SIPEDAS</div>
+                <div class="brand-sub">BPS KABUPATEN TASIKMALAYA</div>
+            </div>
+        </div>
+
+        <div>
+            <!-- Status Badge -->
+            <div class="status-badge">
+                <span class="pulse-dot"></span>
+                <span>Sedang Memuat Ulang Layanan</span>
+            </div>
+        </div>
+
+        <!-- Title & Description -->
+        <h1 class="error-title">Sambungan Sedang Disiapkan</h1>
+        <p class="error-desc">
+            Sistem sedang melakukan pembaruan berkala atau menyegarkan koneksi server. Halaman akan mencoba terhubung kembali secara otomatis.
+        </p>
+
+        <!-- Dynamic Timer & Progress Track -->
+        <div class="timer-box">
+            <div class="timer-label">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Menghubungkan otomatis dalam <span id="timer-num" class="timer-number">5.0</span> detik</span>
+            </div>
+            <div class="progress-track">
+                <div id="progress-bar" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Primary & Secondary Actions -->
+        <div class="actions-group">
+            <button id="btn-reload" class="btn btn-primary" onclick="doReconnect()">
+                <svg id="reload-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                <span id="btn-text">Coba Hubungkan Sekarang</span>
+            </button>
+            <a href="/" class="btn btn-secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Kembali ke Beranda Utama</span>
+            </a>
+        </div>
+
+        <!-- Collapsible Technical Diagnostic -->
+        <div class="tech-info">
+            <button type="button" class="tech-toggle" onclick="toggleTechInfo()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Detail Teknis (HTTP 502)</span>
+            </button>
+            <div id="tech-details" class="tech-details">
+                <div><strong>Kode Status:</strong> 502 Bad Gateway</div>
+                <div><strong>Penyebab:</strong> Upstream FastAPI / Uvicorn sedang memuat ulang proses.</div>
+                <div><strong>Waktu:</strong> <span id="current-timestamp">-</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Official Footer Note -->
+    <div class="footer-note">
+        SIPEDAS &bull; Sistem Pengelolaan Data Statistik &bull; BPS Kabupaten Tasikmalaya
+    </div>
+
+    <script>
+        // Timestamp preview
+        document.getElementById('current-timestamp').textContent = new Date().toLocaleString('id-ID');
+
+        var totalSeconds = 5.0;
+        var remainingSeconds = totalSeconds;
+        var intervalMs = 100;
+        var timerNumEl = document.getElementById('timer-num');
+        var progressBarEl = document.getElementById('progress-bar');
+        var btnTextEl = document.getElementById('btn-text');
+        var reloadIconEl = document.getElementById('reload-icon');
+        var isReconnecting = false;
+
+        function doReconnect() {
+            if (isReconnecting) return;
+            isReconnecting = true;
+            btnTextEl.textContent = 'Menghubungkan...';
+            reloadIconEl.classList.add('spin');
+            
+            // Append cache-buster so browser bypasses local 502 cache
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('_t', Date.now());
+            window.location.href = currentUrl.toString();
+        }
+
+        var timer = setInterval(function() {
+            if (isReconnecting) return;
+            remainingSeconds -= (intervalMs / 1000);
+            
+            if (remainingSeconds <= 0) {
+                remainingSeconds = 0;
+                clearInterval(timer);
+                doReconnect();
+            }
+
+            timerNumEl.textContent = remainingSeconds.toFixed(1);
+            var pct = (remainingSeconds / totalSeconds) * 100;
+            progressBarEl.style.width = pct + '%';
+        }, intervalMs);
+
+        function toggleTechInfo() {
+            var el = document.getElementById('tech-details');
+            el.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

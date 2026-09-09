@@ -2479,7 +2479,33 @@ async function loadDashboardBackupInfo() {
     }
 }
 
+// Helper untuk mengontrol indikator loading grafik dashboard
+function hideDashboardChartLoading() {
+    const overlayIds = ['loading-dashboard-bar-chart', 'loading-dashboard-ref-chart', 'loading-dashboard-trend-chart'];
+    overlayIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.add('hidden');
+            setTimeout(() => {
+                if (el.classList.contains('hidden')) {
+                    el.style.display = 'none';
+                }
+            }, 320);
+        }
+    });
+}
 
+function showDashboardChartLoading() {
+    const overlayIds = ['loading-dashboard-bar-chart', 'loading-dashboard-ref-chart', 'loading-dashboard-trend-chart'];
+    overlayIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'flex';
+            void el.offsetHeight;
+            el.classList.remove('hidden');
+        }
+    });
+}
 
 async function loadDashboardStats() {
 
@@ -2833,9 +2859,12 @@ async function loadDashboardStats() {
                     }
                     renderRefChartMode(window.currentRefChartMode || 'points', !isTabRevisit);
                 }
+
+                // Sembunyikan indikator loading grafik setelah render selesai
+                hideDashboardChartLoading();
+            } else {
+                hideDashboardChartLoading();
             }
-
-
 
             // 5. Feed publikasi terbaru sudah dirender seketika di awal via renderRecentDocsList
             if (window.__cachedDocsList) {
@@ -2845,6 +2874,7 @@ async function loadDashboardStats() {
         } catch (chartErr) {
 
             console.error("Gagal memuat visualisasi chart dashboard:", chartErr);
+            hideDashboardChartLoading();
 
         }
 

@@ -14181,7 +14181,7 @@ async function executeTimeSeriesExport() {
                                                 },
                                                 y: {
                                                     beginAtZero: true,
-                                                    grace: '8%',
+                                                    grace: window.innerWidth <= 576 ? '2%' : '8%',
                                                     grid: { color: '#f1f5f9' },
                                                     title: {
                                                         display: !!yTitleText,
@@ -20996,7 +20996,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     beginAtZero: true,
 
-                    grace: '2%',
+                    grace: window.innerWidth <= 576 ? '2%' : '8%',
 
                     display: true,
 

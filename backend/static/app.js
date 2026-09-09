@@ -1589,15 +1589,11 @@ function navigate(pageId, element) {
 
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-
-
+    document.querySelectorAll('.popover-item').forEach(el => el.classList.remove('active'));
 
     const page = document.getElementById(`page-${pageId}`);
-
     if (page) page.classList.add('active');
-
     if (element) element.classList.add('active');
 
 
@@ -3709,7 +3705,13 @@ function renderRefChartMode(mode, animate = true) {
     const _refN = _refRange === 'all' ? window.cachedRefChartData.labels.length : parseInt(_refRange);
     const _refLabels = window.cachedRefChartData.labels.slice(-_refN);
     const _refData = dataset.data.slice(-_refN);
-    const _filteredDataset = { ...dataset, data: _refData };
+    const _isTeal = isPoints;
+    const _filteredDataset = { 
+        ...dataset, 
+        data: _refData,
+        backgroundColor: _isTeal ? 'rgba(13, 148, 136, 0.82)' : (dataset.backgroundColor || 'rgba(16, 185, 129, 0.82)'),
+        borderColor: _isTeal ? 'rgba(13, 148, 136, 1)' : (dataset.borderColor || 'rgba(16, 185, 129, 1)')
+    };
 
     if (window.dashboardRefYearChartInstance && !animate) {
         window.dashboardRefYearChartInstance.data.labels = _refLabels;
@@ -17312,31 +17314,50 @@ function switchAdminTab(tab) {
 
 
 function navigateSistemTab(tab, element) {
-
     if (!checkRoleAccess('admin')) return;
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.popover-item').forEach(el => el.classList.remove('active'));
 
     const page = document.getElementById('page-sistem');
-
     if (page) page.classList.add('active');
 
     const parent = document.getElementById('nav-sistem');
-
     if (parent) parent.classList.add('active');
 
-    const el = element || document.getElementById(`nav-sistem-${tab}`);
+    // 1. Aktifkan item subnav di dalam sidebar
+    const subnavEl = document.getElementById(`nav-sistem-${tab}`);
+    if (subnavEl) subnavEl.classList.add('active');
 
-    if (el) el.classList.add('active');
+    // 2. Aktifkan item di popover flyout
+    const popoverEl = document.getElementById(`popover-sistem-${tab}`) || 
+                      document.querySelector(`#flyout-sistem-submenu [data-tab="${tab}"]`) || 
+                      (element && element.classList.contains('popover-item') ? element : null);
+    if (popoverEl) popoverEl.classList.add('active');
+
+    // 3. Pastikan submenu accordion terbuka & icon berputar (agar langsung terlihat saat sidebar dibuka)
+    const sub = document.getElementById('sistem-submenu');
+    const icon = document.getElementById('sistem-submenu-icon');
+    if (sub) sub.style.display = 'block';
+    if (icon) icon.classList.add('open');
+
+    // Tutup floating popover jika sedang melayang
+    document.querySelectorAll('.sidebar-floating-popover').forEach(p => {
+        p.classList.remove('popover-visible');
+        p.style.display = '';
+        p.style.position = '';
+        p.style.top = '';
+        p.style.left = '';
+        if (p._originalParent && p.parentNode !== p._originalParent) {
+            p._originalParent.appendChild(p);
+        }
+    });
 
     const mc = document.querySelector('.main-content');
-
     if (mc) mc.scrollTop = 0;
 
     switchSistemTab(tab);
-
 }
 
 
@@ -18432,41 +18453,50 @@ function toggleSistemSubmenu() {
 
 
 function navigateAdminTab(tab, element) {
-
     if (!checkRoleAccess('admin')) return;
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-
-
+    document.querySelectorAll('.popover-item').forEach(el => el.classList.remove('active'));
 
     const page = document.getElementById('page-admin');
-
     if (page) page.classList.add('active');
 
-
-
     const parent = document.getElementById('nav-admin');
-
     if (parent) parent.classList.add('active');
 
+    // 1. Aktifkan item subnav di dalam sidebar
+    const subnavEl = document.getElementById(`nav-admin-${tab}`);
+    if (subnavEl) subnavEl.classList.add('active');
 
+    // 2. Aktifkan item di popover flyout
+    const popoverEl = document.getElementById(`popover-admin-${tab}`) || 
+                      document.querySelector(`#flyout-admin-submenu [data-tab="${tab}"]`) || 
+                      (element && element.classList.contains('popover-item') ? element : null);
+    if (popoverEl) popoverEl.classList.add('active');
 
-    const el = element || document.getElementById(`nav-admin-${tab}`);
+    // 3. Pastikan submenu accordion terbuka & icon berputar (agar langsung terlihat saat sidebar dibuka)
+    const sub = document.getElementById('admin-submenu');
+    const icon = document.getElementById('admin-submenu-icon');
+    if (sub) sub.style.display = 'block';
+    if (icon) icon.classList.add('open');
 
-    if (el) el.classList.add('active');
-
-
+    // Tutup floating popover jika sedang melayang
+    document.querySelectorAll('.sidebar-floating-popover').forEach(p => {
+        p.classList.remove('popover-visible');
+        p.style.display = '';
+        p.style.position = '';
+        p.style.top = '';
+        p.style.left = '';
+        if (p._originalParent && p.parentNode !== p._originalParent) {
+            p._originalParent.appendChild(p);
+        }
+    });
 
     const mc = document.querySelector('.main-content');
-
     if (mc) mc.scrollTop = 0;
 
-
-
     switchAdminTab(tab);
-
 }
 
 
@@ -23300,7 +23330,6 @@ function initBannerLiveClock() {
 // Sidebar Collapsible / Toggle Logic (Cukup klik Logo SIPEDAS)
 
 function toggleSidebar() {
-
     const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
     document.documentElement.classList.toggle('sidebar-collapsed-early', isCollapsed);
 
@@ -23309,28 +23338,36 @@ function toggleSidebar() {
         document.cookie = `sipedas_sidebar_collapsed=${isCollapsed ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
     } catch(e) {}
 
-    // Tutup semua popover + re-parent ke <li> asal
-
-    document.querySelectorAll('.sidebar-floating-popover').forEach(p => {
-
-        p.classList.remove('popover-visible');
-
-        p.style.display = '';
-
-        p.style.position = '';
-
-        p.style.top = '';
-
-        p.style.left = '';
-
-        if (p._originalParent && p.parentNode !== p._originalParent) {
-
-            p._originalParent.appendChild(p);
-
+    // Jika sidebar baru saja dibuka (expanded):
+    // Pastikan submenu yang sedang memiliki tab aktif otomatis terbuka
+    if (!isCollapsed) {
+        const activeAdminSub = document.querySelector('#admin-submenu .subnav-link.active');
+        if (activeAdminSub) {
+            const sub = document.getElementById('admin-submenu');
+            const icon = document.getElementById('admin-submenu-icon');
+            if (sub) sub.style.display = 'block';
+            if (icon) icon.classList.add('open');
         }
+        const activeSistemSub = document.querySelector('#sistem-submenu .subnav-link.active');
+        if (activeSistemSub) {
+            const sub = document.getElementById('sistem-submenu');
+            const icon = document.getElementById('sistem-submenu-icon');
+            if (sub) sub.style.display = 'block';
+            if (icon) icon.classList.add('open');
+        }
+    }
 
+    // Tutup semua popover + re-parent ke <li> asal
+    document.querySelectorAll('.sidebar-floating-popover').forEach(p => {
+        p.classList.remove('popover-visible');
+        p.style.display = '';
+        p.style.position = '';
+        p.style.top = '';
+        p.style.left = '';
+        if (p._originalParent && p.parentNode !== p._originalParent) {
+            p._originalParent.appendChild(p);
+        }
     });
-
 }
 
 function toggleMobileSidebar() {

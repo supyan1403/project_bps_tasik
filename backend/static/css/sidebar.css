@@ -305,6 +305,16 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
     color: var(--text-primary);
 }
 
+.popover-item.active {
+    background: var(--primary) !important;
+    color: var(--text-white) !important;
+    font-weight: 600 !important;
+}
+
+.popover-item.active i {
+    color: var(--text-white) !important;
+}
+
 .popover-item i {
     width: 18px;
     text-align: center;

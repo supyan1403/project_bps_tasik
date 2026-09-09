@@ -371,18 +371,35 @@
     }
 
     /* Toolbar Mode Switcher (Grafik / Tabel / Keduanya) */
+    #ts-view-mode-bar {
+        padding: 10px 14px !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
     .ts-view-mode-label {
         font-size: 0.68rem !important;
+        width: 100% !important;
+        margin-bottom: 2px !important;
+    }
+
+    .ts-segmented-control {
+        width: 100% !important;
+        justify-content: stretch !important;
     }
 
     .ts-segmented-btn {
-        font-size: 0.74rem !important;
-        padding: 4px 10px !important;
+        font-size: 0.78rem !important;
+        padding: 8px 12px !important;
+        flex: 1 !important;
+        justify-content: center !important;
     }
 
     .ts-view-mode-hint-badge {
         font-size: 0.68rem !important;
-        padding: 3px 8px !important;
+        padding: 4px 10px !important;
+        width: 100% !important;
+        justify-content: center !important;
     }
 
     /* Konversi Satuan & Opsi Tampilan */

@@ -12197,6 +12197,19 @@ function toggleTimeSeriesInsights(forceState) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    var trendDetails = document.querySelector('details.ts-trend-collapsible');
+    if (trendDetails) {
+        trendDetails.addEventListener('toggle', function() {
+            if (trendDetails.open) {
+                tsInsightsExpanded = true;
+                initInsightFilterOptions();
+                computeAndRenderTimeSeriesInsights();
+            }
+        });
+    }
+});
+
 function quickJumpToInsights() {
     if (!tsInsightsExpanded) {
         toggleTimeSeriesInsights(true);

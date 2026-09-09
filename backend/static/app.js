@@ -14181,7 +14181,7 @@ async function executeTimeSeriesExport() {
                                                 },
                                                 y: {
                                                     beginAtZero: true,
-                                                    grace: window.innerWidth <= 576 ? '2%' : '8%',
+                                                    grace: '8%',
                                                     grid: { color: '#f1f5f9' },
                                                     title: {
                                                         display: !!yTitleText,
@@ -19939,13 +19939,8 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
     const scrollable = document.getElementById(scrollableId);
     const wrapper = document.getElementById(wrapperId);
     if (wrapper) {
-        const _chartH = window.innerWidth <= 576 ? 160 : 320;
-        wrapper.style.height = _chartH + 'px';
-        wrapper.style.minHeight = _chartH + 'px';
-        if (scrollable) {
-            scrollable.style.height = (_chartH + 20) + 'px';
-            scrollable.style.minHeight = (_chartH + 20) + 'px';
-        }
+        wrapper.style.height = '320px';
+        wrapper.style.minHeight = '320px';
         const activeLabelsCount = isSingleYear ? entities.length : years.length;
         const parentW = (scrollable && scrollable.clientWidth > 50) 
             ? scrollable.clientWidth 
@@ -21000,7 +20995,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     beginAtZero: true,
 
-                    grace: window.innerWidth <= 576 ? '2%' : '8%',
+                    grace: '8%',
 
                     display: true,
 
@@ -21724,25 +21719,15 @@ function setTimeSeriesViewMode(mode) {
         ['ts-chart-wrapper', 'ts-chart-wrapper-2', 'ts-chart-wrapper-3'].forEach(id => {
             const w = document.getElementById(id);
             if (w) {
-                const _chartH = window.innerWidth <= 576 ? 160 : 320;
-                w.style.height = _chartH + 'px';
-                w.style.minHeight = _chartH + 'px';
-            }
-        });
-        ['ts-chart-scrollable', 'ts-chart-scrollable-2', 'ts-chart-scrollable-3'].forEach(id => {
-            const s = document.getElementById(id);
-            if (s) {
-                const _chartH = window.innerWidth <= 576 ? 200 : 320;
-                s.style.height = (_chartH + 30) + 'px';
-                s.style.minHeight = (_chartH + 30) + 'px';
+                w.style.height = '320px';
+                w.style.minHeight = '320px';
             }
         });
         ['timeSeriesChart', 'timeSeriesChart2', 'timeSeriesChart3'].forEach(id => {
             const c = document.getElementById(id);
             if (c) {
-                const _chartH = window.innerWidth <= 576 ? 160 : 320;
-                c.style.height = _chartH + 'px';
-                c.style.minHeight = _chartH + 'px';
+                c.style.height = '320px';
+                c.style.minHeight = '320px';
             }
         });
 

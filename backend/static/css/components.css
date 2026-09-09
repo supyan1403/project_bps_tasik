@@ -1006,3 +1006,42 @@ body.role-pegawai #btn-admin-login {
     color: var(--text-white) !important;
     box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25) !important;
 }
+
+/* ===================== SEARCH TYPE SELECT DROPDOWN ===================== */
+.search-type-select-styled {
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    max-width: 125px !important;
+    border: none !important;
+    border-right: 1.5px solid #dbeafe !important;
+    border-top-left-radius: 0.5rem !important;
+    border-bottom-left-radius: 0.5rem !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    padding: 0.6rem 2rem 0.6rem 0.95rem !important;
+    cursor: pointer !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
+}
+
+.search-type-select-styled:hover,
+.search-type-select-styled:focus {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    border-right-color: #bfdbfe !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+[data-bs-theme="dark"] .search-type-select-styled,
+body.dark-mode .search-type-select-styled {
+    background-color: rgba(30, 64, 175, 0.25) !important;
+    color: #93c5fd !important;
+    border-right-color: rgba(147, 197, 253, 0.2) !important;
+}
+[data-bs-theme="dark"] .search-type-select-styled:hover,
+body.dark-mode .search-type-select-styled:hover {
+    background-color: rgba(30, 64, 175, 0.4) !important;
+    color: #bfdbfe !important;
+}

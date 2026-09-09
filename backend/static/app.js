@@ -10604,20 +10604,57 @@ function _sortEntitiesWithKabLast(arr) {
         return 999;
     };
 
-    return arr.sort(function(a, b) {
-        var aa = a === 'Kabupaten Tasikmalaya', bb = b === 'Kabupaten Tasikmalaya';
-        if (aa && !bb) return 1;
-        if (!aa && bb) return -1;
+    var romanValues = {
+        'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9, 'x': 10,
+        'xi': 11, 'xii': 12, 'xiii': 13, 'xiv': 14, 'xv': 15, 'xvi': 16, 'xvii': 17, 'xviii': 18, 'xix': 19, 'xx': 20
+    };
 
-        var rA = eduRank(a), rB = eduRank(b);
-        if (rA !== 999 || rB !== 999) {
-            if (rA !== rB) return rA - rB;
+    var getRank = function(name) {
+        if (!name) return [9999, 0, ''];
+        var s = String(name).trim();
+        var sLower = s.toLowerCase();
+
+        // 1. Summary rows always at the very bottom
+        if (sLower === 'kabupaten tasikmalaya' || sLower === 'jumlah' || sLower === 'total') {
+            return [9999, 0, sLower];
         }
 
-        var ma = a.match(/^(\d+)/), mb = b.match(/^(\d+)/);
-        if (ma && mb) return parseInt(ma[1],10) - parseInt(mb[1],10) || a.localeCompare(b);
-        if (ma) return -1;
-        if (mb) return 1;
+        // 2. Education levels
+        var er = eduRank(sLower);
+        if (er !== 999) {
+            return [1, er, sLower];
+        }
+
+        // 3. Pure Roman Numerals (e.g. PPPK Golongan I - XVII)
+        var mRoman = sLower.match(/^(?:golongan\s+)?([ivx]+)$/);
+        if (mRoman && romanValues[mRoman[1]]) {
+            return [2, romanValues[mRoman[1]], sLower];
+        }
+
+        // 4. PNS Rank Hierarchy (e.g. I/A, Golongan I/Range I)
+        var mPnsGol = sLower.match(/^golongan\s+([ivx]+)(?:\/.*)?$/);
+        if (mPnsGol && romanValues[mPnsGol[1]]) {
+            return [3, romanValues[mPnsGol[1]] * 100 + 90, sLower];
+        }
+        var mPnsSub = sLower.match(/^([ivx]+)\s*\/\s*([a-e])(?:\s*\(.*\))?$/);
+        if (mPnsSub && romanValues[mPnsSub[1]]) {
+            var subVal = mPnsSub[2].charCodeAt(0) - 96; // 'a'=1, 'b'=2, etc.
+            return [3, romanValues[mPnsSub[1]] * 100 + subVal, sLower];
+        }
+
+        // 5. Numbered items (e.g. 1. xxx)
+        var mNum = s.match(/^(\d+)/);
+        if (mNum) {
+            return [4, parseInt(mNum[1], 10), sLower];
+        }
+
+        return [5, 0, sLower];
+    };
+
+    return arr.sort(function(a, b) {
+        var rA = getRank(a), rB = getRank(b);
+        if (rA[0] !== rB[0]) return rA[0] - rB[0];
+        if (rA[1] !== rB[1]) return rA[1] - rB[1];
         return a.localeCompare(b);
     });
 }

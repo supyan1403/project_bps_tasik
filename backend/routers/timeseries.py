@@ -201,6 +201,55 @@ def normalize_entity_name(raw: str) -> str:
             return kec.title()
     return s.title() if s.islower() else s
 
+_ROMAN_VALUES = {
+    'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9, 'x': 10,
+    'xi': 11, 'xii': 12, 'xiii': 13, 'xiv': 14, 'xv': 15, 'xvi': 16, 'xvii': 17, 'xviii': 18, 'xix': 19, 'xx': 20
+}
+
+def _get_timeseries_entity_sort_key(name: str):
+    if not name:
+        return (9999, 0, "")
+    s = str(name).strip()
+    s_lower = s.lower()
+    
+    # 1. Summary rows always at the bottom
+    if s_lower in ["kabupaten tasikmalaya", "jumlah", "total"]:
+        return (9999, 0, s_lower)
+        
+    # 2. Education levels
+    edu_map = {
+        "≤ sekolah dasar (sd)": 10,
+        "smp / sederajat": 20,
+        "sma / smk / sederajat": 30,
+        "perguruan tinggi": 40
+    }
+    for k, r in edu_map.items():
+        if k in s_lower:
+            return (1, r, s_lower)
+            
+    # 3. Pure Roman Numerals (PPPK)
+    m_roman = re.match(r'^(?:golongan\s+)?([ivx]+)$', s_lower)
+    if m_roman and m_roman.group(1) in _ROMAN_VALUES:
+        return (2, _ROMAN_VALUES[m_roman.group(1)], s_lower)
+        
+    # 4. PNS Rank Hierarchy
+    m_pns = re.match(r'^(?:golongan\s+([ivx]+)(?:/.*)?|([ivx]+)\s*/\s*([a-e])(?:\s*\(.*\))?)$', s_lower)
+    if m_pns:
+        if m_pns.group(1) and m_pns.group(1) in _ROMAN_VALUES:
+            g = _ROMAN_VALUES[m_pns.group(1)]
+            return (3, g * 100 + 90, s_lower)
+        elif m_pns.group(2) and m_pns.group(3) and m_pns.group(2) in _ROMAN_VALUES:
+            g = _ROMAN_VALUES[m_pns.group(2)]
+            sub = ord(m_pns.group(3)) - ord('a') + 1
+            return (3, g * 100 + sub, s_lower)
+            
+    # 5. Numbered items
+    m_num = re.match(r'^(\d+)', s)
+    if m_num:
+        return (4, int(m_num.group(1)), s_lower)
+        
+    return (5, 0, s_lower)
+
 def normalize_entity_key(raw_key: str) -> str:
     if not raw_key:
         return "Rincian"
@@ -539,7 +588,7 @@ def _dedup_timeseries_results(results):
 
             if merged_data:
                 data_rows = list(merged_data.values())
-                data_rows.sort(key=lambda r: (r["entitas"] == "Kabupaten Tasikmalaya", r["entitas"]))
+                data_rows.sort(key=lambda r: _get_timeseries_entity_sort_key(r["entitas"]))
                 deduped.append({
                     "table_id": best_table_info["table_id"],
                     "table_name": best_table_info["table_name"],

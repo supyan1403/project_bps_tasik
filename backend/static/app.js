@@ -24044,6 +24044,25 @@ async function openCreateTableModal(defaultDocId = null, defaultBabNum = null) {
     }
 }
 
+function getBpsStandardTitle(num) {
+    const bpsMap = {
+        1: "Geografi dan Iklim",
+        2: "Pemerintahan",
+        3: "Penduduk dan Ketenagakerjaan",
+        4: "Sosial dan Kesejahteraan Rakyat",
+        5: "Pertanian, Kehutanan, Peternakan, dan Perikanan",
+        6: "Industri, Pertambangan, Energi, dan Air",
+        7: "Perdagangan, Hotel, dan Pariwisata",
+        8: "Transportasi dan Komunikasi",
+        9: "Keuangan Daerah dan Harga",
+        10: "Pengeluaran dan Konsumsi Penduduk",
+        11: "Pendapatan Regional (PDRB)",
+        12: "PDRB Lapangan Usaha",
+        13: "Perbandingan Regional / Antar Wilayah"
+    };
+    return bpsMap[num] || "";
+}
+
 async function updateCreateTableBabOptions(selectBabNum = null) {
     const docSelect = document.getElementById('create-table-doc-id');
     const babSelect = document.getElementById('create-table-bab-num');
@@ -24070,13 +24089,31 @@ async function updateCreateTableBabOptions(selectBabNum = null) {
                 const tocData = await res.json();
                 if (tocData && Array.isArray(tocData) && tocData.length > 0) {
                     let bOpts = '';
-                    tocData.forEach(item => {
-                        const bNum = item.bab_num;
-                        const bTitle = item.title || getChapterTitle(bNum) || '';
+                    tocData.forEach((item, idx) => {
+                        let bNum = item.bab_num || item.num;
+                        let rawTitle = item.title || "";
+                        
+                        const m = rawTitle.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\–\—\.\:]\s*(.*))?/i);
+                        if (m) {
+                            if (!bNum) {
+                                bNum = parseInt(m[1], 10);
+                                if (isNaN(bNum)) bNum = idx + 1;
+                            }
+                            if (m[2] && m[2].trim()) {
+                                rawTitle = m[2].trim();
+                            }
+                        }
+                        if (!bNum) bNum = idx + 1;
+
+                        let cleanTitle = rawTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
+                        if (!cleanTitle || cleanTitle.toLowerCase() === `bab ${bNum}`) {
+                            cleanTitle = (typeof window.__getChapterTitle === 'function' ? window.__getChapterTitle(bNum) : '') || getBpsStandardTitle(bNum) || `Bab ${bNum}`;
+                        }
+
                         const sel = String(bNum) === String(currentVal) ? 'selected' : '';
-                        bOpts += `<option value="${bNum}" ${sel}>Bab ${bNum}: ${escHtml(bTitle)}</option>`;
+                        bOpts += `<option value="${bNum}" ${sel}>Bab ${bNum}: ${escHtml(cleanTitle)}</option>`;
                     });
-                    babSelect.innerHTML = bOpts;
+                    if (bOpts) babSelect.innerHTML = bOpts;
                 }
             }
         } catch (e) {
@@ -24092,7 +24129,8 @@ function updateCreateTableNumberPrefix() {
     const numInput = document.getElementById('create-table-number');
     if (!babSelect || !numInput) return;
 
-    const bab = babSelect.value || '1';
+    let bab = babSelect.value;
+    if (!bab || bab === 'undefined') bab = '1';
     if (!numInput.value || numInput.value.startsWith('Tabel ')) {
         numInput.value = `Tabel ${bab}.1.1`;
     }

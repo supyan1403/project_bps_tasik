@@ -2,10 +2,10 @@
    SIPEDAS — Master Entry Stylesheet
    ========================================================================== */
 
-@import url('/static/css/theme.css?v=20260904_19');
+@import url('/static/css/theme.css?v=20260909_1');
 @import url('/static/css/base.css?v=20260903_15');
 @import url('/static/css/sidebar.css?v=20260909_4');
-@import url('/static/css/dashboard.css?v=20260909_1');
+@import url('/static/css/dashboard.css?v=20260909_2');
 @import url('/static/css/components.css?v=20260905_9');
 @import url('/static/css/tables.css?v=20260903_15');
 @import url('/static/css/timeseries.css?v=20260904_63');

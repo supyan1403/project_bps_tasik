@@ -118,18 +118,18 @@
     --success-emerald: #10b981;
     --success-light-border: #bbf7d0;
 
-    /* === PURPLE EXTENDED === */
-    --purple-50: #ede9fe;
-    --purple-500: #8b5cf6;
+    /* === CYAN / SKY (Eliminated Purple) === */
+    --purple-50: #f0f9ff;
+    --purple-500: #0284c7;
 
-    /* === INDIGO === */
-    --indigo-600: #4f46e5;
+    /* === INDIGO (Aligned with Primary Blue) === */
+    --indigo-600: var(--primary, #2563eb);
 
     /* === BPS BRAND === */
     --bps-brand: #002b66;
 
     /* === SWAL BUTTONS === */
-    --swal-confirm-primary: var(--indigo-600);
+    --swal-confirm-primary: var(--primary, #2563eb);
     --swal-confirm-danger: var(--danger);
     --swal-confirm-success: var(--success-emerald);
     --swal-cancel: var(--text-muted);
@@ -141,18 +141,21 @@
     --badge-blue-text: #1d4ed8;
     --badge-orange-bg: #ffedd5;
     --badge-orange-text: #c2410c;
-    --badge-purple-bg: #ede9fe;
-    --badge-purple-text: #6d28d9;
+    --badge-purple-bg: #e0f2fe;
+    --badge-purple-text: #0369a1;
+    --badge-cyan-bg: #e0f2fe;
+    --badge-cyan-text: #0369a1;
 
     /* === STAT ICON COLORS === */
     --stat-orange: #f97316;
-    --stat-purple: #8b5cf6;
-    --stat-violet: #7c3aed;
+    --stat-purple: #0284c7;
+    --stat-violet: #0284c7;
+    --stat-cyan: #0284c7;
 
     /* === MODAL === */
     --modal-gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
     --modal-gradient-blue-deep: linear-gradient(135deg, #091e42 0%, #1e3a8a 60%, #2563eb 100%);
-    --modal-gradient-violet: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    --modal-gradient-violet: linear-gradient(135deg, #091e42 0%, #1e3a8a 60%, #0284c7 100%);
     --modal-icon-bg: rgba(255, 255, 255, 0.18);
     --modal-icon-border: 1px solid rgba(255, 255, 255, 0.3);
     --modal-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.25);
@@ -265,9 +268,10 @@
     border-radius: 8px;
 }
 
-.badge-purple {
-    background: var(--badge-purple-bg);
-    color: var(--badge-purple-text);
+.badge-purple,
+.badge-cyan {
+    background: var(--badge-cyan-bg);
+    color: var(--badge-cyan-text);
     font-size: 0.74rem;
     font-weight: 600;
     padding: 4px 10px;
@@ -276,7 +280,8 @@
 
 /* --- Stat Icons --- */
 .icon-orange { color: var(--stat-orange); }
-.icon-purple { color: var(--stat-purple); }
+.icon-purple,
+.icon-cyan { color: var(--stat-cyan); }
 
 /* --- Select Inputs --- */
 .select-filter {
@@ -320,7 +325,7 @@
 
 /* --- TS Stats --- */
 .text-ts-purple {
-    color: var(--stat-violet);
+    color: var(--primary);
 }
 
 /* --- Fix Buttons --- */
@@ -363,7 +368,7 @@
 }
 
 .modal-header-violet {
-    background: var(--modal-gradient-violet) !important;
+    background: var(--modal-gradient-blue-deep) !important;
     color: var(--text-white) !important;
 }
 

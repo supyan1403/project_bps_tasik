@@ -10,7 +10,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8fafc;
+            background-color: #f8fafc;
+            background-image: radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -22,44 +24,54 @@
             padding: 20px;
         }
 
-        /* Pulsing watermark matching maintenance.html */
+        /* Glowing Neon SIPEDAS Logo in Background */
         .bg-logo {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 380px;
-            height: 380px;
+            width: 440px;
+            height: 440px;
             object-fit: contain;
-            opacity: 0.22;
+            opacity: 0.38;
             pointer-events: none;
             z-index: 0;
-            filter: drop-shadow(0 0 8px  rgba(59,130,246,0.6))
-                    drop-shadow(0 0 20px rgba(59,130,246,0.4))
-                    drop-shadow(0 0 40px rgba(59,130,246,0.2));
-            animation: neonPulse 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.75))
+                    drop-shadow(0 0 28px rgba(59, 130, 246, 0.6))
+                    drop-shadow(0 0 55px rgba(96, 165, 250, 0.45));
+            animation: neonGlow 3s ease-in-out infinite alternate;
         }
-        @keyframes neonPulse {
-            0%   { filter: drop-shadow(0 0 8px  rgba(59,130,246,0.5))
-                           drop-shadow(0 0 20px rgba(59,130,246,0.3))
-                           drop-shadow(0 0 40px rgba(59,130,246,0.15)); }
-            100% { filter: drop-shadow(0 0 12px rgba(59,130,246,0.7))
-                           drop-shadow(0 0 28px rgba(59,130,246,0.5))
-                           drop-shadow(0 0 50px rgba(59,130,246,0.25)); }
+        @keyframes neonGlow {
+            0% {
+                filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.65))
+                        drop-shadow(0 0 20px rgba(59, 130, 246, 0.45))
+                        drop-shadow(0 0 40px rgba(96, 165, 250, 0.3));
+                opacity: 0.32;
+                transform: translate(-50%, -50%) scale(0.98);
+            }
+            100% {
+                filter: drop-shadow(0 0 16px rgba(37, 99, 235, 0.9))
+                        drop-shadow(0 0 36px rgba(59, 130, 246, 0.75))
+                        drop-shadow(0 0 75px rgba(96, 165, 250, 0.55));
+                opacity: 0.44;
+                transform: translate(-50%, -50%) scale(1.02);
+            }
         }
 
-        /* Clean White Card */
+        /* Clean White Card with Frosted Backdrop */
         .login-card {
             position: relative;
             z-index: 1;
             width: 100%;
             max-width: 400px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.95);
             border-radius: 20px;
             padding: 36px 32px 28px;
-            box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.08), 
-                        0 4px 12px -2px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.08), 
+                        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 

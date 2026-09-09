@@ -210,9 +210,9 @@
     }
 
     .ts-wizard-box {
-        height: 180px;
-        min-height: 180px;
-        max-height: 180px;
+        height: 240px;
+        min-height: 240px;
+        max-height: 240px;
     }
 
     .ts-vk-chip {

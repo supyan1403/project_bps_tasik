@@ -5293,10 +5293,11 @@ async function openEditDocModal(docId, currentYear, currentDataYear, currentFile
 }
 
 async function editBabTitle(docId, babNum, currentTitle) {
+    const cleanCurrentTitle = (currentTitle || '').replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
     const { value: newTitle } = await Swal.fire({
         title: `Edit Judul Bab ${babNum}`,
         input: 'text',
-        inputValue: currentTitle || '',
+        inputValue: cleanCurrentTitle || '',
         inputLabel: 'Nama / Topik Bab',
         inputPlaceholder: 'Contoh: Sosial dan Kependudukan',
         showCancelButton: true,
@@ -5939,9 +5940,15 @@ async function populateDocumentList() {
             Object.keys(docChapters).forEach(rawNum => {
                 const bNum = parseInt(rawNum, 10);
                 if (!isNaN(bNum)) {
-                    const chapterTitle = getChapterTitle(bNum);
+                    let chapterTitle = getChapterTitle(bNum) || "";
+                    chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
                     const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
-                    grouped[bNum] = { name: `Bab ${bNum}${chapterSuffix}`, num: bNum, tables: [] };
+                    grouped[bNum] = { 
+                        name: `Bab ${bNum}${chapterSuffix}`, 
+                        cleanTitle: chapterTitle || `Bab ${bNum}`, 
+                        num: bNum, 
+                        tables: [] 
+                    };
                 }
             });
         }
@@ -5950,14 +5957,17 @@ async function populateDocumentList() {
         tables.forEach(t => {
             const match = t.table_name.match(/Tabel[\s_]*(\d+)/i);
             let babName = "Lainnya";
+            let cleanTitle = "Lainnya";
             let babNum = 999;
             if (match && match[1]) {
                 babNum = parseInt(match[1], 10);
-                const chapterTitle = getChapterTitle(babNum);
+                let chapterTitle = getChapterTitle(babNum) || "";
+                chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
                 const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
                 babName = `Bab ${babNum}${chapterSuffix}`;
+                cleanTitle = chapterTitle || `Bab ${babNum}`;
             }
-            if (!grouped[babNum]) grouped[babNum] = { name: babName, num: babNum, tables: [] };
+            if (!grouped[babNum]) grouped[babNum] = { name: babName, cleanTitle: cleanTitle, num: babNum, tables: [] };
             grouped[babNum].tables.push(t);
         });
 
@@ -6010,12 +6020,21 @@ async function populateDocumentList() {
                     populateDocumentList();
                 };
 
-                const safeTitle = _escJs(bab.name);
+                const safeTitle = _escJs(bab.cleanTitle || bab.name);
 
                 let cardHTML = `
                     <div style="text-align:center; width:100%;">
-                        <h4 class="doc-card-title" style="margin:0 0 0.65rem 0; font-size:1.15rem; font-weight:700; text-align:center; line-height:1.4;">${bab.name}</h4>
-                        <p class="doc-card-subtitle" style="margin:0 0 1.25rem 0; text-align:center; font-size:0.9rem; font-weight:500;">${bab.tables.length} Tabel</p>
+                        <div class="doc-bab-badge mb-1.5" style="font-size: 0.82rem; font-weight: 700; letter-spacing: 0.4px; color: var(--primary, #2563eb); text-transform: uppercase;">
+                            Bab ${bab.num}
+                        </div>
+                        <h4 class="doc-card-title mb-2" style="font-size: 1.12rem; font-weight: 700; color: var(--text-primary, #0f172a); line-height: 1.35; min-height: 2.6rem; display: flex; align-items: center; justify-content: center; word-break: break-word;">
+                            ${escHtml(bab.cleanTitle || bab.name)}
+                        </h4>
+                        <div class="mb-3">
+                            <span class="badge bg-light text-secondary border fw-medium px-2.5 py-1 rounded-pill" style="font-size: 0.74rem;">
+                                ${bab.tables.length} Tabel
+                            </span>
+                        </div>
                     </div>
                 `;
 

@@ -247,6 +247,12 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
             with open(toc_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if data and len(data) > 0:
+                    for idx, item in enumerate(data):
+                        if "bab_num" not in item:
+                            m = re.match(r'Bab\s+(\d+)', item.get("title", ""), re.IGNORECASE)
+                            val = int(m.group(1)) if m else (idx + 1)
+                            item["bab_num"] = val
+                            item["num"] = val
                     with _TOC_CACHE_LOCK:
                         _TOC_CACHE[doc_id] = data
                     return data
@@ -273,12 +279,15 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
             9: "Transportasi dan Komunikasi",
             10: "Keuangan Daerah dan Harga",
             11: "Pengeluaran Penduduk",
-            12: "Pendapatan Regional"
+            12: "Pendapatan Regional",
+            13: "Perbandingan Regional / Antar Wilayah"
         }
         auto_toc = []
         for b in sorted(babs):
             b_name = bps_names.get(b, f"Bab {b}")
             auto_toc.append({
+                "bab_num": b,
+                "num": b,
                 "title": f"Bab {b} - {b_name}",
                 "start_page": b,
                 "end_page": b

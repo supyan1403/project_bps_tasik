@@ -465,7 +465,12 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
         if sess and sess.role == "admin":
             role = "admin"
-    response = templates.TemplateResponse(request=request, name="index.html", context={"initial_role": role})
+    is_sidebar_collapsed = request.cookies.get("sipedas_sidebar_collapsed") == "true"
+    response = templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"initial_role": role, "initial_sidebar_collapsed": is_sidebar_collapsed}
+    )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
 
@@ -477,7 +482,12 @@ def login_page(request: Request, db: Session = Depends(get_db)):
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
         if sess and sess.role == "admin":
             role = "admin"
-    response = templates.TemplateResponse(request=request, name="index.html", context={"initial_role": role})
+    is_sidebar_collapsed = request.cookies.get("sipedas_sidebar_collapsed") == "true"
+    response = templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"initial_role": role, "initial_sidebar_collapsed": is_sidebar_collapsed}
+    )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
 

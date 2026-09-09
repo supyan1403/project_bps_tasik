@@ -413,3 +413,22 @@ body.dark-mode .chart-loading-text {
     color: #94a3b8;
 }
 
+/* Animasi Tombol Refresh & Kartu Metrik */
+@keyframes spinFast {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.spin-fast {
+    display: inline-block;
+    animation: spinFast 0.6s linear infinite !important;
+}
+
+@keyframes cardRefreshPulse {
+    0% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.018); opacity: 1; filter: brightness(1.06); }
+    100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+}
+.stat-card-refreshed {
+    animation: cardRefreshPulse 0.5s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+

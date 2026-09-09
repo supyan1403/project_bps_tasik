@@ -13,7 +13,8 @@
 .stat-card-glow-emerald { background: var(--bg-card) !important; }
 .stat-card-glow-blue { background: var(--bg-card) !important; }
 .stat-card-glow-orange { background: var(--bg-card) !important; }
-.stat-card-glow-purple { background: var(--bg-card) !important; }
+.stat-card-glow-purple,
+.stat-card-glow-cyan { background: var(--bg-card) !important; }
 .stat-card-watermark { display: none; }
 
 /* Custom Slim Scrollbar for Sidebar */

@@ -696,11 +696,11 @@ function copyMasterToSimilar(sourceIndex, keyword) {
 
                 input.style.transition = 'all 0.3s';
 
-                input.style.borderColor = cssVar('--stat-purple') || cssVar('--purple-500') || '#8b5cf6';
+                input.style.borderColor = cssVar('--primary') || '#2563eb';
 
-                input.style.background = cssVar('--purple-50') || '#ede9fe';
+                input.style.background = cssVar('--primary-faint') || '#eff6ff';
 
-                input.style.color = cssVar('--text-primary') || '#1e1b4b';
+                input.style.color = cssVar('--primary') || '#1d4ed8';
 
                 input.style.fontWeight = '600';
 
@@ -770,9 +770,9 @@ function updateRenameSelectedCount() {
 
         badge.textContent = `${checkedCount} kolom dipilih`;
 
-        badge.style.background = checkedCount > 0 ? cssVar('--purple-50') || '#ede9fe' : cssVar('--bg-hover') || '#f1f5f9';
+        badge.style.background = checkedCount > 0 ? cssVar('--primary-faint') || '#eff6ff' : cssVar('--bg-hover') || '#f1f5f9';
 
-        badge.style.color = checkedCount > 0 ? cssVar('--stat-violet') || '#7c3aed' : cssVar('--text-secondary') || '#64748b';
+        badge.style.color = checkedCount > 0 ? cssVar('--primary') || '#2563eb' : cssVar('--text-secondary') || '#64748b';
 
     }
 
@@ -856,11 +856,11 @@ function applyBulkMasterToChecked() {
 
             input.style.transition = 'all 0.3s';
 
-            input.style.borderColor = cssVar('--stat-purple') || cssVar('--purple-500') || '#8b5cf6';
+            input.style.borderColor = cssVar('--primary') || '#2563eb';
 
-            input.style.background = cssVar('--purple-50') || '#ede9fe';
+            input.style.background = cssVar('--primary-faint') || '#eff6ff';
 
-            input.style.color = cssVar('--text-primary') || '#1e1b4b';
+            input.style.color = cssVar('--primary') || '#1d4ed8';
 
             input.style.fontWeight = '600';
 
@@ -944,11 +944,11 @@ function copyMasterToChecked(sourceIndex) {
 
             input.style.transition = 'all 0.3s';
 
-            input.style.borderColor = cssVar('--stat-purple') || cssVar('--purple-500') || '#8b5cf6';
+            input.style.borderColor = cssVar('--primary') || '#2563eb';
 
-            input.style.background = cssVar('--purple-50') || '#ede9fe';
+            input.style.background = cssVar('--primary-faint') || '#eff6ff';
 
-            input.style.color = cssVar('--text-primary') || '#1e1b4b';
+            input.style.color = cssVar('--primary') || '#1d4ed8';
 
             input.style.fontWeight = '600';
 
@@ -2118,7 +2118,7 @@ function buildEditorToolbar(tableId, tableName, mode) {
 
                 </button>
 
-                <button onclick="renameHeadersToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#4338ca; background:#eef2ff; border-color:#c7d2fe !important;" title="Ganti header sesuai master kolom">
+                <button onclick="renameHeadersToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#1d4ed8; background:#eff6ff; border-color:#bfdbfe !important;" title="Ganti header sesuai master kolom">
 
                     <i class="bi bi-pencil-square"></i> Nama Master
 
@@ -3117,9 +3117,9 @@ function renderTrendChartMode(mode, animate = true) {
 
             const yZero = y.getPixelForValue(0);
 
-            const strokeColor = isPoints ? (isDarkTheme ? cssVar('--purple-500') || '#818cf8' : cssVar('--indigo-600') || '#4f46e5') : (isDarkTheme ? cssVar('--primary-light') || '#38bdf8' : cssVar('--info') || '#0284c7');
+            const strokeColor = isPoints ? (isDarkTheme ? cssVar('--primary-light') || '#38bdf8' : cssVar('--primary') || '#2563eb') : (isDarkTheme ? cssVar('--info') || '#0ea5e9' : cssVar('--primary') || '#1d4ed8');
 
-            const fillColor = isPoints ? (isDarkTheme ? 'rgba(99, 102, 241, 0.22)' : 'rgba(99, 102, 241, 0.12)') : (isDarkTheme ? 'rgba(56, 189, 248, 0.22)' : 'rgba(2, 132, 199, 0.12)');
+            const fillColor = isPoints ? (isDarkTheme ? 'rgba(56, 189, 248, 0.22)' : 'rgba(37, 99, 235, 0.12)') : (isDarkTheme ? 'rgba(14, 165, 233, 0.22)' : 'rgba(29, 78, 216, 0.12)');
 
 
 
@@ -5778,7 +5778,7 @@ async function populateDocumentList() {
                         <h3 class="doc-card-title" style="margin:0 0 0.6rem 0; font-size:1.25rem; font-weight:700; word-break:break-word; line-height:1.4;">${pubTitle}</h3>
                     </div>
                     <div style="display:flex; justify-content:center; align-items:center; gap:5px; flex-wrap:nowrap; margin-top:12px; width:100%;">
-                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#e0e7ff; color:#3730a3; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
+                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#e0f2fe; color:#0369a1; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
                         <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${dataYearVal}</span>
                         ${tableBadge}
                     </div>
@@ -11533,7 +11533,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
                         const sourceTooltip = `Publikasi: Kabupaten Tasikmalaya Dalam Angka (${sInfo.doc_year || 'BPS'})\nTabel: ${sInfo.table_name || ''}\nKolom Asli: ${sInfo.raw_col || ''}`;
 
-                        cellDisplay += ` <a href="javascript:void(0)" onclick="showSourceLineageDetail('${y}', '${vkEsc}', '${sInfo.table_id}', '${tnEsc}', '${sInfo.doc_year || ''}', '${fnEsc}', '${rcEsc}')" style="font-size:0.72rem; text-decoration:none; margin-left:3px; padding:1px 4px; background:#e0e7ff; color:#4338ca; border-radius:3px; font-weight:600; vertical-align:middle;" title="${escHtml(sourceTooltip)}" class="d-inline-flex align-items-center gap-1"><i class="bi bi-box-arrow-up-right" style="font-size:0.65rem;"></i></a>`;
+                        cellDisplay += ` <a href="javascript:void(0)" onclick="showSourceLineageDetail('${y}', '${vkEsc}', '${sInfo.table_id}', '${tnEsc}', '${sInfo.doc_year || ''}', '${fnEsc}', '${rcEsc}')" style="font-size:0.72rem; text-decoration:none; margin-left:3px; padding:1px 4px; background:#eff6ff; color:#1d4ed8; border-radius:3px; font-weight:600; vertical-align:middle;" title="${escHtml(sourceTooltip)}" class="d-inline-flex align-items-center gap-1"><i class="bi bi-box-arrow-up-right" style="font-size:0.65rem;"></i></a>`;
 
                     }
 
@@ -12965,9 +12965,9 @@ function showSourceLineageDetail(year, indicator, tableId, tableName, docYear, d
 
     const textMuted = isDark ? cssVar('--text-light') || '#94a3b8' : cssVar('--text-secondary') || '#64748b';
 
-    const codeBg = isDark ? 'rgba(124, 58, 237, 0.25)' : cssVar('--purple-50') || '#ede9fe';
+    const codeBg = isDark ? 'rgba(37, 99, 235, 0.25)' : cssVar('--primary-faint') || '#eff6ff';
 
-    const codeColor = isDark ? cssVar('--purple-500') || '#c4b5fd' : cssVar('--badge-purple-text') || '#6d28d9';
+    const codeColor = isDark ? cssVar('--primary-light') || '#93c5fd' : cssVar('--primary') || '#1d4ed8';
 
 
 
@@ -19441,20 +19441,20 @@ let tsCurrentSubType = 'Semua';
 let tsSavedVKChecks = null;
 let tsSavedSubType = 'Semua';
 
-// Palet 60 warna unik, kontras tinggi, dan saling berselang-seling (Glasbey/Polychrome standard)
+// Palet 60 warna unik, kontras tinggi, dan saling berselang-seling (Glasbey/Polychrome standard - tanpa warna ungu)
 const TS_DISTINCT_60_COLORS = [
-    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed',
-    '#0891b2', '#db2777', '#4b5563', '#84cc16', '#4f46e5',
-    '#ea580c', '#059669', '#9333ea', '#ca8a04', '#0284c7',
-    '#e11d48', '#65a30d', '#6366f1', '#b45309', '#0d9488',
-    '#c026d3', '#78716c', '#0369a1', '#be123c', '#15803d',
-    '#f59e0b', '#6d28d9', '#0e7490', '#9f1239', '#3b82f6',
-    '#4d7c0f', '#a855f7', '#78350f', '#14b8a6', '#f43f5e',
-    '#312e81', '#854d0e', '#047857', '#ec4899', '#1e293b',
-    '#06b6d4', '#eab308', '#8b5cf6', '#ef4444', '#10b981',
-    '#f97316', '#008080', '#d946ef', '#374151', '#22c55e',
-    '#4338ca', '#e05638', '#065f46', '#e59819', '#818cf8',
-    '#fb7185', '#166534', '#c2410c', '#7e22ce', '#0f172a'
+    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#0284c7',
+    '#0891b2', '#db2777', '#4b5563', '#84cc16', '#0284c7',
+    '#ea580c', '#059669', '#0d9488', '#ca8a04', '#0284c7',
+    '#e11d48', '#65a30d', '#2563eb', '#b45309', '#0d9488',
+    '#0891b2', '#78716c', '#0369a1', '#be123c', '#15803d',
+    '#f59e0b', '#15803d', '#0e7490', '#9f1239', '#3b82f6',
+    '#4d7c0f', '#0284c7', '#78350f', '#14b8a6', '#f43f5e',
+    '#0f766e', '#854d0e', '#047857', '#ec4899', '#1e293b',
+    '#06b6d4', '#eab308', '#3b82f6', '#ef4444', '#10b981',
+    '#f97316', '#008080', '#0369a1', '#374151', '#22c55e',
+    '#1d4ed8', '#e05638', '#065f46', '#e59819', '#38bdf8',
+    '#fb7185', '#166534', '#c2410c', '#047857', '#0f172a'
 ];
 
 function getTSDistinctColor(entityName, entIdx, allEntities) {
@@ -22201,7 +22201,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
             return `<div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:8px; margin-bottom:4px; ${i % 2 === 0 ? 'background:#f8fafc;' : 'background:#ffffff;'} border:1px solid #f1f5f9; ${meta ? 'opacity:0.55;' : ''}">
 
-                <input type="checkbox" id="${checkboxId(i)}" class="ren-col-cb" value="${i}" data-header="${escHtml(h)}" ${meta ? 'disabled' : ''} style="width:18px;height:18px;accent-color:#8b5cf6;flex-shrink:0;cursor:pointer;" onchange="document.getElementById('${containerId(i)}').style.display=this.checked?'':'none'; updateRenameSelectedCount();">
+                <input type="checkbox" id="${checkboxId(i)}" class="ren-col-cb" value="${i}" data-header="${escHtml(h)}" ${meta ? 'disabled' : ''} style="width:18px;height:18px;accent-color:#2563eb;flex-shrink:0;cursor:pointer;" onchange="document.getElementById('${containerId(i)}').style.display=this.checked?'':'none'; updateRenameSelectedCount();">
 
                 <span style="flex:1; min-width:240px; font-size:0.92rem; font-weight:600; color:#1e293b; white-space:normal; word-break:break-word; line-height:1.35; text-align:left; padding-right:8px;" title="${escHtml(h)}">${escHtml(h)}${meta ? ' <em style="color:#94a3b8;font-size:0.78rem;">(metadata)</em>' : ''}</span>
 
@@ -22215,7 +22215,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                         ${sameKwCount > 1 ? `
 
-                        <button type="button" title="Salin nilai master ini ke semua kolom yang mengandung '${escHtml(kw)}'" style="background:#f3e8ff; border:1px solid #d8b4fe; border-radius:6px; padding:7px 10px; cursor:pointer; font-size:0.78rem; color:#6b21a8; font-weight:600; display:flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" onclick="copyMasterToSimilar(${i}, '${kw.replace(/'/g, "\\'")}')" onmouseenter="this.style.background=cssVar('--purple-50') || '#e9d5ff'" onmouseleave="this.style.background=cssVar('--purple-50') || '#f3e8ff'">
+                        <button type="button" title="Salin nilai master ini ke semua kolom yang mengandung '${escHtml(kw)}'" style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:7px 10px; cursor:pointer; font-size:0.78rem; color:#1d4ed8; font-weight:600; display:flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" onclick="copyMasterToSimilar(${i}, '${kw.replace(/'/g, "\\'")}')" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#eff6ff'">
 
                             <span>📋 Salin Sejenis</span>
 
@@ -22231,13 +22231,13 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     </div>
 
-                    <div id="custom-dropdown-${i}" class="custom-select-dropdown" style="display:none; position:absolute; z-index:9999; max-height:280px; overflow-y:auto; background:#fff; border:1.5px solid #8b5cf6; border-radius:6px; margin-top:4px; padding:6px; width:100%; box-shadow:0 14px 28px rgba(0,0,0,0.18);">
+                    <div id="custom-dropdown-${i}" class="custom-select-dropdown" style="display:none; position:absolute; z-index:9999; max-height:280px; overflow-y:auto; background:#fff; border:1.5px solid #2563eb; border-radius:6px; margin-top:4px; padding:6px; width:100%; box-shadow:0 14px 28px rgba(0,0,0,0.18);">
 
                         <input type="text" id="custom-dropdown-search-${i}" placeholder="Ketik kata kunci pencarian..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.82rem; margin-bottom:6px; outline:none;" oninput="filterCustomDropdownOptions(${i}, this.value)">
 
                         <div id="custom-dropdown-options-${i}">
 
-                            ${masterCols.map(c => `<div class="custom-dropdown-option" style="padding:8px 12px; cursor:pointer; border-radius:4px; font-size:0.85rem; white-space:normal; word-break:break-word; text-align:left; border-bottom:1px solid #f8fafc; transition:background 0.15s;" onclick="selectCustomOption(${i}, '${c.standard.replace(/'/g, "\'")}')" onmouseenter="this.style.background=cssVar('--purple-50') || '#f3e8ff'" onmouseleave="this.style.background='transparent'">${c.standard}</div>`).join('')}
+                            ${masterCols.map(c => `<div class="custom-dropdown-option" style="padding:8px 12px; cursor:pointer; border-radius:4px; font-size:0.85rem; white-space:normal; word-break:break-word; text-align:left; border-bottom:1px solid #f8fafc; transition:background 0.15s;" onclick="selectCustomOption(${i}, '${c.standard.replace(/'/g, "\'")}')" onmouseenter="this.style.background='#eff6ff'" onmouseleave="this.style.background='transparent'">${c.standard}</div>`).join('')}
 
                         </div>
 
@@ -22259,7 +22259,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                 ${uniqueKeywords.map(kw => `
 
-                    <button type="button" style="background:#ede9fe; color:#6d28d9; border:1px solid #c4b5fd; border-radius:14px; padding:3px 12px; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;" onclick="selectColumnsByKeyword('${kw.replace(/'/g, "\\'")}')" onmouseenter="this.style.background=cssVar('--purple-50') || '#ddd6fe'" onmouseleave="this.style.background=cssVar('--purple-50') || '#ede9fe'">
+                    <button type="button" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:14px; padding:3px 12px; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;" onclick="selectColumnsByKeyword('${kw.replace(/'/g, "\\'")}')" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#eff6ff'">
 
                         ${escHtml(kw)}
 
@@ -22285,7 +22285,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <div style="display: flex; align-items: center; gap: 8px;">
 
-                        <input type="checkbox" id="ren-select-all-cb" style="width: 18px; height: 18px; accent-color: #8b5cf6; cursor: pointer;" onchange="toggleSelectAllRenameColumns(this)">
+                        <input type="checkbox" id="ren-select-all-cb" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;" onchange="toggleSelectAllRenameColumns(this)">
 
                         <label for="ren-select-all-cb" style="font-weight: 600; font-size: 0.92rem; color: #1e293b; cursor: pointer; margin: 0;">Pilih Semua Kolom Data</label>
 
@@ -22309,13 +22309,13 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                         <input type="text" id="bulk-ren-sel" class="master-select-input" placeholder="” Cari & Pilih Master Kolom untuk diterapkan massal..." style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.9rem; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" readonly onclick="showBulkCustomDropdown()">
 
-                        <div id="custom-dropdown-bulk" class="custom-select-dropdown" style="display: none; position: absolute; z-index: 10000; max-height: 380px; overflow-y: auto; background: #fff; border: 1.5px solid #8b5cf6; border-radius: 8px; margin-top: 6px; padding: 8px; width: 100%; box-shadow: 0 16px 36px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08);">
+                        <div id="custom-dropdown-bulk" class="custom-select-dropdown" style="display: none; position: absolute; z-index: 10000; max-height: 380px; overflow-y: auto; background: #fff; border: 1.5px solid #2563eb; border-radius: 8px; margin-top: 6px; padding: 8px; width: 100%; box-shadow: 0 16px 36px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08);">
 
                             <input type="text" id="custom-dropdown-search-bulk" placeholder="Ketik kata kunci master..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; margin-bottom: 8px; outline:none;" oninput="filterBulkCustomDropdownOptions(this.value)">
 
                             <div id="custom-dropdown-options-bulk">
 
-                                ${masterCols.map(c => `<div class="custom-dropdown-option" style="padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 0.85rem; white-space: normal; word-break: break-word; text-align: left; border-bottom: 1px solid #f8fafc; transition: background 0.15s;" onclick="selectBulkCustomOption('${c.standard.replace(/'/g, "\'")}')" onmouseenter="this.style.background=cssVar('--purple-50') || '#f3e8ff'" onmouseleave="this.style.background='transparent'">${c.standard}</div>`).join('')}
+                                ${masterCols.map(c => `<div class="custom-dropdown-option" style="padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 0.85rem; white-space: normal; word-break: break-word; text-align: left; border-bottom: 1px solid #f8fafc; transition: background 0.15s;" onclick="selectBulkCustomOption('${c.standard.replace(/'/g, "\'")}')" onmouseenter="this.style.background='#eff6ff'" onmouseleave="this.style.background='transparent'">${c.standard}</div>`).join('')}
 
                             </div>
 
@@ -22323,7 +22323,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     </div>
 
-                    <button type="button" class="btn btn-sm" onclick="applyBulkMasterToChecked()" style="background: #8b5cf6; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 9px 18px; border-radius: 8px; border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(139,92,246,0.25); cursor: pointer; white-space: nowrap;">
+                    <button type="button" class="btn btn-sm" onclick="applyBulkMasterToChecked()" style="background: #2563eb; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 9px 18px; border-radius: 8px; border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25); cursor: pointer; white-space: nowrap;">
 
                         <span>⚡ Terapkan ke Kolom Tercentang</span>
 
@@ -22333,7 +22333,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                 <label style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #64748b; cursor: pointer; margin-top: 8px; user-select: none;">
 
-                    <input type="checkbox" id="bulk-only-empty" style="accent-color: #8b5cf6; width: 14px; height: 14px; cursor: pointer;">
+                    <input type="checkbox" id="bulk-only-empty" style="accent-color: #2563eb; width: 14px; height: 14px; cursor: pointer;">
 
                     <span>Hanya terapkan ke kolom yang masih kosong (jangan timpa kolom yang sudah diisi)</span>
 

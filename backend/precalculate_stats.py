@@ -204,7 +204,7 @@ chart_payload = {
                     "rgba(59, 130, 246, 0.85)",
                     "rgba(16, 185, 129, 0.85)",
                     "rgba(245, 158, 11, 0.85)",
-                    "rgba(139, 92, 246, 0.85)"
+                    "rgba(13, 148, 136, 0.85)"
                 ],
                 "borderColor": "#ffffff",
                 "borderWidth": 2,
@@ -219,12 +219,12 @@ chart_payload = {
                 "label": "Banyak Titik Data (Akumulatif)",
                 "data": growth_data_points,
                 "fill": True,
-                "backgroundColor": "rgba(99, 102, 241, 0.15)",
-                "borderColor": "rgba(99, 102, 241, 1)",
+                "backgroundColor": "rgba(13, 148, 136, 0.15)",
+                "borderColor": "rgba(13, 148, 136, 1)",
                 "borderWidth": 2.5,
                 "tension": 0.35,
                 "pointRadius": 4,
-                "pointBackgroundColor": "rgba(99, 102, 241, 1)"
+                "pointBackgroundColor": "rgba(13, 148, 136, 1)"
             },
             {
                 "label": "Baris Record Data (Akumulatif)",
@@ -245,8 +245,8 @@ chart_payload = {
             {
                 "label": "Banyak Titik Nilai Data",
                 "data": ref_year_points_data,
-                "backgroundColor": "rgba(99, 102, 241, 0.8)",
-                "borderColor": "rgba(99, 102, 241, 1)",
+                "backgroundColor": "rgba(13, 148, 136, 0.82)",
+                "borderColor": "rgba(13, 148, 136, 1)",
                 "borderWidth": 1.5,
                 "borderRadius": 5,
                 "order": 1

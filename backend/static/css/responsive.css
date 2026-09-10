@@ -586,16 +586,18 @@
     }
 }
 
-/* ===================== TREND COLLAPSIBLE — DARK THEME ===================== */
+/* ===================== TREND COLLAPSIBLE — WHITE + BORDER ACCENT ===================== */
 .ts-trend-collapsible {
     margin-top: 1rem !important;
-    background: linear-gradient(135deg, #0f172a, #1e293b) !important;
-    border: 1px solid #334155 !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    border-bottom: 3px solid var(--primary, #1e40af) !important;
     border-radius: var(--border-radius-lg, 12px) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
 .ts-trend-header {
-    color: #ffffff !important;
+    color: var(--text-primary, #1e293b) !important;
     font-size: 0.88rem !important;
     font-weight: 700 !important;
     letter-spacing: 0.3px !important;
@@ -604,16 +606,16 @@
 .ts-trend-subtitle {
     font-size: 0.74rem !important;
     font-weight: 400 !important;
-    color: #94a3b8 !important;
+    color: var(--text-secondary, #64748b) !important;
     margin-top: 2px !important;
     letter-spacing: 0.1px !important;
 }
 
 .ts-trend-collapsible[open] > .ts-trend-header::after {
-    color: #94a3b8 !important;
+    color: var(--text-secondary, #94a3b8) !important;
 }
 
 .ts-trend-collapsible .ts-collapsible-body {
-    background: var(--bg-card, #ffffff) !important;
+    background: transparent !important;
     border-radius: 0 0 var(--border-radius-lg, 12px) var(--border-radius-lg, 12px) !important;
 }

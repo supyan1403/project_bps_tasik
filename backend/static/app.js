@@ -9094,10 +9094,12 @@ function renderUnitConverterBar(checkedVKs) {
 
     const chartBtnGroup = document.getElementById('ts-chart-unit-btn-group');
     const chartUnitWrapper = document.getElementById('ts-chart-unit-wrapper');
+    const noConversionInfo = document.getElementById('ts-chart-unit-no-conversion');
 
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
         if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
+        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
         return;
     }
 
@@ -9108,9 +9110,12 @@ function renderUnitConverterBar(checkedVKs) {
     if (!familyKey || !UNIVERSAL_UNIT_FAMILIES[familyKey]) {
         container.style.setProperty('display', 'none', 'important');
         if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
+        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'flex', 'important');
         tsActiveUnitKey = null;
         return;
     }
+
+    if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
 
     const family = UNIVERSAL_UNIT_FAMILIES[familyKey];
     if (!tsActiveUnitKey || !family.units[tsActiveUnitKey]) {

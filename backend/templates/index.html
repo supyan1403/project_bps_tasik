@@ -1285,6 +1285,11 @@
                                         <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
                                         <div id="ts-chart-unit-btn-group" class="d-flex gap-2 flex-wrap mt-1"></div>
                                     </div>
+                                    <!-- Info fallback jika tidak ada satuan yang bisa dikonversi -->
+                                    <div id="ts-chart-unit-no-conversion" class="d-flex flex-column" style="display:none;">
+                                        <span class="ts-filter-section-title"><i class="bi bi-info-circle text-secondary me-2"></i> Konversi Satuan</span>
+                                        <span style="font-size:0.78rem; color:var(--text-secondary, #64748b); margin-top:2px;">Indikator ini tidak memiliki satuan yang bisa dikonversi.</span>
+                                    </div>
 
                                     <!-- Chart Display Toggles: Badge Naik/Turun & Tooltip -->
                                     <div class="d-flex flex-column gap-2 ms-auto" id="ts-chart-display-toggles-container">

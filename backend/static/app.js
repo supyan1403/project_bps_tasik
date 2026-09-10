@@ -9099,13 +9099,24 @@ function renderUnitConverterBar(checkedVKs) {
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
         if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
-        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
+    if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
+
+    const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
         return;
     }
 
-    const firstVk = checkedVKs[0];
-    const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
-    const familyKey = detectUnitFamily(vkUnit, firstVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
+    let familyKey = null;
+    let firstVk = null;
+    for (const vk of checkedVKs) {
+        const unit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+        const fk = detectUnitFamily(unit, vk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
+        if (fk && UNIVERSAL_UNIT_FAMILIES[fk]) {
+            familyKey = fk;
+            firstVk = vk;
+            break;
+        }
+    }
+    if (!firstVk) firstVk = checkedVKs[0];
 
     if (!familyKey || !UNIVERSAL_UNIT_FAMILIES[familyKey]) {
         container.style.setProperty('display', 'none', 'important');

@@ -9099,9 +9099,7 @@ function renderUnitConverterBar(checkedVKs) {
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
         if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
-    if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
-
-    const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
+        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
         return;
     }
 
@@ -9132,6 +9130,8 @@ function renderUnitConverterBar(checkedVKs) {
     if (!tsActiveUnitKey || !family.units[tsActiveUnitKey]) {
         tsActiveUnitKey = family.baseUnit;
     }
+
+    const vkUnit = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
 
     function buildChips(groupName) {
         let html = '';

@@ -588,6 +588,7 @@
 
 /* ===================== TREND COLLAPSIBLE — DARK THEME ===================== */
 .ts-trend-collapsible {
+    margin-top: 1rem !important;
     background: linear-gradient(135deg, #0f172a, #1e293b) !important;
     border: 1px solid #334155 !important;
     border-radius: var(--border-radius-lg, 12px) !important;

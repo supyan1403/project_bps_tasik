@@ -9027,7 +9027,7 @@ const UNIVERSAL_UNIT_FAMILIES = {
 
 function detectUnitFamily(unitStr, indicatorName, tableName) {
 
-    const combined = `${unitStr || ''} ${indicatorName || ''} ${tableName || ''}`.toLowerCase();
+    const combined = `${unitStr || ''} ${indicatorName || ''}`.toLowerCase();
 
     
 

@@ -8863,7 +8863,21 @@ function parseIndoNumberToFloat(valStr) {
 
 
 
-let tsActiveUnitKey = null;
+let tsActiveUnitVKMap = {};
+
+function getActiveUnitForVK(vk) {
+    return tsActiveUnitVKMap[vk] || null;
+}
+
+function getUnitConfigForVK(vk) {
+    if (!currentTimeSeriesData || !vk) return null;
+    const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+    const fk = detectUnitFamily(vkUnit, vk, '');
+    const family = fk ? UNIVERSAL_UNIT_FAMILIES[fk] : null;
+    if (!family) return null;
+    const activeKey = getActiveUnitForVK(vk);
+    return (activeKey && family.units[activeKey]) ? family.units[activeKey] : null;
+}
 
 
 
@@ -9092,59 +9106,52 @@ function renderUnitConverterBar(checkedVKs) {
     const btnGroup = document.getElementById('ts-unit-btn-group');
     if (!container || !btnGroup) return;
 
-    const chartBtnGroup = document.getElementById('ts-chart-unit-btn-group');
-    const chartUnitWrapper = document.getElementById('ts-chart-unit-wrapper');
     const noConversionInfo = document.getElementById('ts-chart-unit-no-conversion');
 
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
-        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
         return;
     }
 
-    let familyKey = null;
-    let firstVk = null;
+    const convertibleVKs = [];
     for (const vk of checkedVKs) {
         const unit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
-        const fk = detectUnitFamily(unit, vk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
+        const fk = detectUnitFamily(unit, vk, '');
         if (fk && UNIVERSAL_UNIT_FAMILIES[fk]) {
-            familyKey = fk;
-            firstVk = vk;
-            break;
+            if (!tsActiveUnitVKMap[vk] || !UNIVERSAL_UNIT_FAMILIES[fk].units[tsActiveUnitVKMap[vk]]) {
+                tsActiveUnitVKMap[vk] = UNIVERSAL_UNIT_FAMILIES[fk].baseUnit;
+            }
+            convertibleVKs.push({ vk, familyKey: fk });
         }
     }
-    if (!firstVk) firstVk = checkedVKs[0];
 
-    if (!familyKey || !UNIVERSAL_UNIT_FAMILIES[familyKey]) {
+    if (convertibleVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
-        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         if (noConversionInfo) noConversionInfo.style.setProperty('display', 'flex', 'important');
-        tsActiveUnitKey = null;
         return;
     }
 
     if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
 
-    const family = UNIVERSAL_UNIT_FAMILIES[familyKey];
-    if (!tsActiveUnitKey || !family.units[tsActiveUnitKey]) {
-        tsActiveUnitKey = family.baseUnit;
-    }
+    let html = '';
+    convertibleVKs.forEach(function(cvk, idx) {
+        const vk = cvk.vk;
+        const family = UNIVERSAL_UNIT_FAMILIES[cvk.familyKey];
+        const activeUnitKey = tsActiveUnitVKMap[vk] || family.baseUnit;
+        const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+        const groupName = 'ts-unit-radio-' + idx;
 
-    const vkUnit = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
-
-    function buildChips(groupName) {
-        let html = '';
-        const combinedInfo = `${vkUnit || ''} ${firstVk || ''} ${typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : ''}`.toLowerCase();
+        const combinedInfo = `${vkUnit} ${vk}`.toLowerCase();
         const isEkor = /\b(ekor|ternak|populasi ternak|unggas|sapi|kambing|domba|ayam|itik|kerbau|kuda|babi)\b/i.test(combinedInfo);
         const isPohon = /\b(pohon|batang)\b/i.test(combinedInfo);
 
+        let chipsHtml = '';
         for (const [unitKey, unitCfg] of Object.entries(family.units)) {
-            const isActive = (unitKey === tsActiveUnitKey);
+            const isActive = (unitKey === activeUnitKey);
             let displayLabel = unitCfg.btnLabel || unitCfg.label;
 
-            // Context-aware dynamic labels for count family
-            if (familyKey === 'count') {
+            if (cvk.familyKey === 'count') {
                 if (isEkor) {
                     if (unitKey === 'unit') displayLabel = 'Ekor';
                     else if (unitKey === 'ribu_unit') displayLabel = 'Ribu Ekor';
@@ -9156,8 +9163,7 @@ function renderUnitConverterBar(checkedVKs) {
                 } else {
                     if (unitKey === 'unit') {
                         displayLabel = (vkUnit && vkUnit.trim() && !['unit/ekor', 'satuan', 'unit'].includes(vkUnit.trim().toLowerCase()) && vkUnit.trim().length <= 12)
-                            ? vkUnit.trim()
-                            : 'Unit';
+                            ? vkUnit.trim() : 'Unit';
                     } else if (unitKey === 'ribu_unit') {
                         displayLabel = 'Ribu Unit';
                     } else if (unitKey === 'juta_unit') {
@@ -9166,38 +9172,35 @@ function renderUnitConverterBar(checkedVKs) {
                 }
             }
 
-            html += `
-                <label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${unitKey}')">
-                    <input type="radio" name="${groupName}" value="${unitKey}" ${isActive ? 'checked' : ''}>
-                    <span>${typeof escHtml === 'function' ? escHtml(displayLabel) : displayLabel}</span>
-                </label>`;
+            chipsHtml += `<label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${vk}','${unitKey}')">
+                <input type="radio" name="${groupName}" value="${unitKey}" ${isActive ? 'checked' : ''}>
+                <span>${typeof escHtml === 'function' ? escHtml(displayLabel) : displayLabel}</span>
+            </label>`;
         }
-        return html;
-    }
 
-    btnGroup.innerHTML = buildChips('ts-unit-radio-table');
-    if (chartBtnGroup) chartBtnGroup.innerHTML = buildChips('ts-unit-radio-chart');
+        if (idx > 0) {
+            html += '<div style="border-top: 1px dashed #e2e8f0; margin: 8px 0;"></div>';
+        }
+
+        if (convertibleVKs.length > 1) {
+            html += `<div style="font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 4px;">${typeof escHtml === 'function' ? escHtml(vk) : vk}</div>`;
+        }
+
+        html += `<div class="d-flex gap-2 flex-wrap">${chipsHtml}</div>`;
+    });
+
+    btnGroup.innerHTML = html;
 
     container.style.removeProperty('display');
     container.style.display = 'flex';
-    if (chartUnitWrapper) {
-        chartUnitWrapper.style.removeProperty('display');
-        chartUnitWrapper.style.display = 'flex';
-    }
 }
 
-
-
-function switchTimeSeriesUnit(targetUnitKey) {
-
-    tsActiveUnitKey = targetUnitKey;
+function switchTimeSeriesUnit(vk, targetUnitKey) {
+    tsActiveUnitVKMap[vk] = targetUnitKey;
 
     if (typeof tsRenderCallback === 'function') {
-
         tsRenderCallback();
-
     }
-
 }
 
 
@@ -11030,13 +11033,13 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         const newFamily = detectUnitFamily(firstUnit, keyword, firstTable.table_name);
 
-        const oldFamily = tsActiveUnitKey ? Object.keys(UNIVERSAL_UNIT_FAMILIES).find(fk => UNIVERSAL_UNIT_FAMILIES[fk].units[tsActiveUnitKey]) : null;
-
-        if (newFamily !== oldFamily) {
-
-            tsActiveUnitKey = newFamily ? UNIVERSAL_UNIT_FAMILIES[newFamily].baseUnit : null;
-
-        }
+        Object.keys(tsActiveUnitVKMap).forEach(vk => {
+            const vkUnit = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+            const fk = detectUnitFamily(vkUnit, vk, '');
+            if (!fk || !UNIVERSAL_UNIT_FAMILIES[fk]) {
+                delete tsActiveUnitVKMap[vk];
+            }
+        });
 
     }
 
@@ -11544,15 +11547,6 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         const firstVk = checked[0];
 
-        const vkUnit = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[firstVk]) || '';
-
-        const familyKey = detectUnitFamily(vkUnit, firstVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
-        const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
-        const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
-
-
 
         const thead = document.getElementById("ts-grid-head");
 
@@ -11567,8 +11561,8 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
         headHtml += `</tr><tr>`;
 
         function getCleanUnitSuffix(vk) {
-
-            var rawUnit = unitConfig ? unitConfig.label : (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk] ? currentTimeSeriesData.vkUnits[vk] : '');
+            var perVkCfg = getUnitConfigForVK(vk);
+            var rawUnit = perVkCfg ? perVkCfg.label : (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk] ? currentTimeSeriesData.vkUnits[vk] : '');
 
             if (!rawUnit) return '';
 
@@ -11634,7 +11628,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
                         if (rawNum !== null && !isNaN(rawNum)) {
 
-                            val = formatWithUnitScale(rawNum, unitConfig);
+                            val = formatWithUnitScale(rawNum, getUnitConfigForVK(vk));
 
                         } else {
 
@@ -11898,7 +11892,8 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                                 totalPoints++;
                                 const num = parseIndoNumberToFloat(raw);
                                 if (num !== null && !isNaN(num)) {
-                                    const scaled = unitConfig ? num * (unitConfig.factor != null ? unitConfig.factor : 1) : num;
+                                    const perVkCfg = getUnitConfigForVK(vk);
+                                    const scaled = perVkCfg ? num * (perVkCfg.factor != null ? perVkCfg.factor : 1) : num;
                                     if (!isSummaryRow) {
                                         // Min dan Max hanya dihitung dari entitas wilayah murni (bukan total)
                                         if (scaled < minVal) minVal = scaled;
@@ -11922,12 +11917,13 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                 statTotalPts.textContent = totalPoints > 0 ? totalPoints.toLocaleString('id-ID') + ' Titik Data' : '0';
 
                 if (minVal !== Infinity && maxVal !== -Infinity) {
-                    const minFmt = formatWithUnitScale(minVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
-                    const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
-                    const uSuffix = unitConfig ? ' ' + unitConfig.label : '';
+                    const firstVkCfg = getUnitConfigForVK(checked[0]);
+                    const minFmt = formatWithUnitScale(minVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
+                    const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
+                    const uSuffix = firstVkCfg ? ' ' + firstVkCfg.label : '';
                     let rangeHtml = `${minFmt} — ${maxFmt}${uSuffix}`;
                     if (summaryTotalVal !== null) {
-                        const sumFmt = formatWithUnitScale(summaryTotalVal, { factor: 1, isInteger: unitConfig?.isInteger, maxDecimals: unitConfig?.maxDecimals });
+                        const sumFmt = formatWithUnitScale(summaryTotalVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                         rangeHtml += ` <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary,#64748b); display:block; margin-top:2px;">(Total: ${sumFmt}${uSuffix})</span>`;
                     }
                     statRange.innerHTML = rangeHtml;
@@ -12708,9 +12704,7 @@ function computeAndRenderTimeSeriesInsights() {
     if (subtitleEl) subtitleEl.textContent = `Berdasarkan indikator "${activeVk}" dari Tahun ${startYear} ke ${endYear} (${intervalYears + 1} Tahun Observasi)`;
 
     const vkUnit = (vkUnits && vkUnits[activeVk]) || '';
-    const familyKey = detectUnitFamily(vkUnit, activeVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-    const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-    const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
+    const unitConfig = getUnitConfigForVK(activeVk);
     const uSuffix = unitConfig ? ' ' + unitConfig.label : (vkUnit ? ' ' + vkUnit : '');
 
     const allEntities = _sortEntitiesWithKabLast(Object.keys(entityMap));
@@ -13328,11 +13322,7 @@ async function exportTimeSeriesExcel() {
 
         const vkUnit = (vkUnits && vkUnits[vk]) || '';
 
-        const familyKey = detectUnitFamily(vkUnit, vk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
-        const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
-        const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
+        const unitConfig = getUnitConfigForVK(vk);
 
         if (unitConfig) {
 
@@ -13462,11 +13452,7 @@ function exportTimeSeriesCSV() {
 
         const vkUnit = (vkUnits && vkUnits[vk]) || '';
 
-        const familyKey = detectUnitFamily(vkUnit, vk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
-        const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
-        const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
+        const unitConfig = getUnitConfigForVK(vk);
 
         if (unitConfig) {
 
@@ -13835,11 +13821,7 @@ async function executeTimeSeriesExport() {
 
         const vkUnit = (vkUnits && vkUnits[firstVk]) || '';
 
-        const familyKey = detectUnitFamily(vkUnit, firstVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
-        const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
-        const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
+        const unitConfig = getUnitConfigForVK(firstVk);
 
         const unitLabel = unitConfig ? unitConfig.label : (vkUnit || '-');
 
@@ -19960,11 +19942,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
     const vkUnit = (currentTimeSeriesData && currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[selectedVk]) || '';
 
-    const familyKey = detectUnitFamily(vkUnit, selectedVk, typeof tsCurrentKeyword !== 'undefined' ? tsCurrentKeyword : '');
-
-    const family = familyKey ? UNIVERSAL_UNIT_FAMILIES[familyKey] : null;
-
-    const unitConfig = (family && tsActiveUnitKey && family.units[tsActiveUnitKey]) ? family.units[tsActiveUnitKey] : null;
+    const unitConfig = getUnitConfigForVK(selectedVk);
 
 
 

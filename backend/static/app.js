@@ -9106,10 +9106,13 @@ function renderUnitConverterBar(checkedVKs) {
     const btnGroup = document.getElementById('ts-unit-btn-group');
     if (!container || !btnGroup) return;
 
+    const chartUnitWrapper = document.getElementById('ts-chart-unit-wrapper');
+    const chartBtnGroup = document.getElementById('ts-chart-unit-btn-group');
     const noConversionInfo = document.getElementById('ts-chart-unit-no-conversion');
 
     if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
         return;
     }
@@ -9128,6 +9131,7 @@ function renderUnitConverterBar(checkedVKs) {
 
     if (convertibleVKs.length === 0) {
         container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
         if (noConversionInfo) noConversionInfo.style.setProperty('display', 'flex', 'important');
         return;
     }
@@ -9190,9 +9194,14 @@ function renderUnitConverterBar(checkedVKs) {
     });
 
     btnGroup.innerHTML = html;
+    if (chartBtnGroup) chartBtnGroup.innerHTML = html;
 
     container.style.removeProperty('display');
     container.style.display = 'flex';
+    if (chartUnitWrapper) {
+        chartUnitWrapper.style.removeProperty('display');
+        chartUnitWrapper.style.display = 'flex';
+    }
 }
 
 function switchTimeSeriesUnit(vk, targetUnitKey) {

@@ -1219,8 +1219,16 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
         # Bersihkan nama kolom bilingual
         headers = [clean_bilingual_header(h) for h in orig_headers]
         
+        def _get_row_cell(rec, h_name):
+            if not rec:
+                return ""
+            val = rec.get(h_name)
+            if (val is None or str(val).strip() == "") and f"{h_name}.1" in rec:
+                val = rec.get(f"{h_name}.1")
+            return val if val is not None else ""
+
         all_rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).order_by(models.TableRow.sort_order.asc(), models.TableRow.id.asc()).all()
-        data_rows = [[r.data.get(h, "") for h in orig_headers] for r in all_rows]
+        data_rows = [[_get_row_cell(r.data, h) for h in orig_headers] for r in all_rows]
         
         return {
             "table_id": table.id,

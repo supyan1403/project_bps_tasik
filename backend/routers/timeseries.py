@@ -793,11 +793,23 @@ def timeseries_data_by_indicators(indicators: str = "", years: str = "", db: Ses
                     data_rows = []
                     for r in all_rows:
                         record = r.data
-                        ent = str(record.get(entity_key, "")).strip()
+                        ent = str(record.get(entity_key, "")).strip() if record.get(entity_key) is not None else ""
+                        if not ent:
+                            # Defensive fallback: gunakan key pertama jika entity_key tidak ditemukan persis
+                            first_k = next(iter(record.keys())) if record else None
+                            if first_k and first_k not in value_cols:
+                                ent = str(record.get(first_k, "")).strip()
                         if not ent or ent in ["-", "..."]:
                             continue
                         ent = normalize_entity_name(ent)
-                        vals = {c: _normalize_indo_number(str(record.get(c, "")).strip(), unit="", table_name=table.table_name, header=c) for c in value_cols}
+                        
+                        def _get_val_rec(rec, c_name):
+                            v = rec.get(c_name)
+                            if (v is None or str(v).strip() == "") and f"{c_name}.1" in rec:
+                                v = rec.get(f"{c_name}.1")
+                            return str(v).strip() if v is not None else ""
+
+                        vals = {c: _normalize_indo_number(_get_val_rec(record, c), unit="", table_name=table.table_name, header=c) for c in value_cols}
                         data_rows.append({"entitas": ent, "tipe": _classify_entity_type(ent), "nilai": vals})
 
                     matched_results.append({

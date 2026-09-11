@@ -34,6 +34,14 @@
     font-size: 0.85rem;
     box-sizing: border-box;
 }
+
+/* Wizard search inputs */
+#ts-wizard-search,
+#ts-year-search {
+    font-size: 0.85rem;
+    padding: 7px 12px;
+    height: 35px;
+}
 .ts-year-picker-body {
     align-content: flex-start;
 }

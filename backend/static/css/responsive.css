@@ -767,6 +767,133 @@
         font-size: 1rem !important;
     }
 
+    .dropzone-icon {
+        font-size: 1.2rem;
+    }
+
+    .data-tabel-card-icon {
+        font-size: 1.15rem;
+    }
+
+    .btn-table-action {
+        font-size: 0.72rem;
+        padding: 0.3rem 0.7rem;
+    }
+
+    .ts-view-mode-label {
+        font-size: 0.64rem !important;
+    }
+
+    .ts-control-chip-check label {
+        font-size: 0.68rem !important;
+    }
+
+    .btn-ts-wizard-action,
+    .ts-wizard-footer .btn {
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .ts-insights-card {
+        padding: 10px !important;
+    }
+
+    #ts-insights-drawer h6 {
+        font-size: 0.82rem !important;
+    }
+
+    #ts-insights-subtitle {
+        font-size: 0.66rem !important;
+    }
+
+    .ts-insight-filter-label {
+        font-size: 0.64rem !important;
+    }
+
+    .ts-insight-select,
+    #btn-ts-insight-entity,
+    #btn-ts-insight-trend {
+        font-size: 0.7rem !important;
+        padding: 3px 6px !important;
+    }
+
+    #ts-growth-ranking-table {
+        font-size: 0.68rem !important;
+    }
+
+    #ts-growth-ranking-table thead th {
+        font-size: 0.64rem !important;
+        padding: 4px 5px !important;
+    }
+
+    #ts-growth-ranking-table tbody td {
+        padding: 3px 5px !important;
+        font-size: 0.68rem !important;
+    }
+
+    #ts-grid {
+        font-size: 0.68rem !important;
+    }
+
+    #ts-grid thead tr:first-child th {
+        padding: 5px 7px !important;
+        font-size: 0.68rem !important;
+    }
+
+    #ts-grid thead tr:first-child th:first-child,
+    #ts-grid tbody tr td:first-child {
+        width: 95px !important;
+        min-width: 95px !important;
+        max-width: 105px !important;
+        padding: 4px 7px !important;
+        font-size: 0.68rem !important;
+    }
+
+    #ts-grid thead tr:nth-child(2) th {
+        padding: 4px 7px !important;
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid tbody td {
+        padding: 4px 7px !important;
+        font-size: 0.68rem !important;
+    }
+
+    #ts-grid tbody td:not(:first-child) {
+        min-width: 85px !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .ts-trend-banner .fw-bold {
+        font-size: 0.8rem !important;
+    }
+
+    .ts-trend-banner div:first-child div:last-child {
+        font-size: 0.68rem !important;
+    }
+
+    .ts-trend-banner-cta {
+        font-size: 0.68rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .ts-step-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 0.68rem;
+    }
+
+    #ts-wizard-search,
+    #ts-year-search {
+        height: 32px !important;
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+    }
+
     /* Chart area responsive height */
     #ts-chart-scrollable {
         height: 280px !important;
@@ -939,8 +1066,129 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.7rem !important;
+        font-size: 0.66rem !important;
+        padding: 3px 5px !important;
+    }
+
+    .dropzone-icon {
+        font-size: 1.1rem;
+    }
+
+    .data-tabel-card-icon {
+        font-size: 1rem;
+    }
+
+    .btn-table-action {
+        font-size: 0.68rem;
+        padding: 3px 6px;
+    }
+
+    .ts-view-mode-label {
+        font-size: 0.6rem !important;
+    }
+
+    .ts-control-chip-check label {
+        font-size: 0.64rem !important;
+    }
+
+    .btn-ts-wizard-action,
+    .ts-wizard-footer .btn {
+        font-size: 0.68rem !important;
+        padding: 3px 8px !important;
+    }
+
+    .ts-insights-card {
+        padding: 8px !important;
+    }
+
+    #ts-insights-drawer h6 {
+        font-size: 0.78rem !important;
+    }
+
+    #ts-insights-subtitle {
+        font-size: 0.62rem !important;
+    }
+
+    .ts-insight-filter-label {
+        font-size: 0.6rem !important;
+    }
+
+    #ts-growth-ranking-table {
+        font-size: 0.64rem !important;
+    }
+
+    #ts-growth-ranking-table thead th {
+        font-size: 0.6rem !important;
+        padding: 3px 4px !important;
+    }
+
+    #ts-growth-ranking-table tbody td {
+        padding: 3px 4px !important;
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid {
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid thead tr:first-child th {
+        padding: 4px 6px !important;
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid thead tr:first-child th:first-child,
+    #ts-grid tbody tr td:first-child {
+        width: 85px !important;
+        min-width: 85px !important;
+        max-width: 95px !important;
         padding: 3px 6px !important;
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid thead tr:nth-child(2) th {
+        padding: 3px 6px !important;
+        font-size: 0.6rem !important;
+    }
+
+    #ts-grid tbody td {
+        padding: 3px 6px !important;
+        font-size: 0.64rem !important;
+    }
+
+    #ts-grid tbody td:not(:first-child) {
+        min-width: 75px !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    .ts-step-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 0.64rem;
+    }
+
+    #ts-wizard-search,
+    #ts-year-search {
+        height: 29px !important;
+        padding: 5px 8px !important;
+        font-size: 0.76rem !important;
+    }
+
+    /* Konversi satuan: label di atas, radio di bawah */
+    .ts-unit-vk-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    }
+
+    .ts-unit-vk-chips {
+        gap: 3px !important;
+        flex-wrap: wrap !important;
     }
 
     /* Chart area responsive height */

@@ -380,6 +380,18 @@
         line-height: 1.25 !important;
     }
 
+    .ts-hero-container .form-label.small {
+        font-size: 0.78rem !important;
+    }
+
+    .ts-bab-group-header {
+        font-size: 0.66rem !important;
+    }
+
+    .ts-terpilih-header {
+        font-size: 0.66rem !important;
+    }
+
     /* Insight cards compact */
     .ts-insight-card,
     .ts-highlight-stat-card {
@@ -630,6 +642,7 @@
         height: 180px;
         min-height: 180px;
         max-height: 180px;
+        padding: 8px;
     }
 
     .glass-panel {
@@ -686,6 +699,18 @@
     .ts-indicator-label {
         font-size: 0.76rem !important;
         line-height: 1.2 !important;
+    }
+
+    .ts-hero-container .form-label.small {
+        font-size: 0.72rem !important;
+    }
+
+    .ts-bab-group-header {
+        font-size: 0.62rem !important;
+    }
+
+    .ts-terpilih-header {
+        font-size: 0.62rem !important;
     }
 
     .ts-insight-card,
@@ -930,6 +955,7 @@
         height: 160px;
         min-height: 160px;
         max-height: 160px;
+        padding: 6px;
     }
 
     .glass-panel {
@@ -986,6 +1012,18 @@
     .ts-indicator-label {
         font-size: 0.72rem !important;
         line-height: 1.15 !important;
+    }
+
+    .ts-hero-container .form-label.small {
+        font-size: 0.66rem !important;
+    }
+
+    .ts-bab-group-header {
+        font-size: 0.58rem !important;
+    }
+
+    .ts-terpilih-header {
+        font-size: 0.58rem !important;
     }
 
     .ts-insight-card,

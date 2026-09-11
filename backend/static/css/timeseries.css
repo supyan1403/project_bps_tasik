@@ -42,6 +42,11 @@
     padding: 7px 12px;
     height: 35px;
 }
+
+/* Step label text (Pilih Indikator Master, Pilih Tahun Data) */
+.ts-hero-container .form-label.small {
+    font-size: 0.82rem;
+}
 .ts-year-picker-body {
     align-content: flex-start;
 }

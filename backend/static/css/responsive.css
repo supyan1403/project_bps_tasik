@@ -285,7 +285,7 @@
 
     .btn-table-action {
         white-space: normal;
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         padding: 0.35rem 0.85rem;
     }
 
@@ -432,7 +432,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.62rem !important;
+        font-size: 0.68rem !important;
         padding: 6px 10px !important;
         flex: 1 !important;
         justify-content: center !important;
@@ -455,7 +455,16 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.78rem !important;
+        font-size: 0.74rem !important;
+        padding: 5px 12px !important;
+    }
+
+    .ts-collapse-btn {
+        font-size: 0.82rem !important;
+    }
+
+    .ts-export-preset-btn {
+        font-size: 0.72rem !important;
         padding: 5px 12px !important;
     }
 
@@ -515,7 +524,7 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.74rem !important;
+        font-size: 0.72rem !important;
         padding: 4px 8px !important;
         height: auto !important;
     }
@@ -593,8 +602,8 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.72rem !important;
-        padding: 4px 10px !important;
+        font-size: 0.74rem !important;
+        padding: 5px 12px !important;
     }
 
     .ts-collapsible-body .mb-3 {
@@ -759,7 +768,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.6rem !important;
+        font-size: 0.66rem !important;
         padding: 5px 9px !important;
     }
 
@@ -808,8 +817,8 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.66rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.7rem !important;
+        padding: 4px 10px !important;
     }
 
     .ts-unit-vk-label {
@@ -852,7 +861,7 @@
     }
 
     .btn-table-action {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         padding: 0.3rem 0.7rem;
     }
 
@@ -866,7 +875,16 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.72rem !important;
+        font-size: 0.7rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .ts-collapse-btn {
+        font-size: 0.75rem !important;
+    }
+
+    .ts-export-preset-btn {
+        font-size: 0.68rem !important;
         padding: 4px 10px !important;
     }
 
@@ -901,8 +919,8 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.7rem !important;
-        padding: 3px 6px !important;
+        font-size: 0.68rem !important;
+        padding: 4px 7px !important;
     }
 
     #ts-growth-ranking-table {
@@ -1099,8 +1117,8 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.56rem !important;
-        padding: 5px 7px !important;
+        font-size: 0.62rem !important;
+        padding: 5px 8px !important;
     }
 
     .ts-filter-section-title {
@@ -1144,8 +1162,8 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.6rem !important;
-        padding: 3px 7px !important;
+        font-size: 0.66rem !important;
+        padding: 4px 9px !important;
     }
 
     .ts-unit-vk-label {
@@ -1186,8 +1204,8 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.66rem !important;
-        padding: 3px 5px !important;
+        font-size: 0.64rem !important;
+        padding: 3px 6px !important;
     }
 
     .dropzone-icon {
@@ -1199,7 +1217,7 @@
     }
 
     .btn-table-action {
-        font-size: 0.68rem;
+        font-size: 0.66rem;
         padding: 3px 6px;
     }
 
@@ -1213,7 +1231,16 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.68rem !important;
+        font-size: 0.66rem !important;
+        padding: 3px 8px !important;
+    }
+
+    .ts-collapse-btn {
+        font-size: 0.7rem !important;
+    }
+
+    .ts-export-preset-btn {
+        font-size: 0.64rem !important;
         padding: 3px 8px !important;
     }
 

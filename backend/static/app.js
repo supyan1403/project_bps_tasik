@@ -11950,13 +11950,19 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
                 if (years.length > 0) {
                     statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
-                    const yearSubtitle = document.createElement('div');
-                    yearSubtitle.className = 'text-muted mt-1';
-                    yearSubtitle.style.fontSize = '0.72rem';
+                    let yearSubtitle = document.getElementById('ts-stat-years-subtitle');
+                    if (!yearSubtitle) {
+                        yearSubtitle = document.createElement('div');
+                        yearSubtitle.id = 'ts-stat-years-subtitle';
+                        yearSubtitle.className = 'text-muted mt-1';
+                        yearSubtitle.style.fontSize = '0.72rem';
+                        statYears.parentElement.appendChild(yearSubtitle);
+                    }
                     yearSubtitle.textContent = `(${years.length} Tahun)`;
-                    statYears.parentElement.appendChild(yearSubtitle);
                 } else {
                     statYears.textContent = '-';
+                    const yearSubtitle = document.getElementById('ts-stat-years-subtitle');
+                    if (yearSubtitle) yearSubtitle.textContent = '';
                 }
 
                 // --- 2 kartu: Rincian, Indikator ---

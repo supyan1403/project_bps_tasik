@@ -583,6 +583,33 @@ button.ts-insight-select.dropdown-toggle::after {
     outline: none !important;
 }
 
+/* Per-VK Unit Converter Rows */
+.ts-unit-vk-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+.ts-unit-vk-row + .ts-unit-vk-row {
+    border-top: 1px solid #f1f5f9;
+}
+.ts-unit-vk-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    min-width: 120px;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+.ts-unit-vk-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 /* ===================== TS CUSTOM CHART LEGEND PILLS ===================== */
 .custom-legend-item {
     transition: all var(--transition-normal);

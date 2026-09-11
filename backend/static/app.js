@@ -9183,14 +9183,16 @@ function renderUnitConverterBar(checkedVKs) {
         }
 
         if (idx > 0) {
-            html += '<div style="border-top: 1px dashed #e2e8f0; margin: 8px 0;"></div>';
+            html += '</div><div class="ts-unit-vk-row">';
+        } else {
+            html += '<div class="ts-unit-vk-row">';
         }
 
         if (convertibleVKs.length > 1) {
-            html += `<div style="font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 4px;">${typeof escHtml === 'function' ? escHtml(vk) : vk}</div>`;
+            html += `<span class="ts-unit-vk-label" title="${typeof escHtml === 'function' ? escHtml(vk) : vk}">${typeof escHtml === 'function' ? escHtml(vk) : vk}</span>`;
         }
 
-        html += `<div class="d-flex gap-2 flex-wrap">${chipsHtml}</div>`;
+        html += `<div class="ts-unit-vk-chips">${chipsHtml}</div></div>`;
     });
 
     btnGroup.innerHTML = html;

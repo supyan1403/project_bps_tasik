@@ -1,9 +1,9 @@
 /* ==========================================================================
-   SIPEDAS — Responsive Overrides
+   SIPEDAS — Responsive Overrides (6 Breakpoints)
    ========================================================================== */
 
-/* ===================== TABLET & MOBILE VIEWPORT / TOUCH DEVICES ===================== */
-@media (max-width: 991.98px), (hover: none) {
+/* ===================== BREAKPOINT 1: TABLET LANDSCAPE & TOUCH: < 1200px ===================== */
+@media (max-width: 1199.98px) {
     html, body {
         height: auto !important;
         min-height: 100% !important;
@@ -29,9 +29,9 @@
     }
 
     .ts-wizard-box {
-        height: 220px;
-        min-height: 220px;
-        max-height: 220px;
+        height: 240px;
+        min-height: 240px;
+        max-height: 240px;
     }
 
     .ts-insight-search-box {
@@ -63,9 +63,39 @@
     .glass-panel {
         padding: 0.85rem 1rem;
     }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 1.2rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.82rem !important;
+    }
 }
 
-/* ===================== LARGE PHONE: < 768px ===================== */
+/* ===================== BREAKPOINT 2: TABLET PORTRAIT: < 992px ===================== */
+@media (max-width: 991.98px) {
+    .ts-wizard-box {
+        height: 220px;
+        min-height: 220px;
+        max-height: 220px;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 1.15rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.78rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .banner-badge {
+        font-size: 0.68rem !important;
+        padding: 3px 8px !important;
+    }
+}
+
+/* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */
 @media (max-width: 767.98px) {
     .widget {
         padding: 1rem;
@@ -177,16 +207,21 @@
         width: 48px;
         height: 48px;
     }
+
+    /* Chart area responsive height */
+    #ts-chart-scrollable {
+        height: 320px !important;
+    }
 }
 
-/* ===================== SMALL PHONE: < 576px ===================== */
+/* ===================== BREAKPOINT 4: MEDIUM PHONE: < 576px ===================== */
 @media (max-width: 575.98px) {
     html, body {
         overflow-x: hidden;
     }
 
     .main-content {
-        padding: 1rem !important;
+        padding: 0.85rem !important;
     }
 
     .widget-grid {
@@ -206,9 +241,9 @@
     }
 
     .ts-wizard-box {
-        height: 220px;
-        min-height: 220px;
-        max-height: 220px;
+        height: 200px;
+        min-height: 200px;
+        max-height: 200px;
     }
 
     .ts-vk-chip {
@@ -242,7 +277,6 @@
 
     .doc-icon-wrapper {
         width: 40px;
-        height: 40px;
     }
 
     .data-tabel-card-icon {
@@ -259,7 +293,7 @@
         height: 4px;
     }
 
-    /* ===================== COMPACT TABLE STYLING DI MOBILE (#ts-grid) ===================== */
+    /* Compact table styling */
     #ts-grid {
         width: max-content !important;
         min-width: 100% !important;
@@ -271,7 +305,6 @@
         font-size: 0.72rem !important;
     }
 
-    /* Kolom pertama (Rincian/Kecamatan) sticky dengan lebar pas & teks proporsional */
     #ts-grid thead tr:first-child th:first-child,
     #ts-grid tbody tr td:first-child {
         width: 105px !important;
@@ -284,7 +317,6 @@
         line-height: 1.25 !important;
     }
 
-    /* Baris kedua header: nama kolom & satuan (posisi sticky sejajar pas di bawah baris 1 tanpa gap) */
     #ts-grid thead tr:nth-child(2) th {
         top: 29px !important;
         padding: 5px 8px !important;
@@ -295,19 +327,15 @@
     }
 
     #ts-grid thead tr:first-child th {
-        padding: 6px 8px !important;
-        font-size: 0.72rem !important;
         border-bottom: 1px solid var(--border) !important;
     }
 
-    /* Hilangkan border tebal di kolom rincian mobile */
     #ts-grid thead tr:first-child th:first-child {
         border-bottom: 1px solid var(--border) !important;
         border-right: 1px solid var(--border) !important;
         box-shadow: 2px 0 4px rgba(0, 0, 0, 0.04) !important;
     }
 
-    /* Sel isi tabel (angka nilai desimal) */
     #ts-grid tbody td {
         padding: 5px 8px !important;
         font-size: 0.72rem !important;
@@ -325,10 +353,10 @@
     }
 
     .glass-panel {
-        padding: 0.85rem 1rem;
+        padding: 0.75rem 0.85rem;
     }
 
-    /* Pengecilan Font Elemen Deret Waktu di Mobile (Kecuali Pilihan Indikator & Tahun Data) */
+    /* Hero container font */
     .ts-hero-container h5 {
         font-size: 0.95rem !important;
     }
@@ -337,7 +365,7 @@
         font-size: 0.75rem !important;
     }
 
-    /* Pilihan Indikator Master (Langkah 1) & Tahun Data (Langkah 3) Tetap Normal & Jelas */
+    /* Indicator & year picker remain readable */
     #ts-indicator-master,
     #ts-indicator-search-input,
     #ts-wizard-search,
@@ -352,7 +380,7 @@
         line-height: 1.25 !important;
     }
 
-    /* Kartu Ringkasan Statistik (Quick Summary & Highlight Cards) */
+    /* Insight cards compact */
     .ts-insight-card,
     .ts-highlight-stat-card {
         padding: 8px 12px !important;
@@ -371,7 +399,7 @@
         letter-spacing: 0.3px !important;
     }
 
-    /* Toolbar Mode Switcher (Grafik / Tabel / Keduanya) */
+    /* Toolbar mode switcher */
     #ts-view-mode-bar {
         padding: 10px 14px !important;
         flex-wrap: wrap !important;
@@ -390,18 +418,18 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.78rem !important;
+        font-size: 0.75rem !important;
         padding: 8px 12px !important;
         flex: 1 !important;
         justify-content: center !important;
     }
 
-    /* Konversi Satuan & Opsi Tampilan */
+    /* Konversi satuan & opsi tampilan */
     .ts-filter-section-title {
         font-size: 0.72rem !important;
     }
 
-    .ts-variant-chip, 
+    .ts-variant-chip,
     .ts-filter-chip {
         font-size: 0.72rem !important;
         padding: 3px 8px !important;
@@ -421,7 +449,7 @@
         padding: 12px !important;
     }
 
-    /* Banner Tombol Wawasan Tren & Pertumbuhan di Mobile */
+    /* Trend banner */
     .ts-trend-banner {
         padding: 14px 16px !important;
         border-radius: 12px !important;
@@ -444,7 +472,7 @@
         margin-top: 4px !important;
     }
 
-    /* Pengecilan Font Panel Wawasan Tren di Layar Mobile */
+    /* Wawasan tren panel */
     #ts-insights-drawer h6 {
         font-size: 0.88rem !important;
     }
@@ -482,13 +510,14 @@
         line-height: 1.25 !important;
     }
 
+    /* Welcome banner */
     .welcome-banner {
         padding: 0.75rem !important;
         min-height: auto !important;
     }
 
     .welcome-banner.ts-hero-banner {
-        padding: 1.15rem 1.25rem !important;
+        padding: 1rem 1.15rem !important;
         min-height: auto !important;
         margin-bottom: 0.9rem !important;
     }
@@ -513,6 +542,410 @@
 
     .info-tile {
         padding: 0.85rem 1rem;
+    }
+
+    /* Collapsible */
+    .ts-collapsible-header {
+        padding: 10px 14px !important;
+    }
+
+    .ts-collapsible-body {
+        padding: 0 14px 12px !important;
+    }
+
+    .ts-collapsible-body .mb-3 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Konversi satuan: label di atas, radio di bawah */
+    .ts-unit-vk-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding: 10px 0 !important;
+        border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    }
+
+    .ts-unit-vk-row:last-child {
+        border-bottom: none !important;
+    }
+
+    .ts-unit-vk-label {
+        min-width: auto !important;
+        max-width: none !important;
+        font-size: 0.72rem !important;
+    }
+
+    .ts-unit-vk-chips {
+        gap: 4px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .ts-unit-vk-chips label {
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+    }
+
+    /* Tahun awal/akhir full width */
+    #ts-insight-select-year-start,
+    #ts-insight-select-year-end {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Opsi tampilan wrap */
+    #ts-chart-display-toggles-container .d-flex {
+        gap: 8px !important;
+    }
+
+    /* Chart area responsive height */
+    #ts-chart-scrollable {
+        height: 300px !important;
+    }
+}
+
+/* ===================== BREAKPOINT 5: SMALL PHONE: < 425px ===================== */
+@media (max-width: 424.98px) {
+    .main-content {
+        padding: 0.75rem !important;
+    }
+
+    .widget {
+        padding: 0.75rem;
+    }
+
+    .widget-value {
+        font-size: 1rem;
+    }
+
+    .widget-label {
+        font-size: 0.65rem;
+    }
+
+    .ts-wizard-box {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+    }
+
+    .glass-panel {
+        padding: 0.65rem 0.75rem;
+    }
+
+    .welcome-banner {
+        padding: 0.65rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner {
+        padding: 0.85rem 1rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 0.95rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.7rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .welcome-banner h4 {
+        font-size: 0.85rem;
+    }
+
+    .welcome-banner p {
+        font-size: 0.68rem;
+    }
+
+    .ts-hero-container h5 {
+        font-size: 0.88rem !important;
+    }
+
+    .ts-hero-container p {
+        font-size: 0.7rem !important;
+    }
+
+    #ts-indicator-master,
+    #ts-indicator-search-input,
+    #ts-wizard-search,
+    #ts-wizard-kolom-checkboxes,
+    #ts-year-picker,
+    .ts-year-chip {
+        font-size: 0.8rem !important;
+    }
+
+    .ts-indicator-label {
+        font-size: 0.76rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .ts-insight-card,
+    .ts-highlight-stat-card {
+        padding: 6px 10px !important;
+    }
+
+    .ts-insight-card .fs-5,
+    .ts-highlight-stat-card .fs-4 {
+        font-size: 0.9rem !important;
+    }
+
+    .ts-insight-card .small,
+    .ts-highlight-stat-card .small {
+        font-size: 0.6rem !important;
+    }
+
+    .ts-segmented-btn {
+        font-size: 0.72rem !important;
+        padding: 7px 10px !important;
+    }
+
+    .ts-filter-section-title {
+        font-size: 0.68rem !important;
+    }
+
+    .ts-variant-chip,
+    .ts-filter-chip {
+        font-size: 0.68rem !important;
+        padding: 3px 7px !important;
+    }
+
+    .ts-trend-banner {
+        padding: 12px 14px !important;
+    }
+
+    .ts-trend-banner .fw-bold {
+        font-size: 0.8rem !important;
+    }
+
+    .ts-trend-banner div:first-child div:last-child {
+        font-size: 0.68rem !important;
+    }
+
+    .ts-trend-banner-cta {
+        font-size: 0.68rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .ts-collapsible-header {
+        padding: 9px 12px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .ts-collapsible-body {
+        padding: 0 12px 10px !important;
+    }
+
+    .ts-unit-vk-label {
+        font-size: 0.68rem !important;
+    }
+
+    .ts-unit-vk-chips label {
+        font-size: 0.68rem !important;
+        padding: 3px 8px !important;
+    }
+
+    .doc-icon-wrapper {
+        width: 36px;
+        height: 36px;
+    }
+
+    .dropzone-modern {
+        min-height: 120px;
+        padding: 14px 10px;
+    }
+
+    .info-tile {
+        padding: 0.75rem 0.85rem;
+    }
+
+    .swal2-popup {
+        padding: 0.85rem !important;
+    }
+
+    .swal2-title {
+        font-size: 1rem !important;
+    }
+
+    /* Chart area responsive height */
+    #ts-chart-scrollable {
+        height: 280px !important;
+    }
+}
+
+/* ===================== BREAKPOINT 6: EXTRA SMALL PHONE: < 375px ===================== */
+@media (max-width: 374.98px) {
+    .main-content {
+        padding: 0.65rem !important;
+    }
+
+    .widget {
+        padding: 0.65rem;
+    }
+
+    .widget-value {
+        font-size: 0.92rem;
+    }
+
+    .widget-label {
+        font-size: 0.62rem;
+    }
+
+    .ts-wizard-box {
+        height: 160px;
+        min-height: 160px;
+        max-height: 160px;
+    }
+
+    .glass-panel {
+        padding: 0.55rem 0.65rem;
+    }
+
+    .welcome-banner {
+        padding: 0.55rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner {
+        padding: 0.75rem 0.85rem !important;
+        margin-bottom: 0.65rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 0.88rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.66rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .welcome-banner h4 {
+        font-size: 0.8rem;
+    }
+
+    .welcome-banner p {
+        font-size: 0.65rem;
+    }
+
+    .ts-hero-container h5 {
+        font-size: 0.82rem !important;
+    }
+
+    .ts-hero-container p {
+        font-size: 0.65rem !important;
+    }
+
+    #ts-indicator-master,
+    #ts-indicator-search-input,
+    #ts-wizard-search,
+    #ts-wizard-kolom-checkboxes,
+    #ts-year-picker,
+    .ts-year-chip {
+        font-size: 0.76rem !important;
+    }
+
+    .ts-indicator-label {
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .ts-insight-card,
+    .ts-highlight-stat-card {
+        padding: 5px 8px !important;
+    }
+
+    .ts-insight-card .fs-5,
+    .ts-highlight-stat-card .fs-4 {
+        font-size: 0.82rem !important;
+    }
+
+    .ts-insight-card .small,
+    .ts-highlight-stat-card .small {
+        font-size: 0.58rem !important;
+    }
+
+    .ts-segmented-btn {
+        font-size: 0.68rem !important;
+        padding: 6px 8px !important;
+    }
+
+    .ts-filter-section-title {
+        font-size: 0.65rem !important;
+    }
+
+    .ts-variant-chip,
+    .ts-filter-chip {
+        font-size: 0.65rem !important;
+        padding: 2px 6px !important;
+    }
+
+    .ts-trend-banner .fw-bold {
+        font-size: 0.75rem !important;
+    }
+
+    .ts-trend-banner div:first-child div:last-child {
+        font-size: 0.65rem !important;
+    }
+
+    .ts-trend-banner-cta {
+        font-size: 0.65rem !important;
+        padding: 4px 8px !important;
+    }
+
+    .ts-collapsible-header {
+        padding: 8px 10px !important;
+        font-size: 0.74rem !important;
+    }
+
+    .ts-collapsible-body {
+        padding: 0 10px 8px !important;
+    }
+
+    .ts-unit-vk-label {
+        font-size: 0.65rem !important;
+    }
+
+    .ts-unit-vk-chips label {
+        font-size: 0.65rem !important;
+        padding: 3px 7px !important;
+    }
+
+    #ts-growth-ranking-table {
+        font-size: 0.68rem !important;
+    }
+
+    #ts-growth-ranking-table thead th {
+        font-size: 0.64rem !important;
+        padding: 4px 5px !important;
+    }
+
+    #ts-growth-ranking-table tbody td {
+        padding: 3px 5px !important;
+        font-size: 0.68rem !important;
+    }
+
+    #ts-insights-drawer h6 {
+        font-size: 0.82rem !important;
+    }
+
+    #ts-insights-subtitle {
+        font-size: 0.66rem !important;
+    }
+
+    .ts-insight-filter-label {
+        font-size: 0.64rem !important;
+    }
+
+    .ts-insight-select,
+    #btn-ts-insight-entity,
+    #btn-ts-insight-trend {
+        font-size: 0.7rem !important;
+        padding: 3px 6px !important;
+    }
+
+    /* Chart area responsive height */
+    #ts-chart-scrollable {
+        height: 260px !important;
     }
 }
 
@@ -566,55 +999,6 @@
 
 .ts-collapsible-body {
     padding: 0 18px 16px !important;
-}
-
-@media (max-width: 575.98px) {
-    .ts-collapsible-header {
-        padding: 10px 14px !important;
-    }
-    .ts-collapsible-body {
-        padding: 0 14px 12px !important;
-    }
-    .ts-collapsible-body .mb-3 {
-        margin-bottom: 0.5rem !important;
-    }
-
-    /* Konversi Satuan: label di atas, radio di bawah, border pembatas */
-    .ts-unit-vk-row {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 6px !important;
-        padding: 10px 0 !important;
-        border-bottom: 1px solid var(--border, #e2e8f0) !important;
-    }
-    .ts-unit-vk-row:last-child {
-        border-bottom: none !important;
-    }
-    .ts-unit-vk-label {
-        min-width: auto !important;
-        max-width: none !important;
-        font-size: 0.72rem !important;
-    }
-    .ts-unit-vk-chips {
-        gap: 4px !important;
-        flex-wrap: wrap !important;
-    }
-    .ts-unit-vk-chips label {
-        font-size: 0.72rem !important;
-        padding: 4px 10px !important;
-    }
-
-    /* Tahun Awal/Akhir: full width */
-    #ts-insight-select-year-start,
-    #ts-insight-select-year-end {
-        min-width: 0 !important;
-        width: 100% !important;
-    }
-
-    /* Opsi Tampilan: wrap */
-    #ts-chart-display-toggles-container .d-flex {
-        gap: 8px !important;
-    }
 }
 
 /* ===================== TREND COLLAPSIBLE — WHITE + BORDER ACCENT ===================== */

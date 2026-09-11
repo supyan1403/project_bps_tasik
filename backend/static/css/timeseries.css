@@ -446,6 +446,18 @@ button.ts-insight-select.dropdown-toggle::after {
     min-height: 320px !important;
 }
 
+/* Chart scrollable container — base height */
+#ts-chart-scrollable,
+#ts-chart-scrollable-2,
+#ts-chart-scrollable-3 {
+    height: 350px !important;
+    flex-grow: 1;
+    overflow-x: auto;
+    overflow-y: visible;
+    touch-action: pan-y;
+    min-width: 0;
+}
+
 /* Wizard Selection Boxes */
 .ts-wizard-box--enhanced {
     background-color: var(--bg-page);

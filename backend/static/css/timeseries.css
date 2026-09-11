@@ -566,27 +566,37 @@ button.ts-insight-select.dropdown-toggle::after {
     font-weight: 600;
 }
 .ts-variant-chip input[type="radio"] {
-    width: 15px !important;
-    height: 15px !important;
-    min-width: 15px !important;
-    max-width: 15px !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: 1px solid var(--border) !important;
+    border: 2px solid var(--border) !important;
     border-radius: 50% !important;
     background: #ffffff !important;
-    accent-color: var(--primary) !important;
     cursor: pointer !important;
     display: inline-block !important;
     vertical-align: middle !important;
     box-shadow: none !important;
     outline: none !important;
+    position: relative !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
 }
 .ts-variant-chip.active input[type="radio"] {
-    appearance: auto !important;
-    accent-color: var(--primary) !important;
     border-color: var(--primary) !important;
-    background: #ffffff !important;
+}
+.ts-variant-chip.active input[type="radio"]::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
 }
 
 /* Per-VK Unit Converter Rows */

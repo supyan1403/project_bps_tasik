@@ -879,6 +879,7 @@ button.ts-insight-select.dropdown-toggle::after {
     line-height: 1.25;
     position: relative;
     user-select: none;
+    white-space: nowrap;
 }
 
 .ts-segmented-btn:hover {

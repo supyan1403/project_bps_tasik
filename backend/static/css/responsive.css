@@ -307,9 +307,9 @@
 
     #ts-grid thead tr:first-child th:first-child,
     #ts-grid tbody tr td:first-child {
-        width: 105px !important;
-        min-width: 105px !important;
-        max-width: 115px !important;
+        width: 130px !important;
+        min-width: 130px !important;
+        max-width: 145px !important;
         padding: 5px 8px !important;
         font-size: 0.72rem !important;
         white-space: normal !important;
@@ -877,11 +877,11 @@
 
     #ts-grid thead tr:first-child th:first-child,
     #ts-grid tbody tr td:first-child {
-        width: 95px !important;
-        min-width: 95px !important;
-        max-width: 105px !important;
-        padding: 4px 7px !important;
-        font-size: 0.68rem !important;
+        width: 110px !important;
+        min-width: 110px !important;
+        max-width: 125px !important;
+        padding: 3px 6px !important;
+        font-size: 0.64rem !important;
     }
 
     #ts-grid thead tr:nth-child(2) th {
@@ -1191,11 +1191,11 @@
 
     #ts-grid thead tr:first-child th:first-child,
     #ts-grid tbody tr td:first-child {
-        width: 85px !important;
-        min-width: 85px !important;
-        max-width: 95px !important;
-        padding: 3px 6px !important;
-        font-size: 0.64rem !important;
+        width: 120px !important;
+        min-width: 120px !important;
+        max-width: 135px !important;
+        padding: 4px 7px !important;
+        font-size: 0.68rem !important;
     }
 
     #ts-grid thead tr:nth-child(2) th {

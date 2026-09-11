@@ -11949,7 +11949,14 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                 }
 
                 if (years.length > 0) {
-                    statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
+                    const isConsecutive = years.every((y, i) => i === 0 || y === years[i - 1] + 1);
+                    if (isConsecutive && years.length > 1) {
+                        statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
+                    } else if (years.length <= 3) {
+                        statYears.textContent = years.join(' & ');
+                    } else {
+                        statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
+                    }
                     let yearSubtitle = document.getElementById('ts-stat-years-subtitle');
                     if (!yearSubtitle) {
                         yearSubtitle = document.createElement('div');

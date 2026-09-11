@@ -432,7 +432,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.68rem !important;
+        font-size: 0.62rem !important;
         padding: 6px 10px !important;
         flex: 1 !important;
         justify-content: center !important;
@@ -577,7 +577,7 @@
     /* Collapsible */
     .ts-collapsible-header {
         padding: 9px 14px !important;
-        font-size: 0.75rem !important;
+        font-size: 0.68rem !important;
     }
 
     .ts-collapsible-body {
@@ -585,11 +585,11 @@
     }
 
     .ts-trend-header {
-        font-size: 0.78rem !important;
+        font-size: 0.7rem !important;
     }
 
     .ts-trend-subtitle {
-        font-size: 0.66rem !important;
+        font-size: 0.6rem !important;
     }
 
     .ts-collapsible-body .mb-3 {
@@ -754,7 +754,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.66rem !important;
+        font-size: 0.6rem !important;
         padding: 5px 9px !important;
     }
 
@@ -787,7 +787,7 @@
 
     .ts-collapsible-header {
         padding: 8px 10px !important;
-        font-size: 0.72rem !important;
+        font-size: 0.66rem !important;
     }
 
     .ts-collapsible-body {
@@ -795,11 +795,11 @@
     }
 
     .ts-trend-header {
-        font-size: 0.74rem !important;
+        font-size: 0.68rem !important;
     }
 
     .ts-trend-subtitle {
-        font-size: 0.62rem !important;
+        font-size: 0.56rem !important;
     }
 
     .ts-unit-vk-label {
@@ -1089,7 +1089,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.62rem !important;
+        font-size: 0.56rem !important;
         padding: 5px 7px !important;
     }
 
@@ -1118,7 +1118,7 @@
 
     .ts-collapsible-header {
         padding: 7px 9px !important;
-        font-size: 0.68rem !important;
+        font-size: 0.62rem !important;
     }
 
     .ts-collapsible-body {
@@ -1126,11 +1126,11 @@
     }
 
     .ts-trend-header {
-        font-size: 0.7rem !important;
+        font-size: 0.64rem !important;
     }
 
     .ts-trend-subtitle {
-        font-size: 0.58rem !important;
+        font-size: 0.52rem !important;
     }
 
     .ts-unit-vk-label {

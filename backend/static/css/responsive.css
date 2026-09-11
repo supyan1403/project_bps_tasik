@@ -395,13 +395,6 @@
         justify-content: center !important;
     }
 
-    .ts-view-mode-hint-badge {
-        font-size: 0.68rem !important;
-        padding: 4px 10px !important;
-        width: 100% !important;
-        justify-content: center !important;
-    }
-
     /* Konversi Satuan & Opsi Tampilan */
     .ts-filter-section-title {
         font-size: 0.72rem !important;

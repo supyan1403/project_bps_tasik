@@ -302,10 +302,10 @@
     background-color: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--border-radius-lg);
-    padding: 16px 20px;
+    padding: 12px 16px;
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
-    min-height: 94px;
+    min-height: 70px;
     height: 100%;
 }
 .ts-insight-card:hover {

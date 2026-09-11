@@ -438,6 +438,11 @@
         justify-content: center !important;
     }
 
+    #ts-view-mode-bar {
+        padding: 8px 12px !important;
+        gap: 6px !important;
+    }
+
     /* Konversi satuan & opsi tampilan */
     .ts-filter-section-title {
         font-size: 0.72rem !important;
@@ -785,6 +790,13 @@
     .ts-filter-chip {
         font-size: 0.65rem !important;
         padding: 3px 7px !important;
+    }
+
+    #ts-view-mode-bar {
+        padding: 6px 10px !important;
+        border: none !important;
+        box-shadow: none !important;
+        gap: 5px !important;
     }
 
     .ts-trend-banner {
@@ -1139,6 +1151,13 @@
     .ts-filter-chip {
         font-size: 0.65rem !important;
         padding: 2px 6px !important;
+    }
+
+    #ts-view-mode-bar {
+        padding: 5px 8px !important;
+        border: none !important;
+        box-shadow: none !important;
+        gap: 4px !important;
     }
 
     .ts-trend-banner .fw-bold {

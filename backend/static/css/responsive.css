@@ -577,6 +577,38 @@
     .ts-collapsible-body .mb-3 {
         margin-bottom: 0.5rem !important;
     }
+
+    /* Konversi Satuan: stack vertikal, compact */
+    .ts-unit-vk-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding: 6px 0 !important;
+    }
+    .ts-unit-vk-label {
+        min-width: auto !important;
+        max-width: none !important;
+        font-size: 0.72rem !important;
+    }
+    .ts-unit-vk-chips {
+        gap: 4px !important;
+    }
+    .ts-unit-vk-chips label {
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+    }
+
+    /* Tahun Awal/Akhir: full width */
+    #ts-insight-select-year-start,
+    #ts-insight-select-year-end {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Opsi Tampilan: wrap */
+    #ts-chart-display-toggles-container .d-flex {
+        gap: 8px !important;
+    }
 }
 
 /* ===================== TREND COLLAPSIBLE — WHITE + BORDER ACCENT ===================== */

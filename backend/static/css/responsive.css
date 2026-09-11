@@ -578,24 +578,33 @@
         margin-bottom: 0.5rem !important;
     }
 
-    /* Konversi Satuan: stack vertikal, compact */
+    /* Konversi Satuan: tabel-like, horizontal */
     .ts-unit-vk-row {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 6px !important;
-        padding: 6px 0 !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        padding: 10px 0 !important;
+        border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    }
+    .ts-unit-vk-row:last-child {
+        border-bottom: none !important;
     }
     .ts-unit-vk-label {
         min-width: auto !important;
         max-width: none !important;
         font-size: 0.72rem !important;
+        flex-shrink: 1 !important;
+        white-space: normal !important;
     }
     .ts-unit-vk-chips {
         gap: 4px !important;
+        flex-wrap: nowrap !important;
+        flex-shrink: 0 !important;
     }
     .ts-unit-vk-chips label {
         font-size: 0.72rem !important;
-        padding: 4px 10px !important;
+        padding: 4px 8px !important;
     }
 
     /* Tahun Awal/Akhir: full width */

@@ -11950,6 +11950,30 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                 }
 
                 statYears.textContent = years.length > 0 ? `${years[0]} s/d ${years[years.length - 1]} (${years.length} Tahun)` : '-';
+
+                // --- 3 kartu baru: Wilayah, Kelengkapan, Indikator ---
+                const statEntities = document.getElementById('ts-stat-total-entities');
+                const statCompleteness = document.getElementById('ts-stat-completeness');
+                const statIndicators = document.getElementById('ts-stat-active-indicators');
+
+                if (statEntities) {
+                    const detailEntities = filteredEntities.filter(ent => {
+                        const t = currentTimeSeriesData.entityTypeMap?.[ent] || '';
+                        return t !== 'Total' && t !== 'Kabupaten/Kota';
+                    });
+                    statEntities.textContent = detailEntities.length > 0 ? `${detailEntities.length} Wilayah` : '-';
+                }
+
+                if (statCompleteness) {
+                    const totalCells = filteredEntities.length * years.length * checked.length;
+                    const pct = totalCells > 0 ? Math.round((totalPoints / totalCells) * 100) : 0;
+                    statCompleteness.textContent = `${pct}% Lengkap`;
+                }
+
+                if (statIndicators) {
+                    const totalVks = currentTimeSeriesData.valueKeys?.length || 0;
+                    statIndicators.textContent = checked.length > 0 ? `${checked.length} dari ${totalVks}` : '-';
+                }
             }
         } catch(e) {
 

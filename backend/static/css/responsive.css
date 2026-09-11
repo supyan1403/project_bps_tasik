@@ -461,6 +461,18 @@
 
     .ts-insights-card {
         padding: 12px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .ts-insight-filter-bar {
+        border: none !important;
+        background: transparent !important;
+        padding: 8px 0 !important;
+    }
+
+    .ts-insights-drawer {
+        margin-bottom: 0.5rem !important;
     }
 
     /* Trend banner */
@@ -569,7 +581,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 14px 12px !important;
+        padding: 0 10px 8px !important;
     }
 
     .ts-trend-header {
@@ -779,7 +791,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 12px 10px !important;
+        padding: 0 8px 6px !important;
     }
 
     .ts-trend-header {
@@ -849,7 +861,19 @@
     }
 
     .ts-insights-card {
-        padding: 10px !important;
+        padding: 8px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .ts-insight-filter-bar {
+        border: none !important;
+        background: transparent !important;
+        padding: 6px 0 !important;
+    }
+
+    .ts-insights-drawer {
+        margin-bottom: 0.25rem !important;
     }
 
     #ts-insights-drawer h6 {
@@ -1098,7 +1122,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 10px 8px !important;
+        padding: 0 6px 4px !important;
     }
 
     .ts-trend-header {
@@ -1179,7 +1203,19 @@
     }
 
     .ts-insights-card {
-        padding: 8px !important;
+        padding: 6px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .ts-insight-filter-bar {
+        border: none !important;
+        background: transparent !important;
+        padding: 4px 0 !important;
+    }
+
+    .ts-insights-drawer {
+        margin-bottom: 0 !important;
     }
 
     #ts-insights-drawer h6 {

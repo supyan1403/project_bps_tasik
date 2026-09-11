@@ -11933,13 +11933,20 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                     const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                     const uSuffix = firstVkCfg ? ' ' + firstVkCfg.label : '';
                     let rangeHtml = `${minFmt} — ${maxFmt}${uSuffix}`;
-                    if (summaryTotalVal !== null) {
-                        const sumFmt = formatWithUnitScale(summaryTotalVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
-                        rangeHtml += ` <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary,#64748b); display:block; margin-top:2px;">(Total: ${sumFmt}${uSuffix})</span>`;
-                    }
                     statRange.innerHTML = rangeHtml;
+                    const statRangeTotal = document.getElementById('ts-stat-range-total');
+                    if (statRangeTotal) {
+                        if (summaryTotalVal !== null) {
+                            const sumFmt = formatWithUnitScale(summaryTotalVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
+                            statRangeTotal.textContent = `(Total: ${sumFmt}${uSuffix})`;
+                        } else {
+                            statRangeTotal.textContent = '';
+                        }
+                    }
                 } else {
                     statRange.textContent = '-';
+                    const statRangeTotal = document.getElementById('ts-stat-range-total');
+                    if (statRangeTotal) statRangeTotal.textContent = '';
                 }
 
                 statYears.textContent = years.length > 0 ? `${years[0]} s/d ${years[years.length - 1]} (${years.length} Tahun)` : '-';

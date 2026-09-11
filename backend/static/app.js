@@ -21683,7 +21683,6 @@ function setTimeSeriesViewMode(mode) {
     const btnChart = document.getElementById('btn-ts-view-chart');
     const btnTable = document.getElementById('btn-ts-view-table');
     const btnBoth = document.getElementById('btn-ts-view-both');
-    const hint = document.getElementById('ts-view-mode-hint');
 
     if (btnChart) btnChart.classList.toggle('active', mode === 'chart');
     if (btnTable) btnTable.classList.toggle('active', mode === 'table');
@@ -21692,15 +21691,12 @@ function setTimeSeriesViewMode(mode) {
     if (mode === 'chart') {
         if (secChart) secChart.style.display = 'block';
         if (secTable) secTable.style.display = 'none';
-        if (hint) hint.innerHTML = '<i class="bi bi-graph-up text-primary me-1"></i> Visualisasi grafik deret waktu & analisis tren';
     } else if (mode === 'table') {
         if (secChart) secChart.style.display = 'none';
         if (secTable) secTable.style.display = 'block';
-        if (hint) hint.innerHTML = '<i class="bi bi-table text-success me-1"></i> Matriks data tabular lengkap per tahun';
     } else { // 'both'
         if (secChart) secChart.style.display = 'block';
         if (secTable) secTable.style.display = 'block';
-        if (hint) hint.innerHTML = '<i class="bi bi-layout-split text-info me-1"></i> Mode komparasi: Grafik visual & tabel data';
     }
 
     if (mode === 'chart' || mode === 'both') {

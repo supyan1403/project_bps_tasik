@@ -839,18 +839,6 @@ button.ts-insight-select.dropdown-toggle::after {
     box-shadow: none;
 }
 
-.ts-view-mode-hint-badge {
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--text-secondary, #64748b);
-    background: transparent;
-    padding: 5px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border, #e2e8f0);
-    display: inline-flex;
-    align-items: center;
-}
-
 #ts-view-mode-bar {
     padding: 10px 20px !important;
 }
@@ -874,12 +862,6 @@ button.ts-insight-select.dropdown-toggle::after {
     background: var(--primary, #3b82f6);
     color: #ffffff;
     box-shadow: none;
-}
-
-[data-bs-theme="dark"] .ts-view-mode-hint-badge {
-    color: #94a3b8;
-    background: #1e293b;
-    border-color: #334155;
 }
 
 /* ==========================================================================

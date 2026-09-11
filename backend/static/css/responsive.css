@@ -509,11 +509,11 @@
 
     /* Wawasan tren panel */
     #ts-insights-drawer h6 {
-        font-size: 0.88rem !important;
+        font-size: 0.78rem !important;
     }
 
     #ts-insights-subtitle {
-        font-size: 0.7rem !important;
+        font-size: 0.62rem !important;
     }
 
     .ts-insight-filter-label {
@@ -759,7 +759,7 @@
     .ts-insight-card .fs-5,
     .ts-highlight-stat-card .fs-4,
     .ts-highlight-stat-card .fs-6 {
-        font-size: 0.82rem !important;
+        font-size: 0.78rem !important;
     }
 
     .ts-insight-card .small,
@@ -768,7 +768,7 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.66rem !important;
+        font-size: 0.62rem !important;
         padding: 5px 9px !important;
     }
 
@@ -778,7 +778,7 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.68rem !important;
+        font-size: 0.65rem !important;
         padding: 3px 7px !important;
     }
 
@@ -795,13 +795,13 @@
     }
 
     .ts-trend-banner-cta {
-        font-size: 0.68rem !important;
+        font-size: 0.64rem !important;
         padding: 4px 10px !important;
     }
 
     .ts-collapsible-header {
         padding: 8px 10px !important;
-        font-size: 0.66rem !important;
+        font-size: 0.62rem !important;
     }
 
     .ts-collapsible-body {
@@ -809,15 +809,15 @@
     }
 
     .ts-trend-header {
-        font-size: 0.68rem !important;
+        font-size: 0.64rem !important;
     }
 
     .ts-trend-subtitle {
-        font-size: 0.56rem !important;
+        font-size: 0.52rem !important;
     }
 
     #btn-ts-main-export {
-        font-size: 0.7rem !important;
+        font-size: 0.66rem !important;
         padding: 4px 10px !important;
     }
 
@@ -861,7 +861,7 @@
     }
 
     .btn-table-action {
-        font-size: 0.7rem;
+        font-size: 0.66rem;
         padding: 0.3rem 0.7rem;
     }
 
@@ -875,16 +875,16 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.7rem !important;
+        font-size: 0.66rem !important;
         padding: 4px 10px !important;
     }
 
     .ts-collapse-btn {
-        font-size: 0.75rem !important;
+        font-size: 0.7rem !important;
     }
 
     .ts-export-preset-btn {
-        font-size: 0.68rem !important;
+        font-size: 0.64rem !important;
         padding: 4px 10px !important;
     }
 
@@ -919,7 +919,7 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.68rem !important;
+        font-size: 0.64rem !important;
         padding: 4px 7px !important;
     }
 
@@ -1132,11 +1132,11 @@
     }
 
     .ts-trend-banner .fw-bold {
-        font-size: 0.75rem !important;
+        font-size: 0.76rem !important;
     }
 
     .ts-trend-banner div:first-child div:last-child {
-        font-size: 0.65rem !important;
+        font-size: 0.64rem !important;
     }
 
     .ts-trend-banner-cta {

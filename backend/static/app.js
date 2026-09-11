@@ -11964,6 +11964,23 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                     const yearSubtitle = document.getElementById('ts-stat-years-subtitle');
                     if (yearSubtitle) yearSubtitle.textContent = '';
                 }
+
+                // --- 2 kartu: Rincian, Indikator ---
+                const statEntities = document.getElementById('ts-stat-total-entities');
+                const statIndicators = document.getElementById('ts-stat-active-indicators');
+
+                if (statEntities) {
+                    const detailEntities = filteredEntities.filter(ent => {
+                        const t = currentTimeSeriesData.entityTypeMap?.[ent] || '';
+                        return t !== 'Total' && t !== 'Kabupaten/Kota';
+                    });
+                    statEntities.textContent = detailEntities.length > 0 ? detailEntities.length.toLocaleString('id-ID') : '-';
+                }
+
+                if (statIndicators) {
+                    const totalVks = currentTimeSeriesData.valueKeys?.length || 0;
+                    statIndicators.textContent = checked.length > 0 ? `${checked.length} / ${totalVks}` : '-';
+                }
             }
         } catch(e) {
 

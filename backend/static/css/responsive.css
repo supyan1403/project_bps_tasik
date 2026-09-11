@@ -578,12 +578,11 @@
         margin-bottom: 0.5rem !important;
     }
 
-    /* Konversi Satuan: tabel-like, horizontal */
+    /* Konversi Satuan: label di atas, radio di bawah, border pembatas */
     .ts-unit-vk-row {
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 8px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
         padding: 10px 0 !important;
         border-bottom: 1px solid var(--border, #e2e8f0) !important;
     }
@@ -594,17 +593,14 @@
         min-width: auto !important;
         max-width: none !important;
         font-size: 0.72rem !important;
-        flex-shrink: 1 !important;
-        white-space: normal !important;
     }
     .ts-unit-vk-chips {
         gap: 4px !important;
-        flex-wrap: nowrap !important;
-        flex-shrink: 0 !important;
+        flex-wrap: wrap !important;
     }
     .ts-unit-vk-chips label {
         font-size: 0.72rem !important;
-        padding: 4px 8px !important;
+        padding: 4px 10px !important;
     }
 
     /* Tahun Awal/Akhir: full width */

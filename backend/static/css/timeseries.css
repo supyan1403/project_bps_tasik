@@ -583,6 +583,7 @@ button.ts-insight-select.dropdown-toggle::after {
     outline: none !important;
 }
 .ts-variant-chip.active input[type="radio"] {
+    appearance: auto !important;
     accent-color: var(--primary) !important;
     border-color: var(--primary) !important;
     background: #ffffff !important;

@@ -300,7 +300,7 @@
 /* Quick Insight Summary Cards */
 .ts-insight-card {
     background-color: var(--bg-card);
-    border: 1px solid var(--border) !important;
+    border: 1px solid var(--border);
     border-radius: var(--border-radius-lg);
     padding: 16px 20px;
     box-shadow: var(--shadow-sm);

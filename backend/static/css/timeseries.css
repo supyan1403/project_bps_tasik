@@ -833,7 +833,7 @@ button.ts-insight-select.dropdown-toggle::after {
 }
 
 .ts-segmented-btn.active {
-    background: var(--primary, #1e40af);
+    background: #1e293b;
     color: #ffffff;
     font-weight: 600;
     box-shadow: none;
@@ -859,8 +859,8 @@ button.ts-insight-select.dropdown-toggle::after {
 }
 
 [data-bs-theme="dark"] .ts-segmented-btn.active {
-    background: var(--primary, #3b82f6);
-    color: #ffffff;
+    background: #e2e8f0;
+    color: #0f172a;
     box-shadow: none;
 }
 

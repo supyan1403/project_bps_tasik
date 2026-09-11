@@ -582,6 +582,11 @@ button.ts-insight-select.dropdown-toggle::after {
     box-shadow: none !important;
     outline: none !important;
 }
+.ts-variant-chip.active input[type="radio"] {
+    accent-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    background: #ffffff !important;
+}
 
 /* Per-VK Unit Converter Rows */
 .ts-unit-vk-row {

@@ -603,10 +603,11 @@ button.ts-insight-select.dropdown-toggle::after {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
 }
-.ts-unit-vk-row + .ts-unit-vk-row {
-    border-top: 1px solid #f1f5f9;
+.ts-unit-vk-row:last-child {
+    border-bottom: none;
 }
 .ts-unit-vk-label {
     font-size: 0.78rem;

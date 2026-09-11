@@ -248,6 +248,18 @@
 .ts-hero-banner {
     border: none !important;
 }
+
+.ts-hero-title {
+    font-size: 1.2rem !important;
+}
+
+.ts-hero-desc {
+    font-size: 0.82rem !important;
+}
+
+.banner-badge {
+    font-size: 0.72rem !important;
+}
 .ts-hero-banner:hover {
     box-shadow: var(--shadow-lg) !important;
 }

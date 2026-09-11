@@ -523,13 +523,17 @@
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 1.05rem !important;
+        font-size: 0.92rem !important;
         margin-bottom: 0.25rem !important;
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.74rem !important;
+        font-size: 0.66rem !important;
         line-height: 1.35 !important;
+    }
+
+    .welcome-banner.ts-hero-banner .banner-badge {
+        font-size: 0.62rem !important;
     }
 
     .welcome-banner h4 {
@@ -642,12 +646,16 @@
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 0.95rem !important;
+        font-size: 0.82rem !important;
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.7rem !important;
+        font-size: 0.62rem !important;
         line-height: 1.3 !important;
+    }
+
+    .welcome-banner.ts-hero-banner .banner-badge {
+        font-size: 0.56rem !important;
     }
 
     .welcome-banner h4 {
@@ -938,12 +946,16 @@
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 0.88rem !important;
+        font-size: 0.75rem !important;
     }
 
     .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.66rem !important;
+        font-size: 0.58rem !important;
         line-height: 1.25 !important;
+    }
+
+    .welcome-banner.ts-hero-banner .banner-badge {
+        font-size: 0.5rem !important;
     }
 
     .welcome-banner h4 {

@@ -11925,15 +11925,14 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                     maxVal = summaryTotalVal;
                 }
 
-                statTotalPts.textContent = totalPoints > 0 ? totalPoints.toLocaleString('id-ID') + ' Titik Data' : '0';
+                statTotalPts.textContent = totalPoints > 0 ? totalPoints.toLocaleString('id-ID') : '0';
 
                 if (minVal !== Infinity && maxVal !== -Infinity) {
                     const firstVkCfg = getUnitConfigForVK(checked[0]);
                     const minFmt = formatWithUnitScale(minVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                     const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                     const uSuffix = firstVkCfg ? ' ' + firstVkCfg.label : '';
-                    let rangeHtml = `${minFmt} — ${maxFmt}${uSuffix}`;
-                    statRange.innerHTML = rangeHtml;
+                    statRange.textContent = `${minFmt} – ${maxFmt}${uSuffix}`;
                     const statRangeTotal = document.getElementById('ts-stat-range-total');
                     if (statRangeTotal) {
                         if (summaryTotalVal !== null) {
@@ -11949,11 +11948,19 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                     if (statRangeTotal) statRangeTotal.textContent = '';
                 }
 
-                statYears.textContent = years.length > 0 ? `${years[0]} s/d ${years[years.length - 1]} (${years.length} Tahun)` : '-';
+                if (years.length > 0) {
+                    statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
+                    const yearSubtitle = document.createElement('div');
+                    yearSubtitle.className = 'text-muted mt-1';
+                    yearSubtitle.style.fontSize = '0.72rem';
+                    yearSubtitle.textContent = `(${years.length} Tahun)`;
+                    statYears.parentElement.appendChild(yearSubtitle);
+                } else {
+                    statYears.textContent = '-';
+                }
 
-                // --- 3 kartu baru: Wilayah, Kelengkapan, Indikator ---
+                // --- 2 kartu: Rincian, Indikator ---
                 const statEntities = document.getElementById('ts-stat-total-entities');
-                const statCompleteness = document.getElementById('ts-stat-completeness');
                 const statIndicators = document.getElementById('ts-stat-active-indicators');
 
                 if (statEntities) {
@@ -11961,18 +11968,12 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                         const t = currentTimeSeriesData.entityTypeMap?.[ent] || '';
                         return t !== 'Total' && t !== 'Kabupaten/Kota';
                     });
-                    statEntities.textContent = detailEntities.length > 0 ? `${detailEntities.length} Wilayah` : '-';
-                }
-
-                if (statCompleteness) {
-                    const totalCells = filteredEntities.length * years.length * checked.length;
-                    const pct = totalCells > 0 ? Math.round((totalPoints / totalCells) * 100) : 0;
-                    statCompleteness.textContent = `${pct}% Lengkap`;
+                    statEntities.textContent = detailEntities.length > 0 ? detailEntities.length.toLocaleString('id-ID') : '-';
                 }
 
                 if (statIndicators) {
                     const totalVks = currentTimeSeriesData.valueKeys?.length || 0;
-                    statIndicators.textContent = checked.length > 0 ? `${checked.length} dari ${totalVks}` : '-';
+                    statIndicators.textContent = checked.length > 0 ? `${checked.length} / ${totalVks}` : '-';
                 }
             }
         } catch(e) {

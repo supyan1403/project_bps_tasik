@@ -3,6 +3,17 @@
     transition: all 0.25s ease-in-out;
 }
 
+/* Result Title — Section Header Style */
+#ts-result-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+    letter-spacing: 0.3px;
+    margin-bottom: 0.5rem !important;
+}
+
 /* ===================== TIME SERIES WIZARD ===================== */
 
 /* Step badge (1, 2) */

@@ -212,6 +212,70 @@
     #ts-chart-scrollable {
         height: 320px !important;
     }
+
+    /* --- ADMIN & DATA TABLE RESPONSIVE (< 768px) --- */
+    .editor-table-wrapper th,
+    .editor-table-wrapper td,
+    #data-grid th,
+    #data-grid td,
+    #summary-grid th,
+    #summary-grid td,
+    #master-columns-table th,
+    #master-columns-table td,
+    #admin-ts-anomalies-table th,
+    #admin-ts-anomalies-table td,
+    #anom-modal-table th,
+    #anom-modal-table td,
+    .table-responsive table th,
+    .table-responsive table td {
+        font-size: 0.78rem !important;
+        padding: 0.45rem 0.6rem !important;
+    }
+
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        max-width: 155px !important;
+        min-width: 95px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 0.76rem !important;
+    }
+
+    .editor-header {
+        padding: 0.75rem 1rem !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .editor-toolbar {
+        padding: 8px 12px !important;
+        gap: 6px !important;
+    }
+
+    .editor-toolbar .btn,
+    .btn-table-action {
+        font-size: 0.74rem !important;
+        padding: 4px 10px !important;
+    }
+
+    .admin-overview-card {
+        padding: 10px 14px !important;
+        gap: 10px !important;
+    }
+
+    .stat-card-glass {
+        padding: 14px 16px !important;
+    }
+
+    .stat-card-glass .stat-card-value {
+        font-size: 1.25rem !important;
+    }
+
+    .stat-card-glass .stat-card-label {
+        font-size: 0.74rem !important;
+    }
 }
 
 /* ===================== BREAKPOINT 4: MEDIUM PHONE: < 576px ===================== */
@@ -665,6 +729,140 @@
     #ts-chart-scrollable {
         height: 300px !important;
     }
+
+    /* --- ADMIN & DATA TABLE RESPONSIVE (< 576px) --- */
+    .editor-table-wrapper th,
+    .editor-table-wrapper td,
+    #data-grid th,
+    #data-grid td,
+    #summary-grid th,
+    #summary-grid td,
+    #master-columns-table th,
+    #master-columns-table td,
+    #admin-ts-anomalies-table th,
+    #admin-ts-anomalies-table td,
+    #anom-modal-table th,
+    #anom-modal-table td,
+    .table-responsive table th,
+    .table-responsive table td {
+        font-size: 0.73rem !important;
+        padding: 0.35rem 0.5rem !important;
+    }
+
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        max-width: 135px !important;
+        min-width: 85px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 0.72rem !important;
+        padding: 0.35rem 0.5rem !important;
+    }
+
+    #data-grid input,
+    #data-grid select,
+    .cell-input {
+        font-size: 0.72rem !important;
+        padding: 2px 5px !important;
+        height: 28px !important;
+    }
+
+    .row-action-cell {
+        min-width: 50px !important;
+        gap: 2px !important;
+    }
+
+    .row-action-cell button {
+        font-size: 0.68rem !important;
+        padding: 2px 5px !important;
+    }
+
+    .col-delete-pill {
+        font-size: 0.68rem !important;
+        padding: 2px 6px !important;
+    }
+
+    .readonly-cell {
+        font-size: 0.73rem !important;
+        padding: 0.35rem 0.5rem !important;
+    }
+
+    .editor-header {
+        padding: 0.6rem 0.75rem !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    #editor-table-number {
+        width: 65px !important;
+        font-size: 0.8rem !important;
+    }
+
+    #editor-title {
+        font-size: 0.82rem !important;
+    }
+
+    #editor-mode-badge {
+        font-size: 0.68rem !important;
+        padding: 2px 8px !important;
+    }
+
+    .editor-toolbar {
+        padding: 6px 8px !important;
+        gap: 4px !important;
+    }
+
+    .editor-toolbar .btn {
+        font-size: 0.70rem !important;
+        padding: 4px 8px !important;
+        border-radius: 6px !important;
+    }
+
+    .admin-overview-card {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+    }
+
+    .stat-card-glass {
+        padding: 12px !important;
+    }
+
+    .stat-card-glass .stat-card-value {
+        font-size: 1.15rem !important;
+    }
+
+    .stat-card-glass .stat-card-label {
+        font-size: 0.70rem !important;
+    }
+
+    .glass-panel {
+        padding: 1rem !important;
+        border-radius: 12px !important;
+    }
+
+    .data-tabel-card {
+        padding: 10px 12px !important;
+    }
+
+    .data-tabel-card-title {
+        font-size: 0.85rem !important;
+    }
+
+    .data-tabel-card-meta {
+        font-size: 0.70rem !important;
+    }
+
+    .dropzone-modern {
+        min-height: 140px !important;
+        padding: 16px 12px !important;
+    }
+
+    .dropzone-icon {
+        width: 38px !important;
+        height: 38px !important;
+    }
 }
 
 /* ===================== BREAKPOINT 5: SMALL PHONE: < 425px ===================== */
@@ -1025,6 +1223,99 @@
     /* Chart area responsive height */
     #ts-chart-scrollable {
         height: 280px !important;
+    }
+
+    /* --- ADMIN & DATA TABLE RESPONSIVE (< 425px) --- */
+    .editor-table-wrapper th,
+    .editor-table-wrapper td,
+    #data-grid th,
+    #data-grid td,
+    #summary-grid th,
+    #summary-grid td,
+    #master-columns-table th,
+    #master-columns-table td,
+    #admin-ts-anomalies-table th,
+    #admin-ts-anomalies-table td,
+    #anom-modal-table th,
+    #anom-modal-table td,
+    .table-responsive table th,
+    .table-responsive table td {
+        font-size: 0.69rem !important;
+        padding: 0.28rem 0.42rem !important;
+    }
+
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        max-width: 120px !important;
+        min-width: 80px !important;
+        font-size: 0.68rem !important;
+        padding: 0.28rem 0.42rem !important;
+    }
+
+    #data-grid input,
+    #data-grid select,
+    .cell-input {
+        font-size: 0.68rem !important;
+        padding: 2px 4px !important;
+        height: 25px !important;
+    }
+
+    .row-action-cell button {
+        font-size: 0.64rem !important;
+        padding: 1.5px 4px !important;
+    }
+
+    .col-delete-pill {
+        font-size: 0.64rem !important;
+        padding: 1.5px 5px !important;
+    }
+
+    .readonly-cell {
+        font-size: 0.69rem !important;
+        padding: 0.28rem 0.42rem !important;
+    }
+
+    .editor-header {
+        padding: 0.5rem 0.65rem !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    #editor-table-number {
+        width: 58px !important;
+        font-size: 0.76rem !important;
+    }
+
+    #editor-title {
+        font-size: 0.78rem !important;
+    }
+
+    .editor-toolbar {
+        padding: 5px 6px !important;
+        gap: 3px !important;
+    }
+
+    .editor-toolbar .btn {
+        font-size: 0.66rem !important;
+        padding: 3px 6px !important;
+    }
+
+    .admin-overview-card {
+        padding: 8px 10px !important;
+    }
+
+    .stat-card-glass {
+        padding: 10px !important;
+    }
+
+    .stat-card-glass .stat-card-value {
+        font-size: 1.05rem !important;
+    }
+
+    .glass-panel {
+        padding: 0.85rem !important;
     }
 }
 
@@ -1387,6 +1678,60 @@
     /* Chart area responsive height */
     #ts-chart-scrollable {
         height: 260px !important;
+    }
+
+    /* --- ADMIN & DATA TABLE RESPONSIVE (< 375px) --- */
+    .editor-table-wrapper th,
+    .editor-table-wrapper td,
+    #data-grid th,
+    #data-grid td,
+    #summary-grid th,
+    #summary-grid td,
+    #master-columns-table th,
+    #master-columns-table td,
+    #admin-ts-anomalies-table th,
+    #admin-ts-anomalies-table td,
+    #anom-modal-table th,
+    #anom-modal-table td,
+    .table-responsive table th,
+    .table-responsive table td {
+        font-size: 0.66rem !important;
+        padding: 0.24rem 0.36rem !important;
+    }
+
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        max-width: 110px !important;
+        min-width: 75px !important;
+        font-size: 0.65rem !important;
+        padding: 0.24rem 0.36rem !important;
+    }
+
+    #data-grid input,
+    #data-grid select,
+    .cell-input {
+        font-size: 0.65rem !important;
+        height: 23px !important;
+        padding: 1px 3px !important;
+    }
+
+    .editor-toolbar .btn {
+        font-size: 0.62rem !important;
+        padding: 2.5px 5px !important;
+    }
+
+    .stat-card-glass .stat-card-value {
+        font-size: 0.95rem !important;
+    }
+
+    .stat-card-glass .stat-card-label {
+        font-size: 0.65rem !important;
+    }
+
+    .glass-panel {
+        padding: 0.75rem !important;
     }
 }
 

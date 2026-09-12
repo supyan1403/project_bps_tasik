@@ -886,7 +886,6 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
     border: 1.5px solid var(--bg-card);
     z-index: 2;
 }
-}
 
 .sidebar-user-info {
     white-space: nowrap !important;

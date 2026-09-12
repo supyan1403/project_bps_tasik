@@ -573,13 +573,41 @@
 
     #data-grid thead th:first-child,
     #data-grid tbody td:first-child,
-    #page-editor.mode-view #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid tbody td:first-child {
+    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 155px !important;
         min-width: 95px !important;
         white-space: normal !important;
         word-break: break-word !important;
         font-size: 0.76rem !important;
+    }
+
+    /* Mode Edit: Kolom 1 (Aksi) 68px di left:0, Kolom 2 (Kecamatan) sticky di left:68px */
+    #page-editor.mode-edit #data-grid thead th:first-child,
+    #page-editor.mode-edit #data-grid thead th.th-action-col,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
+        left: 0 !important;
+        padding: 0.45rem 0.25rem !important;
+    }
+    #page-editor.mode-edit #data-grid thead th:nth-child(2),
+    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
+        left: 68px !important;
+        min-width: 135px !important;
+        max-width: 160px !important;
+        font-size: 0.76rem !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+    #page-editor.mode-edit .row-action-cell {
+        min-width: 0 !important;
+        width: 100% !important;
+        gap: 2px !important;
+    }
+    #page-editor.mode-edit .row-action-cell button {
+        padding: 2px 4px !important;
+        font-size: 0.68rem !important;
     }
 
     .editor-header {
@@ -1100,14 +1128,38 @@
 
     #data-grid thead th:first-child,
     #data-grid tbody td:first-child,
-    #page-editor.mode-view #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid tbody td:first-child {
+    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 135px !important;
         min-width: 85px !important;
         white-space: normal !important;
         word-break: break-word !important;
         font-size: 0.72rem !important;
         padding: 0.35rem 0.5rem !important;
+    }
+
+    /* Mode Edit: Kolom 1 (Aksi) 64px di left:0, Kolom 2 (Kecamatan) sticky di left:64px */
+    #page-editor.mode-edit #data-grid thead th:first-child,
+    #page-editor.mode-edit #data-grid thead th.th-action-col,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        width: 64px !important;
+        min-width: 64px !important;
+        max-width: 64px !important;
+        left: 0 !important;
+        padding: 0.35rem 0.2rem !important;
+    }
+    #page-editor.mode-edit #data-grid thead th:nth-child(2),
+    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
+        left: 64px !important;
+        min-width: 120px !important;
+        max-width: 140px !important;
+        font-size: 0.72rem !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        padding: 0.35rem 0.45rem !important;
+    }
+    #page-editor.mode-edit .row-action-cell button {
+        padding: 2px 3px !important;
+        font-size: 0.65rem !important;
     }
 
     #data-grid input,
@@ -1595,12 +1647,34 @@
 
     #data-grid thead th:first-child,
     #data-grid tbody td:first-child,
-    #page-editor.mode-view #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid tbody td:first-child {
+    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 120px !important;
         min-width: 80px !important;
         font-size: 0.68rem !important;
         padding: 0.28rem 0.42rem !important;
+    }
+
+    /* Mode Edit: Kolom 1 (Aksi) 58px di left:0, Kolom 2 (Kecamatan) sticky di left:58px */
+    #page-editor.mode-edit #data-grid thead th:first-child,
+    #page-editor.mode-edit #data-grid thead th.th-action-col,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        width: 58px !important;
+        min-width: 58px !important;
+        max-width: 58px !important;
+        left: 0 !important;
+        padding: 0.28rem 0.15rem !important;
+    }
+    #page-editor.mode-edit #data-grid thead th:nth-child(2),
+    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
+        left: 58px !important;
+        min-width: 110px !important;
+        max-width: 130px !important;
+        font-size: 0.68rem !important;
+        padding: 0.28rem 0.35rem !important;
+    }
+    #page-editor.mode-edit .row-action-cell button {
+        padding: 1px 2px !important;
+        font-size: 0.62rem !important;
     }
 
     #data-grid input,
@@ -2050,12 +2124,34 @@
 
     #data-grid thead th:first-child,
     #data-grid tbody td:first-child,
-    #page-editor.mode-view #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid tbody td:first-child {
+    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 110px !important;
         min-width: 75px !important;
         font-size: 0.65rem !important;
         padding: 0.24rem 0.36rem !important;
+    }
+
+    /* Mode Edit: Kolom 1 (Aksi) 54px di left:0, Kolom 2 (Kecamatan) sticky di left:54px */
+    #page-editor.mode-edit #data-grid thead th:first-child,
+    #page-editor.mode-edit #data-grid thead th.th-action-col,
+    #page-editor.mode-edit #data-grid tbody td:first-child {
+        width: 54px !important;
+        min-width: 54px !important;
+        max-width: 54px !important;
+        left: 0 !important;
+        padding: 0.24rem 0.12rem !important;
+    }
+    #page-editor.mode-edit #data-grid thead th:nth-child(2),
+    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
+        left: 54px !important;
+        min-width: 100px !important;
+        max-width: 120px !important;
+        font-size: 0.65rem !important;
+        padding: 0.24rem 0.3rem !important;
+    }
+    #page-editor.mode-edit .row-action-cell button {
+        padding: 1px 2px !important;
+        font-size: 0.58rem !important;
     }
 
     #data-grid input,

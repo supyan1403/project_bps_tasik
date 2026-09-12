@@ -82,41 +82,98 @@ th, td {
     box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
 }
 
-/* Data Grid Edit Mode */
-#page-editor.mode-edit #data-grid thead th:first-child {
+/* ==========================================================================
+   PAGE EDITOR: TWO-COLUMN STICKY SYSTEM (KHUSUS MODE EDIT DATA)
+   Kolom 1: Aksi Baris (left: 0, fixed width: 80px)
+   Kolom 2: Kolom Rincian / Kecamatan (left: 80px, min-width: 170px)
+   ========================================================================== */
+
+/* 1. Header Kolom 1 (Aksi Baris) */
+#page-editor.mode-edit #data-grid thead th:first-child,
+#page-editor.mode-edit #data-grid thead th.th-action-col {
     position: sticky !important;
     top: 0 !important;
     left: 0 !important;
-    z-index: 31 !important;
-    background-color: var(--bg-page) !important;
-    border-right: 1px solid var(--border) !important;
+    z-index: 45 !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    background-color: var(--bg-page, #f8fafc) !important;
+    border-right: 1px solid var(--border, #e2e8f0) !important;
+    border-bottom: 2px solid var(--border, #cbd5e1) !important;
+    text-align: center !important;
 }
 
+/* 2. Body Kolom 1 (Tombol Sisip & Hapus Baris) */
 #page-editor.mode-edit #data-grid tbody td:first-child {
     position: sticky !important;
     left: 0 !important;
-    z-index: 9 !important;
-    background-color: var(--bg-card) !important;
-    border-right: 1px solid var(--border) !important;
+    z-index: 25 !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    background-color: var(--bg-card, #ffffff) !important;
+    border-right: 1px solid var(--border, #e2e8f0) !important;
 }
 
+/* 3. Header Kolom 2 (Kolom Rincian / Kecamatan) */
 #page-editor.mode-edit #data-grid thead th:nth-child(2) {
     position: sticky !important;
     top: 0 !important;
     left: 80px !important;
-    z-index: 30 !important;
-    background-color: var(--bg-page) !important;
-    border-right: 2px solid var(--border) !important;
-    box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.08);
+    z-index: 40 !important;
+    min-width: 170px !important;
+    background-color: var(--bg-page, #f8fafc) !important;
+    border-right: 2px solid var(--border, #cbd5e1) !important;
+    border-bottom: 2px solid var(--border, #cbd5e1) !important;
+    box-shadow: 3px 0 6px -1px rgba(0, 0, 0, 0.08) !important;
 }
 
+/* 4. Body Kolom 2 (Data Rincian / Kecamatan) */
 #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
     position: sticky !important;
     left: 80px !important;
-    z-index: 8 !important;
-    background-color: var(--bg-card) !important;
-    border-right: 2px solid var(--border) !important;
-    box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.05);
+    z-index: 20 !important;
+    min-width: 170px !important;
+    background-color: var(--bg-card, #ffffff) !important;
+    border-right: 2px solid var(--border, #cbd5e1) !important;
+    box-shadow: 3px 0 6px -1px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 5. Header Kolom 3 dst di Mode Edit (Sticky Vertikal Top) */
+#page-editor.mode-edit #data-grid thead th:nth-child(n+3) {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--bg-page, #f8fafc) !important;
+}
+
+/* 6. Sinkronisasi Warna Baris saat Hover di Mode Edit */
+#page-editor.mode-edit #data-grid tbody tr:hover td:first-child,
+#page-editor.mode-edit #data-grid tbody tr:hover td:nth-child(2) {
+    background-color: var(--bg-hover, #f1f5f9) !important;
+}
+
+/* Dark mode support khusus Mode Edit */
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid thead th:first-child,
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid thead th:nth-child(2),
+body.dark-mode #page-editor.mode-edit #data-grid thead th:first-child,
+body.dark-mode #page-editor.mode-edit #data-grid thead th:nth-child(2) {
+    background-color: var(--bg-card, #1e293b) !important;
+}
+
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody td:first-child,
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody td:nth-child(2),
+body.dark-mode #page-editor.mode-edit #data-grid tbody td:first-child,
+body.dark-mode #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
+    background-color: var(--bg-card, #1e293b) !important;
+}
+
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody tr:hover td:first-child,
+[data-bs-theme="dark"] #page-editor.mode-edit #data-grid tbody tr:hover td:nth-child(2),
+body.dark-mode #page-editor.mode-edit #data-grid tbody tr:hover td:first-child,
+body.dark-mode #page-editor.mode-edit #data-grid tbody tr:hover td:nth-child(2) {
+    background-color: var(--bg-hover, #334155) !important;
 }
 
 /* 3. INTERSEKSI SUDUT KIRI ATAS */

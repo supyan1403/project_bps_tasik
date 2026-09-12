@@ -1796,35 +1796,26 @@ function navigateToEditor(tableId, tableName, mode = 'csv') {
 
 
     containers.forEach(container => {
-
-        const icon = container.querySelector('span');
-
-        if (isReadOnly) {
-
-            container.style.border = 'none';
-
-            container.style.background = 'transparent';
-
-            container.setAttribute('onmouseenter', '');
-
-            container.setAttribute('onmouseleave', '');
-
-            if (icon) icon.style.display = 'none';
-
-        } else {
-
-            container.style.border = '1px dashed #cbd5e1';
-
-            container.style.background = cssVar('--bg-page') || '#fafafa';
-
-            container.setAttribute('onmouseenter', "this.style.borderColor=cssVar('--indigo-600') || '#4F46E5'; this.style.background=cssVar('--text-white') || '#ffffff';");
-
-            container.setAttribute('onmouseleave', "this.style.borderColor=cssVar('--text-muted') || '#cbd5e1'; this.style.background=cssVar('--bg-page') || '#fafafa';");
-
-            if (icon) icon.style.display = 'inline';
-
+        const icon = container.querySelector('.edit-pencil-icon');
+        if (container.classList.contains('table-number-wrapper')) {
+            container.style.border = isReadOnly ? '1px solid var(--border, #cbd5e1)' : '1px dashed #cbd5e1';
+            container.style.background = isReadOnly ? 'var(--bg-page, #f8fafc)' : (cssVar('--bg-page') || '#fafafa');
+            return;
         }
 
+        if (isReadOnly) {
+            container.style.border = 'none';
+            container.style.background = 'transparent';
+            container.setAttribute('onmouseenter', '');
+            container.setAttribute('onmouseleave', '');
+            if (icon) icon.style.display = 'none';
+        } else {
+            container.style.border = '1px dashed #cbd5e1';
+            container.style.background = cssVar('--bg-page') || '#fafafa';
+            container.setAttribute('onmouseenter', "this.style.borderColor=cssVar('--indigo-600') || '#4F46E5'; this.style.background=cssVar('--text-white') || '#ffffff';");
+            container.setAttribute('onmouseleave', "this.style.borderColor=cssVar('--text-muted') || '#cbd5e1'; this.style.background=cssVar('--bg-page') || '#fafafa';");
+            if (icon) icon.style.display = 'inline';
+        }
     });
 
 }
@@ -2316,19 +2307,12 @@ function switchToCsvEdit(tableId, tableName) {
 
 
     containers.forEach(container => {
-
-        const icon = container.querySelector('span');
-
+        const icon = container.querySelector('.edit-pencil-icon');
         container.style.border = '1px dashed #cbd5e1';
-
         container.style.background = cssVar('--bg-page') || '#fafafa';
-
         container.setAttribute('onmouseenter', "this.style.borderColor=cssVar('--indigo-600') || '#4F46E5'; this.style.background=cssVar('--text-white') || '#ffffff';");
-
         container.setAttribute('onmouseleave', "this.style.borderColor=cssVar('--text-muted') || '#cbd5e1'; this.style.background=cssVar('--bg-page') || '#fafafa';");
-
         if (icon) icon.style.display = 'inline';
-
     });
 
 

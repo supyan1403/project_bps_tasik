@@ -2283,6 +2283,12 @@ function switchToCsvEdit(tableId, tableName) {
 
     editorState.mode = 'csv-edit';
 
+    const pe = document.getElementById('page-editor');
+    if (pe) {
+        pe.classList.remove('mode-view');
+        pe.classList.add('mode-edit');
+    }
+
     const badge = document.getElementById('editor-mode-badge');
 
     if (badge) { badge.textContent = 'Edit Data'; badge.className = 'editor-mode-badge badge-csv'; }
@@ -6895,6 +6901,12 @@ function openTableForEdit(tableId) {
  */
 
 async function _loadCsvIntoEditor(tableId, tableName, isEditable = false, highlightCol) {
+
+    const pe = document.getElementById('page-editor');
+    if (pe) {
+        pe.classList.remove('mode-view', 'mode-edit');
+        pe.classList.add(isEditable ? 'mode-edit' : 'mode-view');
+    }
 
     // Reset col-delete-bar
 

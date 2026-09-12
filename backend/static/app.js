@@ -2,6 +2,13 @@ let __excelDragFiles = [];
 
 // Global error handler — tangkap unhandled JS errors
 window.addEventListener('error', function(e) {
+    const msg = (e.message || (e.error && e.error.message) || '').toString();
+    if (
+        msg.includes('ResizeObserver') ||
+        msg.includes('Script error.')
+    ) {
+        return; // Abaikan notifikasi benign browser resize observer & cross-origin script
+    }
     console.error('[SIPEDAS Error]', e.filename, e.lineno, e.message);
     if (typeof showToast === 'function') {
         showToast('error', 'Kesalahan Sistem', 'Terjadi kesalahan tak terduga. Silakan muat ulang halaman.');

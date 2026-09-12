@@ -571,35 +571,15 @@
         padding: 0.45rem 0.6rem !important;
     }
 
-    /* Sticky Two-Column di Mobile (< 768px) */
-    #page-editor #data-grid thead th:first-child,
-    #page-editor #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid thead th:first-child,
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
     #page-editor.mode-edit #data-grid tbody td:first-child {
-        width: 72px !important;
-        min-width: 72px !important;
-        max-width: 72px !important;
-        left: 0 !important;
-        padding: 0.35rem 0.4rem !important;
-        font-size: 0.74rem !important;
-    }
-
-    #page-editor #data-grid thead th:nth-child(2),
-    #page-editor #data-grid tbody td:nth-child(2),
-    #page-editor.mode-edit #data-grid thead th:nth-child(2),
-    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
-        left: 72px !important;
-        width: 145px !important;
-        min-width: 145px !important;
-        max-width: 165px !important;
-        padding: 0.35rem 0.5rem !important;
-        font-size: 0.74rem !important;
-    }
-
-    #page-editor.mode-view #data-grid tbody td:first-child {
-        max-width: 140px !important;
-        min-width: 90px !important;
-        left: 0 !important;
+        max-width: 155px !important;
+        min-width: 95px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 0.76rem !important;
     }
 
     .editor-header {
@@ -1118,35 +1098,16 @@
         padding: 0.35rem 0.5rem !important;
     }
 
-    /* Sticky Two-Column di Phone (< 576px) */
-    #page-editor #data-grid thead th:first-child,
-    #page-editor #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid thead th:first-child,
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
     #page-editor.mode-edit #data-grid tbody td:first-child {
-        width: 68px !important;
-        min-width: 68px !important;
-        max-width: 68px !important;
-        left: 0 !important;
-        padding: 0.25rem 0.35rem !important;
-        font-size: 0.7rem !important;
-    }
-
-    #page-editor #data-grid thead th:nth-child(2),
-    #page-editor #data-grid tbody td:nth-child(2),
-    #page-editor.mode-edit #data-grid thead th:nth-child(2),
-    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
-        left: 68px !important;
-        width: 135px !important;
-        min-width: 135px !important;
-        max-width: 155px !important;
-        padding: 0.25rem 0.45rem !important;
-        font-size: 0.7rem !important;
-    }
-
-    #page-editor.mode-view #data-grid tbody td:first-child {
-        max-width: 130px !important;
+        max-width: 135px !important;
         min-width: 85px !important;
-        left: 0 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 0.72rem !important;
+        padding: 0.35rem 0.5rem !important;
     }
 
     #data-grid input,
@@ -1632,35 +1593,14 @@
         padding: 0.28rem 0.42rem !important;
     }
 
-    /* Sticky Two-Column di Phone (< 425px) */
-    #page-editor #data-grid thead th:first-child,
-    #page-editor #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid thead th:first-child,
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
     #page-editor.mode-edit #data-grid tbody td:first-child {
-        width: 65px !important;
-        min-width: 65px !important;
-        max-width: 65px !important;
-        left: 0 !important;
-        padding: 0.22rem 0.3rem !important;
-        font-size: 0.68rem !important;
-    }
-
-    #page-editor #data-grid thead th:nth-child(2),
-    #page-editor #data-grid tbody td:nth-child(2),
-    #page-editor.mode-edit #data-grid thead th:nth-child(2),
-    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
-        left: 65px !important;
-        width: 125px !important;
-        min-width: 125px !important;
-        max-width: 145px !important;
-        padding: 0.22rem 0.4rem !important;
-        font-size: 0.68rem !important;
-    }
-
-    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 120px !important;
         min-width: 80px !important;
-        left: 0 !important;
+        font-size: 0.68rem !important;
+        padding: 0.28rem 0.42rem !important;
     }
 
     #data-grid input,
@@ -2108,35 +2048,14 @@
         padding: 0.24rem 0.36rem !important;
     }
 
-    /* Sticky Two-Column di Small Phone (< 375px) */
-    #page-editor #data-grid thead th:first-child,
-    #page-editor #data-grid tbody td:first-child,
-    #page-editor.mode-edit #data-grid thead th:first-child,
+    #data-grid thead th:first-child,
+    #data-grid tbody td:first-child,
+    #page-editor.mode-view #data-grid tbody td:first-child,
     #page-editor.mode-edit #data-grid tbody td:first-child {
-        width: 60px !important;
-        min-width: 60px !important;
-        max-width: 60px !important;
-        left: 0 !important;
-        padding: 0.2rem 0.25rem !important;
-        font-size: 0.65rem !important;
-    }
-
-    #page-editor #data-grid thead th:nth-child(2),
-    #page-editor #data-grid tbody td:nth-child(2),
-    #page-editor.mode-edit #data-grid thead th:nth-child(2),
-    #page-editor.mode-edit #data-grid tbody td:nth-child(2) {
-        left: 60px !important;
-        width: 115px !important;
-        min-width: 115px !important;
-        max-width: 135px !important;
-        padding: 0.2rem 0.35rem !important;
-        font-size: 0.65rem !important;
-    }
-
-    #page-editor.mode-view #data-grid tbody td:first-child {
         max-width: 110px !important;
         min-width: 75px !important;
-        left: 0 !important;
+        font-size: 0.65rem !important;
+        padding: 0.24rem 0.36rem !important;
     }
 
     #data-grid input,

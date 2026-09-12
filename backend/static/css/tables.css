@@ -98,6 +98,8 @@ th, td {
     width: 80px !important;
     min-width: 80px !important;
     max-width: 80px !important;
+    box-sizing: border-box !important;
+    padding: 0.5rem 0.35rem !important;
     background-color: var(--bg-page, #f8fafc) !important;
     border-right: 1px solid var(--border, #e2e8f0) !important;
     border-bottom: 2px solid var(--border, #cbd5e1) !important;
@@ -112,8 +114,15 @@ th, td {
     width: 80px !important;
     min-width: 80px !important;
     max-width: 80px !important;
+    box-sizing: border-box !important;
+    padding: 0.4rem 0.35rem !important;
     background-color: var(--bg-card, #ffffff) !important;
     border-right: 1px solid var(--border, #e2e8f0) !important;
+}
+
+#page-editor.mode-edit .row-action-cell {
+    min-width: 0 !important;
+    width: 100% !important;
 }
 
 /* 3. Header Kolom 2 (Kolom Rincian / Kecamatan) */

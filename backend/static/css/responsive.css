@@ -261,6 +261,55 @@
         height: 320px !important;
     }
 
+    /* --- RESPONSIVE DAFTAR TABEL & HASIL PENCARIAN (< 768px) --- */
+    .doc-table-list-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.85rem !important;
+        padding: 1rem 0.85rem !important;
+    }
+
+    .doc-table-list-item .doc-table-title-container {
+        width: 100% !important;
+        padding-right: 0 !important;
+        flex: none !important;
+    }
+
+    .doc-table-list-item .doc-table-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 0.35rem !important;
+    }
+
+    .doc-table-list-item .doc-table-actions .btn {
+        font-size: 0.72rem !important;
+        padding: 4px 8px !important;
+    }
+
+    .clean-table-title-row {
+        align-items: flex-start !important;
+    }
+
+    .search-result-item-enhanced {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+        padding: 0.85rem 0.75rem !important;
+    }
+
+    .search-result-item-enhanced > div:first-child {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .search-result-item-enhanced > div:last-child {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 0.35rem !important;
+    }
+
     /* --- ADMIN & DATA TABLE RESPONSIVE (< 768px) --- */
     .editor-table-wrapper th,
     .editor-table-wrapper td,
@@ -334,6 +383,16 @@
 
     .main-content {
         padding: 0.85rem !important;
+    }
+
+    .clean-table-title-row .badge {
+        margin-right: 8px !important;
+        font-size: 0.78rem !important;
+        width: 58px !important;
+        min-width: 58px !important;
+        max-width: 58px !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
     }
 
     .widget-grid {

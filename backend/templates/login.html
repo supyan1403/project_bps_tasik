@@ -12,6 +12,13 @@
         html, body {
             width: 100%;
             min-height: 100vh;
+            overscroll-behavior: none;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+            display: none;
         }
 
         body {
@@ -387,227 +394,315 @@
             text-align: center;
         }
 
-        /* Responsive Mobile & Tablet */
+        /* Responsive Mobile & Tablet (Non-scrollable, fit 1 screen) */
         @media (max-width: 900px) {
+            html, body {
+                height: 100%;
+                height: 100dvh;
+                overflow: hidden;
+                overscroll-behavior: none;
+                touch-action: pan-y;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            html::-webkit-scrollbar, body::-webkit-scrollbar {
+                display: none;
+            }
+
             .login-layout {
                 flex-direction: column-reverse;
-                min-height: 100vh;
-                padding-bottom: 60px;
+                height: 100%;
+                height: 100dvh;
+                max-height: 100dvh;
+                min-height: 0;
+                padding-bottom: 0;
+                justify-content: space-evenly;
+                overflow: hidden;
             }
+
             .layout-divider {
                 display: none;
             }
-            .form-pane {
-                padding: 24px 24px 40px;
-            }
-            .form-title {
-                font-size: 26px;
-            }
-            .showcase-pane {
-                padding: 40px 24px 16px;
-            }
-            .showcase-logo {
-                width: 110px;
-                height: 110px;
-            }
-            .showcase-brand {
-                font-size: 26px;
-            }
-            .footer-text {
-                position: static;
-                margin-top: 20px;
-                margin-bottom: 16px;
-            }
-        }
 
-        /* Small Tablet / Large Phone */
-        @media (max-width: 576px) {
-            .form-pane {
-                padding: 20px 28px 32px;
+            .showcase-pane {
+                flex: 0 0 auto;
+                padding: 20px 24px 6px;
+                justify-content: center;
             }
+
+            .showcase-glow {
+                width: 260px;
+                height: 260px;
+                filter: blur(40px);
+            }
+
+            .neon-logo-wrapper {
+                margin-bottom: 12px;
+            }
+
+            .showcase-logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .showcase-brand {
+                font-size: 24px;
+                margin-bottom: 4px;
+                line-height: 1.1;
+            }
+
+            .showcase-instansi {
+                font-size: 11px;
+                letter-spacing: 0.8px;
+            }
+
+            .showcase-kab {
+                font-size: 10.5px;
+                margin-bottom: 6px;
+            }
+
+            .showcase-desc {
+                font-size: 12px;
+                line-height: 1.45;
+                max-width: 320px;
+            }
+
+            .form-pane {
+                flex: 0 1 auto;
+                padding: 10px 24px 24px;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .form-inner {
+                max-width: 400px;
+            }
+
             .form-badge {
                 font-size: 10.5px;
                 padding: 4px 10px;
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
+
             .form-title {
                 font-size: 22px;
-                margin-bottom: 8px;
+                margin-bottom: 4px;
             }
+
             .form-desc {
-                font-size: 13px;
-                margin-bottom: 24px;
+                font-size: 12.5px;
+                line-height: 1.45;
+                margin-bottom: 16px;
             }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-label {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+
             .form-input {
                 height: 48px;
                 font-size: 14px;
                 border-radius: 12px;
             }
+
             .btn-submit {
                 height: 48px;
                 font-size: 14px;
                 border-radius: 12px;
             }
-            .showcase-pane {
-                padding: 32px 28px 12px;
+
+            .alert-error {
+                padding: 10px 14px;
+                font-size: 12.5px;
+                margin-bottom: 14px;
+                border-radius: 10px;
             }
-            .showcase-logo {
-                width: 90px;
-                height: 90px;
+
+            .back-link-wrapper {
+                margin-top: 14px;
             }
-            .showcase-brand {
-                font-size: 22px;
-            }
-            .showcase-instansi {
-                font-size: 11px;
-            }
-            .showcase-kab {
-                font-size: 10.5px;
-                margin-bottom: 12px;
-            }
-            .showcase-desc {
-                font-size: 13px;
-            }
+
             .back-link {
                 font-size: 12.5px;
             }
+
+            .footer-text {
+                display: none !important;
+            }
         }
 
-        /* Medium Phone */
+        /* Small Phone / Tight Heights */
         @media (max-width: 425px) {
-            .login-layout {
-                padding-bottom: 50px;
+            .showcase-pane {
+                padding: 16px 20px 6px;
             }
+
+            .neon-logo-wrapper {
+                margin-bottom: 10px;
+            }
+
+            .showcase-logo {
+                width: 72px;
+                height: 72px;
+            }
+
+            .showcase-brand {
+                font-size: 22px;
+            }
+
+            .showcase-desc {
+                font-size: 11.5px;
+                max-width: 290px;
+            }
+
             .form-pane {
-                padding: 16px 24px 28px;
+                padding: 8px 20px 20px;
             }
+
             .form-badge {
                 font-size: 10px;
                 padding: 3.5px 9px;
-                margin-bottom: 14px;
+                margin-bottom: 10px;
             }
+
             .form-title {
                 font-size: 20px;
-                margin-bottom: 6px;
+                margin-bottom: 4px;
             }
+
             .form-desc {
-                font-size: 12.5px;
-                margin-bottom: 20px;
+                font-size: 12px;
+                margin-bottom: 14px;
             }
-            .form-label {
-                font-size: 11px;
+
+            .form-group {
+                margin-bottom: 14px;
             }
+
             .form-input {
                 height: 46px;
                 font-size: 13.5px;
                 padding: 0 42px 0 40px;
                 border-radius: 11px;
             }
+
             .input-icon {
                 left: 14px;
             }
+
             .toggle-pw-btn {
                 right: 8px;
                 padding: 6px;
             }
+
             .btn-submit {
                 height: 46px;
                 font-size: 13.5px;
                 border-radius: 11px;
             }
-            .showcase-pane {
-                padding: 24px 16px 10px;
+
+            .back-link-wrapper {
+                margin-top: 12px;
             }
-            .showcase-logo {
-                width: 75px;
-                height: 75px;
-            }
-            .showcase-brand {
-                font-size: 19px;
-            }
-            .showcase-instansi {
-                font-size: 10px;
-                letter-spacing: 0.8px;
-            }
-            .showcase-kab {
-                font-size: 9.5px;
-                margin-bottom: 10px;
-            }
-            .showcase-desc {
-                font-size: 12px;
-            }
+
             .back-link {
                 font-size: 12px;
-                gap: 5px;
             }
         }
 
-        /* Small Phone */
+        /* Very Small Phone (<= 375px width or tight vertical height) */
         @media (max-width: 375px) {
-            .form-pane {
-                padding: 14px 20px 24px;
+            .showcase-pane {
+                padding: 12px 16px 4px;
             }
+
+            .neon-logo-wrapper {
+                margin-bottom: 8px;
+            }
+
+            .showcase-logo {
+                width: 62px;
+                height: 62px;
+            }
+
+            .showcase-brand {
+                font-size: 20px;
+            }
+
+            .showcase-instansi {
+                font-size: 10px;
+            }
+
+            .showcase-kab {
+                font-size: 9.5px;
+                margin-bottom: 4px;
+            }
+
+            .showcase-desc {
+                font-size: 11px;
+                line-height: 1.4;
+                max-width: 270px;
+            }
+
+            .form-pane {
+                padding: 6px 16px 16px;
+            }
+
             .form-badge {
                 font-size: 9.5px;
                 padding: 3px 8px;
+                margin-bottom: 8px;
+            }
+
+            .form-title {
+                font-size: 19px;
+                margin-bottom: 3px;
+            }
+
+            .form-desc {
+                font-size: 11.5px;
                 margin-bottom: 12px;
             }
-            .form-title {
-                font-size: 18px;
-                margin-bottom: 5px;
-            }
-            .form-desc {
-                font-size: 12px;
-                margin-bottom: 18px;
-            }
+
             .form-input {
                 height: 44px;
                 font-size: 13px;
                 padding: 0 40px 0 38px;
                 border-radius: 10px;
             }
-            .input-icon {
-                left: 12px;
-                width: 17px;
-                height: 17px;
-            }
-            .toggle-pw-btn {
-                right: 6px;
-                padding: 6px;
-            }
+
             .btn-submit {
                 height: 44px;
                 font-size: 13px;
                 border-radius: 10px;
             }
-            .showcase-pane {
-                padding: 20px 20px 8px;
+
+            .back-link-wrapper {
+                margin-top: 10px;
             }
-            .showcase-logo {
-                width: 65px;
-                height: 65px;
-            }
-            .showcase-brand {
-                font-size: 17px;
-            }
-            .showcase-instansi {
-                font-size: 9.5px;
-                letter-spacing: 0.6px;
-            }
-            .showcase-kab {
-                font-size: 9px;
-            }
-            .showcase-desc {
+
+            .back-link {
                 font-size: 11.5px;
-                line-height: 1.5;
             }
-            .alert-error {
-                font-size: 12px;
-                padding: 10px 12px;
-                border-radius: 10px;
+        }
+
+        /* Fallback for Landscape or Extreme Small Heights (< 520px) */
+        @media (max-height: 520px) and (max-width: 900px) {
+            html, body {
+                height: auto !important;
+                overflow-y: auto !important;
             }
-            .footer-text {
-                font-size: 11px;
+            .login-layout {
+                height: auto !important;
+                min-height: 100vh !important;
+                max-height: none !important;
+                overflow-y: visible !important;
+                padding-bottom: 24px !important;
             }
         }
     </style>

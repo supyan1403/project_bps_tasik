@@ -343,19 +343,22 @@
     /* Kartu Publikasi (Level 1) Mobile Overhaul */
     .doc-folder-card {
         min-height: auto !important;
-        padding: 0.85rem 0.95rem !important;
+        padding: 0.95rem 1rem !important;
         border-radius: 12px !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 0.65rem !important;
-        text-align: left !important;
+        position: relative !important;
+        gap: 0 !important;
     }
 
-    .doc-folder-card .doc-card-header-mobile {
+    .doc-folder-card .doc-card-content-wrap {
         display: flex !important;
-        align-items: flex-start !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        text-align: left !important;
         gap: 0.75rem !important;
+        padding-right: 68px !important;
         width: 100% !important;
     }
 
@@ -364,7 +367,7 @@
         height: 38px !important;
         min-width: 38px !important;
         border-radius: 10px !important;
-        margin-bottom: 0 !important;
+        margin: 0 !important;
         background: #eff6ff !important;
         display: flex !important;
         align-items: center !important;
@@ -376,19 +379,21 @@
     }
 
     .doc-folder-card .doc-card-title {
-        font-size: 0.92rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
         line-height: 1.35 !important;
         margin: 0 !important;
         text-align: left !important;
         word-break: break-word !important;
+        color: var(--text-primary, #0f172a) !important;
     }
 
     .doc-folder-card .doc-card-actions {
-        position: static !important;
+        position: absolute !important;
+        top: 12px !important;
+        right: 12px !important;
         display: flex !important;
         gap: 4px !important;
-        margin-left: auto !important;
-        flex-shrink: 0 !important;
     }
 
     .doc-folder-card .doc-action-btn {
@@ -400,33 +405,33 @@
     .doc-folder-card .doc-card-badges-container {
         display: flex !important;
         align-items: center !important;
+        justify-content: flex-start !important;
         gap: 5px !important;
         flex-wrap: wrap !important;
-        margin-top: 0 !important;
+        margin-top: 0.65rem !important;
         width: 100% !important;
     }
 
     .doc-folder-card .doc-card-badge {
-        font-size: 0.7rem !important;
+        font-size: 0.72rem !important;
         padding: 2px 7px !important;
     }
 
     /* Kartu Bab (Level 2) Mobile Overhaul */
     .doc-chapter-card {
         min-height: auto !important;
-        padding: 0.85rem 0.95rem !important;
+        padding: 0.95rem 1rem !important;
         border-radius: 12px !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 0.65rem !important;
-        text-align: left !important;
     }
 
-    .doc-chapter-card .doc-chapter-header-mobile {
+    .doc-chapter-card .doc-chapter-content-wrap {
         display: flex !important;
+        flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.75rem !important;
+        text-align: left !important;
         width: 100% !important;
     }
 
@@ -439,10 +444,13 @@
         border-radius: 6px !important;
         white-space: nowrap !important;
         align-self: flex-start !important;
+        margin-bottom: 0.35rem !important;
     }
 
     .doc-chapter-card .doc-card-title {
-        font-size: 0.88rem !important;
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+        color: var(--text-primary, #0f172a) !important;
         line-height: 1.35 !important;
         height: auto !important;
         display: -webkit-box !important;
@@ -452,18 +460,18 @@
         overflow: hidden !important;
         text-align: left !important;
         margin: 0 !important;
-        flex: 1 1 auto !important;
     }
 
-    .doc-chapter-card .doc-chapter-actions-mobile {
+    .doc-chapter-card .doc-chapter-actions-wrap {
         display: flex !important;
         align-items: center !important;
+        justify-content: flex-start !important;
         gap: 6px !important;
         width: 100% !important;
-        margin-top: 0.25rem !important;
+        margin-top: 0.65rem !important;
     }
 
-    .doc-chapter-card .doc-chapter-actions-mobile .btn {
+    .doc-chapter-card .doc-chapter-actions-wrap .btn {
         font-size: 0.72rem !important;
         padding: 0.3rem 0.65rem !important;
         flex: 1 1 auto !important;

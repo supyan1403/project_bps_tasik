@@ -282,44 +282,11 @@
     border-color: var(--text-light);
 }
 
-.doc-card-header-mobile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    width: 100%;
-    position: relative;
-}
-
-.doc-card-badges-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-    width: 100%;
-}
-
-.doc-chapter-header-mobile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    width: 100%;
-}
-
-.doc-chapter-actions-mobile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: auto;
-    width: 100%;
-}
-
 .doc-card-title {
-    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+    line-height: 1.4;
     transition: color var(--transition-normal);
 }
 

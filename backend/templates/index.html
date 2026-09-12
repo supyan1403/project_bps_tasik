@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="/static/style.css?v=20260912_1">
+    <link rel="stylesheet" href="/static/style.css?v=20260912_2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -247,7 +247,7 @@
         <div class="main-content flex-grow-1 px-3 py-3 overflow-auto">
 
             <!-- Operator / Top App Bar (Header Halaman Utama) -->
-            <div id="operator-header" class="operator-header align-items-center justify-content-between" {% if initial_role == 'admin' %}style="display:none !important;"{% endif %}>
+            <div id="operator-header" class="operator-header align-items-center justify-content-between">
                 <!-- Sisi Kiri: Logo + SIPEDAS & Kepanjangannya (Unified Lockup) -->
                 <div class="d-flex align-items-center gap-3">
                     <button id="mobile-menu-toggle" class="mobile-menu-toggle me-1" onclick="toggleMobileSidebar()" aria-label="Buka menu">
@@ -262,13 +262,20 @@
                     </div>
                 </div>
 
-                <!-- Sisi Kanan: Identitas Resmi BPS Kabupaten Tasikmalaya (Hanya tampil di tablet & desktop agar mobile tidak pengap) -->
+                <!-- Sisi Kanan: Identitas Resmi BPS Kabupaten Tasikmalaya (Tablet & Desktop) -->
                 <div class="d-none d-md-flex align-items-center">
                     <div class="d-none d-sm-block me-3" style="width: 1px; height: 26px; background: var(--border); opacity: 0.9;"></div>
                     <div class="d-flex flex-column text-end justify-content-center">
                         <span style="font-weight:700; font-size:0.75rem; letter-spacing:0.3px; line-height:1.25; color:var(--text-primary); text-transform:uppercase;">BADAN PUSAT STATISTIK</span>
                         <span style="font-weight:600; font-size:0.68rem; letter-spacing:0.4px; line-height:1.25; color:var(--text-secondary); text-transform:uppercase;">KABUPATEN TASIKMALAYA</span>
                     </div>
+                </div>
+
+                <!-- Sisi Kanan: Status Admin di Mobile -->
+                <div class="d-flex d-md-none align-items-center">
+                    <span class="admin-only badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 rounded-pill px-2.5 py-1" style="font-size: 0.72rem; font-weight: 600;">
+                        <i class="bi bi-shield-lock-fill me-1 text-primary"></i>Admin
+                    </span>
                 </div>
             </div>
 
@@ -340,7 +347,7 @@
                     <div style="position: absolute; right: -2%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
 
                     <!-- Top Right Live Status & Clock -->
-                    <div class="position-absolute" style="top: 20px; right: 24px; z-index: 3;">
+                    <div class="welcome-banner-clock-container position-absolute" style="top: 20px; right: 24px; z-index: 3;">
                         <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark py-1 px-3" style="font-size: 0.78rem;">
                             <span class="position-relative d-inline-flex me-1" style="width: 7px; height: 7px;">
                                 <span class="position-absolute w-100 h-100 rounded-circle bg-success" style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.75;"></span>
@@ -350,8 +357,8 @@
                             <span class="text-white text-opacity-30 me-1">|</span>
                             <i class="bi bi-clock text-info" style="font-size: 0.78rem;"></i>
                             <span id="banner-live-clock" class="fw-bold text-white font-monospace" style="letter-spacing: 0.6px; font-size: 0.78rem;">--:--:--</span>
-                            <span class="text-white text-opacity-30 mx-1">|</span>
-                            <span id="banner-live-date" class="text-white text-opacity-85 fw-medium" style="font-size: 0.78rem;">Memuat tanggal...</span>
+                            <span class="banner-clock-date-divider text-white text-opacity-30 mx-1">|</span>
+                            <span id="banner-live-date" class="banner-clock-date text-white text-opacity-85 fw-medium" style="font-size: 0.78rem;">Memuat tanggal...</span>
                         </div>
                     </div>
 
@@ -388,14 +395,14 @@
                 <!-- ADMIN DASHBOARD (gabungan: ANALITIK DATA ENGINE + Charts + Admin-only) -->
                 <div id="dashboard-admin-view">
                     <!-- 1. ANALITIK DATA ENGINE: 5 kartu statistik -->
-                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
+                    <div class="dashboard-analytics-header d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                        <div class="analytics-title-group d-flex align-items-center gap-2 flex-wrap">
                             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill" style="font-size: 0.72rem; font-weight: 600;">
                                 <i class="bi bi-cpu-fill me-1 text-primary"></i> ANALITIK DATA ENGINE
                             </span>
                             <h5 class="fw-bold text-dark mb-0 fs-6">Karakteristik &amp; Kedalaman Database SIPEDAS</h5>
                         </div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="analytics-actions-group d-flex align-items-center gap-3">
                             <small class="text-muted" style="font-size: 0.78rem;"><i class="bi bi-database-check me-1.5 text-success"></i>Live Query Database BPS</small>
                             <button id="btn-refresh-dashboard" onclick="loadDashboardStats(true)" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-2 shadow-2xs" style="font-size:0.75rem; font-weight:500;" title="Muat ulang seluruh metrik &amp; statistik">
                                 <i id="icon-refresh-dashboard" class="bi bi-arrow-clockwise"></i> <span id="text-refresh-dashboard">Perbarui</span>
@@ -2731,7 +2738,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js?v=20260909_9" defer></script>
+    <script src="/static/app.js?v=20260912_2" defer></script>
     <script src="/static/auth_role_logic.js?v=20260828_45" defer></script>
 </body>
 </html>

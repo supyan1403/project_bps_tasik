@@ -14810,7 +14810,7 @@ function updateRoleUI(role) {
         document.querySelectorAll(".admin-only").forEach(el => el.style.removeProperty('display'));
 
         const opHeader = document.getElementById('operator-header');
-        if (opHeader) opHeader.style.display = 'none';
+        if (opHeader) opHeader.style.removeProperty('display');
 
     } else {
 
@@ -14824,7 +14824,7 @@ function updateRoleUI(role) {
         document.querySelectorAll(".admin-only").forEach(el => el.style.setProperty('display', 'none', 'important'));
 
         const opHeader = document.getElementById('operator-header');
-        if (opHeader) opHeader.style.setProperty('display', 'flex', 'important');
+        if (opHeader) opHeader.style.removeProperty('display');
 
         const container = document.getElementById('ts-sources-lineage-container');
 
@@ -17479,6 +17479,9 @@ function switchAdminTab(tab) {
 
 
 function navigateSistemTab(tab, element) {
+    const mobileSidebar = document.querySelector('.sidebar.mobile-open');
+    if (mobileSidebar && typeof toggleMobileSidebar === 'function') toggleMobileSidebar();
+
     if (!checkRoleAccess('admin')) return;
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
@@ -18630,6 +18633,9 @@ function toggleSistemSubmenu() {
 
 
 function navigateAdminTab(tab, element) {
+    const mobileSidebar = document.querySelector('.sidebar.mobile-open');
+    if (mobileSidebar && typeof toggleMobileSidebar === 'function') toggleMobileSidebar();
+
     if (!checkRoleAccess('admin')) return;
 
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
@@ -23185,6 +23191,8 @@ function setupKeyboardShortcuts() {
 
 
 function openSettingsModal(tabName = 'shortcuts') {
+    const mobileSidebar = document.querySelector('.sidebar.mobile-open');
+    if (mobileSidebar && typeof toggleMobileSidebar === 'function') toggleMobileSidebar();
 
     const modalEl = document.getElementById('settingsModal');
 

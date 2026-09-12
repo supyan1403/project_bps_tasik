@@ -5676,93 +5676,32 @@ async function populateDocumentList() {
     container.innerHTML = "";
 
     // ===================== NAV BAR: Breadcrumb + Action Buttons =====================
-
     const navBar = document.createElement("div");
-
     navBar.className = "doc-breadcrumb";
-
-    navBar.style.marginBottom = "1rem";
-
-    navBar.style.fontSize = "0.95rem";
-
-    navBar.style.padding = "0.75rem 1.25rem";
-
-    navBar.style.borderRadius = "8px";
-
-    navBar.style.background = "var(--bg-page, #f8fafc)";
-
-    navBar.style.border = "1px solid var(--border, #e2e8f0)";
-
-    navBar.style.display = "flex";
-
-    navBar.style.justifyContent = "space-between";
-
-    navBar.style.alignItems = "center";
-
-    navBar.style.gap = "12px";
-
-    navBar.style.flexWrap = "wrap";
-
     
-
     // KIRI: Breadcrumb links
-
     const bcLeft = document.createElement("div");
-
-    bcLeft.style.display = "flex";
-
-    bcLeft.style.alignItems = "center";
-
-    bcLeft.style.gap = "8px";
-
-    bcLeft.style.flexWrap = "wrap";
-
+    bcLeft.className = "d-flex align-items-center flex-wrap gap-1";
     
-
-    let bcHTML = `<span class="doc-bc-link d-inline-flex align-items-center" style="cursor:pointer; color:var(--info, #2563eb); font-weight:600; padding:4px 8px; border-radius:6px;" onclick="viewState.selectedDocId=null; viewState.selectedBabNum=null; populateDocumentList();"><i class="bi bi-folder2 me-2 fs-6"></i> Semua Dokumen</span>`;
-
+    let bcHTML = `<span class="doc-bc-link d-inline-flex align-items-center" style="cursor:pointer; color:var(--info, #2563eb); font-weight:600; padding:4px 8px; border-radius:6px;" onclick="viewState.selectedDocId=null; viewState.selectedBabNum=null; populateDocumentList();"><i class="bi bi-folder2 me-1.5 fs-6"></i> Semua Dokumen</span>`;
     
-
     const doc = docs.find(d => d.id === viewState.selectedDocId);
-
     if (viewState.selectedDocId && doc) {
-
         const pubLabel = doc.year ? `Publikasi ${doc.year}` : doc.filename;
-
-        bcHTML += `<span style="color:#94a3b8;">/</span><span class="doc-bc-link" style="cursor:pointer; color:var(--info, #2563eb); font-weight:600; padding:4px 8px; border-radius:6px;" onclick="viewState.selectedBabNum=null; populateDocumentList();">${pubLabel}</span>`;
-
+        bcHTML += `<span class="text-muted opacity-50">/</span><span class="doc-bc-link" style="cursor:pointer; color:var(--info, #2563eb); font-weight:600; padding:4px 8px; border-radius:6px;" onclick="viewState.selectedBabNum=null; populateDocumentList();">${pubLabel}</span>`;
         if (viewState.selectedBabNum !== null) {
-
             const chapterTitle = getChapterTitle(viewState.selectedBabNum);
-
             const chapterSuffix = chapterTitle ? ` - ${chapterTitle}` : "";
-
-            bcHTML += `<span style="color:#94a3b8;">/</span><span class="doc-bc-active" style="font-weight:600; padding:4px 8px;">Bab ${viewState.selectedBabNum}${chapterSuffix}</span>`;
-
+            bcHTML += `<span class="text-muted opacity-50">/</span><span class="doc-bc-active text-dark fw-semibold" style="padding:4px 8px;">Bab ${viewState.selectedBabNum}${chapterSuffix}</span>`;
         }
-
     }
-
     bcLeft.innerHTML = bcHTML;
-
     navBar.appendChild(bcLeft);
-
     
-
     // KANAN: Action buttons
-
     const bcRight = document.createElement("div");
-
-    bcRight.style.display = "flex";
-
-    bcRight.style.alignItems = "center";
-
-    bcRight.style.gap = "8px";
-
-    bcRight.style.flexWrap = "wrap";
-
+    bcRight.className = "d-flex align-items-center flex-wrap gap-2";
     
-
     // Action buttons context-aware
     if (viewState.selectedDocId && doc && viewState.selectedBabNum === null) {
         // LEVEL 2: Di dalam publikasi (melihat Daftar Bab) -> Tambah Bab, Tambah Tabel, Hapus Semua
@@ -5773,7 +5712,7 @@ async function populateDocumentList() {
             <button onclick="openCreateTableModal(${doc.id})" class="btn btn-sm fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background:#059669; border-color:#059669; color:white;">
                 <i class="bi bi-plus-circle-fill"></i> Tambah Tabel
             </button>
-            <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\\'")}')" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
+            <button onclick="deleteAllTablesForDoc(${doc.id}, '${doc.filename.replace(/'/g, "\'")}')" class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-3 d-inline-flex align-items-center gap-1.5">
                 <i class="bi bi-trash"></i> Hapus Semua
             </button>
         `;
@@ -5798,11 +5737,7 @@ async function populateDocumentList() {
             </button>
         `;
     }
-
-    
-
     navBar.appendChild(bcRight);
-
     container.appendChild(navBar);
 
     
@@ -5810,43 +5745,13 @@ async function populateDocumentList() {
     if (!viewState.selectedDocId) {
 
         // LEVEL 1: Tampilkan Grid Dokumen
-
         const grid = document.createElement("div");
-
-        grid.style.display = "grid";
-
-        grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(320px, 1fr))";
-
-        grid.style.gap = "1.5rem";
-
+        grid.className = "doc-folder-grid";
         
-
         for (const d of docs) {
-
             if(d.status === 'ready' || d.status.startsWith('extracting') || d.status.startsWith('done')) {
-
                 const card = document.createElement("div");
-
                 card.className = "doc-folder-card";
-
-                card.style.borderRadius = "16px";
-
-                card.style.padding = "2rem 1.5rem";
-
-                card.style.cursor = "pointer";
-
-                card.style.position = "relative";
-
-                card.style.display = "flex";
-
-                card.style.flexDirection = "column";
-
-                card.style.justifyContent = "space-between";
-
-                card.style.alignItems = "center";
-
-                card.style.minHeight = "230px";
-
                 card.onclick = (e) => {
                     if (e.target.closest('.doc-action-btn') || e.target.closest('button')) return;
                     viewState.selectedDocId = d.id;
@@ -5858,15 +5763,15 @@ async function populateDocumentList() {
                 let loadingBadge = '';
                 if (d.status.startsWith('extracting')) {
                     loadingBadge = `
-                        <div style="position:absolute; top:15px; right:15px; display:flex; align-items:center; gap:6px; background:#fffbeb; color:#b45309; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:700; border:1px solid #fcd34d; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-                            <div style="width:12px; height:12px; border:2px solid #fcd34d; border-top-color:#b45309; border-radius:50%; animation:spin 1s linear infinite;"></div>
+                        <div class="doc-card-actions" style="display:flex; align-items:center; gap:6px; background:#fffbeb; color:#b45309; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; border:1px solid #fcd34d; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                            <div style="width:10px; height:10px; border:2px solid #fcd34d; border-top-color:#b45309; border-radius:50%; animation:spin 1s linear infinite;"></div>
                             <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
                             Mengekstrak...
                         </div>`;
                 }
 
                 const actionButtons = `
-                    <div class="doc-card-actions" style="position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:5;" onclick="event.stopPropagation()">
+                    <div class="doc-card-actions" onclick="event.stopPropagation()">
                         <button class="doc-action-btn btn-edit" title="Edit Publikasi" onclick="openEditDocModal(${d.id}, ${d.year || "null"}, ${d.data_year !== null && d.data_year !== undefined ? d.data_year : "null"}, '${_escJs(d.filename || '')}')">
                             <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
                         </button>
@@ -5878,20 +5783,22 @@ async function populateDocumentList() {
 
                 const pubTitle = d.year ? `Publikasi ${d.year}` : d.filename;
                 const tableBadge = d.table_count !== undefined 
-                    ? `<span style="color:var(--info, #2563eb); font-weight:600; font-size:0.78rem; background:#eff6ff; border:1px solid #bfdbfe; padding:3px 8px; border-radius:20px; white-space:nowrap;">${d.table_count} Tabel</span>` 
+                    ? `<span class="doc-card-badge" style="color:var(--info, #2563eb); font-weight:600; font-size:0.75rem; background:#eff6ff; border:1px solid #bfdbfe; padding:2.5px 8px; border-radius:20px; white-space:nowrap;">${d.table_count} Tabel</span>` 
                     : '';
 
                 const dataYearVal = (d.data_year !== null && d.data_year !== undefined) ? d.data_year : (d.year ? d.year - 1 : '-');
 
                 card.innerHTML = `
-                    ${loadingBadge ? loadingBadge : actionButtons}
-                    <div style="text-align:center; width:100%;">
-                        <div class="doc-icon-wrapper"><i class="bi bi-folder2-open text-primary" style="font-size:2rem;"></i></div>
-                        <h3 class="doc-card-title" style="margin:0 0 0.6rem 0; font-size:1.25rem; font-weight:700; word-break:break-word; line-height:1.4;">${pubTitle}</h3>
+                    <div class="doc-card-header-mobile">
+                        <div class="doc-icon-wrapper"><i class="bi bi-folder2-open text-primary" style="font-size:1.75rem;"></i></div>
+                        <div style="flex:1; min-width:0;">
+                            <h3 class="doc-card-title" title="${escHtml(pubTitle)}">${pubTitle}</h3>
+                        </div>
+                        ${loadingBadge ? loadingBadge : actionButtons}
                     </div>
-                    <div style="display:flex; justify-content:center; align-items:center; gap:5px; flex-wrap:nowrap; margin-top:12px; width:100%;">
-                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#e0f2fe; color:#0369a1; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
-                        <span class="doc-card-badge" style="font-size:0.78rem; padding:3px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${dataYearVal}</span>
+                    <div class="doc-card-badges-container">
+                        <span class="doc-card-badge" style="font-size:0.75rem; padding:2.5px 8px; border-radius:20px; font-weight:600; background:#e0f2fe; color:#0369a1; white-space:nowrap;">Publikasi ${d.year || '-'}</span>
+                        <span class="doc-card-badge" style="font-size:0.75rem; padding:2.5px 8px; border-radius:20px; font-weight:600; background:#f1f5f9; color:#334155; white-space:nowrap;">Data ${dataYearVal}</span>
                         ${tableBadge}
                     </div>
                 `;
@@ -6047,32 +5954,14 @@ async function populateDocumentList() {
         if (viewState.selectedBabNum === null) {
 
             // LEVEL 2: Tampilkan Grid Bab
-
             const grid = document.createElement("div");
-
-            grid.style.display = "grid";
-
-            grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(280px, 1fr))";
-
-            grid.style.gap = "1.5rem";
-
-            
+            grid.className = "doc-chapter-grid";
 
             const sortedBabs = Object.values(grouped).sort((a, b) => a.num - b.num);
 
             sortedBabs.forEach(bab => {
-
                 const card = document.createElement("div");
-
                 card.className = "doc-chapter-card";
-                card.style.borderRadius = "16px";
-                card.style.padding = "1.5rem 1.25rem";
-                card.style.cursor = "pointer";
-                card.style.display = "flex";
-                card.style.flexDirection = "column";
-                card.style.justifyContent = "space-between";
-                card.style.alignItems = "center";
-                card.style.minHeight = "215px";
 
                 card.onclick = (e) => {
                     if (e.target.closest('button') || e.target.closest('.btn')) return;
@@ -6083,15 +5972,15 @@ async function populateDocumentList() {
                 const safeTitle = _escJs(bab.cleanTitle || bab.name);
 
                 let cardHTML = `
-                    <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center;">
-                        <div class="doc-bab-badge mb-1" style="font-size: 0.84rem; font-weight: 600; color: var(--primary, #2563eb);">
+                    <div class="doc-chapter-header-mobile">
+                        <div class="doc-bab-badge">
                             Bab ${bab.num}
                         </div>
-                        <h4 class="doc-card-title mb-2" style="font-size: 1.08rem; font-weight: 700; color: var(--text-primary, #0f172a); line-height: 1.35; height: 2.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; text-align: center;" title="${escHtml(bab.cleanTitle || bab.name)}">
+                        <h4 class="doc-card-title" title="${escHtml(bab.cleanTitle || bab.name)}">
                             ${escHtml(bab.cleanTitle || bab.name)}
                         </h4>
                         <div>
-                            <span class="badge bg-light text-secondary border fw-medium px-2.5 py-1 rounded-pill" style="font-size: 0.74rem;">
+                            <span class="badge bg-light text-secondary border fw-medium px-2 py-0.5 rounded-pill" style="font-size: 0.72rem; white-space:nowrap;">
                                 ${bab.tables.length} Tabel
                             </span>
                         </div>
@@ -6099,11 +5988,11 @@ async function populateDocumentList() {
                 `;
 
                 const actionBtns = `
-                    <div class="d-flex justify-content-center align-items-center gap-2 mt-auto w-100" onclick="event.stopPropagation()">
-                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" style="font-size:0.8rem; font-weight:600;" onclick="editBabTitle(${d.id}, ${bab.num}, '${safeTitle}')">
+                    <div class="doc-chapter-actions-mobile" onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill" style="font-size:0.75rem; font-weight:600;" onclick="editBabTitle(${d.id}, ${bab.num}, '${safeTitle}')">
                             <i class="bi bi-pencil me-1"></i> Edit Bab
                         </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1" style="font-size:0.8rem; font-weight:600;" onclick="deleteBab(${d.id}, ${bab.num}, '${safeTitle}')">
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" style="font-size:0.75rem; font-weight:600;" onclick="deleteBab(${d.id}, ${bab.num}, '${safeTitle}')">
                             <i class="bi bi-trash me-1"></i> Hapus
                         </button>
                     </div>

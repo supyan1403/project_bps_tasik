@@ -261,12 +261,218 @@
         height: 320px !important;
     }
 
-    /* --- RESPONSIVE DAFTAR TABEL & HASIL PENCARIAN (< 768px) --- */
+    /* --- RESPONSIVE DAFTAR TABEL & BROWSER PUBLIKASI (< 768px) --- */
+    #page-tabel .glass-panel {
+        padding: 0.85rem 0.75rem !important;
+        border-radius: 12px !important;
+    }
+
+    #page-tabel h5 {
+        font-size: 1.05rem !important;
+    }
+
+    #header-tabel-actions {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    #header-tabel-actions .btn {
+        font-size: 0.76rem !important;
+        padding: 0.35rem 0.65rem !important;
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* Search bar compact & bernafas di mobile */
+    .search-type-select-styled {
+        max-width: 82px !important;
+        font-size: 0.76rem !important;
+        padding: 0.45rem 1.25rem 0.45rem 0.55rem !important;
+    }
+
+    #search-table-input {
+        font-size: 0.8rem !important;
+        padding: 0.45rem 0.65rem !important;
+    }
+
+    #page-tabel button[onclick="onUnifiedSearch()"] {
+        padding-left: 0.85rem !important;
+        padding-right: 0.85rem !important;
+        font-size: 0.78rem !important;
+    }
+
+    /* Breadcrumb toolbar mobile */
+    .doc-breadcrumb {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 0.65rem 0.75rem !important;
+        gap: 0.65rem !important;
+        border-radius: 10px !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    .doc-breadcrumb > div:first-child {
+        width: 100% !important;
+        font-size: 0.82rem !important;
+        gap: 4px !important;
+    }
+
+    .doc-breadcrumb > div:last-child {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+    }
+
+    .doc-breadcrumb .btn {
+        font-size: 0.74rem !important;
+        padding: 0.35rem 0.65rem !important;
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* Grids di mobile jadi 1 kolom compact */
+    .doc-folder-grid,
+    .doc-chapter-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+
+    /* Kartu Publikasi (Level 1) Mobile Overhaul */
+    .doc-folder-card {
+        min-height: auto !important;
+        padding: 0.85rem 0.95rem !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.65rem !important;
+        text-align: left !important;
+    }
+
+    .doc-folder-card .doc-card-header-mobile {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    .doc-folder-card .doc-icon-wrapper {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 10px !important;
+        margin-bottom: 0 !important;
+        background: #eff6ff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .doc-folder-card .doc-icon-wrapper i {
+        font-size: 1.35rem !important;
+    }
+
+    .doc-folder-card .doc-card-title {
+        font-size: 0.92rem !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        text-align: left !important;
+        word-break: break-word !important;
+    }
+
+    .doc-folder-card .doc-card-actions {
+        position: static !important;
+        display: flex !important;
+        gap: 4px !important;
+        margin-left: auto !important;
+        flex-shrink: 0 !important;
+    }
+
+    .doc-folder-card .doc-action-btn {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 6px !important;
+    }
+
+    .doc-folder-card .doc-card-badges-container {
+        display: flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        flex-wrap: wrap !important;
+        margin-top: 0 !important;
+        width: 100% !important;
+    }
+
+    .doc-folder-card .doc-card-badge {
+        font-size: 0.7rem !important;
+        padding: 2px 7px !important;
+    }
+
+    /* Kartu Bab (Level 2) Mobile Overhaul */
+    .doc-chapter-card {
+        min-height: auto !important;
+        padding: 0.85rem 0.95rem !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.65rem !important;
+        text-align: left !important;
+    }
+
+    .doc-chapter-card .doc-chapter-header-mobile {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    .doc-chapter-card .doc-bab-badge {
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+        background: #eff6ff !important;
+        color: var(--primary, #2563eb) !important;
+        padding: 3px 8px !important;
+        border-radius: 6px !important;
+        white-space: nowrap !important;
+        align-self: flex-start !important;
+    }
+
+    .doc-chapter-card .doc-card-title {
+        font-size: 0.88rem !important;
+        line-height: 1.35 !important;
+        height: auto !important;
+        max-height: none !important;
+        -webkit-line-clamp: 2 !important;
+        text-align: left !important;
+        margin: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .doc-chapter-card .doc-chapter-actions-mobile {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    .doc-chapter-card .doc-chapter-actions-mobile .btn {
+        font-size: 0.72rem !important;
+        padding: 0.3rem 0.65rem !important;
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* List Tabel (Level 3) & Hasil Pencarian Mobile */
     .doc-table-list-item {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.85rem !important;
-        padding: 1rem 0.85rem !important;
+        gap: 0.75rem !important;
+        padding: 0.85rem 0.75rem !important;
     }
 
     .doc-table-list-item .doc-table-title-container {
@@ -284,7 +490,10 @@
 
     .doc-table-list-item .doc-table-actions .btn {
         font-size: 0.72rem !important;
-        padding: 4px 8px !important;
+        padding: 0.3rem 0.65rem !important;
+        min-height: 32px !important;
+        display: inline-flex !important;
+        align-items: center !important;
     }
 
     .clean-table-title-row {

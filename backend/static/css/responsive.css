@@ -497,7 +497,29 @@
     }
 
     .clean-table-title-row {
+        display: flex !important;
+        flex-direction: column !important;
         align-items: flex-start !important;
+        width: 100% !important;
+    }
+
+    .clean-table-badge-wrapper {
+        margin-bottom: 0.25rem !important;
+    }
+
+    .clean-table-num-badge {
+        font-size: 0.72rem !important;
+        padding: 2px 6px !important;
+        border-radius: 5px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin-right: 0 !important;
+    }
+
+    .clean-table-title-text {
+        font-size: 0.85rem !important;
+        line-height: 1.4 !important;
     }
 
     .search-result-item-enhanced {
@@ -594,14 +616,14 @@
         padding: 0.85rem !important;
     }
 
-    .clean-table-title-row .badge {
-        margin-right: 8px !important;
-        font-size: 0.78rem !important;
-        width: 58px !important;
-        min-width: 58px !important;
-        max-width: 58px !important;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
+    .clean-table-num-badge {
+        font-size: 0.68rem !important;
+        padding: 1.5px 5px !important;
+    }
+
+    .clean-table-title-text {
+        font-size: 0.82rem !important;
+        line-height: 1.35 !important;
     }
 
     .widget-grid {

@@ -124,14 +124,15 @@ function renderCleanTableTitleHtml(tableName, customClass = "") {
         mainTitle = numMatch[2].trim();
     }
     
+    // Badge hanya angka saja (tanpa '#' dan tanpa 'Tabel')
     const badgeHtml = num 
-        ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 rounded-2 font-monospace fw-bold text-center" style="font-size:0.82rem; line-height:1.25; letter-spacing:0.3px; width:66px !important; min-width:66px !important; max-width:66px !important; flex-shrink:0 !important; margin-right:14px !important; display:inline-block;">${escHtml(num)}</span>`
+        ? `<div class="clean-table-badge-wrapper"><span class="clean-table-num-badge badge bg-primary-subtle text-primary border border-primary-subtle font-monospace fw-bold">${escHtml(num)}</span></div>`
         : '';
         
-    return `<div class="clean-table-title-row d-flex align-items-start w-100 ${customClass}" style="line-height:1.45; text-align:left;">
+    return `<div class="clean-table-title-row w-100 ${customClass}">
         ${badgeHtml}
-        <div class="flex-grow-1" style="min-width:0; overflow-wrap:break-word; word-break:break-word;">
-            <span class="fw-bold text-dark" style="font-size:0.9rem; white-space:normal !important; line-height:1.45;">${escHtml(mainTitle)}</span>
+        <div class="clean-table-text-wrapper w-100">
+            <span class="fw-bold text-dark clean-table-title-text">${escHtml(mainTitle)}</span>
         </div>
     </div>`;
 }

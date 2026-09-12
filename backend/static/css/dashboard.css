@@ -369,6 +369,47 @@
     background-color: var(--bg-page);
 }
 
+/* --- CLEAN TABLE TITLE ROW (STACKED BADGE & TITLE) --- */
+.clean-table-title-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+}
+
+.clean-table-badge-wrapper {
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+}
+
+.clean-table-num-badge {
+    font-size: 0.74rem !important;
+    padding: 2px 7px !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    line-height: 1.25 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: inline-block !important;
+}
+
+.clean-table-text-wrapper {
+    width: 100%;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.clean-table-title-text {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    white-space: normal !important;
+}
+
 .doc-empty-state {
     background: var(--bg-page);
     border: 1px dashed var(--border);

@@ -167,8 +167,56 @@
     }
 
     .welcome-banner {
-        padding: 0.85rem 1rem !important;
+        padding: 1.25rem 1rem !important;
         min-height: auto !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Hilangkan overlap pill status & jam live di mobile */
+    .welcome-banner-clock-container {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        margin-bottom: 0.85rem !important;
+        align-self: flex-start !important;
+    }
+
+    .welcome-banner-clock-container .banner-clock-date-divider,
+    .welcome-banner-clock-container .banner-clock-date,
+    .welcome-banner-clock-container #banner-live-date {
+        display: none !important;
+    }
+
+    .welcome-banner h1 {
+        font-size: 1.35rem !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Header Section Analitik Data Engine Responsif di Mobile */
+    .dashboard-analytics-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+    }
+
+    .dashboard-analytics-header .analytics-title-group {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.35rem !important;
+        width: 100% !important;
+    }
+
+    .dashboard-analytics-header .analytics-title-group h5 {
+        font-size: 0.95rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .dashboard-analytics-header .analytics-actions-group {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
     }
 
     .welcome-banner.ts-hero-banner {

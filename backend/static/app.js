@@ -121,7 +121,7 @@ function renderCleanTableTitleHtml(tableName, customClass = "") {
         ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 rounded-2 font-monospace fw-bold text-center" style="font-size:0.82rem; line-height:1.25; letter-spacing:0.3px; width:66px !important; min-width:66px !important; max-width:66px !important; flex-shrink:0 !important; margin-right:14px !important; display:inline-block;">${escHtml(num)}</span>`
         : '';
         
-    return `<div class="d-flex align-items-center w-100 ${customClass}" style="line-height:1.45; text-align:left;">
+    return `<div class="clean-table-title-row d-flex align-items-start w-100 ${customClass}" style="line-height:1.45; text-align:left;">
         ${badgeHtml}
         <div class="flex-grow-1" style="min-width:0; overflow-wrap:break-word; word-break:break-word;">
             <span class="fw-bold text-dark" style="font-size:0.9rem; white-space:normal !important; line-height:1.45;">${escHtml(mainTitle)}</span>
@@ -6177,14 +6177,6 @@ async function populateDocumentList() {
 
                 li.className = "doc-table-list-item";
 
-                li.style.display = "flex";
-
-                li.style.justifyContent = "space-between";
-
-                li.style.alignItems = "center";
-
-                li.style.padding = "1.25rem 1.5rem";
-
                 li.style.borderBottom = index !== bab.tables.length - 1 ? "1px solid #f1f5f9" : "none";
 
                 li.style.transition = "background-color 0.2s ease";
@@ -6220,13 +6212,13 @@ async function populateDocumentList() {
 
 
                 li.innerHTML = `
-                    <div style="display:flex; flex-direction:column; flex: 1; padding-right: 15px; overflow-wrap: break-word; word-wrap: break-word;">
+                    <div class="doc-table-title-container">
                         <div class="doc-card-title d-flex align-items-center flex-wrap" style="line-height: 1.5; white-space: normal;">
                             ${renderCleanTableTitleHtml(t.table_name)}
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:0.45rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; align-items:center;">
+                    <div class="doc-table-actions">
 
                         <!-- Quick Snippet & Tren -->
 
@@ -17167,7 +17159,7 @@ async function searchTables() {
                         ${t.bab_num ? `<span class="badge bg-light text-secondary border px-1.5 py-0.5">Bab ${t.bab_num}</span>` : ''}
                     </div>
                 </div>
-                <div class="d-flex gap-1.5 flex-shrink-0">
+                <div class="d-flex gap-1.5 flex-shrink-0 flex-wrap">
                     <button onclick="openTableSnippet(${t.id}); clearTableSearch(); return false;" class="btn btn-sm btn-outline-info px-2 py-1" style="font-size:0.72rem;">Snippet</button>
                     <button onclick="openTimeSeriesForTable(${t.id}, '${(t.table_name || '').replace(/'/g, "\\'")}'); clearTableSearch(); return false;" class="btn btn-sm btn-outline-warning px-2 py-1" style="font-size:0.72rem;color:#b45309;border-color:#fcd34d;">Tren</button>
                     <button onclick="openTable(${t.id}); clearTableSearch(); return false;" class="btn btn-sm btn-outline-primary px-2.5 py-1" style="font-size:0.72rem;">Lihat</button>

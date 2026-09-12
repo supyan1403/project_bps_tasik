@@ -229,7 +229,30 @@
 }
 
 .doc-table-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
     transition: background-color var(--transition-normal);
+}
+
+.doc-table-list-item .doc-table-title-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    padding-right: 15px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.doc-table-list-item .doc-table-actions {
+    display: flex;
+    gap: 0.45rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .doc-table-list-item:hover {

@@ -1119,9 +1119,9 @@
     }
 
     .ts-indicator-label {
-        font-size: 0.76rem !important;
-        line-height: 1.2 !important;
-        padding: 2px 5px !important;
+        font-size: 0.84rem !important;
+        line-height: 1.25 !important;
+        padding: 5px 10px !important;
     }
 
     .ts-hero-container .form-label.small {
@@ -1676,9 +1676,9 @@
     }
 
     .ts-indicator-label {
-        font-size: 0.72rem !important;
-        line-height: 1.15 !important;
-        padding: 2px 4px !important;
+        font-size: 0.80rem !important;
+        line-height: 1.2 !important;
+        padding: 4px 9px !important;
     }
 
     .ts-hero-container .form-label.small {
@@ -2183,9 +2183,9 @@
     }
 
     .ts-indicator-label {
-        font-size: 0.68rem !important;
-        line-height: 1.1 !important;
-        padding: 2px 4px !important;
+        font-size: 0.76rem !important;
+        line-height: 1.15 !important;
+        padding: 4px 8px !important;
     }
 
     .ts-hero-container .form-label.small {

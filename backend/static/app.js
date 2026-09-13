@@ -9600,7 +9600,7 @@ function _createIndicatorCheckbox(ind, isPinned) {
 
     label.className = isPinned ? 'ts-indicator-label ts-indicator-pinned ts-indicator-pill' : 'ts-indicator-label ts-indicator-pill';
 
-    label.style.cssText = 'display:flex; align-items:center; gap:6px; cursor:pointer; padding:3px 6px; margin:0; border-radius:4px; font-size:0.82rem; line-height:1.3;';
+    label.style.cssText = 'display:flex; align-items:center; gap:6px; cursor:pointer; padding:5px 10px; margin:0; border-radius:6px; font-size:0.95rem; line-height:1.3;';
 
     
 

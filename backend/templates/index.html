@@ -1140,7 +1140,7 @@
                                 <!-- Step 1: Pilih Indikator Master -->
                                 <div class="col-12 ts-wizard-col--indicator d-flex flex-column">
                                     <div class="d-flex align-items-center justify-content-between mb-2" style="min-height: 26px;">
-                                        <label class="form-label small fw-semibold text-muted mb-0"><span class="ts-step-badge">1</span>Pilih Indikator Master</label>
+                                        <label class="form-label fw-semibold text-muted mb-0" style="font-size:0.88rem;"><span class="ts-step-badge">1</span>Pilih Indikator Master</label>
                                     </div>
                                     <input type="text" id="ts-wizard-search" class="form-control form-control-sm mb-2" placeholder="Cari indikator master..." oninput="filterTSIndicators(this.value)" style="font-size:0.85rem; padding: 7px 12px; height: 35px;">
                                     <div id="ts-wizard-kolom-checkboxes" class="ts-wizard-box ts-wizard-box--enhanced d-flex flex-column gap-0">
@@ -1150,9 +1150,9 @@
                                 <!-- Step 2: Pilih Tahun Data -->
                                 <div class="col-12 ts-wizard-col--year d-flex flex-column">
                                     <div class="d-flex align-items-center justify-content-between mb-2" style="min-height: 26px;">
-                                        <label class="form-label small fw-semibold text-muted mb-0"><span class="ts-step-badge">2</span>Pilih Tahun Data</label>
+                                        <label class="form-label fw-semibold text-muted mb-0" style="font-size:0.88rem;"><span class="ts-step-badge">2</span>Pilih Tahun Data</label>
                                         <div class="d-flex align-items-center gap-2">
-                                            <button type="button" class="btn btn-xs btn-outline-primary py-1 px-3 fw-semibold" id="btn-ts-toggle-all-years" onclick="toggleSelectAllYearsBtn()" style="font-size:0.75rem; height:28px; border-radius:6px; display:none;" title="Pilih atau batal pilih semua tahun">Pilih Semua</button>
+                                            <button type="button" class="btn btn-xs btn-outline-primary py-1 px-3 fw-semibold" id="btn-ts-toggle-all-years" onclick="toggleSelectAllYearsBtn()" style="font-size:0.85rem; height:32px; border-radius:6px; display:none;" title="Pilih atau batal pilih semua tahun">Pilih Semua</button>
                                             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none ts-collapse-btn" id="btn-toggle-year-picker" onclick="toggleYearPicker()" title="Perkecil / Besarkan pemilih tahun">
                                                 <i class="bi bi-chevron-up" id="year-picker-chevron"></i>
                                             </button>
@@ -1174,14 +1174,13 @@
                     </div>
                 </div>
 
-                <div class="glass-panel mt-3" id="ts-results-container">
+                <h5 id="ts-result-title" class="mt-3 mb-2 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.95rem; display:none;">Hasil Analisis Deret Waktu</h5>
+                <div id="ts-result-badges-outside" class="d-flex flex-wrap align-items-center gap-2 mt-2 mb-2 pt-0.5" style="display:none;"></div>
+
+                <div class="glass-panel mt-2" id="ts-results-container">
                     <div id="ts-results-loading" class="text-center text-muted py-4" style="display:none;"><i>Mencari data ke database...</i></div>
                     <div id="ts-results-content" style="display:none;">
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <div>
-                                <h5 id="ts-result-title" class="mb-2 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.95rem;">Hasil Analisis Deret Waktu</h5>
-                <div id="ts-result-badges" class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-0.5" style="display:none;"></div>
-                            </div>
                             <div class="d-flex gap-2 align-items-center flex-wrap">
                                 <!-- Unified Export Dropdown (Always Accessible) -->
                                 <div class="dropdown" id="ts-unified-export-dropdown">
@@ -1290,7 +1289,7 @@
                             <summary class="ts-collapsible-header">Filter & Konversi</summary>
                             <div id="ts-chart-control-card" class="ts-data-control-card mt-2" style="display:none; padding: 18px 22px;">
                                 <!-- Top Row: Unit Converter (Left) & Display Options (Right) -->
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-chart-top-control-bar">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-4 pb-3 mb-3" id="ts-chart-top-control-bar">
                                     <div id="ts-chart-unit-wrapper" class="d-flex flex-column" style="display:none;">
                                         <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
                                         <div id="ts-chart-unit-btn-group" class="d-flex flex-column gap-1 mt-1"></div>
@@ -1302,11 +1301,11 @@
                                     <div class="d-flex flex-column gap-2 ms-auto" id="ts-chart-display-toggles-container">
                                         <span class="ts-filter-section-title"><i class="bi bi-sliders text-primary me-2"></i> OPSI TAMPILAN:</span>
                                         <div class="d-flex align-items-center flex-wrap pt-0.5" style="gap: 12px;">
-                                            <label class="ts-filter-chip active" id="ts-chart-badge-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
+                                            <label class="ts-filter-chip active" id="ts-chart-badge-toggle-chip" style="margin:0;">
                                                 <input type="checkbox" id="ts-chart-growth-badge-toggle" checked>
                                                 <span>Badge Naik/Turun</span>
                                             </label>
-                                            <label class="ts-filter-chip active" id="ts-chart-tooltip-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
+                                            <label class="ts-filter-chip active" id="ts-chart-tooltip-toggle-chip" style="margin:0;">
                                                 <input type="checkbox" id="ts-chart-tooltip-toggle" checked>
                                                 <span>Tooltip</span>
                                             </label>
@@ -1545,7 +1544,7 @@
                         <!-- Unified TS Data Controls Card: Unit Converter + Column Filters + Display Toggles + Entity Checklist -->
                         <div id="ts-data-control-card" class="ts-data-control-card mt-2" style="display:none; padding: 18px 22px;">
                             <!-- Top Control Bar: Unit Converter -->
-                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-top-control-bar">
+                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3" id="ts-top-control-bar">
                                 <!-- Universal Unit Converter Bar (if active) -->
                                 <div id="ts-unit-converter-container" class="d-flex flex-column" style="display:none;">
                                     <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>

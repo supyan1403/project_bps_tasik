@@ -313,8 +313,12 @@
     }
 
     .dashboard-analytics-header .analytics-actions-group .btn {
-        font-size: 0.72rem !important;
-        padding: 2.5px 8px !important;
+        font-size: 0.75rem !important;
+        padding: 5px 10px !important;
+        min-height: 32px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        border-radius: 6px !important;
     }
 
     .welcome-banner.ts-hero-banner {
@@ -376,10 +380,12 @@
     }
 
     #header-tabel-actions .btn {
-        font-size: 0.76rem !important;
-        padding: 0.35rem 0.65rem !important;
+        font-size: 0.78rem !important;
+        padding: 6px 12px !important;
+        min-height: 36px !important;
         flex: 1 1 auto !important;
         justify-content: center !important;
+        border-radius: 8px !important;
     }
 
     /* Search bar compact & bernafas di mobile */
@@ -425,10 +431,12 @@
     }
 
     .doc-breadcrumb .btn {
-        font-size: 0.74rem !important;
-        padding: 0.35rem 0.65rem !important;
+        font-size: 0.76rem !important;
+        padding: 6px 12px !important;
+        min-height: 34px !important;
         flex: 1 1 auto !important;
         justify-content: center !important;
+        border-radius: 8px !important;
     }
 
     /* Grids di mobile jadi 1 kolom compact */
@@ -495,9 +503,14 @@
     }
 
     .doc-folder-card .doc-action-btn {
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 6px !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .doc-folder-card .doc-card-badges-container {
@@ -570,10 +583,12 @@
     }
 
     .doc-chapter-card .doc-chapter-actions-wrap .btn {
-        font-size: 0.72rem !important;
-        padding: 0.3rem 0.65rem !important;
+        font-size: 0.76rem !important;
+        padding: 6px 12px !important;
+        min-height: 34px !important;
         flex: 1 1 auto !important;
         justify-content: center !important;
+        border-radius: 8px !important;
     }
 
     /* List Tabel (Level 3) & Hasil Pencarian Mobile */
@@ -598,11 +613,12 @@
     }
 
     .doc-table-list-item .doc-table-actions .btn {
-        font-size: 0.72rem !important;
-        padding: 0.3rem 0.65rem !important;
-        min-height: 32px !important;
+        font-size: 0.76rem !important;
+        padding: 5px 12px !important;
+        min-height: 34px !important;
         display: inline-flex !important;
         align-items: center !important;
+        border-radius: 8px !important;
     }
 
     .clean-table-title-row {
@@ -837,8 +853,73 @@
     }
 
     .btn-table-action {
-        font-size: 0.74rem !important;
+        font-size: 0.76rem !important;
+        padding: 6px 12px !important;
+        min-height: 34px !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    /* Standarisasi Tombol Download Template & ZIP Publikasi Mobile */
+    .btn-download-main,
+    .btn-download-zip {
+        font-size: 0.82rem !important;
+        padding: 8px 14px !important;
+        min-height: 40px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Standarisasi Tombol Modal Mobile (< 768px) */
+    .modal-footer {
+        padding: 10px 14px !important;
+        gap: 8px !important;
+    }
+
+    .modal-footer .btn {
+        font-size: 0.82rem !important;
+        padding: 7px 14px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+    }
+
+    #tableSnippetModal .modal-footer {
+        padding: 10px 14px !important;
+        gap: 8px !important;
+    }
+
+    #tableSnippetModal .modal-footer .btn {
+        font-size: 0.78rem !important;
+        padding: 6px 12px !important;
+        min-height: 36px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Standarisasi SweetAlert2 Buttons Mobile */
+    .swal2-confirm.swal2-styled,
+    .swal2-cancel.swal2-styled {
+        font-size: 0.84rem !important;
+        padding: 7px 16px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Standarisasi Pagination Mobile */
+    .pagination {
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        justify-content: center !important;
+    }
+
+    .pagination .page-link {
+        font-size: 0.76rem !important;
         padding: 4px 10px !important;
+        min-height: 32px !important;
+        min-width: 32px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 6px !important;
     }
 
     .admin-overview-card {
@@ -943,8 +1024,9 @@
 
     .btn-table-action {
         white-space: normal;
-        font-size: 0.74rem;
-        padding: 0.35rem 0.85rem;
+        font-size: 0.74rem !important;
+        padding: 5px 12px !important;
+        min-height: 34px !important;
     }
 
     .table-responsive::-webkit-scrollbar {
@@ -1090,10 +1172,12 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.68rem !important;
-        padding: 6px 10px !important;
+        font-size: 0.74rem !important;
+        padding: 6px 12px !important;
+        min-height: 34px !important;
         flex: 1 !important;
         justify-content: center !important;
+        border-radius: 8px !important;
     }
 
     #ts-view-mode-bar {
@@ -1118,8 +1202,10 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.74rem !important;
-        padding: 5px 12px !important;
+        font-size: 0.76rem !important;
+        padding: 6px 14px !important;
+        min-height: 36px !important;
+        border-radius: 8px !important;
     }
 
     .ts-collapse-btn {
@@ -1127,8 +1213,10 @@
     }
 
     .ts-export-preset-btn {
-        font-size: 0.72rem !important;
-        padding: 5px 12px !important;
+        font-size: 0.74rem !important;
+        padding: 6px 12px !important;
+        min-height: 32px !important;
+        border-radius: 6px !important;
     }
 
     .ts-insights-card {
@@ -1187,9 +1275,17 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.72rem !important;
-        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+        padding: 6px 10px !important;
+        min-height: 34px !important;
         height: auto !important;
+        border-radius: 8px !important;
+    }
+
+    #btn-ts-toggle-all-years {
+        min-height: 30px !important;
+        font-size: 0.74rem !important;
+        padding: 4px 10px !important;
     }
 
     #ts-growth-ranking-table {
@@ -1266,8 +1362,10 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.82rem !important;
-        padding: 7px 16px !important;
+        font-size: 0.84rem !important;
+        padding: 8px 16px !important;
+        min-height: 40px !important;
+        border-radius: 8px !important;
     }
 
     #ts-result-title {
@@ -1607,8 +1705,9 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.62rem !important;
-        padding: 5px 9px !important;
+        font-size: 0.72rem !important;
+        padding: 6px 8px !important;
+        min-height: 32px !important;
     }
 
     .ts-filter-section-title {
@@ -1663,8 +1762,9 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.76rem !important;
-        padding: 6px 14px !important;
+        font-size: 0.80rem !important;
+        padding: 7px 14px !important;
+        min-height: 38px !important;
     }
 
     #ts-result-title {
@@ -1712,8 +1812,9 @@
     }
 
     .btn-table-action {
-        font-size: 0.66rem;
-        padding: 0.3rem 0.7rem;
+        font-size: 0.74rem !important;
+        padding: 5px 10px !important;
+        min-height: 34px !important;
     }
 
     .ts-view-mode-label {
@@ -1726,8 +1827,9 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.66rem !important;
-        padding: 4px 10px !important;
+        font-size: 0.74rem !important;
+        padding: 6px 12px !important;
+        min-height: 34px !important;
     }
 
     .ts-collapse-btn {
@@ -1735,8 +1837,9 @@
     }
 
     .ts-export-preset-btn {
-        font-size: 0.64rem !important;
-        padding: 4px 10px !important;
+        font-size: 0.72rem !important;
+        padding: 5px 10px !important;
+        min-height: 32px !important;
     }
 
     .ts-insights-card {
@@ -2102,8 +2205,9 @@
     }
 
     .ts-segmented-btn {
-        font-size: 0.62rem !important;
-        padding: 5px 8px !important;
+        font-size: 0.70rem !important;
+        padding: 5px 7px !important;
+        min-height: 32px !important;
     }
 
     .ts-filter-section-title {
@@ -2154,8 +2258,9 @@
     }
 
     #btn-ts-main-export {
-        font-size: 0.72rem !important;
-        padding: 6px 13px !important;
+        font-size: 0.78rem !important;
+        padding: 7px 12px !important;
+        min-height: 38px !important;
     }
 
     #ts-result-title {
@@ -2201,8 +2306,9 @@
     .ts-insight-select,
     #btn-ts-insight-entity,
     #btn-ts-insight-trend {
-        font-size: 0.64rem !important;
-        padding: 3px 6px !important;
+        font-size: 0.72rem !important;
+        padding: 5px 8px !important;
+        min-height: 32px !important;
     }
 
     .dropzone-icon {
@@ -2214,8 +2320,9 @@
     }
 
     .btn-table-action {
-        font-size: 0.66rem;
-        padding: 3px 6px;
+        font-size: 0.72rem !important;
+        padding: 5px 9px !important;
+        min-height: 34px !important;
     }
 
     .ts-view-mode-label {
@@ -2228,8 +2335,9 @@
 
     .btn-ts-wizard-action,
     .ts-wizard-footer .btn {
-        font-size: 0.66rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.72rem !important;
+        padding: 5px 10px !important;
+        min-height: 34px !important;
     }
 
     .ts-collapse-btn {
@@ -2237,8 +2345,9 @@
     }
 
     .ts-export-preset-btn {
-        font-size: 0.64rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.70rem !important;
+        padding: 4px 8px !important;
+        min-height: 30px !important;
     }
 
     .ts-insights-card {

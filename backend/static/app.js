@@ -11035,17 +11035,19 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         if (rawKeywords.length === 1) {
 
-            titleEl.innerHTML = `<span>Deret Waktu: <span class="text-primary fw-semibold">${escHtml(rawKeywords[0])}</span></span>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Deret Waktu: <span class="fw-bold" style="color:var(--primary, #1e40af);">${escHtml(rawKeywords[0])}</span></span></div>`;
 
         } else if (rawKeywords.length > 1) {
 
-            titleEl.innerHTML = `<span>Hasil Analisis Deret Waktu <span class="badge bg-primary-subtle text-primary border ms-2" style="font-size:0.78rem; font-weight:600;">${rawKeywords.length} Indikator</span></span>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span><span class="badge bg-primary text-white ms-1" style="font-size:0.72rem;">${rawKeywords.length} Indikator</span></div>`;
 
         } else {
 
-            titleEl.innerHTML = `<span>Hasil Analisis Deret Waktu</span>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span></div>`;
 
         }
+
+        titleEl.style.display = 'block';
 
     }
 
@@ -13174,6 +13176,12 @@ function backToTablePicker() {
     }
 
     document.getElementById("ts-results-content").style.display = "none";
+
+    const resultTitleEl = document.getElementById("ts-result-title");
+    if (resultTitleEl) resultTitleEl.style.display = "none";
+
+    const badgesOutsideEl = document.getElementById("ts-result-badges-outside");
+    if (badgesOutsideEl) { badgesOutsideEl.innerHTML = ''; badgesOutsideEl.style.display = 'none'; }
 
     const dataControlCard = document.getElementById('ts-data-control-card');
     if (dataControlCard) dataControlCard.style.display = 'none';

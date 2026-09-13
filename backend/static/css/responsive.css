@@ -117,7 +117,8 @@
     }
 
     .ts-highlight-stat-card {
-        padding: 12px !important;
+        padding: 16px 18px !important;
+        min-height: 85px;
     }
 
     .ts-trend-banner {
@@ -1694,7 +1695,7 @@
 
     .ts-insight-card,
     .ts-highlight-stat-card {
-        padding: 6px 10px !important;
+        padding: 10px 14px !important;
     }
 
     .ts-insight-card .fs-5,
@@ -2201,7 +2202,7 @@
 
     .ts-insight-card,
     .ts-highlight-stat-card {
-        padding: 5px 8px !important;
+        padding: 8px 12px !important;
     }
 
     .ts-insight-card .fs-5,

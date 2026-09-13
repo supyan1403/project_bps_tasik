@@ -11025,7 +11025,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
     const titleEl = document.getElementById("ts-result-title");
 
-    const badgesEl = document.getElementById("ts-result-badges");
+    const badgesEl = document.getElementById("ts-result-badges-outside");
 
     const rawKeywords = (keyword || '').split(',').map(k => k.trim()).filter(Boolean);
 

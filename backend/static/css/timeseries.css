@@ -21,14 +21,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
+    padding: 2px 8px;
+    width: auto;
+    border-radius: 6px;
     background: var(--primary);
     color: var(--text-white);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.2;
     text-align: center;
     flex-shrink: 0;
     margin-right: 6px;
@@ -528,12 +528,12 @@ button.ts-insight-select.dropdown-toggle::after {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 16px;
+    padding: 8px 18px;
     margin: 3px 5px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-primary);
     cursor: pointer;
@@ -552,8 +552,8 @@ button.ts-insight-select.dropdown-toggle::after {
 }
 
 .ts-filter-chip input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
+    width: 17px;
+    height: 17px;
     cursor: pointer;
     margin: 0;
     accent-color: var(--primary);
@@ -591,11 +591,11 @@ button.ts-insight-select.dropdown-toggle::after {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 13px;
+    padding: 7px 16px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
@@ -614,10 +614,10 @@ button.ts-insight-select.dropdown-toggle::after {
     font-weight: 600;
 }
 .ts-variant-chip input[type="radio"] {
-    width: 14px !important;
-    height: 14px !important;
-    min-width: 14px !important;
-    max-width: 14px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 2px solid var(--border) !important;

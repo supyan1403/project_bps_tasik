@@ -66,6 +66,96 @@ function handleDataChange(type) {
     } catch(e) {}
 }
 
+// === GATEKEEPER INPUT SEL TABEL: CEGAH PASTE GAMBAR, FILE & FORMAT HTML ===
+document.addEventListener('paste', function(e) {
+    const cell = e.target && e.target.closest ? e.target.closest('.editable-cell') : null;
+    if (!cell) return;
+
+    const clipboardData = e.clipboardData || window.clipboardData;
+    if (!clipboardData) return;
+
+    // 1. Cek apakah ada file atau gambar di clipboard
+    let hasImage = false;
+    if (clipboardData.types) {
+        for (let i = 0; i < clipboardData.types.length; i++) {
+            if (clipboardData.types[i] === 'Files') {
+                hasImage = true;
+                break;
+            }
+        }
+    }
+    if (!hasImage && clipboardData.items) {
+        for (let i = 0; i < clipboardData.items.length; i++) {
+            if (clipboardData.items[i].type && clipboardData.items[i].type.indexOf('image') !== -1) {
+                hasImage = true;
+                break;
+            }
+        }
+    }
+
+    if (hasImage) {
+        e.preventDefault();
+        if (typeof showToast === 'function') {
+            showToast('warning', 'Input Tidak Valid', 'Gambar atau file tidak dapat ditempel ke dalam sel tabel data. Kolom ini hanya menerima nilai teks atau angka.');
+        }
+        return;
+    }
+
+    // 2. Hanya ambil Plain Text (buang semua styling HTML & tag eksternal)
+    e.preventDefault();
+    let rawText = clipboardData.getData('text/plain') || '';
+    let cleanText = rawText.replace(/[\r\n]+/g, ' ').trim();
+
+    // 3. Validasi tipe data jika kolom bertipe number
+    const colType = cell.getAttribute('data-type') || 'text';
+    if (colType === 'number' && cleanText !== '') {
+        const isBpsSymbol = /^(\-|--|\.\.\.|n\.a|na|0)$/i.test(cleanText);
+        const cleanNum = cleanText.replace(/\./g, '').replace(/,/g, '.').replace(/\s/g, '');
+        const isNumeric = !isNaN(Number(cleanNum)) && cleanNum !== '';
+
+        if (!isBpsSymbol && !isNumeric) {
+            cell.classList.add('cell-invalid-type');
+            if (typeof showToast === 'function') {
+                showToast('warning', 'Perhatian Tipe Data', 'Teks yang ditempel bukan format angka yang valid untuk kolom statistik ini.');
+            }
+            setTimeout(() => cell.classList.remove('cell-invalid-type'), 3000);
+        }
+    }
+
+    // Sisipkan plain text ke kursor atau sel
+    if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+        document.execCommand('insertText', false, cleanText);
+    } else {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(cleanText));
+            range.collapse(false);
+        } else {
+            cell.innerText = cleanText;
+        }
+    }
+});
+
+// Cegah drag and drop gambar / file ke dalam editable-cell
+document.addEventListener('dragover', function(e) {
+    if (e.target && e.target.closest && e.target.closest('.editable-cell')) {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('drop', function(e) {
+    const cell = e.target && e.target.closest ? e.target.closest('.editable-cell') : null;
+    if (cell) {
+        e.preventDefault();
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            if (typeof showToast === 'function') {
+                showToast('warning', 'Aksi Ditolak', 'Tidak dapat memasukkan file atau gambar ke dalam sel tabel data.');
+            }
+        }
+    }
+});
 
 function cssVar(name) {
 
@@ -6383,42 +6473,35 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
 
 
+        const colTypes = (data && data.column_types) || headers.map((h, idx) => idx === 0 ? 'text' : 'number');
+
         const formattedHeaders = headers.map((h, idx) => {
 
             let displayHeader = h.replace(/\.\d+$/, ''); // Strip pandas duplicate suffix (.1)
 
-            
-
             const unit = units[idx] != null ? String(units[idx]).trim() : "";
             const year = years[idx] != null ? String(years[idx]).trim() : "";
 
-            
-
             const skipUnit = !unit || unit === "-" || unit.toLowerCase() === "satuan";
-
             const skipYear = !year || year === "-" || year.toLowerCase() === "tahun";
 
             if (!skipUnit || !skipYear) {
-
                 let suffix = "";
-
                 if (!skipUnit) suffix += unit;
-
                 if (!skipYear) suffix += suffix ? `, ${year}` : year;
-
                 if (suffix) displayHeader += ` (${suffix})`;
-
             }
 
-            return `<th>${displayHeader}</th>`;
+            const colType = colTypes[idx] || (idx === 0 ? 'text' : 'number');
+            const typeBadge = colType === 'number'
+                ? `<span class="col-type-tag type-num" title="Tipe Kolom: Angka / Nilai Statistik BPS">123</span>`
+                : `<span class="col-type-tag type-txt" title="Tipe Kolom: Teks / Label Wilayah">Abc</span>`;
+
+            return `<th data-key="${h.replace(/"/g, '&quot;')}"><div class="th-header-cell"><span class="th-text">${displayHeader}</span>${typeBadge}</div></th>`;
 
         }).join("");
 
-
-
         thead.innerHTML = `<tr><th>Aksi</th>${formattedHeaders}</tr>`;
-
-
 
         rows.forEach(row => {
 
@@ -6427,8 +6510,6 @@ async function _loadDbIntoEditor(tableId, tableName) {
             tr.id = `row-${row.id}`;
 
             if(row.is_anomaly) tr.classList.add("row-anomaly");
-
-
 
             const safeBtn = row.is_anomaly 
 
@@ -6444,11 +6525,11 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
                 if (idx === 0) val = normalizeEntityName(val);
 
-                html += `<td class="editable-cell" contenteditable="true" onblur="updateCell(${row.id}, '${h}', this.innerText)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${val}</td>`;
+                const colType = colTypes[idx] || (idx === 0 ? 'text' : 'number');
+
+                html += `<td class="editable-cell" contenteditable="plaintext-only" data-type="${colType}" data-col="${h.replace(/"/g, '&quot;')}" onblur="handleCellBlur(${row.id}, '${h.replace(/'/g, "\\'")}', this)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${val}</td>`;
 
             });
-
-
 
             tr.innerHTML = html;
             tbody.appendChild(tr);
@@ -6510,36 +6591,50 @@ async function addDbColumn(tableId, tableName) {
 
 
 
+async function handleCellBlur(rowId, column, cellElem) {
+    const colType = cellElem.getAttribute('data-type') || 'text';
+    let val = cellElem.innerText.trim();
+
+    if (colType === 'number' && val !== '') {
+        const isBpsSymbol = /^(\-|--|\.\.\.|n\.a|na|0)$/i.test(val);
+        const cleanNum = val.replace(/\./g, '').replace(/,/g, '.').replace(/\s/g, '');
+        const isNumeric = !isNaN(Number(cleanNum)) && cleanNum !== '';
+
+        if (!isBpsSymbol && !isNumeric) {
+            cellElem.classList.add('cell-invalid-type');
+            if (typeof showToast === 'function') {
+                showToast('warning', 'Perhatian Format Data', `Kolom "${column}" bertipe Angka. Masukkan nilai angka atau simbol data BPS (- / ...).`);
+            }
+            setTimeout(() => cellElem.classList.remove('cell-invalid-type'), 3500);
+        } else {
+            cellElem.classList.remove('cell-invalid-type');
+        }
+    }
+
+    await updateCell(rowId, column, val);
+}
+
 async function updateCell(rowId, column, newValue) {
-
     const tr = document.getElementById(`row-${rowId}`);
-
     if (!tr) return;
 
-    const headers = Array.from(document.getElementById("data-grid-head").querySelector("tr").children).slice(1).map(th => th.innerText);
-
+    const thElements = Array.from(document.getElementById("data-grid-head").querySelector("tr").children).slice(1);
+    const headers = thElements.map(th => th.getAttribute('data-key') || th.innerText.trim());
     const cells = Array.from(tr.children).slice(1);
 
-    
-
     const newData = {};
-
-    headers.forEach((h, idx) => { newData[h] = cells[idx].innerText; });
-
-
-
-    await fetch(`${API_BASE}/data/${rowId}`, {
-
-        method: "PUT",
-
-        headers: { "Content-Type": "application/json" },
-
-        body: JSON.stringify({ data: newData })
-
+    headers.forEach((h, idx) => { 
+        if (cells[idx]) {
+            newData[h] = cells[idx].innerText.trim(); 
+        }
     });
 
+    await fetch(`${API_BASE}/data/${rowId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: newData })
+    });
     // Can optionally re-fetch to see if anomaly status changed, but for speed we just save.
-
 }
 
 
@@ -7117,7 +7212,7 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false, highli
 
                         if (cellIdx === 0) val = normalizeEntityName(val);
 
-                        html += `<td class="editable-cell" contenteditable="true" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${val}</td>`;
+                        html += `<td class="editable-cell" contenteditable="plaintext-only" data-type="${cellIdx === 0 ? 'text' : 'number'}" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${val}</td>`;
 
                     });
 
@@ -7826,7 +7921,7 @@ function insertCsvRowBelowLocal(rowIndex) {
 
     for (let i = 0; i < numCols; i++) {
 
-        html += `<td class="editable-cell" contenteditable="true" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }"></td>`;
+        html += `<td class="editable-cell" contenteditable="plaintext-only" data-type="${i === 0 ? 'text' : 'number'}" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }"></td>`;
 
     }
 
@@ -8068,7 +8163,8 @@ async function insertCsvColBelowLocal(colIndex) {
 
         newTd.className = "editable-cell";
 
-        newTd.contentEditable = "true";
+        newTd.contentEditable = "plaintext-only";
+        newTd.setAttribute("data-type", "number");
 
         newTd.setAttribute("onkeydown", "if(event.key === 'Enter') { event.preventDefault(); this.blur(); }");
 
@@ -8625,9 +8721,9 @@ function transposeCsvLocal() {
 
 
 
-        row.forEach(cell => {
+        row.forEach((cell, cellIdx) => {
 
-            html += `<td class="editable-cell" contenteditable="true" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${cell != null ? cell : ""}</td>`;
+            html += `<td class="editable-cell" contenteditable="plaintext-only" data-type="${cellIdx === 0 ? 'text' : 'number'}" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }">${cell != null ? cell : ""}</td>`;
 
         });
 

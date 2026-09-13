@@ -948,13 +948,32 @@ def get_table_info(table_id: int, db: Session = Depends(get_db)):
         "has_db_data": has_db
     }
 
+def sanitize_row_data(data: dict) -> dict:
+    """Sanitasi nilai sel data: buang gambar base64, file data URL, dan tag HTML."""
+    if not isinstance(data, dict):
+        return {}
+    cleaned = {}
+    for k, v in data.items():
+        if v is None:
+            cleaned[k] = ""
+            continue
+        v_str = str(v)
+        # Cegah string data URL base64 gambar
+        if "data:image/" in v_str:
+            cleaned[k] = ""
+            continue
+        # Bersihkan tag HTML
+        v_clean = re.sub(r'<[^>]*?>', '', v_str).strip()
+        cleaned[k] = v_clean
+    return cleaned
+
 @app.put("/api/tables/{table_id}/db_rows")
 def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     """Batch update database rows from edit mode."""
     rows = payload.get("rows", [])
     for row_data in rows:
         row_id = row_data.get("id")
-        data = row_data.get("data", {})
+        data = sanitize_row_data(row_data.get("data", {}))
         is_anomaly = row_data.get("is_anomaly", False)
         if row_id:
             row = db.query(models.TableRow).filter(models.TableRow.id == row_id, models.TableRow.table_id == table_id).first()
@@ -974,11 +993,26 @@ def get_table_data(table_id: int, response: Response, db: Session = Depends(get_
     headers = get_table_headers(db, table)
     units = table.units if table and table.units else ([""] * len(headers) if headers else [])
     years = table.years if table and table.years else ([""] * len(headers) if headers else [])
+    
+    # Hitung tipe data per kolom (column_types):
+    # Kolom 0 selalu text (nama wilayah / label), kolom 1 ke atas default number kecuali kolom keterangan
+    column_types = []
+    text_indicators = ["kategori", "keterangan", "status", "nama", "uraian", "deskripsi", "jenis", "sektor", "bulan"]
+    for idx, h in enumerate(headers):
+        if idx == 0:
+            column_types.append("text")
+        else:
+            h_lower = str(h).lower()
+            if any(w in h_lower for w in text_indicators) and not any(char.isdigit() for char in h_lower):
+                column_types.append("text")
+            else:
+                column_types.append("number")
             
     return {
         "headers": headers, 
         "units": units,
         "years": years,
+        "column_types": column_types,
         "rows": [{"id": r.id, "data": r.data, "is_anomaly": r.is_anomaly} for r in rows]
     }
 
@@ -987,7 +1021,7 @@ def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db), a
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
-    row.data = payload.get("data", {})
+    row.data = sanitize_row_data(payload.get("data", {}))
     db.commit()
     log_activity(db, "edit_row", f"row_id={row_id}", {"table_id": row.table_id})
     return {"message": "Updated successfully"}

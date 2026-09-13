@@ -20568,7 +20568,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     left: 8,
 
-                    bottom: 8
+                    bottom: 40
 
                 }
 

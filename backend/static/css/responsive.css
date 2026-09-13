@@ -195,12 +195,16 @@
 
     .header-sipedas-sub {
         display: block !important;
-        font-size: 0.59rem !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-size: 0.58rem !important;
         font-weight: 500 !important;
         color: var(--text-secondary) !important;
-        line-height: 1.2 !important;
+        line-height: 1.22 !important;
         letter-spacing: -0.05px !important;
-        max-width: calc(100vw - 175px) !important;
+        max-width: calc(100vw - 165px) !important;
     }
 
     .welcome-banner {
@@ -1858,8 +1862,9 @@
     }
 
     .header-sipedas-sub {
-        font-size: 0.54rem !important;
-        max-width: calc(100vw - 150px) !important;
+        font-size: 0.53rem !important;
+        line-height: 1.2 !important;
+        max-width: calc(100vw - 145px) !important;
     }
 
     .widget-value {

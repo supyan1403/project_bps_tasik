@@ -247,14 +247,25 @@
     }
 
     .welcome-banner .admin-only {
-        margin-top: 0.95rem !important;
-        gap: 7px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        row-gap: 10px !important;
+        column-gap: 8px !important;
+        margin-top: 1rem !important;
+    }
+
+    body.role-pegawai:not(.role-admin) .welcome-banner .admin-only {
+        display: none !important;
     }
 
     .welcome-banner .admin-only .badge {
+        display: inline-flex !important;
+        align-items: center !important;
         font-size: 0.70rem !important;
-        padding: 4px 10px !important;
-        border-radius: 7px !important;
+        padding: 5px 11px !important;
+        border-radius: 8px !important;
+        line-height: 1.25 !important;
+        margin: 0 !important;
     }
 
     /* Header Section Analitik Data Engine Responsif di Mobile */

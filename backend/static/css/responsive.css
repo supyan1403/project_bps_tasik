@@ -204,11 +204,11 @@
     }
 
     .welcome-banner {
-        padding: 0.95rem 1rem !important;
+        padding: 1.4rem 1.35rem !important;
         min-height: auto !important;
         justify-content: flex-start !important;
-        margin-bottom: 0.95rem !important;
-        border-radius: 14px !important;
+        margin-bottom: 1.25rem !important;
+        border-radius: 18px !important;
     }
 
     /* Hilangkan overlap pill status & jam live di mobile */
@@ -216,14 +216,14 @@
         position: static !important;
         top: auto !important;
         right: auto !important;
-        margin-bottom: 0.45rem !important;
+        margin-bottom: 0.75rem !important;
         align-self: flex-start !important;
     }
 
     .welcome-banner-clock-container .rounded-pill,
     .welcome-banner-clock-container .pill-dark {
-        padding: 2.5px 8px !important;
-        font-size: 0.7rem !important;
+        padding: 3.5px 10px !important;
+        font-size: 0.72rem !important;
     }
 
     .welcome-banner-clock-container .banner-clock-date-divider,
@@ -234,27 +234,27 @@
 
     .welcome-banner h1,
     .welcome-banner .welcome-banner-title {
-        font-size: 1.15rem !important;
-        line-height: 1.25 !important;
-        margin-bottom: 0.35rem !important;
+        font-size: 1.22rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.45rem !important;
     }
 
     .welcome-banner p,
     .welcome-banner .welcome-banner-desc {
-        font-size: 0.8rem !important;
-        line-height: 1.42 !important;
+        font-size: 0.82rem !important;
+        line-height: 1.5 !important;
         max-width: 100% !important;
     }
 
     .welcome-banner .admin-only {
-        margin-top: 0.55rem !important;
-        gap: 5px !important;
+        margin-top: 0.95rem !important;
+        gap: 7px !important;
     }
 
     .welcome-banner .admin-only .badge {
-        font-size: 0.66rem !important;
-        padding: 3px 8px !important;
-        border-radius: 6px !important;
+        font-size: 0.70rem !important;
+        padding: 4px 10px !important;
+        border-radius: 7px !important;
     }
 
     /* Header Section Analitik Data Engine Responsif di Mobile */
@@ -1079,8 +1079,9 @@
 
     /* Welcome banner */
     .welcome-banner {
-        padding: 0.75rem !important;
+        padding: 1.3rem 1.2rem !important;
         min-height: auto !important;
+        border-radius: 16px !important;
     }
 
     .welcome-banner.ts-hero-banner {
@@ -1385,7 +1386,8 @@
     }
 
     .welcome-banner {
-        padding: 0.65rem !important;
+        padding: 1.2rem 1.1rem !important;
+        border-radius: 16px !important;
     }
 
     .welcome-banner.ts-hero-banner {
@@ -1869,7 +1871,8 @@
     }
 
     .welcome-banner {
-        padding: 0.55rem !important;
+        padding: 1.1rem 1rem !important;
+        border-radius: 15px !important;
     }
 
     .welcome-banner.ts-hero-banner {

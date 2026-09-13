@@ -572,19 +572,246 @@ body.dark-mode .col-type-tag.type-txt {
 .badge-csv-view { background: var(--bg-hover); color: var(--text-secondary); border: 1.5px solid var(--border); }
 .badge-db { background: var(--success-light); color: var(--success-dark); border: 1.5px solid var(--success-light-border); }
 
-/* --- Editor Toolbar --- */
+/* --- Editor Toolbar Modernized --- */
 .editor-toolbar {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
     background: var(--bg-card);
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--border);
     margin-bottom: 0.75rem;
     box-shadow: var(--shadow-sm);
     align-items: center;
     flex-shrink: 0;
+}
+
+.editor-toolbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.toolbar-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-vr {
+    height: 22px;
+    opacity: 0.25;
+    margin: auto 0.25rem;
+}
+
+.btn-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 6px 13px;
+    border-radius: 8px;
+    transition: all var(--transition-fast, 0.15s ease);
+    white-space: nowrap;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.btn-toolbar:active {
+    transform: scale(0.97);
+}
+
+.btn-toolbar i {
+    font-size: 0.92rem;
+}
+
+.btn-toolbar-back {
+    color: #334155;
+    background: #f8fafc;
+    border-color: #cbd5e1 !important;
+}
+.btn-toolbar-back:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-toolbar-prev,
+.btn-toolbar-next {
+    color: var(--text-secondary, #475569);
+    background: #f8fafc;
+    border-color: #cbd5e1 !important;
+}
+.btn-toolbar-next {
+    border-left: none !important;
+}
+.btn-toolbar-prev:hover,
+.btn-toolbar-next:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-toolbar-edit {
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
+}
+
+.btn-toolbar-cancel {
+    color: #dc2626 !important;
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+}
+.btn-toolbar-cancel:hover {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+.btn-toolbar-excel {
+    color: #15803d !important;
+    background: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+}
+.btn-toolbar-excel:hover {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+}
+
+.btn-toolbar-csv {
+    color: var(--text-secondary, #475569);
+    background: #f8fafc;
+    border-color: #cbd5e1 !important;
+    border-left: none !important;
+}
+.btn-toolbar-csv:hover {
+    background: #f1f5f9;
+}
+
+.btn-toolbar-ts {
+    color: #b45309 !important;
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    border-radius: 8px !important;
+}
+.btn-toolbar-ts:hover {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.btn-toolbar-transpose {
+    color: #b45309 !important;
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    border-radius: 8px !important;
+}
+.btn-toolbar-transpose:hover {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.btn-toolbar-rename {
+    color: #1d4ed8 !important;
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+    border-radius: 8px !important;
+}
+.btn-toolbar-rename:hover {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+.btn-toolbar-match {
+    color: #0e7490 !important;
+    background: #ecfeff !important;
+    border-color: #a5f3fc !important;
+    border-radius: 8px !important;
+}
+.btn-toolbar-match:hover {
+    background: #cffafe !important;
+    color: #155e75 !important;
+}
+
+.btn-toolbar-addcol {
+    color: #334155 !important;
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    border-radius: 8px !important;
+}
+.btn-toolbar-addcol:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.btn-toolbar-save {
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+}
+
+.toolbar-status-badge {
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    font-weight: 600;
+    background: #f8fafc;
+    border-color: #e2e8f0 !important;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Dark mode theme overrides */
+[data-bs-theme="dark"] .btn-toolbar-back,
+[data-bs-theme="dark"] .btn-toolbar-prev,
+[data-bs-theme="dark"] .btn-toolbar-next,
+[data-bs-theme="dark"] .btn-toolbar-csv,
+[data-bs-theme="dark"] .btn-toolbar-addcol,
+[data-bs-theme="dark"] .toolbar-status-badge {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-back:hover,
+[data-bs-theme="dark"] .btn-toolbar-prev:hover,
+[data-bs-theme="dark"] .btn-toolbar-next:hover,
+[data-bs-theme="dark"] .btn-toolbar-csv:hover,
+[data-bs-theme="dark"] .btn-toolbar-addcol:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-excel {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    color: #34d399 !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-ts,
+[data-bs-theme="dark"] .btn-toolbar-transpose {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24 !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-rename {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-match {
+    background: rgba(6, 182, 212, 0.15) !important;
+    border-color: rgba(6, 182, 212, 0.3) !important;
+    color: #22d3ee !important;
+}
+
+[data-bs-theme="dark"] .btn-toolbar-cancel {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
 }
 
 .editor-tool-btn {

@@ -2053,229 +2053,132 @@ function buildEditorToolbar(tableId, tableName, mode) {
     const tn = tableName.replace(/'/g, "\\'");
 
     if (mode === 'csv-view') {
-
         toolbar.innerHTML = `
-
-            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
-
-                <!-- Tombol Kembali -->
-
-                <button onclick="backToTableList()" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 12px; border-radius:6px; color:#334155; background:#f8fafc; border-color:#cbd5e1 !important;" title="Kembali ke Daftar Tabel">
-
-                    <i class="bi bi-arrow-left"></i> Kembali
-
-                </button>
-
-                
-
-                <!-- Tombol Navigasi Prev / Next -->
-
-                <div id="nav-buttons" class="btn-group" role="group">
-
-                    <button id="btn-prev" onclick="navigateTable('prev')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; color:var(--text-secondary, #475569); background:#f8fafc; border-color:#cbd5e1 !important;" title="Tabel Sebelumnya">
-
-                        <i class="bi bi-chevron-left"></i> Prev
-
+            <div class="editor-toolbar-inner">
+                <!-- Baris 1 / Sesi Navigasi & Mode -->
+                <div class="toolbar-section toolbar-section-nav">
+                    <!-- Tombol Kembali -->
+                    <button onclick="backToTableList()" class="btn btn-sm btn-toolbar btn-toolbar-back" title="Kembali ke Daftar Tabel">
+                        <i class="bi bi-arrow-left"></i> Kembali
                     </button>
+                    
+                    <!-- Tombol Navigasi Prev / Next -->
+                    <div id="nav-buttons" class="btn-group toolbar-nav-group" role="group">
+                        <button id="btn-prev" onclick="navigateTable('prev')" class="btn btn-sm btn-toolbar btn-toolbar-prev" title="Tabel Sebelumnya">
+                            <i class="bi bi-chevron-left"></i> Prev
+                        </button>
+                        <button id="btn-next" onclick="navigateTable('next')" class="btn btn-sm btn-toolbar btn-toolbar-next" title="Tabel Selanjutnya">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
 
-                    <button id="btn-next" onclick="navigateTable('next')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; color:var(--text-secondary, #475569); background:#f8fafc; border-color:#cbd5e1 !important; border-left:none;" title="Tabel Selanjutnya">
-
-                        Next <i class="bi bi-chevron-right"></i>
-
+                    <!-- Beralih ke Edit Data -->
+                    <button onclick="switchToCsvEdit(${tableId}, '${tn}')" class="btn btn-sm btn-primary btn-toolbar btn-toolbar-edit" title="Beralih ke mode pengeditan data">
+                        <i class="bi bi-pencil-square"></i> Edit Data
                     </button>
-
                 </div>
 
-                
+                <div class="vr mx-1 my-auto toolbar-vr" style="height:20px; opacity:0.25;"></div>
 
-                <div class="vr mx-1 my-auto" style="height:20px; opacity:0.25;"></div>
+                <!-- Baris 2 / Sesi Ekspor & Analisis -->
+                <div class="toolbar-section toolbar-section-actions">
+                    <div class="btn-group toolbar-export-group" role="group">
+                        <button onclick="downloadExcel(${tableId})" class="btn btn-sm btn-toolbar btn-toolbar-excel" title="Unduh format Microsoft Excel (.xlsx)">
+                            <i class="bi bi-file-earmark-excel-fill"></i> Excel (.xlsx)
+                        </button>
+                        <button onclick="downloadCsv(${tableId})" class="btn btn-sm btn-toolbar btn-toolbar-csv" title="Unduh format CSV">
+                            <i class="bi bi-filetype-csv"></i> CSV
+                        </button>
+                    </div>
 
-
-
-                <!-- Export Buttons Group -->
-
-                <div class="btn-group" role="group">
-
-                    <button onclick="downloadExcel(${tableId})" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 11px; color:#15803d; background:#f0fdf4; border-color:#bbf7d0 !important;" title="Unduh format Microsoft Excel (.xlsx)">
-
-                        <i class="bi bi-file-earmark-excel-fill"></i> Excel (.xlsx)
-
+                    <!-- Analisis Deret Waktu -->
+                    <button onclick="openTimeSeriesForTable(${tableId}, '${tn}')" class="btn btn-sm btn-toolbar btn-toolbar-ts" title="Buka analisis grafik deret waktu">
+                        <i class="bi bi-graph-up-arrow"></i> Deret Waktu
                     </button>
-
-                    <button onclick="downloadCsv(${tableId})" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 11px; color:var(--text-secondary, #475569); background:#f8fafc; border-color:#cbd5e1 !important; border-left:none;" title="Unduh format CSV">
-
-                        <i class="bi bi-filetype-csv"></i> CSV
-
-                    </button>
-
                 </div>
-
-                
-
-                <div class="vr mx-1 my-auto" style="height:20px; opacity:0.25;"></div>
-
-
-
-                <!-- Analisis Deret Waktu -->
-
-                <button onclick="openTimeSeriesForTable(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 11px; border-radius:6px; color:#b45309; background:#fffbeb; border-color:#fde68a !important;" title="Buka analisis grafik deret waktu">
-
-                    <i class="bi bi-graph-up-arrow"></i> Deret Waktu
-
-                </button>
-
-                
-
-                <!-- Beralih ke Edit Data -->
-
-                <button onclick="switchToCsvEdit(${tableId}, '${tn}')" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 14px; border-radius:6px; box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);" title="Beralih ke mode pengeditan data">
-
-                    <i class="bi bi-pencil-square me-1"></i> Edit Data
-
-                </button>
-
-
 
                 <!-- Status Badge -->
-
-                <span style="margin-left:auto; font-size:0.8rem; display:flex; align-items:center; gap:6px;">
-
-                    <span class="badge bg-light text-secondary border" style="font-size:0.75rem; padding:5px 10px; font-weight:600; background:#f8fafc; border-color:#e2e8f0 !important;">
-
+                <div class="toolbar-section toolbar-section-status ms-auto">
+                    <span class="badge bg-light text-secondary border toolbar-status-badge">
                         <i class="bi bi-eye me-1"></i> Mode Lihat (Baca Saja)
-
                     </span>
-
-                </span>
-
+                </div>
             </div>
-
         `;
-
         fetchTableNeighbors(tableId);
 
     } else if (mode === 'csv-edit') {
-
         toolbar.innerHTML = `
-
-            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
-
-                <!-- Action Back / Cancel -->
-
-                <button onclick="backToTableList()" class="btn btn-sm btn-light border border-danger-subtle text-danger d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 12px; border-radius:6px; background:#fef2f2;" title="Kembali ke daftar tanpa menyimpan">
-
-                    <i class="bi bi-x-circle-fill"></i> Batal / Kembali
-
-                </button>
-
-                
-
-                <div class="vr mx-1 my-auto" style="height:20px; opacity:0.25;"></div>
-
-
-
-                <!-- Export Group -->
-
-                <div class="btn-group" role="group">
-
-                    <button onclick="downloadExcel(${tableId})" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; color:#15803d; background:#f0fdf4; border-color:#bbf7d0 !important;" title="Unduh Excel">
-
-                        <i class="bi bi-file-earmark-excel-fill"></i> Excel
-
+            <div class="editor-toolbar-inner">
+                <!-- Baris 1 / Batal & Ekspor -->
+                <div class="toolbar-section toolbar-section-nav">
+                    <!-- Action Back / Cancel -->
+                    <button onclick="backToTableList()" class="btn btn-sm btn-toolbar btn-toolbar-cancel" title="Kembali ke daftar tanpa menyimpan">
+                        <i class="bi bi-x-circle-fill"></i> Batal / Kembali
                     </button>
 
-                    <button onclick="downloadCsv(${tableId})" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; color:var(--text-secondary, #475569); background:#f8fafc; border-color:#cbd5e1 !important; border-left:none;" title="Unduh CSV">
-
-                        <i class="bi bi-filetype-csv"></i> CSV
-
-                    </button>
-
+                    <div class="btn-group toolbar-export-group" role="group">
+                        <button onclick="downloadExcel(${tableId})" class="btn btn-sm btn-toolbar btn-toolbar-excel" title="Unduh Excel">
+                            <i class="bi bi-file-earmark-excel-fill"></i> Excel
+                        </button>
+                        <button onclick="downloadCsv(${tableId})" class="btn btn-sm btn-toolbar btn-toolbar-csv" title="Unduh CSV">
+                            <i class="bi bi-filetype-csv"></i> CSV
+                        </button>
+                    </div>
                 </div>
 
-                
+                <div class="vr mx-1 my-auto toolbar-vr" style="height:20px; opacity:0.25;"></div>
 
-                <div class="vr mx-1 my-auto" style="height:20px; opacity:0.25;"></div>
+                <!-- Baris 2 / Transform & Master Group -->
+                <div class="toolbar-section toolbar-section-tools">
+                    <button onclick="transposeCsvLocal()" class="btn btn-sm btn-toolbar btn-toolbar-transpose" title="Tukar baris dan kolom tabel">
+                        <i class="bi bi-arrow-left-right"></i> Transpose
+                    </button>
+                    <button onclick="renameHeadersToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-toolbar btn-toolbar-rename" title="Ganti header sesuai master kolom">
+                        <i class="bi bi-pencil-square"></i> Nama Master
+                    </button>
+                    <button onclick="matchColumnsToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-toolbar btn-toolbar-match" title="Cocokkan header secara otomatis ke master kolom">
+                        <i class="bi bi-stars"></i> Cocokkan Master
+                    </button>
+                    <button onclick="addColFromMaster(${tableId}, '${tn}')" class="btn btn-sm btn-toolbar btn-toolbar-addcol" title="Daftarkan kolom tabel ini ke master">
+                        <i class="bi bi-clipboard-plus"></i> Daftarkan Master
+                    </button>
+                </div>
 
-
-
-                <!-- Transform & Master Group -->
-
-                <button onclick="transposeCsvLocal()" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#b45309; background:#fffbeb; border-color:#fde68a !important;" title="Tukar baris dan kolom tabel">
-
-                    <i class="bi bi-arrow-left-right"></i> Transpose
-
-                </button>
-
-                <button onclick="renameHeadersToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#1d4ed8; background:#eff6ff; border-color:#bfdbfe !important;" title="Ganti header sesuai master kolom">
-
-                    <i class="bi bi-pencil-square"></i> Nama Master
-
-                </button>
-
-                <button onclick="matchColumnsToMaster(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#0e7490; background:#ecfeff; border-color:#a5f3fc !important;" title="Cocokkan header secara otomatis ke master kolom">
-
-                    <i class="bi bi-stars"></i> Cocokkan Master
-
-                </button>
-
-                <button onclick="addColFromMaster(${tableId}, '${tn}')" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 10px; border-radius:6px; color:#334155; background:#f1f5f9; border-color:#cbd5e1 !important;" title="Daftarkan kolom tabel ini ke master">
-
-                    <i class="bi bi-clipboard-plus"></i> Daftarkan Master
-
-                </button>
-
-                
-
-                <!-- Save Changes Button -->
-
-                <button onclick="saveCsvChangesToServer(${tableId})" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 ms-auto" style="font-weight:700; font-size:0.82rem; padding:5px 16px; border-radius:6px; box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);">
-
-                    <i class="bi bi-check2-circle"></i> Simpan Perubahan
-
-                </button>
-
+                <!-- Baris 3 / Save Changes Button -->
+                <div class="toolbar-section toolbar-section-save ms-auto">
+                    <button onclick="saveCsvChangesToServer(${tableId})" class="btn btn-sm btn-success btn-toolbar btn-toolbar-save" title="Simpan perubahan ke database">
+                        <i class="bi bi-check2-circle"></i> Simpan Perubahan
+                    </button>
+                </div>
             </div>
-
         `;
 
     } else {
-
         toolbar.innerHTML = `
-
-            <button onclick="backToTableList()" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 12px; border-radius:6px;">
-
-                <i class="bi bi-arrow-left"></i> Kembali
-
-            </button>
-
-            <div id="nav-buttons" class="btn-group" role="group" style="margin-left: 8px;">
-
-                <button id="btn-prev" onclick="navigateTable('prev')" class="btn btn-sm btn-outline-secondary" style="font-size:0.8rem; padding:5px 10px;">
-
-                    <i class="bi bi-chevron-left"></i> Prev
-
-                </button>
-
-                <button id="btn-next" onclick="navigateTable('next')" class="btn btn-sm btn-outline-secondary" style="font-size:0.8rem; padding:5px 10px;">
-
-                    Next <i class="bi bi-chevron-right"></i>
-
-                </button>
-
+            <div class="editor-toolbar-inner">
+                <div class="toolbar-section toolbar-section-nav">
+                    <button onclick="backToTableList()" class="btn btn-sm btn-toolbar btn-toolbar-back" title="Kembali">
+                        <i class="bi bi-arrow-left"></i> Kembali
+                    </button>
+                    <div id="nav-buttons" class="btn-group toolbar-nav-group" role="group">
+                        <button id="btn-prev" onclick="navigateTable('prev')" class="btn btn-sm btn-toolbar btn-toolbar-prev" title="Tabel Sebelumnya">
+                            <i class="bi bi-chevron-left"></i> Prev
+                        </button>
+                        <button id="btn-next" onclick="navigateTable('next')" class="btn btn-sm btn-toolbar btn-toolbar-next" title="Tabel Selanjutnya">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    <button onclick="markAllSafeInTable(${tableId}, '${tn}')" class="btn btn-sm btn-success btn-toolbar" title="Tandai semua aman">
+                        <i class="bi bi-shield-check"></i> Tandai Semua Aman
+                    </button>
+                </div>
+                <div class="toolbar-section toolbar-section-status ms-auto">
+                    <span class="toolbar-note" style="font-size:0.8rem; color:#94a3b8;">Baris <span style='color:#ef4444;font-weight:700;'>merah</span> = data anomali. Auto-save aktif.</span>
+                </div>
             </div>
-
-            <button onclick="markAllSafeInTable(${tableId}, '${tn}')" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1" style="font-weight:600; font-size:0.8rem; padding:5px 12px; border-radius:6px;">
-
-                <i class="bi bi-shield-check"></i> Tandai Semua Aman
-
-            </button>
-
-            <span style="margin-left:auto; font-size:0.8rem; color:#94a3b8;">Baris <span style='color:#ef4444;font-weight:700;'>merah</span> = data anomali. Auto-save aktif.</span>
-
         `;
-
         fetchTableNeighbors(tableId);
-
     }
 
 }

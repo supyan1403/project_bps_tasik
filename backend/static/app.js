@@ -23588,6 +23588,12 @@ function toggleMobileSidebar() {
 
 function initSidebarState() {
     try {
+        if (window.innerWidth < 992) {
+            document.body.classList.remove('sidebar-collapsed');
+            document.documentElement.classList.remove('sidebar-collapsed-early');
+            return;
+        }
+
         const savedState = localStorage.getItem('sipedas_sidebar_collapsed');
         const hasCookie = document.cookie.indexOf('sipedas_sidebar_collapsed=true') !== -1;
         const isCollapsed = savedState === 'true' || (savedState === null && hasCookie);
@@ -23602,45 +23608,26 @@ function initSidebarState() {
     } catch(e) {}
 }
 
-
-
 // ===================== FLYOUT POPOVER LOGIC =====================
-
 // Karena sidebar punya overflow:hidden, popover perlu di-append ke body
-
 // lalu diposisikan secara absolut mengikuti koordinat icon yang di-hover.
-
 function initFlyoutPopovers() {
-
     const sidebarEl = document.querySelector('.sidebar');
-
     if (!sidebarEl) return;
 
-
-
     document.querySelectorAll('.has-flyout-submenu').forEach(li => {
-
         const navLink = li.querySelector('.nav-link');
-
         const popover = li.querySelector('.sidebar-floating-popover');
-
         if (!navLink || !popover) return;
 
-
-
         // Simpan referensi parent <li> asal
-
         popover._originalParent = li;
-
-
 
         let hideTimeout = null;
 
-
-
         function showPopover() {
-
-            if (!document.body.classList.contains('sidebar-collapsed')) return;
+            // Hanya aktif di layar Desktop (>= 992px) saat sidebar dalam mode collapsed/icon-only
+            if (window.innerWidth < 992 || !document.body.classList.contains('sidebar-collapsed')) return;
 
 
 

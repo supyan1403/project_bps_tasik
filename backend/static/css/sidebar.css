@@ -266,9 +266,11 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     pointer-events: auto;
 }
 
-body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover,
-body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
-    display: block;
+@media (min-width: 992px) {
+    body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover,
+    body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
+        display: block;
+    }
 }
 
 .sidebar-floating-popover .popover-header {
@@ -734,6 +736,16 @@ body.mobile-sidebar-active {
 
 /* --- Tablet & Mobile: < 992px --- */
 @media (max-width: 991.98px) {
+    /* Matikan sepenuhnya flyout floating popover di mobile (menu mobile harus accordion inline) */
+    .sidebar-floating-popover,
+    body.sidebar-collapsed .sidebar-floating-popover,
+    body.sidebar-collapsed .has-flyout-submenu:hover .sidebar-floating-popover {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
     /* Tampilkan hamburger button khusus mode Admin */
     body.role-admin .mobile-menu-toggle,
     html.is-admin-early body.role-admin .mobile-menu-toggle,

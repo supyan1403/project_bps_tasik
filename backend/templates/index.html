@@ -1297,24 +1297,19 @@
                             <!-- Chart Controls Card: Unit Converter + Display Options (Badge & Tooltip) + Entity Filter -->
                             <details class="ts-collapsible-mobile" open>
                             <summary class="ts-collapsible-header">Filter & Konversi</summary>
-                            <div class="ts-collapsible-body">
-                            <div id="ts-chart-control-card" class="ts-data-control-card mb-3 border shadow-sm" style="display:none; background: #ffffff; padding: 18px 22px; border-radius: 12px;">
+                            <div id="ts-chart-control-card" class="ts-data-control-card mt-2 border shadow-sm" style="display:none; background: #ffffff; padding: 18px 22px; border-radius: 12px;">
                                 <!-- Top Row: Unit Converter (Left) & Display Options (Right) -->
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-4 pb-3 mb-3 border-bottom" id="ts-chart-top-control-bar">
-                                    <!-- Chart Unit Converter -->
                                     <div id="ts-chart-unit-wrapper" class="d-flex flex-column" style="display:none;">
                                         <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
                                         <div id="ts-chart-unit-btn-group" class="d-flex flex-column gap-1 mt-1"></div>
                                     </div>
-                                    <!-- Info fallback jika tidak ada satuan yang bisa dikonversi -->
                                     <div id="ts-chart-unit-no-conversion" class="d-flex flex-column" style="display:none;">
                                         <span class="ts-filter-section-title"><i class="bi bi-info-circle text-secondary me-2"></i> Konversi Satuan</span>
                                         <span style="font-size:0.78rem; color:var(--text-secondary, #64748b); margin-top:2px;">Indikator ini tidak memiliki satuan yang bisa dikonversi.</span>
                                     </div>
-
-                                    <!-- Chart Display Toggles: Badge Naik/Turun & Tooltip -->
                                     <div class="d-flex flex-column gap-2 ms-auto" id="ts-chart-display-toggles-container">
-                                        <span class="ts-filter-section-title"><i class="bi bi-sliders text-secondary me-2"></i> OPSI TAMPILAN:</span>
+                                        <span class="ts-filter-section-title"><i class="bi bi-sliders text-primary me-2"></i> OPSI TAMPILAN:</span>
                                         <div class="d-flex align-items-center flex-wrap pt-0.5" style="gap: 12px;">
                                             <label class="ts-filter-chip active" id="ts-chart-badge-toggle-chip" style="margin:0; padding:5px 14px; font-size:0.8rem;">
                                                 <input type="checkbox" id="ts-chart-growth-badge-toggle" checked>
@@ -1327,15 +1322,11 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <!-- Bottom Row: Entity Filter -->
                                 <div class="d-flex flex-column gap-2 w-100" id="ts-chart-entity-wrapper">
-                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                        <span class="ts-filter-section-title"><i class="bi bi-funnel-fill text-primary me-2"></i> FILTER RINCIAN:</span>
-                                    </div>
+                                    <span class="ts-filter-section-title"><i class="bi bi-funnel-fill text-primary me-2"></i> FILTER RINCIAN:</span>
                                     <div id="ts-entity-checklist-chart" class="d-flex align-items-center"></div>
                                 </div>
-                            </div>
                             </div>
                             </details>
 

@@ -248,16 +248,18 @@
 
             <!-- Operator / Top App Bar (Header Halaman Utama) -->
             <div id="operator-header" class="operator-header align-items-center justify-content-between">
-                <!-- Sisi Kiri: Logo + SIPEDAS & Kepanjangannya (Unified Lockup) -->
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 gap-sm-3">
                     <button id="mobile-menu-toggle" class="mobile-menu-toggle me-1" onclick="toggleMobileSidebar()" aria-label="Buka menu">
                         <i class="bi bi-list"></i>
                     </button>
-                    <div class="d-flex align-items-center gap-2.5">
-                        <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo SIPEDAS" style="height: 34px; width: auto; object-fit: contain;">
+                    <div class="d-flex align-items-center gap-2 gap-sm-2.5">
+                        <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo SIPEDAS" class="header-brand-logo" style="height: 32px; width: auto; object-fit: contain;">
                         <div class="d-flex flex-column justify-content-center">
-                            <span style="font-family:'Inter', sans-serif; font-weight:800; font-style:italic; font-size:1.05rem; letter-spacing:-0.2px; color:var(--text-primary); line-height:1.15;">SIPEDAS</span>
-                            <span style="font-size:0.64rem; font-weight:500; color:var(--text-secondary); line-height:1.2; letter-spacing:-0.05px;">Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                            <span style="font-family:'Inter', sans-serif; font-weight:800; font-style:italic; font-size:1.02rem; letter-spacing:-0.2px; color:var(--text-primary); line-height:1.15;">SIPEDAS</span>
+                            <!-- Desktop & Tablet: Kepanjangan Lengkap -->
+                            <span class="d-none d-md-block text-truncate" style="font-size:0.64rem; font-weight:500; color:var(--text-secondary); line-height:1.2; letter-spacing:-0.05px;">Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                            <!-- Mobile: Identitas Resmi BPS Ringkas & Lega -->
+                            <span class="d-md-none text-nowrap" style="font-size:0.66rem; font-weight:600; color:var(--text-secondary); line-height:1.15; letter-spacing:0.1px;">BPS Kab. Tasikmalaya</span>
                         </div>
                     </div>
                 </div>
@@ -364,11 +366,12 @@
 
                     <!-- Main Content (Vertically Centered along Y-Axis) -->
                     <div class="position-relative my-auto" style="z-index: 2;">
-                        <h1 class="fs-2 fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.4px; line-height: 1.25;">
+                        <h1 class="welcome-banner-title fs-2 fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.4px; line-height: 1.25;">
                             Selamat Datang di <span class="text-brand-sipedas">SIPEDAS</span>
                         </h1>
-                        <p class="mb-0 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
-                            Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.
+                        <p class="welcome-banner-desc mb-0 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.55; max-width: 680px;">
+                            <span class="d-none d-md-inline">Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.</span>
+                            <span class="d-md-none">Portal integrasi &amp; analisis data statistik resmi Kabupaten Tasikmalaya.</span>
                         </p>
 
                         <!-- Admin Capabilities Badges (Hanya tampil saat mode Admin aktif) -->

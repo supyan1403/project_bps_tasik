@@ -19905,7 +19905,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
             ? scrollable.clientWidth 
             : (container && container.clientWidth > 50 ? container.clientWidth : 800);
         const parentWidth = parentW - 15;
-        const calculatedWidth = activeLabelsCount * 60;
+        const calculatedWidth = activeLabelsCount * 80;
         if (calculatedWidth > parentWidth) {
             wrapper.style.width = calculatedWidth + 'px';
         } else {

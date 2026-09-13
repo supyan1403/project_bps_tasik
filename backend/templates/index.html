@@ -55,12 +55,12 @@
         })();
     </script>
 </head>
-<body class="role-{{ initial_role | default('pegawai') }}">
+<body class="role-{{ initial_role | default('pegawai') }}" data-initial-sidebar-collapsed="{{ 'true' if initial_sidebar_collapsed else 'false' }}">
     <script>
         (function() {
             try {
                 if (window.innerWidth >= 992) {
-                    var isCollapsed = {{ 'true' if initial_sidebar_collapsed else 'false' }} ||
+                    var isCollapsed = document.body.getAttribute('data-initial-sidebar-collapsed') === 'true' ||
                                       document.documentElement.classList.contains('sidebar-collapsed-early') ||
                                       localStorage.getItem('sipedas_sidebar_collapsed') === 'true';
                     if (isCollapsed) {

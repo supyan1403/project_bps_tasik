@@ -28,6 +28,7 @@ backend/data/auth_credentials.json
 # Backup database (simpan di disk, jangan di-commit)
 backups/
 *.sql
+*backup*.json
 
 # Output ekstraksi (regenerable)
 output_extraction/

@@ -762,24 +762,43 @@ body.sidebar-collapsed .sidebar-floating-popover.popover-visible {
         padding-right: 1rem !important;
     }
 
-    /* Operator header menyatu penuh ke tepi layar (flush) */
+    /* Operator header menyatu penuh ke tepi layar (flush) & Sticky */
     .operator-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1020 !important;
         margin: -1rem -1rem 1rem -1rem !important;
-        padding: 10px 1rem !important;
+        padding-top: max(14px, env(safe-area-inset-top, 14px)) !important;
+        padding-bottom: 12px !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
         border-radius: 0 !important;
         border-left: none !important;
         border-right: none !important;
         border-top: none !important;
         border-bottom: 1px solid var(--border) !important;
-        background: #ffffff !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
     }
 }
 
 /* --- Small Phone: < 576px --- */
 @media (max-width: 575.98px) {
     .operator-header {
-        margin: -0.75rem -0.75rem 0.85rem -0.75rem !important;
-        padding: 8px 0.75rem !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1020 !important;
+        margin: -0.75rem -0.75rem 0.95rem -0.75rem !important;
+        padding-top: max(13px, env(safe-area-inset-top, 13px)) !important;
+        padding-bottom: 11px !important;
+        padding-left: 0.85rem !important;
+        padding-right: 0.85rem !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
     }
     .mobile-menu-toggle {
         width: 36px !important;
@@ -1034,6 +1053,14 @@ body.sidebar-collapsed .sidebar-user-avatar {
 html.sidebar-collapsed-early body .sidebar-user-dropdown,
 body.sidebar-collapsed .sidebar-user-dropdown {
     display: none !important;
+}
+
+/* Dark mode support for sticky operator-header */
+[data-bs-theme="dark"] .operator-header,
+body.dark-mode .operator-header {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
 }
 
 #btn-admin-logout,

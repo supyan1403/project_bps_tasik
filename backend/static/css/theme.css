@@ -217,6 +217,7 @@
     letter-spacing: -0.4px;
     background: linear-gradient(135deg, #ffffff 0%, #93c5fd 60%, #60a5fa 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
     padding-right: 0.12em;
@@ -229,6 +230,7 @@
     letter-spacing: -0.4px;
     background: linear-gradient(135deg, #ffffff 0%, #93c5fd 60%, #60a5fa 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
     padding-right: 0.18em;

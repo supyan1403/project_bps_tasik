@@ -23569,6 +23569,8 @@ function toggleMobileSidebar() {
         sidebar.classList.remove('mobile-open');
         overlay.classList.remove('active');
         setTimeout(() => { overlay.style.display = 'none'; }, 250);
+        document.documentElement.classList.remove('mobile-sidebar-active');
+        document.body.classList.remove('mobile-sidebar-active');
         document.body.style.overflow = '';
     } else {
         overlay.style.display = 'block';
@@ -23576,6 +23578,8 @@ function toggleMobileSidebar() {
             sidebar.classList.add('mobile-open');
             overlay.classList.add('active');
         });
+        document.documentElement.classList.add('mobile-sidebar-active');
+        document.body.classList.add('mobile-sidebar-active');
         document.body.style.overflow = 'hidden';
     }
 }

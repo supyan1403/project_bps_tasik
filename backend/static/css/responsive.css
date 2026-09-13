@@ -233,20 +233,29 @@
     .dashboard-analytics-header {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.65rem !important;
+        gap: 0.55rem !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
     }
 
     .dashboard-analytics-header .analytics-title-group {
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.35rem !important;
+        gap: 0.3rem !important;
         width: 100% !important;
     }
 
+    .dashboard-analytics-header .analytics-title-group .badge {
+        font-size: 0.65rem !important;
+        padding: 2px 7px !important;
+        letter-spacing: 0.3px;
+    }
+
     .dashboard-analytics-header .analytics-title-group h5 {
-        font-size: 0.95rem !important;
-        line-height: 1.35 !important;
+        font-size: 0.86rem !important;
+        line-height: 1.3 !important;
+        font-weight: 700 !important;
     }
 
     .dashboard-analytics-header .analytics-actions-group {
@@ -254,6 +263,15 @@
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+    }
+
+    .dashboard-analytics-header .analytics-actions-group small {
+        font-size: 0.72rem !important;
+    }
+
+    .dashboard-analytics-header .analytics-actions-group .btn {
+        font-size: 0.72rem !important;
+        padding: 2.5px 8px !important;
     }
 
     .welcome-banner.ts-hero-banner {

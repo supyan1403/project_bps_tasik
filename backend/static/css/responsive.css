@@ -1125,16 +1125,16 @@
     }
 
     .ts-filter-chip {
-        font-size: 1.0rem !important;
-        padding: 9px 20px !important;
+        font-size: 0.92rem !important;
+        padding: 7px 16px !important;
     }
     .ts-filter-chip input[type="checkbox"] {
-        width: 18px !important;
-        height: 18px !important;
+        width: 17px !important;
+        height: 17px !important;
     }
     .ts-variant-chip {
-        font-size: 0.98rem !important;
-        padding: 8px 18px !important;
+        font-size: 0.92rem !important;
+        padding: 7px 16px !important;
     }
     .ts-variant-chip input[type="radio"] {
         width: 17px !important;
@@ -1214,8 +1214,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 1.0rem !important;
-        padding: 9px 20px !important;
+        font-size: 0.92rem !important;
+        padding: 7px 16px !important;
     }
 
     .ts-control-chip-check label {
@@ -1701,16 +1701,16 @@
     }
 
     .ts-filter-chip {
-        font-size: 0.96rem !important;
-        padding: 8px 18px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
     .ts-filter-chip input[type="checkbox"] {
-        width: 17px !important;
-        height: 17px !important;
+        width: 16px !important;
+        height: 16px !important;
     }
     .ts-variant-chip {
-        font-size: 0.94rem !important;
-        padding: 7px 16px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
     .ts-variant-chip input[type="radio"] {
         width: 16px !important;
@@ -1759,8 +1759,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.96rem !important;
-        padding: 8px 18px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
 
     #ts-view-mode-bar {
@@ -2227,16 +2227,16 @@
     }
 
     .ts-filter-chip {
-        font-size: 0.92rem !important;
-        padding: 8px 17px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 13px !important;
     }
     .ts-filter-chip input[type="checkbox"] {
-        width: 17px !important;
-        height: 17px !important;
+        width: 16px !important;
+        height: 16px !important;
     }
     .ts-variant-chip {
-        font-size: 0.90rem !important;
-        padding: 7px 15px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 13px !important;
     }
     .ts-variant-chip input[type="radio"] {
         width: 16px !important;
@@ -2285,8 +2285,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.92rem !important;
-        padding: 8px 17px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 13px !important;
     }
 
     #ts-view-mode-bar {

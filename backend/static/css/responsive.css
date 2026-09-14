@@ -1214,8 +1214,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.72rem !important;
-        padding: 3px 8px !important;
+        font-size: 1.0rem !important;
+        padding: 9px 20px !important;
     }
 
     .ts-control-chip-check label {
@@ -1759,8 +1759,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.65rem !important;
-        padding: 3px 7px !important;
+        font-size: 0.96rem !important;
+        padding: 8px 18px !important;
     }
 
     #ts-view-mode-bar {
@@ -2285,8 +2285,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.65rem !important;
-        padding: 2px 6px !important;
+        font-size: 0.92rem !important;
+        padding: 8px 17px !important;
     }
 
     #ts-view-mode-bar {

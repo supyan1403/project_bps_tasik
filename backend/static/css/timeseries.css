@@ -525,12 +525,12 @@ button.ts-insight-select.dropdown-toggle::after {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 18px;
+    padding: 7px 16px;
     margin: 3px 5px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--text-primary);
     cursor: pointer;
@@ -549,8 +549,8 @@ button.ts-insight-select.dropdown-toggle::after {
 }
 
 .ts-filter-chip input[type="checkbox"] {
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
     cursor: pointer;
     margin: 0;
     accent-color: var(--primary);
@@ -588,11 +588,11 @@ button.ts-insight-select.dropdown-toggle::after {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 16px;
+    padding: 5px 13px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);
-    font-size: 0.92rem;
+    font-size: 0.82rem;
     font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
@@ -611,10 +611,10 @@ button.ts-insight-select.dropdown-toggle::after {
     font-weight: 600;
 }
 .ts-variant-chip input[type="radio"] {
-    width: 16px !important;
-    height: 16px !important;
-    min-width: 16px !important;
-    max-width: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 2px solid var(--border) !important;

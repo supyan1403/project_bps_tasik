@@ -2581,6 +2581,9 @@
     background: none !important;
     margin: 0 !important;
     letter-spacing: 0.2px !important;
+}
+
+.ts-collapsible-header--accent {
     border-bottom: 2px solid var(--primary, #1e40af) !important;
 }
 

@@ -1419,8 +1419,8 @@
     }
 
     .ts-unit-vk-chips label {
-        font-size: 0.72rem !important;
-        padding: 4px 10px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 14px !important;
     }
 
     /* Tahun awal/akhir full width */
@@ -1816,8 +1816,8 @@
     }
 
     .ts-unit-vk-chips label {
-        font-size: 0.68rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 14px !important;
     }
 
     .doc-icon-wrapper {
@@ -2334,8 +2334,8 @@
     }
 
     .ts-unit-vk-chips label {
-        font-size: 0.65rem !important;
-        padding: 3px 7px !important;
+        font-size: 0.82rem !important;
+        padding: 6px 13px !important;
     }
 
     #ts-growth-ranking-table {

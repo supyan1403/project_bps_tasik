@@ -1125,22 +1125,22 @@
     }
 
     .ts-filter-chip {
-        font-size: 0.92rem !important;
-        padding: 7px 16px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
     .ts-filter-chip input[type="checkbox"] {
-        width: 17px !important;
-        height: 17px !important;
+        width: 16px !important;
+        height: 16px !important;
     }
     .ts-variant-chip {
-        font-size: 0.92rem !important;
-        padding: 7px 16px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
     .ts-variant-chip input[type="radio"] {
-        width: 17px !important;
-        height: 17px !important;
-        min-width: 17px !important;
-        max-width: 17px !important;
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
     }
 
     .ts-hero-container .form-label.small {
@@ -1214,8 +1214,8 @@
 
     .ts-variant-chip,
     .ts-filter-chip {
-        font-size: 0.92rem !important;
-        padding: 7px 16px !important;
+        font-size: 0.88rem !important;
+        padding: 6px 14px !important;
     }
 
     .ts-control-chip-check label {

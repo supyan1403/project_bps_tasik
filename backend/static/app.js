@@ -20582,7 +20582,17 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
             },
 
+            interaction: {
+
+                mode: 'nearest',
+
+                intersect: false
+
+            },
+
             onHover: (event, elements, chart) => {
+
+                if (chart._isMobileTouch) return;
 
                 if (elements && elements.length > 0) {
 
@@ -21119,6 +21129,126 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
         if (_tsContainerLeaveTimer) { clearTimeout(_tsContainerLeaveTimer); _tsContainerLeaveTimer = null; }
 
     });
+
+
+
+    // 2c. Long-press tooltip for mobile touch devices
+
+    if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) {
+
+        var _touchLongPressTimer = null;
+
+        var _touchLongPressDuration = 350;
+
+        var _touchStartPos = null;
+
+        var _touchTooltipActive = false;
+
+
+
+        ctx.addEventListener('touchstart', function(e) {
+
+            if (e.touches.length !== 1) return;
+
+            var touch = e.touches[0];
+
+            _touchStartPos = { x: touch.clientX, y: touch.clientY };
+
+            _touchLongPressTimer = setTimeout(function() {
+
+                _touchTooltipActive = true;
+
+                chartInst._isMobileTouch = true;
+
+                var rect = ctx.getBoundingClientRect();
+
+                var fakeEvent = {
+
+                    clientX: _touchStartPos.x,
+
+                    clientY: _touchStartPos.y,
+
+                    type: 'touchstart'
+
+                };
+
+                var elements = chartInst.getElementsAtEventForMode(fakeEvent, 'nearest', { intersect: false }, false);
+
+                if (elements && elements.length > 0) {
+
+                    chartInst.setActiveElements(elements);
+
+                    chartInst.tooltip.setActiveElements(elements, { x: 0, y: 0 });
+
+                    chartInst.update('none');
+
+                }
+
+            }, _touchLongPressDuration);
+
+        }, { passive: true });
+
+
+
+        ctx.addEventListener('touchmove', function(e) {
+
+            if (_touchLongPressTimer) {
+
+                var touch = e.touches[0];
+
+                if (_touchStartPos) {
+
+                    var dx = Math.abs(touch.clientX - _touchStartPos.x);
+
+                    var dy = Math.abs(touch.clientY - _touchStartPos.y);
+
+                    if (dx > 10 || dy > 10) {
+
+                        clearTimeout(_touchLongPressTimer);
+
+                        _touchLongPressTimer = null;
+
+                    }
+
+                }
+
+            }
+
+        }, { passive: true });
+
+
+
+        ctx.addEventListener('touchend', function(e) {
+
+            if (_touchLongPressTimer) {
+
+                clearTimeout(_touchLongPressTimer);
+
+                _touchLongPressTimer = null;
+
+            }
+
+            if (_touchTooltipActive) {
+
+                _touchTooltipActive = false;
+
+                chartInst._isMobileTouch = false;
+
+                setTimeout(function() {
+
+                    chartInst.setActiveElements([]);
+
+                    chartInst.tooltip.setActiveElements([], { x: 0, y: 0 });
+
+                    chartInst.update('none');
+
+                }, 1500);
+
+            }
+
+        }, { passive: true });
+
+    }
 
 
 

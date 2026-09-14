@@ -327,9 +327,6 @@
 /* ===================== TIME SERIES DATA CONTROL CARD ===================== */
 .ts-data-control-card {
     background-color: var(--bg-card);
-    border: 1px solid var(--border) !important;
-    border-radius: var(--border-radius-lg) !important;
-    box-shadow: var(--shadow-card) !important;
     transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 

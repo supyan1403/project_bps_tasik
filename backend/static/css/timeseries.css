@@ -549,11 +549,31 @@ button.ts-insight-select.dropdown-toggle::after {
 }
 
 .ts-filter-chip input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    margin: 0;
-    accent-color: var(--primary);
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    box-shadow: none !important;
+    outline: none !important;
+    position: relative !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+.ts-filter-chip input[type="checkbox"]:checked {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 12px 12px !important;
 }
 
 /* Smart Column Indicator Chips */
@@ -611,10 +631,10 @@ button.ts-insight-select.dropdown-toggle::after {
     font-weight: 600;
 }
 .ts-variant-chip input[type="radio"] {
-    width: 14px !important;
-    height: 14px !important;
-    min-width: 14px !important;
-    max-width: 14px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 2px solid var(--border) !important;
@@ -638,8 +658,8 @@ button.ts-insight-select.dropdown-toggle::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--primary);
 }

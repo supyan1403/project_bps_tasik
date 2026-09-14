@@ -158,6 +158,10 @@
         padding: 5px 12px;
         margin: 2px 3px;
     }
+    .ts-variant-chip {
+        padding: 5px 12px;
+        margin: 2px 3px;
+    }
 
     #ts-chart-top-control-bar {
         flex-direction: column !important;

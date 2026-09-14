@@ -609,6 +609,7 @@ button.ts-insight-select.dropdown-toggle::after {
     align-items: center;
     gap: 8px;
     padding: 7px 16px;
+    margin: 3px 5px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);

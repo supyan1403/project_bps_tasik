@@ -159,8 +159,8 @@
         margin: 2px 3px;
     }
     .ts-variant-chip {
-        padding: 5px 12px;
-        margin: 2px 3px;
+        padding: 7px 16px;
+        margin: 3px 5px;
     }
 
     #ts-chart-top-control-bar {
@@ -1712,7 +1712,7 @@
     }
     .ts-variant-chip {
         font-size: 0.85rem !important;
-        padding: 6px 14px !important;
+        padding: 7px 16px !important;
     }
     .ts-variant-chip input[type="radio"] {
         width: 16px !important;
@@ -2272,7 +2272,7 @@
     }
     .ts-variant-chip {
         font-size: 0.82rem !important;
-        padding: 6px 13px !important;
+        padding: 7px 16px !important;
     }
     .ts-variant-chip input[type="radio"] {
         width: 15px !important;

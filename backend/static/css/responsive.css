@@ -2571,7 +2571,6 @@
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    flex-wrap: wrap !important;
     padding: 10px 16px !important;
     font-size: 0.78rem !important;
     font-weight: 700 !important;
@@ -2582,20 +2581,11 @@
     background: none !important;
     margin: 0 !important;
     letter-spacing: 0.2px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
 }
 
 .ts-collapsible-header::-webkit-details-marker {
     display: none !important;
-}
-
-.ts-collapsible-breadcrumb {
-    display: block !important;
-    width: 100% !important;
-    font-size: 0.72rem !important;
-    font-weight: 400 !important;
-    color: var(--text-secondary, #94a3b8) !important;
-    margin-top: 2px !important;
-    letter-spacing: 0.1px !important;
 }
 
 .ts-collapsible-header::after {

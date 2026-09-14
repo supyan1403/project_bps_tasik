@@ -607,14 +607,14 @@ button.ts-insight-select.dropdown-toggle::after {
 .ts-variant-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 13px;
+    gap: 8px;
+    padding: 7px 16px;
     border-radius: var(--border-radius);
     background: var(--bg-page);
     border: 1px solid var(--border);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;

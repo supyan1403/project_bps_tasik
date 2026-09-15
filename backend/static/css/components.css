@@ -679,6 +679,8 @@ body.role-pegawai #btn-admin-login {
     background: var(--bg-card);
     transition: all var(--transition-normal);
     border-color: var(--border) !important;
+    padding: 14px 16px;
+    gap: 12px;
 }
 .ts-export-format-card:hover {
     background: var(--bg-page);

@@ -9,7 +9,8 @@
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.3px;
-    margin-bottom: 0.5rem !important;
+    margin-top: 1.6rem !important;
+    margin-bottom: 0.65rem !important;
 }
 
 /* ===================== TIME SERIES WIZARD ===================== */

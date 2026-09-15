@@ -20668,7 +20668,10 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                     filter: function() {
 
-                        return !!(tsTooltipEnabled && window.tsTooltipEnabled !== false);
+                        if (!(tsTooltipEnabled && window.tsTooltipEnabled !== false)) return false;
+                        // Mobile: block built-in tooltip; only allow via long-press external
+                        if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) return false;
+                        return true;
 
                     },
 
@@ -20802,6 +20805,16 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                             return;
 
+                        }
+
+                        // Mobile: block tooltip from Chart.js auto-trigger; only allow via long-press
+                        var _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                        if (_isTouchDevice && !context.chart._touchTooltipActive) {
+                            if (el._hideTimer) clearTimeout(el._hideTimer);
+                            el._isHovered = false;
+                            el.style.opacity = '0';
+                            el.style.display = 'none';
+                            return;
                         }
 
                         const items = (tooltip.dataPoints || []).filter(d => !context.chart.data.datasets[d.datasetIndex].hidden);
@@ -21144,6 +21157,8 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
         var _touchTooltipActive = false;
 
+        var _touchAutoHideTimer = null;
+
 
 
         ctx.addEventListener('touchstart', function(e) {
@@ -21159,6 +21174,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
                 _touchTooltipActive = true;
 
                 chartInst._isMobileTouch = true;
+                chartInst._touchTooltipActive = true;
 
                 var rect = ctx.getBoundingClientRect();
 
@@ -21181,6 +21197,22 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
                     chartInst.tooltip.setActiveElements(elements, { x: 0, y: 0 });
 
                     chartInst.update('none');
+
+                    // Auto-hide tooltip after 2 seconds on mobile
+                    if (_touchAutoHideTimer) clearTimeout(_touchAutoHideTimer);
+                    _touchAutoHideTimer = setTimeout(function() {
+                        _touchTooltipActive = false;
+                        chartInst._touchTooltipActive = false;
+                        chartInst._isMobileTouch = false;
+                        chartInst.setActiveElements([]);
+                        chartInst.tooltip.setActiveElements([], { x: 0, y: 0 });
+                        chartInst.update('none');
+                        var tipEl = document.getElementById(tooltipElId);
+                        if (tipEl) {
+                            tipEl.style.opacity = '0';
+                            tipEl.style.display = 'none';
+                        }
+                    }, 2000);
 
                 }
 
@@ -21207,6 +21239,7 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
                         clearTimeout(_touchLongPressTimer);
 
                         _touchLongPressTimer = null;
+                        if (_touchAutoHideTimer) { clearTimeout(_touchAutoHideTimer); _touchAutoHideTimer = null; }
 
                     }
 
@@ -21233,6 +21266,8 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
                 _touchTooltipActive = false;
 
                 chartInst._isMobileTouch = false;
+                chartInst._touchTooltipActive = false;
+                if (_touchAutoHideTimer) { clearTimeout(_touchAutoHideTimer); _touchAutoHideTimer = null; }
 
                 setTimeout(function() {
 

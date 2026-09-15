@@ -62,10 +62,35 @@ input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:f
     border-color: var(--primary, #2563eb) !important;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e") !important;
 }
-.form-check-input[type="checkbox"]:checked {
+.form-check-input[type="checkbox"]:not(.form-switch *):not(.form-switch):checked {
     background-color: var(--primary, #2563eb) !important;
     border-color: var(--primary, #2563eb) !important;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+}
+
+/* ===================== FORM SWITCH TOGGLE (DESKTOP & MOBILE) ===================== */
+.form-switch {
+    padding-left: 2.8em !important;
+}
+.form-switch .form-check-input {
+    width: 2.4em !important;
+    height: 1.3em !important;
+    margin-left: -2.8em !important;
+    background-color: #cbd5e1 !important;
+    border-color: #cbd5e1 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e") !important;
+    background-position: left center !important;
+    background-repeat: no-repeat !important;
+    border-radius: 2em !important;
+    transition: background-position 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+.form-switch .form-check-input:checked {
+    background-color: var(--primary, #2563eb) !important;
+    border-color: var(--primary, #2563eb) !important;
+    background-position: right center !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e") !important;
 }
 
 /* ===================== BUTTONS ===================== */

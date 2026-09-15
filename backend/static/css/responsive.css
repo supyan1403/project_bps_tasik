@@ -1238,15 +1238,15 @@
         font-size: 0.82rem !important;
     }
 
-    /* Modal export responsive mobile overhaul: compact floating dialog with internal scroll */
+    /* Modal export responsive mobile overhaul: spacious floating dialog with internal scroll */
     .modal-export-responsive {
-        width: 90% !important;
-        max-width: min(420px, calc(100vw - 28px)) !important;
+        width: calc(100vw - 24px) !important;
+        max-width: 440px !important;
         margin: 1.25rem auto !important;
     }
 
     #modal-ts-export-custom .modal-content {
-        max-height: min(80vh, 580px) !important;
+        max-height: min(82vh, 620px) !important;
         display: flex !important;
         flex-direction: column !important;
         border-radius: 16px !important;
@@ -1255,29 +1255,29 @@
 
     #modal-ts-export-custom .modal-header {
         flex-shrink: 0 !important;
-        padding: 0.65rem 0.9rem !important;
+        padding: 0.85rem 1.15rem !important;
         background: #ffffff !important;
         border-bottom: 1px solid #e9ecef !important;
     }
 
     #modal-ts-export-custom .modal-header .modal-ts-header-icon {
-        width: 32px !important;
-        height: 32px !important;
-        border-radius: 8px !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 9px !important;
     }
 
     #modal-ts-export-custom .modal-header .modal-ts-header-icon i {
-        font-size: 0.95rem !important;
+        font-size: 1.05rem !important;
     }
 
     #modal-ts-export-custom .modal-title {
-        font-size: 0.92rem !important;
-        line-height: 1.25 !important;
+        font-size: 0.96rem !important;
+        line-height: 1.3 !important;
     }
 
     #modal-ts-export-custom .modal-ts-header-subtitle {
-        font-size: 0.70rem !important;
-        line-height: 1.2 !important;
+        font-size: 0.72rem !important;
+        line-height: 1.25 !important;
     }
 
     #modal-ts-export-custom .modal-body {
@@ -1285,36 +1285,41 @@
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
-        padding: 0.75rem 0.9rem !important;
+        padding: 1rem 1.15rem !important;
     }
 
+    /* Scrollbar gutter yang rapi & tidak menempel ke border */
     #modal-ts-export-custom .modal-body::-webkit-scrollbar {
-        width: 4px;
+        width: 5px;
+    }
+
+    #modal-ts-export-custom .modal-body::-webkit-scrollbar-track {
+        background: transparent;
     }
 
     #modal-ts-export-custom .modal-body::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.18);
+        border-radius: 6px;
     }
 
-    /* Standardized section spacing in modal */
+    /* Standardized section spacing with comfortable breathing room */
     #modal-ts-export-custom .ts-export-section {
-        margin-bottom: 11px !important;
+        margin-bottom: 16px !important;
         padding-bottom: 0 !important;
     }
 
     #modal-ts-export-custom .ts-export-section-title {
-        font-size: 0.80rem !important;
+        font-size: 0.82rem !important;
         letter-spacing: 0.2px !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 8px !important;
     }
 
-    /* Pilihan Format: Berdampingan 2 Kolom Kompak */
+    /* Pilihan Format: Berdampingan 2 Kolom Lega & Rapi */
     #modal-ts-export-custom .ts-export-format-card {
-        padding: 7px 9px !important;
-        gap: 6px !important;
-        min-height: 42px !important;
-        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        gap: 8px !important;
+        min-height: 48px !important;
+        border-radius: 10px !important;
     }
 
     #modal-ts-export-custom .ts-export-format-card input[type="radio"] {
@@ -1326,25 +1331,21 @@
     }
 
     #modal-ts-export-custom .ts-export-format-card .fw-bold {
-        font-size: 0.80rem !important;
+        font-size: 0.84rem !important;
     }
 
     #modal-ts-export-custom .ts-export-format-card i {
-        font-size: 1.05rem !important;
+        font-size: 1.15rem !important;
     }
 
-    /* Preset Cepat: Chip Scroll Horizontal */
+    /* Preset Cepat: Baris Penuh dengan Chip Scroll Horizontal */
     .ts-export-preset-wrapper {
-        flex-wrap: nowrap !important;
-        overflow: hidden !important;
-        margin-bottom: 8px !important;
-        gap: 6px !important;
+        margin-bottom: 10px !important;
     }
 
     .ts-export-preset-label {
-        font-size: 0.72rem !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
+        font-size: 0.74rem !important;
+        color: #64748b !important;
     }
 
     .ts-export-preset-group {
@@ -1353,8 +1354,9 @@
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none !important;
         white-space: nowrap !important;
-        max-width: 100% !important;
-        padding: 2px !important;
+        width: 100% !important;
+        padding: 3px 2px !important;
+        gap: 6px !important;
         border-radius: 10px !important;
     }
 
@@ -1365,22 +1367,28 @@
     .ts-export-preset-btn {
         flex: 0 0 auto !important;
         white-space: nowrap !important;
-        font-size: 0.70rem !important;
-        padding: 4px 10px !important;
-        min-height: 26px !important;
-        border-radius: 6px !important;
+        font-size: 0.74rem !important;
+        padding: 5px 12px !important;
+        min-height: 30px !important;
+        border-radius: 7px !important;
     }
 
-    /* Komponen Checklist Ramping */
+    /* Komponen Checklist Bersih & Lega (Hilangkan kesan kotak ganda) */
     .ts-export-components-box {
-        padding: 6px 8px !important;
-        gap: 5px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        gap: 8px !important;
     }
 
     .ts-export-component-item {
-        padding: 7px 8px !important;
-        gap: 8px !important;
-        border-radius: 7px !important;
+        padding: 10px 12px !important;
+        gap: 10px !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
     }
 
     .ts-export-component-badge {
@@ -1392,60 +1400,63 @@
     }
 
     .ts-export-component-title {
-        font-size: 0.80rem !important;
+        font-size: 0.84rem !important;
     }
 
     /* Sub-opsi Format Tren */
     #ts-export-insights-suboptions {
-        padding-left: 10px !important;
-        margin-top: 6px !important;
-        padding-top: 6px !important;
-        gap: 6px !important;
+        padding-left: 6px !important;
+        margin-top: 8px !important;
+        padding-top: 8px !important;
+        gap: 8px !important;
+        border-top: 1px solid #f1f5f9 !important;
     }
 
     #ts-export-insights-suboptions .radio-label {
-        font-size: 0.74rem !important;
+        font-size: 0.76rem !important;
         display: flex !important;
         align-items: center !important;
-        gap: 6px !important;
+        gap: 8px !important;
         cursor: pointer;
+        padding: 2px 0;
     }
 
     #ts-export-insights-suboptions .radio-label input[type="radio"] {
-        width: 15px !important;
-        height: 15px !important;
+        width: 16px !important;
+        height: 16px !important;
         margin: 0 !important;
         flex-shrink: 0 !important;
     }
 
     /* Section Pengaturan PDF */
     #ts-export-pdf-options {
-        padding: 9px 11px !important;
+        padding: 12px 14px !important;
         margin-bottom: 0 !important;
+        border-radius: 10px !important;
     }
 
     #ts-export-pdf-options .form-label {
-        font-size: 0.76rem !important;
-        margin-bottom: 5px !important;
+        font-size: 0.78rem !important;
+        margin-bottom: 6px !important;
     }
 
     #ts-export-pdf-options .form-select-sm {
-        font-size: 0.78rem !important;
-        padding: 5px 8px !important;
+        font-size: 0.80rem !important;
+        padding: 6px 10px !important;
     }
 
     /* Pinned Modal Footer */
     #modal-ts-export-custom .modal-footer {
         flex-shrink: 0 !important;
-        padding: 0.65rem 0.9rem !important;
+        padding: 0.85rem 1.15rem !important;
         background: #ffffff !important;
         border-top: 1px solid #e9ecef !important;
     }
 
     #modal-ts-export-custom .modal-footer .btn {
-        font-size: 0.80rem !important;
-        padding: 6px 13px !important;
-        min-height: 34px !important;
+        font-size: 0.82rem !important;
+        padding: 7px 16px !important;
+        min-height: 38px !important;
         border-radius: 8px !important;
     }
 
@@ -2100,21 +2111,21 @@
 
     /* Modal export responsive mobile */
     .modal-export-responsive {
-        width: 92% !important;
-        max-width: min(420px, calc(100vw - 20px)) !important;
+        width: calc(100vw - 20px) !important;
+        max-width: 420px !important;
         margin: 1rem auto !important;
     }
 
     #modal-ts-export-custom .modal-header {
-        padding: 0.6rem 0.75rem !important;
+        padding: 0.75rem 0.95rem !important;
     }
 
     #modal-ts-export-custom .modal-body {
-        padding: 0.65rem 0.75rem !important;
+        padding: 0.85rem 0.95rem !important;
     }
 
     #modal-ts-export-custom .modal-footer {
-        padding: 0.6rem 0.75rem !important;
+        padding: 0.75rem 0.95rem !important;
     }
 
     .ts-insights-card {
@@ -2653,21 +2664,21 @@
 
     /* Modal export responsive mobile */
     .modal-export-responsive {
-        width: 94% !important;
-        max-width: calc(100vw - 16px) !important;
+        width: calc(100vw - 14px) !important;
+        max-width: 350px !important;
         margin: 0.75rem auto !important;
     }
 
     #modal-ts-export-custom .modal-header {
-        padding: 0.5rem 0.65rem !important;
+        padding: 0.65rem 0.8rem !important;
     }
 
     #modal-ts-export-custom .modal-body {
-        padding: 0.55rem 0.65rem !important;
+        padding: 0.75rem 0.8rem !important;
     }
 
     #modal-ts-export-custom .modal-footer {
-        padding: 0.5rem 0.65rem !important;
+        padding: 0.65rem 0.8rem !important;
     }
 
     .ts-insights-card {

@@ -1171,14 +1171,18 @@
     .ts-insight-card .fs-5,
     .ts-highlight-stat-card .fs-4,
     .ts-highlight-stat-card .fs-6 {
-        font-size: 0.88rem !important;
+        font-size: 1rem !important;
         margin-top: 2px !important;
     }
 
     .ts-insight-card .small,
     .ts-highlight-stat-card .small {
-        font-size: 0.64rem !important;
+        font-size: 0.78rem !important;
         letter-spacing: 0.3px !important;
+    }
+
+    .ts-insight-card .text-muted {
+        font-size: 0.72rem !important;
     }
 
     /* Toolbar mode switcher */
@@ -1741,12 +1745,16 @@
     .ts-insight-card .fs-5,
     .ts-highlight-stat-card .fs-4,
     .ts-highlight-stat-card .fs-6 {
-        font-size: 0.78rem !important;
+        font-size: 0.92rem !important;
     }
 
     .ts-insight-card .small,
     .ts-highlight-stat-card .small {
-        font-size: 0.6rem !important;
+        font-size: 0.74rem !important;
+    }
+
+    .ts-insight-card .text-muted {
+        font-size: 0.7rem !important;
     }
 
     .ts-segmented-btn {
@@ -2242,12 +2250,16 @@
     .ts-insight-card .fs-5,
     .ts-highlight-stat-card .fs-4,
     .ts-highlight-stat-card .fs-6 {
-        font-size: 0.75rem !important;
+        font-size: 0.86rem !important;
     }
 
     .ts-insight-card .small,
     .ts-highlight-stat-card .small {
-        font-size: 0.58rem !important;
+        font-size: 0.72rem !important;
+    }
+
+    .ts-insight-card .text-muted {
+        font-size: 0.68rem !important;
     }
 
     .ts-segmented-btn {

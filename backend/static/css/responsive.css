@@ -1288,6 +1288,8 @@
         width: 36px !important;
         height: 36px !important;
         border-radius: 9px !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
     }
 
     #modal-ts-export-custom .modal-header .modal-ts-header-icon i {
@@ -2697,6 +2699,14 @@
 
     #modal-ts-export-custom .modal-header {
         padding: 0.65rem 0.8rem !important;
+    }
+
+    #modal-ts-export-custom .modal-header .modal-ts-header-icon {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+        margin-right: 10px !important;
+        flex-shrink: 0 !important;
     }
 
     #modal-ts-export-custom .modal-body {

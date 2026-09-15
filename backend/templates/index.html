@@ -2545,7 +2545,7 @@
 
     <!-- Modal Ekspor Kustom PDF & PNG (Deret Waktu) -->
     <div class="modal fade" id="modal-ts-export-custom" tabindex="-1" aria-labelledby="modalTsExportTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-export-responsive">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg modal-export-responsive">
             <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
                 <!-- Modal Header: Executive Pure White / Clean Minimalist -->
                 <div class="modal-header px-3 px-sm-4 py-2.5 py-sm-3.5 bg-white border-bottom">
@@ -2567,8 +2567,8 @@
 
                 <div class="modal-body p-3 p-sm-4 modal-body-light">
                     <!-- 1. Pilihan Format File (PDF vs PNG) -->
-                    <div class="mb-3 mb-sm-4 pb-1">
-                        <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                    <div class="mb-3 mb-sm-4 pb-1 ts-export-section">
+                        <label class="form-label fw-bold text-dark mb-2 ts-export-section-title" style="font-size: 0.86rem; letter-spacing: 0.2px;">
                             1. PILIH FORMAT BERKAS:
                         </label>
                         <div class="row g-2 g-sm-3">
@@ -2602,17 +2602,17 @@
                     </div>
 
                     <!-- 2. Pilihan Komponen yang Disertakan -->
-                    <div class="mb-3 mb-sm-4 pb-1">
+                    <div class="mb-3 mb-sm-4 pb-1 ts-export-section">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <label class="form-label fw-bold text-dark mb-0" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                            <label class="form-label fw-bold text-dark mb-0 ts-export-section-title" style="font-size: 0.86rem; letter-spacing: 0.2px;">
                                 2. KOMPONEN YANG INGIN DISERTAKAN:
                             </label>
-                            <span class="badge bg-primary-subtle text-primary border px-2.5 py-1" style="font-size: 0.73rem;">Bebas dipilih</span>
+                            <span class="badge bg-primary-subtle text-primary border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.73rem;">Bebas dipilih</span>
                         </div>
 
                         <!-- Quick Presets (Segmented Pill Group) -->
-                        <div class="d-flex align-items-center flex-wrap mb-2.5" style="gap: 8px;">
-                            <span class="text-secondary small fw-bold" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Cepat:</span>
+                        <div class="d-flex align-items-center flex-wrap mb-2.5 ts-export-preset-wrapper" style="gap: 8px;">
+                            <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Cepat:</span>
                             <div class="ts-export-preset-group" id="ts-export-preset-container">
                                 <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
                                     Laporan Lengkap (Semua)
@@ -2690,8 +2690,8 @@
                     </div>
 
                     <!-- 3. Pengaturan Tambahan PDF -->
-                    <div id="ts-export-pdf-options" class="bg-white rounded-3 border shadow-xs" style="padding: 18px 20px;">
-                        <label class="form-label fw-bold text-dark mb-2.5" style="font-size: 0.85rem; letter-spacing: 0.2px;">
+                    <div id="ts-export-pdf-options" class="bg-white rounded-3 border shadow-xs ts-export-section" style="padding: 18px 20px;">
+                        <label class="form-label fw-bold text-dark mb-2.5 ts-export-section-title" style="font-size: 0.85rem; letter-spacing: 0.2px;">
                             3. PENGATURAN TATA LETAK LAPORAN:
                         </label>
                         <div class="row g-3 align-items-center">

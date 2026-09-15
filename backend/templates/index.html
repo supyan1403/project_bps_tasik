@@ -2611,9 +2611,11 @@
                         </div>
 
                         <!-- Quick Presets (Segmented Pill Group) -->
-                        <div class="d-flex align-items-center flex-wrap mb-2.5 ts-export-preset-wrapper" style="gap: 8px;">
-                            <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Cepat:</span>
-                            <div class="ts-export-preset-group" id="ts-export-preset-container">
+                        <div class="mb-3 ts-export-preset-wrapper">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Pilihan Cepat:</span>
+                            </div>
+                            <div class="ts-export-preset-group w-100" id="ts-export-preset-container">
                                 <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
                                     Laporan Lengkap (Semua)
                                 </button>
@@ -2695,15 +2697,15 @@
                             3. PENGATURAN TATA LETAK LAPORAN:
                         </label>
                         <div class="row g-3 align-items-center">
-                            <div class="col-sm-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="small text-muted fw-medium mb-1.5" style="font-size: 0.76rem;">Orientasi Kertas:</label>
                                 <select id="ts-export-pdf-orientation" class="form-select form-select-sm" style="font-size: 0.82rem; padding: 6px 10px;">
                                     <option value="landscape" selected>Landscape / Mendatar (Direkomendasikan)</option>
                                     <option value="portrait">Portrait / Tegak</option>
                                 </select>
                             </div>
-                            <div class="col-sm-6">
-                                <label class="small text-muted fw-medium mb-1.5" style="font-size: 0.76rem;">Header Dokumen:</label>
+                            <div class="col-12 col-sm-6">
+                                <label class="small text-muted fw-medium mb-1.5 d-none d-sm-block" style="font-size: 0.76rem;">Header Dokumen:</label>
                                 <div class="form-check form-switch pt-1">
                                     <input class="form-check-input" type="checkbox" id="ts-export-include-header" checked style="cursor: pointer;">
                                     <label class="form-check-label small text-dark fw-medium" for="ts-export-include-header" style="font-size: 0.8rem; cursor: pointer;">Sertakan Header & Logo SIPEDAS</label>

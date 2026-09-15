@@ -1362,6 +1362,8 @@
 
     #modal-ts-export-custom .ts-export-format-card i {
         font-size: 1.15rem !important;
+        margin-right: 8px !important;
+        flex-shrink: 0 !important;
     }
 
     /* Preset Cepat: Baris Penuh dengan Chip Scroll Horizontal */
@@ -1456,9 +1458,13 @@
 
     /* Section Pengaturan PDF */
     #ts-export-pdf-options {
-        padding: 12px 14px !important;
+        padding: 14px 16px 16px 16px !important;
         margin-bottom: 0 !important;
         border-radius: 10px !important;
+    }
+
+    #ts-export-pdf-options .form-check.form-switch {
+        margin-bottom: 4px !important;
     }
 
     #ts-export-pdf-options .form-label {
@@ -1637,6 +1643,7 @@
 
     #ts-result-title {
         font-size: 0.9rem !important;
+        margin-top: 1.4rem !important;
         padding-bottom: 6px !important;
     }
 
@@ -2062,6 +2069,7 @@
 
     #ts-result-title {
         font-size: 0.85rem !important;
+        margin-top: 1.35rem !important;
         padding-bottom: 5px !important;
     }
 
@@ -2604,6 +2612,7 @@
 
     #ts-result-title {
         font-size: 0.8rem !important;
+        margin-top: 1.25rem !important;
         padding-bottom: 4px !important;
     }
 

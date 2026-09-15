@@ -691,6 +691,10 @@ body.role-pegawai #btn-admin-login {
     border-color: var(--primary-light) !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+.ts-export-format-card i {
+    margin-right: 8px;
+    flex-shrink: 0;
+}
 .ts-export-component-item {
     border: 1px solid var(--bg-hover);
     transition: all 0.15s ease;

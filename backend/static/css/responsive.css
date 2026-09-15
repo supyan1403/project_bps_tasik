@@ -4,12 +4,31 @@
 
 /* ===================== BREAKPOINT 1: TABLET LANDSCAPE & TOUCH: < 1200px ===================== */
 @media (max-width: 1199.98px) {
-    html, body {
+    html {
         height: auto !important;
         min-height: 100% !important;
         overflow-y: auto !important;
-        overflow-x: clip !important;
+        overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Kunci scroll background saat modal atau dialog aktif agar tidak memunculkan scrollbar ganda */
+    html:has(body.modal-open),
+    html:has(body.swal2-shown),
+    html.modal-open,
+    html.swal2-shown,
+    body.modal-open,
+    body.swal2-shown {
+        overflow: hidden !important;
+        height: 100% !important;
+        touch-action: none;
     }
 
     .d-flex.vh-100 {
@@ -1239,10 +1258,15 @@
     }
 
     /* Modal export responsive mobile overhaul: spacious floating dialog with internal scroll */
+    #modal-ts-export-custom {
+        overflow-y: hidden !important;
+    }
+
     .modal-export-responsive {
+        --bs-modal-margin: 1.25rem;
         width: calc(100vw - 24px) !important;
         max-width: 440px !important;
-        margin: 1.25rem auto !important;
+        margin: var(--bs-modal-margin) auto !important;
     }
 
     #modal-ts-export-custom .modal-content {
@@ -2111,9 +2135,10 @@
 
     /* Modal export responsive mobile */
     .modal-export-responsive {
+        --bs-modal-margin: 1rem;
         width: calc(100vw - 20px) !important;
         max-width: 420px !important;
-        margin: 1rem auto !important;
+        margin: var(--bs-modal-margin) auto !important;
     }
 
     #modal-ts-export-custom .modal-header {
@@ -2664,9 +2689,10 @@
 
     /* Modal export responsive mobile */
     .modal-export-responsive {
+        --bs-modal-margin: 0.75rem;
         width: calc(100vw - 14px) !important;
         max-width: 350px !important;
-        margin: 0.75rem auto !important;
+        margin: var(--bs-modal-margin) auto !important;
     }
 
     #modal-ts-export-custom .modal-header {

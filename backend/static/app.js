@@ -11035,7 +11035,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         if (rawKeywords.length === 1) {
 
-            titleEl.innerHTML = `<div class="d-flex align-items-center gap-2 px-4 py-2.5" style="border-left:4px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary fs-4"></i><span style="font-size:1.05rem; font-weight:700; letter-spacing:0.5px; color:var(--text-primary, #1e293b);">Deret Waktu: <span style="color:var(--primary, #1e40af);">${escHtml(rawKeywords[0])}</span></span></div>`;
+            titleEl.innerHTML = `<div class="d-flex align-items-center gap-2 px-4 py-2.5" style="border-left:4px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary fs-4"></i><span style="font-size:1.05rem; font-weight:700; letter-spacing:0.5px; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span><span class="badge bg-primary text-white ms-2" style="font-size:0.72rem;">1 Indikator</span></div>`;
 
         } else if (rawKeywords.length > 1) {
 
@@ -11053,7 +11053,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
     if (badgesEl) {
 
-        if (rawKeywords.length > 1) {
+        if (rawKeywords.length > 0) {
 
             badgesEl.innerHTML = rawKeywords.map(ind => `<span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill shadow-xs" style="font-size:0.76rem; font-weight:500; letter-spacing:0.1px;">${escHtml(ind)}</span>`).join('');
 

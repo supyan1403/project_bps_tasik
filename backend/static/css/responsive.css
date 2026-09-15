@@ -1627,7 +1627,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 10px 8px !important;
+        padding: 8px 10px 8px !important;
     }
 
     .ts-trend-header {
@@ -2054,7 +2054,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 8px 6px !important;
+        padding: 7px 8px 6px !important;
     }
 
     .ts-trend-header {
@@ -2597,7 +2597,7 @@
     }
 
     .ts-collapsible-body {
-        padding: 0 6px 4px !important;
+        padding: 6px 6px 4px !important;
     }
 
     .ts-trend-header {
@@ -2970,7 +2970,7 @@
 }
 
 .ts-collapsible-body {
-    padding: 0 16px 14px !important;
+    padding: 14px 16px 14px !important;
 }
 
 /* ===================== TREND COLLAPSIBLE — WHITE + BORDER ACCENT ===================== */

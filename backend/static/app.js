@@ -13826,487 +13826,189 @@ async function executeTimeSeriesExport() {
 
 
 
-        // Create dedicated printable offscreen container
-
-        const reportContainer = document.createElement('div');
-
-        reportContainer.id = 'ts-export-temp-report';
-
-        reportContainer.style.cssText = 'position:fixed; left:-99999px; top:0; width:1200px; background:var(--bg-card, #ffffff); color:var(--text-primary, #1e293b); font-family:"Inter", -apple-system, BlinkMacSystemFont, sans-serif; padding:32px 36px; box-sizing:border-box; z-index:-1000;';
-
-
-
-        let reportHtml = '';
-
-        // Tentukan section aktif terakhir agar footer resmi SIPEDAS menempel di akhir halaman dokumen
-        const lastSectionKey = optTable ? 'data-table' : (optChart ? 'charts' : (optInsights ? 'insights' : 'cover'));
-        const footerHtml = `
-            <div id="ts-pdf-footer" style="border-top:1px solid var(--border, #e2e8f0); padding-top:10px; margin-top:20px; display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--text-secondary, #64748b);">
-                <div>Dokumen digenerasi secara otomatis oleh SIPEDAS BPS Kabupaten Tasikmalaya</div>
-                <div>SIPEDAS \u00A9 2026</div>
-            </div>
-        `;
-
-        // Running Header resmi BPS & SIPEDAS untuk semua halaman konten (halaman 2 ke atas)
-        if (includeHeader) {
-            reportHtml += `
-                <div id="ts-pdf-page-running-header" style="display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #cbd5e1; padding:4px 0 14px 0; margin-bottom:28px; background:#ffffff;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:36px; width:auto; object-fit:contain;">
-                        <div>
-                            <div style="font-size:13px; font-weight:800; color:#0f2b5c; letter-spacing:0.4px; font-family:'Inter', sans-serif;">
-                                SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
-                            </div>
-                            <div style="font-size:11px; font-weight:800; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-family:'Inter', sans-serif;">
-                                Badan Pusat Statistik Kabupaten Tasikmalaya
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Wrap Executive Modern Minimalist Cover (Option 1)
-        reportHtml += `
-            <div data-pdf-section="cover" style="min-height:510px; display:flex; flex-direction:column; justify-content:center; align-items:center; border:1.5px solid #cbd5e1; border-radius:16px; background:radial-gradient(circle at 50% 40%, #ffffff 0%, #f8fafc 100%); padding:40px 32px; box-sizing:border-box; position:relative; box-shadow:inset 0 0 40px rgba(0,0,0,0.015); margin-bottom:10px;">
-                
-                <!-- Logo SIPEDAS -->
-                <div style="margin-bottom:18px;">
-                    <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:120px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(15, 43, 92, 0.12));">
-                </div>
-
-                <!-- Brand Title -->
-                <div style="font-size:36px; font-weight:900; letter-spacing:3px; color:#0f2b5c; margin-bottom:6px; font-family:'Inter', sans-serif;">SIPEDAS</div>
-
-                <!-- Tagline / Kepanjangan -->
-                <div style="font-size:15px; font-weight:600; color:#475569; letter-spacing:0.3px; max-width:680px; text-align:center; line-height:1.45; margin-bottom:16px; font-family:'Inter', sans-serif;">
-                    Sistem Integrasi, Pencarian, dan Analisis Data Statistik
-                </div>
-
-                <!-- Garis Aksen BPS (Tricolor) -->
-                <div style="display:flex; gap:6px; margin-bottom:20px; align-items:center;">
-                    <span style="width:36px; height:3.5px; background:#0284c7; border-radius:2px;"></span>
-                    <span style="width:36px; height:3.5px; background:#16a34a; border-radius:2px;"></span>
-                    <span style="width:36px; height:3.5px; background:#f59e0b; border-radius:2px;"></span>
-                </div>
-
-                <!-- Nama Instansi Resmi -->
-                <div style="font-size:15px; font-weight:800; color:#1e293b; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:28px; font-family:'Inter', sans-serif;">
-                    Badan Pusat Statistik Kabupaten Tasikmalaya
-                </div>
-
-                <!-- Kartu Identitas Laporan -->
-                <div style="background:#ffffff; border:1px solid #bfdbfe; border-radius:12px; padding:18px 32px; text-align:center; box-shadow:0 3px 12px rgba(37, 99, 235, 0.08); max-width:720px; width:100%; box-sizing:border-box;">
-                    <div style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
-                        Laporan Analisis Deret Waktu
-                    </div>
-                    <div style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:10px; letter-spacing:-0.2px; font-family:'Inter', sans-serif;">
-                        ${escHtml(keywordTitle)}
-                    </div>
-                    <div style="font-size:12.5px; color:#334155; font-weight:600; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
-                        <span style="background:#f1f5f9; padding:4px 14px; border-radius:6px; color:#334155;">${escHtml(yearPeriodStr)}</span>
-                        <span style="background:#f1f5f9; padding:4px 14px; border-radius:6px; color:#334155;">Satuan: <b>${escHtml(unitLabel)}</b></span>
-                    </div>
-                </div>
-        `;
-
-        if (lastSectionKey === 'cover') {
-            reportHtml += footerHtml;
-        }
-        // Close cover section
-        reportHtml += `</div>`;
-
-        // 2. Komponen: Quick Insights & Peringkat Pertumbuhan (Berdasarkan Sub-opsi)
-        if (optInsights) {
-            reportHtml += `<div data-pdf-section="insights">`;
-            reportHtml += `
-                <div style="margin-bottom:26px;">
-                    <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:18px; letter-spacing:0.3px;">
-                        RINGKASAN TREN & PERINGKAT PERTUMBUHAN
-                    </div>
-            `;
-
-            // Render Card Metrik (jika 'both' atau 'card_only')
-            if (insightsScope === 'both' || insightsScope === 'card_only') {
-                const gainerName = document.getElementById('ts-gainer-name')?.textContent || '-';
-                const gainerBadge = document.getElementById('ts-gainer-badge')?.textContent || '0%';
-                const declinerName = document.getElementById('ts-decliner-name')?.textContent || '-';
-                const declinerBadge = document.getElementById('ts-decliner-badge')?.textContent || '0%';
-                const avgBadge = document.getElementById('ts-avg-badge')?.textContent || '0%';
-                const trendSummary = document.getElementById('ts-trend-summary')?.textContent || 'Tren Stabil';
-
-                reportHtml += `
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:14px;">
-                        <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-                            <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Pertumbuhan Tertinggi</div>
-                            <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(gainerName)}</div>
-                            <div style="font-size:12px; font-weight:700; color:var(--success, #16a34a); margin-top:2px;">${escHtml(gainerBadge)}</div>
-                        </div>
-                        <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-                            <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Penurunan Tertinggi</div>
-                            <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(declinerName)}</div>
-                            <div style="font-size:12px; font-weight:700; color:var(--danger, #dc2626); margin-top:2px;">${escHtml(declinerBadge)}</div>
-                        </div>
-                        <div style="background:var(--bg-page, #f8fafc); border:1px solid var(--border, #e2e8f0); padding:12px 14px; border-radius:8px;">
-                            <div style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:600; text-transform:uppercase;">Laju Rata-Rata Tahunan</div>
-                            <div style="font-size:14px; font-weight:700; color:var(--text-primary, #0f172a); margin-top:2px;">${escHtml(trendSummary)}</div>
-                            <div style="font-size:12px; font-weight:700; color:var(--info, #2563eb); margin-top:2px;">${escHtml(avgBadge)}</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Render Tabel Peringkat Pertumbuhan (jika 'both' atau 'table_only')
-            if (insightsScope === 'both' || insightsScope === 'table_only') {
-                const rankingTableEl = document.getElementById('ts-growth-ranking-table');
-                if (rankingTableEl) {
-                    const startYearText = document.getElementById('ts-th-year-start')?.textContent || 'Tahun Awal';
-                    const endYearText = document.getElementById('ts-th-year-end')?.textContent || 'Tahun Akhir';
-                    const rankingTbody = document.getElementById('ts-growth-ranking-tbody')?.innerHTML || '';
-
-                    reportHtml += `
-                        <div style="margin-top:14px;">
-                            <div style="font-size:12.5px; font-weight:700; color:#1e293b; margin-bottom:8px;">Tabel Urutan Peringkat Pertumbuhan (${escHtml(startYearText)} ke ${escHtml(endYearText)})</div>
-                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;" data-pdf-table="ranking">
-                                <thead data-pdf-table-header="ranking">
-                                    <tr>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:center; width:45px;">No.</th>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:left;">Rincian</th>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">${escHtml(startYearText)}</th>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">${escHtml(endYearText)}</th>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">Selisih Nominal</th>
-                                        <th style="background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:right;">Perubahan (%)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rankingTbody}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-            }
-
-            reportHtml += `</div>`;
-            if (lastSectionKey === 'insights') {
-                reportHtml += footerHtml;
-            }
-            // Close insights section
-            reportHtml += `</div>`;
-        }
-
-        // 3. Komponen: Grafik Visual
+        // Ekstraksi gambar grafik beresolusi tinggi terlebih dahulu (jika optChart dipilih)
+        const chartImages = [];
         if (optChart) {
-            reportHtml += `<div data-pdf-section="charts">`;
-            reportHtml += `
-                <div style="margin-bottom:26px; page-break-inside:avoid; break-inside:avoid;">
-                    <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:20px; letter-spacing:0.3px;">
-                        GRAFIK VISUAL DERET WAKTU
-                    </div>
-                    <div id="ts-export-chart-images-container" style="display:flex; flex-direction:column; gap:16px;"></div>
-                </div>
-            `;
-            if (lastSectionKey === 'charts') {
-                reportHtml += footerHtml;
-            }
-            // Close charts section
-            reportHtml += `</div>`;
-        }
+            const chartConfigs = [
+                { canvasId: 'timeSeriesChart', containerId: 'ts-chart-container', title: activeVKs[0] },
+                { canvasId: 'timeSeriesChart2', containerId: 'ts-chart-container-2', title: activeVKs[1] },
+                { canvasId: 'timeSeriesChart3', containerId: 'ts-chart-container-3', title: activeVKs[2] }
+            ];
 
-        // 4. Komponen: Tabel Data Tabular
-        if (optTable) {
-            reportHtml += `<div data-pdf-section="data-table">`;
-            const tableEl = document.getElementById('ts-grid');
-            if (tableEl) {
-                reportHtml += `
-                    <div style="margin-bottom:24px;">
-                        <div style="font-size:14px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:8px; margin-top:10px; margin-bottom:18px; letter-spacing:0.3px;">
-                            TABEL DATA TABULAR
-                        </div>
-                        <div style="overflow-x:auto;">
-                            <table style="width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter', sans-serif;" data-pdf-table="tabular">
-                                ${tableEl.innerHTML}
-                            </table>
-                        </div>
-                    </div>
-                `;
-            }
-            if (lastSectionKey === 'data-table') {
-                reportHtml += footerHtml;
-            }
-            // Close data-table section
-            reportHtml += `</div>`;
-        }
+            for (const c of chartConfigs) {
+                const cont = document.getElementById(c.containerId);
+                if (cont && cont.style.display !== 'none') {
+                    try {
+                        const canvas = document.getElementById(c.canvasId);
+                        if (!canvas) continue;
 
-        reportContainer.innerHTML = reportHtml;
-        const clonedTables = reportContainer.querySelectorAll('table');
-        clonedTables.forEach(tbl => {
-            // Sanitasi: Hapus semua elemen tautan dan ikon lacak sumber data (↗) dari ekspor PDF
-            tbl.querySelectorAll('a, button, .bi-box-arrow-up-right').forEach(el => {
-                el.remove();
-            });
+                        let dataUrl = null;
+                        const originalChart = (window.Chart && Chart.getChart(canvas)) || (window.timeSeriesCharts && window.timeSeriesCharts[c.canvasId]);
 
-            tbl.querySelectorAll('th').forEach(th => {
-                th.style.cssText = 'background:#f1f5f9; color:var(--text-primary, #0f172a); font-weight:700; border:1px solid #cbd5e1; padding:6px 8px; text-align:center; font-size:10.5px;';
-            });
-            tbl.querySelectorAll('td').forEach(td => {
-                td.style.cssText = 'border:1px solid #e2e8f0; padding:5px 8px; font-size:10px; color:#334155;';
-            });
-            tbl.querySelectorAll('tr:nth-child(even) td').forEach(td => {
-                td.style.backgroundColor = cssVar('--bg-page') || '#f8fafc';
-            });
-        });
+                        if (originalChart && originalChart.data && originalChart.data.datasets) {
+                            try {
+                                const offCanvas = document.createElement('canvas');
+                                offCanvas.width = 1100;
+                                offCanvas.height = 460;
+                                const offCtx = offCanvas.getContext('2d');
 
-        document.body.appendChild(reportContainer);
+                                offCtx.fillStyle = '#ffffff';
+                                offCtx.fillRect(0, 0, 1100, 460);
 
-        // If chart is requested, convert active Chart canvases (timeSeriesChart) to high-res image elements
-        if (optChart) {
-            const chartImgContainer = reportContainer.querySelector('#ts-export-chart-images-container');
-            if (chartImgContainer) {
-                const chartConfigs = [
-                    { canvasId: 'timeSeriesChart', containerId: 'ts-chart-container', title: activeVKs[0] },
-                    { canvasId: 'timeSeriesChart2', containerId: 'ts-chart-container-2', title: activeVKs[1] },
-                    { canvasId: 'timeSeriesChart3', containerId: 'ts-chart-container-3', title: activeVKs[2] }
-                ];
+                                const clonedDatasets = (originalChart.data.datasets || []).map(ds => {
+                                    const isHidden = ds.hidden || tsHiddenEntities.has(ds.entity || ds.label);
+                                    return {
+                                        ...ds,
+                                        hidden: isHidden,
+                                        borderWidth: (ds.borderWidth || 2) + 0.5,
+                                        pointRadius: (ds.pointRadius || 3) + 1
+                                    };
+                                });
 
-                chartConfigs.forEach(c => {
-                    const cont = document.getElementById(c.containerId);
-                    if (cont && cont.style.display !== 'none') {
-                        try {
-                            const canvas = document.getElementById(c.canvasId);
-                            if (!canvas) return;
+                                const origYScale = (originalChart.options.scales && originalChart.options.scales.y) || {};
+                                const yTitleText = (origYScale.title && origYScale.title.text) || unitLabel || '';
 
-                            let dataUrl = null;
-                            const originalChart = (window.Chart && Chart.getChart(canvas)) || (window.timeSeriesCharts && window.timeSeriesCharts[c.canvasId]);
-
-                            if (originalChart && originalChart.data && originalChart.data.datasets) {
-                                try {
-                                    const offCanvas = document.createElement('canvas');
-                                    offCanvas.width = 1100;
-                                    offCanvas.height = 480;
-                                    const offCtx = offCanvas.getContext('2d');
-
-                                    offCtx.fillStyle = '#ffffff';
-                                    offCtx.fillRect(0, 0, 1100, 480);
-
-                                    const clonedDatasets = (originalChart.data.datasets || []).map(ds => {
-                                        const isHidden = ds.hidden || tsHiddenEntities.has(ds.entity || ds.label);
-                                        return {
-                                            ...ds,
-                                            hidden: isHidden,
-                                            borderWidth: (ds.borderWidth || 2) + 0.5,
-                                            pointRadius: (ds.pointRadius || 3) + 1
-                                        };
-                                    });
-
-                                    const origYScale = (originalChart.options.scales && originalChart.options.scales.y) || {};
-                                    const yTitleText = (origYScale.title && origYScale.title.text) || unitLabel || '';
-
-                                    const tempChart = new Chart(offCtx, {
-                                        type: originalChart.config.type || 'line',
-                                        data: {
-                                            labels: originalChart.data.labels || [],
-                                            datasets: clonedDatasets
-                                        },
-                                        options: {
-                                            responsive: false,
-                                            animation: false,
-                                            plugins: {
-                                                legend: {
-                                                    display: true,
-                                                    position: 'bottom',
-                                                    labels: {
-                                                        boxWidth: 12,
-                                                        boxHeight: 12,
-                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
-                                                        color: '#334155',
-                                                        padding: 12,
-                                                        filter: function(item, chartData) {
-                                                            const ds = chartData.datasets[item.datasetIndex];
-                                                            return !(ds && ds.hidden);
-                                                        }
+                                const tempChart = new Chart(offCtx, {
+                                    type: originalChart.config.type || 'line',
+                                    data: {
+                                        labels: originalChart.data.labels || [],
+                                        datasets: clonedDatasets
+                                    },
+                                    options: {
+                                        responsive: false,
+                                        animation: false,
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: 'bottom',
+                                                labels: {
+                                                    boxWidth: 12,
+                                                    boxHeight: 12,
+                                                    font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
+                                                    color: '#334155',
+                                                    padding: 10,
+                                                    filter: function(item, chartData) {
+                                                        const ds = chartData.datasets[item.datasetIndex];
+                                                        return !(ds && ds.hidden);
                                                     }
-                                                },
-                                                tooltip: { enabled: false },
-                                                progressiveLineTracer: false
+                                                }
                                             },
-                                            scales: {
-                                                x: {
-                                                    grid: { display: false },
-                                                    ticks: {
-                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '500' },
-                                                        color: '#475569',
-                                                        maxRotation: 45,
-                                                        minRotation: 0
-                                                    }
+                                            tooltip: { enabled: false }
+                                        },
+                                        scales: {
+                                            x: {
+                                                grid: { display: false },
+                                                ticks: {
+                                                    font: { family: 'Inter, sans-serif', size: 11, weight: '500' },
+                                                    color: '#475569',
+                                                    maxRotation: 45,
+                                                    minRotation: 0
+                                                }
+                                            },
+                                            y: {
+                                                beginAtZero: true,
+                                                grace: '8%',
+                                                grid: { color: '#f1f5f9' },
+                                                title: {
+                                                    display: !!yTitleText,
+                                                    text: yTitleText,
+                                                    font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
+                                                    color: '#64748b'
                                                 },
-                                                y: {
-                                                    beginAtZero: true,
-                                                    grace: '8%',
-                                                    grid: { color: '#f1f5f9' },
-                                                    title: {
-                                                        display: !!yTitleText,
-                                                        text: yTitleText,
-                                                        font: { family: 'Inter, sans-serif', size: 11, weight: '600' },
-                                                        color: '#64748b'
-                                                    },
-                                                    ticks: {
-                                                        font: { family: 'Inter, sans-serif', size: 10 },
-                                                        color: '#64748b',
-                                                        callback: function(v) {
-                                                            if (v >= 1e6) return (v / 1e6).toFixed(1) + 'jt';
-                                                            if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'rb';
-                                                            return v;
-                                                        }
+                                                ticks: {
+                                                    font: { family: 'Inter, sans-serif', size: 10 },
+                                                    color: '#64748b',
+                                                    callback: function(v) {
+                                                        if (v >= 1e6) return (v / 1e6).toFixed(1) + 'jt';
+                                                        if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'rb';
+                                                        return v;
                                                     }
                                                 }
                                             }
                                         }
-                                    });
+                                    }
+                                });
 
-                                    dataUrl = offCanvas.toDataURL('image/png', 1.0);
-                                    tempChart.destroy();
-                                } catch (renderErr) {
-                                    console.warn('Offscreen chart render fallback:', renderErr);
-                                }
+                                dataUrl = offCanvas.toDataURL('image/png', 1.0);
+                                tempChart.destroy();
+                            } catch (renderErr) {
+                                console.warn('Offscreen chart render fallback:', renderErr);
                             }
-
-                            if (!dataUrl) {
-                                dataUrl = canvas.toDataURL('image/png', 1.0);
-                            }
-
-                            if (dataUrl && dataUrl.length > 100) {
-                                const imgDiv = document.createElement('div');
-                                imgDiv.className = 'ts-pdf-chart-card';
-                                imgDiv.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:16px 18px; text-align:center; margin-bottom:16px; page-break-inside:avoid; break-inside:avoid; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-
-                                if (c.title) {
-                                    imgDiv.innerHTML = `<div style="font-size:13.5px; font-weight:700; color:var(--text-primary, #0f172a); margin-bottom:12px; text-align:left; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">${escHtml(c.title)}</div>`;
-                                }
-
-                                const img = document.createElement('img');
-                                img.src = dataUrl;
-                                img.style.cssText = 'width:100%; max-width:1100px; height:auto; display:block; margin:0 auto; object-fit:contain; border-radius:6px;';
-
-                                imgDiv.appendChild(img);
-                                chartImgContainer.appendChild(imgDiv);
-                            }
-                        } catch (err) {
-                            console.error('Error capturing chart canvas:', err);
                         }
+
+                        if (!dataUrl) {
+                            dataUrl = canvas.toDataURL('image/png', 1.0);
+                        }
+
+                        if (dataUrl && dataUrl.length > 100) {
+                            chartImages.push({ title: c.title, dataUrl });
+                        }
+                    } catch (err) {
+                        console.error('Error capturing chart canvas:', err);
                     }
-                });
-            }
-        }
-
-        // Wait brief tick for DOM rendering & images to settle
-        await new Promise(r => setTimeout(r, 250));
-
-        // Render with html2canvas
-        let capturedSections = [];
-        let capturedRunningHeader = null;
-
-        const canvas = await html2canvas(reportContainer, {
-            scale: 2,
-            backgroundColor: cssVar('--text-white') || '#ffffff',
-            useCORS: true,
-            logging: false,
-            onclone: function(clonedDoc) {
-                const clonedContainer = clonedDoc.getElementById('ts-export-temp-report');
-                if (!clonedContainer) return;
-                const containerRect = clonedContainer.getBoundingClientRect();
-
-                const runningHdr = clonedContainer.querySelector('#ts-pdf-page-running-header');
-                if (runningHdr) {
-                    const hdrRect = runningHdr.getBoundingClientRect();
-                    capturedRunningHeader = {
-                        top: Math.max(0, hdrRect.top - containerRect.top),
-                        height: hdrRect.height
-                    };
                 }
-
-                const sections = clonedContainer.querySelectorAll('[data-pdf-section]');
-                
-                sections.forEach(sec => {
-                    const secRect = sec.getBoundingClientRect();
-                    const secTop = Math.max(0, secRect.top - containerRect.top);
-                    const secBottom = Math.max(0, secRect.bottom - containerRect.top);
-                    if (secBottom <= secTop) return;
-
-                    let tableInfo = null;
-                    const table = sec.querySelector('table');
-                    if (table) {
-                        const thead = table.querySelector('thead');
-                        const tbodyRows = table.querySelectorAll('tbody tr').length > 0 
-                            ? table.querySelectorAll('tbody tr') 
-                            : table.querySelectorAll('tr:not(thead tr)');
-                        let theadTop = 0;
-                        let theadH = 0;
-                        if (thead) {
-                            const theadRect = thead.getBoundingClientRect();
-                            theadTop = Math.max(0, theadRect.top - containerRect.top);
-                            theadH = theadRect.height;
-                        }
-
-                        const rowBoundaries = [];
-                        tbodyRows.forEach(tr => {
-                            const trRect = tr.getBoundingClientRect();
-                            const rTop = Math.max(0, trRect.top - containerRect.top);
-                            const rBottom = Math.max(0, trRect.bottom - containerRect.top);
-                            if (rBottom > rTop) {
-                                rowBoundaries.push({ top: rTop, bottom: rBottom });
-                            }
-                        });
-
-                        tableInfo = {
-                            theadTop: theadTop,
-                            theadH: theadH,
-                            rows: rowBoundaries
-                        };
-                    }
-
-                    const chartCards = sec.querySelectorAll('.ts-pdf-chart-card');
-                    const chartCardBoundaries = [];
-                    chartCards.forEach(card => {
-                        const cRect = card.getBoundingClientRect();
-                        const cTop = Math.max(0, cRect.top - containerRect.top);
-                        const cBottom = Math.max(0, cRect.bottom - containerRect.top);
-                        if (cBottom > cTop) {
-                            chartCardBoundaries.push({ top: cTop, bottom: cBottom });
-                        }
-                    });
-
-                    capturedSections.push({
-                        name: sec.dataset.pdfSection,
-                        top: secTop,
-                        bottom: secBottom,
-                        table: tableInfo,
-                        chartCards: chartCardBoundaries
-                    });
-                });
-            }
-        });
-
-        if (!capturedRunningHeader) {
-            const liveHdr = reportContainer.querySelector('#ts-pdf-page-running-header');
-            if (liveHdr) {
-                const cRect = reportContainer.getBoundingClientRect();
-                const hRect = liveHdr.getBoundingClientRect();
-                capturedRunningHeader = {
-                    top: Math.max(0, hRect.top - cRect.top),
-                    height: hRect.height
-                };
             }
         }
 
         const fileNameBase = _getTimeSeriesFileName('pdf').replace(/\.pdf$/i, '');
 
         if (format === 'png') {
-            // PNG Download
+            // PNG Download: buat kontainer kontinu sederhana untuk snapshot gambar utuh
+            const pngContainer = document.createElement('div');
+            pngContainer.id = 'ts-export-png-report';
+            pngContainer.style.cssText = 'position:fixed; left:-99999px; top:0; width:1200px; background:#ffffff; color:#1e293b; font-family:"Inter", -apple-system, BlinkMacSystemFont, sans-serif; padding:32px 36px; box-sizing:border-box; z-index:-1000;';
+
+            let pngHtml = '';
+            if (includeHeader) {
+                pngHtml += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #cbd5e1; padding-bottom:12px; margin-bottom:20px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:36px; width:auto; object-fit:contain;">
+                            <div>
+                                <div style="font-size:13px; font-weight:800; color:#0f2b5c;">SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span></div>
+                                <div style="font-size:11px; font-weight:800; color:#1e293b; text-transform:uppercase; margin-top:2px;">Badan Pusat Statistik Kabupaten Tasikmalaya</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Kartu Ringkasan
+            pngHtml += `
+                <div style="background:#f8fafc; border:1px solid #bfdbfe; border-radius:10px; padding:16px 20px; margin-bottom:20px;">
+                    <div style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Laporan Analisis Deret Waktu</div>
+                    <div style="font-size:18px; font-weight:900; color:#0f172a; margin-bottom:6px;">${escHtml(keywordTitle)}</div>
+                    <div style="font-size:12px; color:#475569;">${escHtml(yearPeriodStr)} \u2022 Satuan: <b>${escHtml(unitLabel)}</b></div>
+                </div>
+            `;
+
+            if (optChart && chartImages.length > 0) {
+                pngHtml += `<div style="margin-bottom:24px;">`;
+                chartImages.forEach(c => {
+                    pngHtml += `
+                        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:16px; text-align:center;">
+                            ${c.title ? `<div style="font-size:13px; font-weight:700; text-align:left; margin-bottom:10px;">${escHtml(c.title)}</div>` : ''}
+                            <img src="${c.dataUrl}" style="width:100%; max-width:1100px; height:auto; display:block; margin:0 auto; border-radius:6px;">
+                        </div>
+                    `;
+                });
+                pngHtml += `</div>`;
+            }
+
+            pngContainer.innerHTML = pngHtml;
+            document.body.appendChild(pngContainer);
+
+            await new Promise(r => setTimeout(r, 200));
+
+            const canvas = await html2canvas(pngContainer, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false
+            });
+
             canvas.toBlob(blob => {
-                if (!blob) {
-                    throw new Error('Gagal membuat berkas gambar PNG');
-                }
+                if (!blob) throw new Error('Gagal membuat berkas gambar PNG');
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -14315,287 +14017,431 @@ async function executeTimeSeriesExport() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                if (reportContainer && reportContainer.parentNode) {
-                    reportContainer.parentNode.removeChild(reportContainer);
+                if (pngContainer && pngContainer.parentNode) {
+                    pngContainer.parentNode.removeChild(pngContainer);
                 }
                 Swal.close();
                 showToast('success', 'Berhasil', 'Gambar grafik & data (.png) berhasil diunduh.');
             }, 'image/png');
+
         } else {
-            // PDF Generation: Smart Row-Aware & Section-Aware pagination
+            // =========================================================================
+            // PDF GENERATION: DETERMINISTIC PAGE-BASED LAYOUT ENGINE (A4 PRINT READY)
+            // =========================================================================
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
 
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
-            const marginTop = 36, marginBottom = 36, marginLeft = 28, marginRight = 28;
-            const contentWidth = pdfWidth - (marginLeft + marginRight);
-            const pageEffectiveHeight = pdfHeight - (marginTop + marginBottom);
-            const maxCanvasSliceH = Math.floor((pageEffectiveHeight * canvas.width) / contentWidth);
-            const totalSrcHeight = canvas.height;
+            const isLandscape = (orientation === 'landscape');
 
-            const canvasScale = canvas.width / (reportContainer.offsetWidth || 1200);
+            // Tetapkan rasio piksel presisi yang sinkron 1:1 dengan rasio A4
+            const pagePxW = isLandscape ? 1190 : 842;
+            const pagePxH = isLandscape ? 841 : 1191;
 
-            let runningHeaderCanvasTop = 0;
-            let runningHeaderCanvasH = 0;
-            if (capturedRunningHeader) {
-                runningHeaderCanvasTop = Math.floor(capturedRunningHeader.top * canvasScale);
-                runningHeaderCanvasH = Math.ceil(capturedRunningHeader.height * canvasScale);
+            // Wadah offscreen terisolasi
+            const stagingContainer = document.createElement('div');
+            stagingContainer.id = 'ts-export-staging';
+            stagingContainer.style.cssText = 'position:fixed; left:-99999px; top:0; z-index:-1000; font-family:"Inter", -apple-system, BlinkMacSystemFont, sans-serif;';
+            document.body.appendChild(stagingContainer);
+
+            const pageElements = [];
+
+            // Tinggi area konten efektif per halaman
+            const paddingVertical = 56; // 22px top + 34px bottom
+            const runningHeaderH = includeHeader ? 54 : 0;
+            const usableContentH = pagePxH - paddingVertical - runningHeaderH;
+
+            // Factory Pembuat Halaman Konten
+            function createContentPage(pageNum) {
+                const page = document.createElement('div');
+                page.className = 'ts-pdf-page';
+                page.style.cssText = `width:${pagePxW}px; height:${pagePxH}px; max-height:${pagePxH}px; padding:22px 32px 34px 32px; box-sizing:border-box; background:#ffffff; position:relative; overflow:hidden; display:flex; flex-direction:column;`;
+
+                if (includeHeader) {
+                    const hdr = document.createElement('div');
+                    hdr.className = 'ts-pdf-running-header';
+                    hdr.style.cssText = 'display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #cbd5e1; padding-bottom:8px; margin-bottom:14px; flex-shrink:0;';
+                    hdr.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:32px; width:auto; object-fit:contain;">
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#0f2b5c; letter-spacing:0.3px; font-family:'Inter', sans-serif;">
+                                    SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                                </div>
+                                <div style="font-size:10px; font-weight:800; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px; margin-top:1px; font-family:'Inter', sans-serif;">
+                                    Badan Pusat Statistik Kabupaten Tasikmalaya
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:9.5px; font-weight:700; color:#2563eb; background:#eff6ff; padding:3px 10px; border-radius:4px; border:1px solid #bfdbfe;">
+                            ${escHtml(keywordTitle)}
+                        </div>
+                    `;
+                    page.appendChild(hdr);
+                }
+
+                const body = document.createElement('div');
+                body.className = 'ts-pdf-content-body';
+                body.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; overflow:hidden;';
+                page.appendChild(body);
+
+                const ftr = document.createElement('div');
+                ftr.className = 'ts-pdf-page-footer';
+                ftr.style.cssText = 'position:absolute; bottom:12px; left:32px; right:32px; display:flex; justify-content:space-between; align-items:center; font-size:9px; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:6px;';
+                ftr.innerHTML = `
+                    <div>SIPEDAS BPS Kabupaten Tasikmalaya</div>
+                    <div class="ts-pdf-page-number">Halaman ${pageNum}</div>
+                `;
+                page.appendChild(ftr);
+
+                return page;
             }
 
-            let sectionDataList = [];
-            if (capturedSections.length > 0) {
-                sectionDataList = capturedSections.map(s => {
-                    let tableData = null;
-                    if (s.table) {
-                        tableData = {
-                            theadCanvasTop: Math.floor(s.table.theadTop * canvasScale),
-                            theadCanvasH: Math.ceil(s.table.theadH * canvasScale),
-                            rows: s.table.rows.map(r => ({
-                                top: Math.floor(r.top * canvasScale),
-                                bottom: Math.ceil(r.bottom * canvasScale)
-                            }))
-                        };
-                    }
-                    return {
-                        name: s.name,
-                        canvasTop: Math.floor(s.top * canvasScale),
-                        canvasBottom: Math.min(totalSrcHeight, Math.ceil(s.bottom * canvasScale)),
-                        table: tableData,
-                        chartCards: s.chartCards.map(c => ({
-                            top: Math.floor(c.top * canvasScale),
-                            bottom: Math.ceil(c.bottom * canvasScale)
-                        }))
-                    };
-                });
-            } else {
-                const containerRect = reportContainer.getBoundingClientRect();
-                const containerHeight = reportContainer.offsetHeight || containerRect.height || 1;
-                const canvasScaleY = canvas.height / containerHeight;
-                const sections = reportContainer.querySelectorAll('[data-pdf-section]');
+            // =========================================================================
+            // 1. HALAMAN 1: SAMPUL RESMI MANDIRI (DEDICATED FULL COVER PAGE)
+            // =========================================================================
+            const coverPage = document.createElement('div');
+            coverPage.className = 'ts-pdf-page';
+            coverPage.style.cssText = `width:${pagePxW}px; height:${pagePxH}px; max-height:${pagePxH}px; padding:32px 36px; box-sizing:border-box; background:#ffffff; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;`;
+            coverPage.innerHTML = `
+                <div style="width:100%; max-width:${isLandscape ? '820px' : '700px'}; border:1.5px solid #cbd5e1; border-radius:18px; background:radial-gradient(circle at 50% 35%, #ffffff 0%, #f8fafc 100%); padding:${isLandscape ? '36px 36px' : '48px 36px'}; box-sizing:border-box; text-align:center; box-shadow:0 4px 20px rgba(15, 43, 92, 0.05); margin:auto;">
+                    <!-- Logo SIPEDAS -->
+                    <div style="margin-bottom:14px;">
+                        <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:${isLandscape ? 88 : 110}px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(15, 43, 92, 0.12));">
+                    </div>
+                    <!-- Brand Title -->
+                    <div style="font-size:${isLandscape ? '30px' : '34px'}; font-weight:900; letter-spacing:3px; color:#0f2b5c; margin-bottom:4px; font-family:'Inter', sans-serif;">SIPEDAS</div>
+                    <!-- Tagline -->
+                    <div style="font-size:${isLandscape ? '13.5px' : '14.5px'}; font-weight:600; color:#475569; letter-spacing:0.3px; max-width:620px; margin:0 auto 14px auto; line-height:1.45; font-family:'Inter', sans-serif;">
+                        Sistem Integrasi, Pencarian, dan Analisis Data Statistik
+                    </div>
+                    <!-- Garis Aksen BPS (Tricolor) -->
+                    <div style="display:flex; gap:6px; margin:0 auto 16px auto; justify-content:center; align-items:center;">
+                        <span style="width:36px; height:3.5px; background:#0284c7; border-radius:2px;"></span>
+                        <span style="width:36px; height:3.5px; background:#16a34a; border-radius:2px;"></span>
+                        <span style="width:36px; height:3.5px; background:#f59e0b; border-radius:2px;"></span>
+                    </div>
+                    <!-- Nama Instansi Resmi -->
+                    <div style="font-size:${isLandscape ? '13px' : '14px'}; font-weight:800; color:#1e293b; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:20px; font-family:'Inter', sans-serif;">
+                        Badan Pusat Statistik Kabupaten Tasikmalaya
+                    </div>
+                    <!-- Kartu Identitas Laporan -->
+                    <div style="background:#ffffff; border:1px solid #bfdbfe; border-radius:12px; padding:16px 24px; text-align:center; box-shadow:0 3px 12px rgba(37, 99, 235, 0.08); max-width:640px; margin:0 auto; box-sizing:border-box;">
+                        <div style="font-size:10.5px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
+                            Laporan Analisis Deret Waktu
+                        </div>
+                        <div style="font-size:${isLandscape ? '20px' : '22px'}; font-weight:900; color:#0f172a; margin-bottom:8px; letter-spacing:-0.2px; font-family:'Inter', sans-serif;">
+                            ${escHtml(keywordTitle)}
+                        </div>
+                        <div style="font-size:11.5px; color:#334155; font-weight:600; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
+                            <span style="background:#f1f5f9; padding:4px 12px; border-radius:6px; color:#334155;">${escHtml(yearPeriodStr)}</span>
+                            <span style="background:#f1f5f9; padding:4px 12px; border-radius:6px; color:#334155;">Satuan: <b>${escHtml(unitLabel)}</b></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cover Footer -->
+                <div style="position:absolute; bottom:16px; left:36px; right:36px; display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:6px;">
+                    <div>Dokumen resmi digenerasi oleh SIPEDAS BPS Kabupaten Tasikmalaya</div>
+                    <div>SIPEDAS \u00A9 2026</div>
+                </div>
+            `;
+            stagingContainer.appendChild(coverPage);
+            pageElements.push(coverPage);
 
-                sections.forEach(sec => {
-                    const secRect = sec.getBoundingClientRect();
-                    const secTop = Math.max(0, Math.floor((secRect.top - containerRect.top) * canvasScaleY));
-                    const secBottom = Math.min(totalSrcHeight, Math.ceil((secRect.bottom - containerRect.top) * canvasScaleY));
-                    if (secBottom <= secTop) return;
+            // =========================================================================
+            // 2. HALAMAN KONTEN: HALAMAN 2 KE ATAS
+            // =========================================================================
+            let currentPage = createContentPage(2);
+            stagingContainer.appendChild(currentPage);
+            pageElements.push(currentPage);
+            let currentUsedH = 0;
 
-                    let tableInfo = null;
-                    const table = sec.querySelector('table');
-                    if (table) {
-                        const thead = table.querySelector('thead');
-                        const tbodyRows = table.querySelectorAll('tbody tr').length > 0
-                            ? table.querySelectorAll('tbody tr')
-                            : table.querySelectorAll('tr:not(thead tr)');
-                        let theadCanvasTop = 0;
-                        let theadCanvasH = 0;
-                        if (thead) {
-                            const theadRect = thead.getBoundingClientRect();
-                            theadCanvasTop = Math.max(0, Math.floor((theadRect.top - containerRect.top) * canvasScaleY));
-                            theadCanvasH = Math.ceil(theadRect.height * canvasScaleY);
-                        }
-
-                        const rowBoundaries = [];
-                        tbodyRows.forEach(tr => {
-                            const trRect = tr.getBoundingClientRect();
-                            const rTop = Math.max(0, Math.floor((trRect.top - containerRect.top) * canvasScaleY));
-                            const rBottom = Math.min(totalSrcHeight, Math.ceil((trRect.bottom - containerRect.top) * canvasScaleY));
-                            if (rBottom > rTop) {
-                                rowBoundaries.push({ top: rTop, bottom: rBottom });
-                            }
-                        });
-
-                        tableInfo = {
-                            theadCanvasTop: theadCanvasTop,
-                            theadCanvasH: theadCanvasH,
-                            rows: rowBoundaries
-                        };
-                    }
-
-                    const chartCards = sec.querySelectorAll('.ts-pdf-chart-card');
-                    const chartCardBoundaries = [];
-                    chartCards.forEach(card => {
-                        const cRect = card.getBoundingClientRect();
-                        const cTop = Math.max(0, Math.floor((cRect.top - containerRect.top) * canvasScaleY));
-                        const cBottom = Math.min(totalSrcHeight, Math.ceil((cRect.bottom - containerRect.top) * canvasScaleY));
-                        if (cBottom > cTop) {
-                            chartCardBoundaries.push({ top: cTop, bottom: cBottom });
-                        }
-                    });
-
-                    sectionDataList.push({
-                        name: sec.dataset.pdfSection,
-                        canvasTop: secTop,
-                        canvasBottom: secBottom,
-                        table: tableInfo,
-                        chartCards: chartCardBoundaries
-                    });
-                });
+            function ensureSpace(neededH) {
+                if (currentUsedH + neededH > usableContentH) {
+                    const nextPageNum = pageElements.length + 1;
+                    currentPage = createContentPage(nextPageNum);
+                    stagingContainer.appendChild(currentPage);
+                    pageElements.push(currentPage);
+                    currentUsedH = 0;
+                }
             }
 
-            let pageNum = 1;
+            // A. KOMPONEN: QUICK INSIGHTS & PERINGKAT PERTUMBUHAN
+            if (optInsights) {
+                const insTitleEl = document.createElement('div');
+                insTitleEl.style.cssText = 'font-size:13px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:5px; margin-bottom:10px; letter-spacing:0.3px; flex-shrink:0;';
+                insTitleEl.textContent = 'RINGKASAN TREN & PERINGKAT PERTUMBUHAN';
 
-            if (sectionDataList.length > 0) {
-                for (const secData of sectionDataList) {
-                    let currY = secData.canvasTop;
-                    const secEnd = secData.canvasBottom;
-                    let isFirstPageOfSec = true;
+                if (insightsScope === 'both' || insightsScope === 'card_only') {
+                    const gainerName = document.getElementById('ts-gainer-name')?.textContent || '-';
+                    const gainerBadge = document.getElementById('ts-gainer-badge')?.textContent || '0%';
+                    const declinerName = document.getElementById('ts-decliner-name')?.textContent || '-';
+                    const declinerBadge = document.getElementById('ts-decliner-badge')?.textContent || '0%';
+                    const avgBadge = document.getElementById('ts-avg-badge')?.textContent || '0%';
+                    const trendSummary = document.getElementById('ts-trend-summary')?.textContent || 'Tren Stabil';
 
-                    while (currY < secEnd) {
-                        const isCover = (secData.name === 'cover');
-                        // Running header appears on ALL pages EXCEPT the cover
-                        const includeRunningHeader = !isCover && (runningHeaderCanvasH > 0);
-                        const runningH = includeRunningHeader ? runningHeaderCanvasH : 0;
-                        // Jarak napas lega antara garis bawah kop resmi dan judul konten di bawahnya (28pt)
-                        const headerGap = includeRunningHeader ? Math.round(28 * canvasScale) : 0;
+                    const cardsEl = document.createElement('div');
+                    cardsEl.style.cssText = 'display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:12px; flex-shrink:0;';
+                    cardsEl.innerHTML = `
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px;">
+                            <div style="font-size:10px; color:#64748b; font-weight:600; text-transform:uppercase;">Pertumbuhan Tertinggi</div>
+                            <div style="font-size:13px; font-weight:700; color:#0f172a; margin-top:2px;">${escHtml(gainerName)}</div>
+                            <div style="font-size:11.5px; font-weight:700; color:#16a34a; margin-top:2px;">${escHtml(gainerBadge)}</div>
+                        </div>
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px;">
+                            <div style="font-size:10px; color:#64748b; font-weight:600; text-transform:uppercase;">Penurunan Tertinggi</div>
+                            <div style="font-size:13px; font-weight:700; color:#0f172a; margin-top:2px;">${escHtml(declinerName)}</div>
+                            <div style="font-size:11.5px; font-weight:700; color:#dc2626; margin-top:2px;">${escHtml(declinerBadge)}</div>
+                        </div>
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px;">
+                            <div style="font-size:10px; color:#64748b; font-weight:600; text-transform:uppercase;">Laju Rata-Rata Tahunan</div>
+                            <div style="font-size:13px; font-weight:700; color:#0f172a; margin-top:2px;">${escHtml(trendSummary)}</div>
+                            <div style="font-size:11.5px; font-weight:700; color:#2563eb; margin-top:2px;">${escHtml(avgBadge)}</div>
+                        </div>
+                    `;
+                    ensureSpace(115);
+                    currentPage.querySelector('.ts-pdf-content-body').appendChild(insTitleEl);
+                    currentPage.querySelector('.ts-pdf-content-body').appendChild(cardsEl);
+                    currentUsedH += 115;
+                } else {
+                    ensureSpace(35);
+                    currentPage.querySelector('.ts-pdf-content-body').appendChild(insTitleEl);
+                    currentUsedH += 35;
+                }
 
-                        const hasTable = !!(secData.table && secData.table.theadCanvasH > 0);
-                        // Repeat table header ONLY if this section has a table, and we are beyond the first page of this section
-                        const needTableHeader = !isFirstPageOfSec && hasTable && (currY >= (secData.table.theadCanvasTop + secData.table.theadCanvasH));
-                        const tableH = needTableHeader ? secData.table.theadCanvasH : 0;
+                if (insightsScope === 'both' || insightsScope === 'table_only') {
+                    const rankingTableEl = document.getElementById('ts-growth-ranking-table');
+                    if (rankingTableEl) {
+                        const startYearText = document.getElementById('ts-th-year-start')?.textContent || 'Tahun Awal';
+                        const endYearText = document.getElementById('ts-th-year-end')?.textContent || 'Tahun Akhir';
+                        const rankingTrs = Array.from(document.querySelectorAll('#ts-growth-ranking-tbody tr'));
 
-                        const availContentH = maxCanvasSliceH - runningH - headerGap - tableH;
+                        if (rankingTrs.length > 0) {
+                            ensureSpace(150);
 
-                        if (availContentH <= 30) {
-                            break;
-                        }
+                            const tblTitleEl = document.createElement('div');
+                            tblTitleEl.style.cssText = 'font-size:11.5px; font-weight:700; color:#1e293b; margin-bottom:6px; flex-shrink:0;';
+                            tblTitleEl.textContent = `Tabel Urutan Peringkat Pertumbuhan (${startYearText} ke ${endYearText})`;
+                            currentPage.querySelector('.ts-pdf-content-body').appendChild(tblTitleEl);
+                            currentUsedH += 24;
 
-                        const idealCutY = currY + availContentH;
-                        let cutY = idealCutY;
+                            const rankingTheadHtml = `
+                                <thead style="background:#f1f5f9;">
+                                    <tr>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:center; width:40px; font-size:9.5px;">No.</th>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:left; font-size:9.5px;">Rincian</th>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:right; font-size:9.5px;">${escHtml(startYearText)}</th>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:right; font-size:9.5px;">${escHtml(endYearText)}</th>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:right; font-size:9.5px;">Selisih Nominal</th>
+                                        <th style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:right; font-size:9.5px;">Perubahan (%)</th>
+                                    </tr>
+                                </thead>
+                            `;
 
-                        if (idealCutY >= secEnd) {
-                            cutY = secEnd;
-                        } else if (hasTable && secData.table.rows.length > 0) {
-                            const remainingRows = secData.table.rows.filter(r => r.bottom > currY + 2);
-                            if (remainingRows.length > 0) {
-                                const fittingRows = remainingRows.filter(r => r.bottom <= idealCutY);
-                                if (fittingRows.length > 0) {
-                                    if (fittingRows.length === remainingRows.length && secEnd <= idealCutY) {
-                                        cutY = secEnd;
-                                    } else {
-                                        const lastFit = fittingRows[fittingRows.length - 1];
-                                        cutY = lastFit.bottom;
-                                    }
-                                } else {
-                                    cutY = Math.min(secEnd, Math.max(currY + 30, idealCutY));
+                            const rankingRowH = 24;
+                            const rankingTheadH = 28;
+                            let rIdx = 0;
+
+                            while (rIdx < rankingTrs.length) {
+                                const availH = usableContentH - currentUsedH - rankingTheadH - 8;
+                                const maxFit = Math.max(1, Math.floor(availH / rankingRowH));
+                                const batch = rankingTrs.slice(rIdx, rIdx + maxFit);
+                                rIdx += batch.length;
+
+                                const tbl = document.createElement('table');
+                                tbl.style.cssText = 'width:100%; border-collapse:collapse; font-size:10px; font-family:"Inter", sans-serif; margin-bottom:10px;';
+                                tbl.innerHTML = rankingTheadHtml + `<tbody>${batch.map(tr => tr.outerHTML).join('')}</tbody>`;
+
+                                tbl.querySelectorAll('td').forEach((td, colIdx) => {
+                                    td.style.border = '1px solid #e2e8f0';
+                                    td.style.padding = '3.5px 7px';
+                                    td.style.fontSize = '9px';
+                                    td.style.color = '#334155';
+                                    if (colIdx === 0) td.style.textAlign = 'center';
+                                    else if (colIdx === 1) td.style.textAlign = 'left';
+                                    else td.style.textAlign = 'right';
+                                });
+                                tbl.querySelectorAll('tr:nth-child(even) td').forEach(td => {
+                                    td.style.backgroundColor = '#f8fafc';
+                                });
+
+                                currentPage.querySelector('.ts-pdf-content-body').appendChild(tbl);
+                                currentUsedH += rankingTheadH + (batch.length * rankingRowH) + 10;
+
+                                if (rIdx < rankingTrs.length) {
+                                    const nextPageNum = pageElements.length + 1;
+                                    currentPage = createContentPage(nextPageNum);
+                                    stagingContainer.appendChild(currentPage);
+                                    pageElements.push(currentPage);
+                                    currentUsedH = 0;
                                 }
                             }
-                        } else if (secData.chartCards && secData.chartCards.length > 0) {
-                            const remainingCards = secData.chartCards.filter(c => c.bottom > currY + 2);
-                            if (remainingCards.length > 0) {
-                                const fittingCards = remainingCards.filter(c => c.bottom <= idealCutY);
-                                if (fittingCards.length > 0) {
-                                    if (fittingCards.length === remainingCards.length && secEnd <= idealCutY) {
-                                        cutY = secEnd;
-                                    } else {
-                                        cutY = fittingCards[fittingCards.length - 1].bottom;
-                                    }
-                                }
-                            }
                         }
-
-                        const contentH = cutY - currY;
-                        if (contentH <= 0) break;
-
-                        const totalSliceH = contentH + runningH + headerGap + tableH;
-                        const sliceCanvas = document.createElement('canvas');
-                        sliceCanvas.width = canvas.width;
-                        sliceCanvas.height = totalSliceH;
-                        const sCtx = sliceCanvas.getContext('2d');
-                        sCtx.fillStyle = '#ffffff';
-                        sCtx.fillRect(0, 0, sliceCanvas.width, totalSliceH);
-
-                        // 1. Draw Running Header (for all content pages)
-                        if (runningH > 0) {
-                            sCtx.drawImage(
-                                canvas,
-                                0, runningHeaderCanvasTop, canvas.width, runningHeaderCanvasH,
-                                0, 0, canvas.width, runningH
-                            );
-                        }
-
-                        // 2. Draw Table Header if continuation page
-                        if (tableH > 0) {
-                            sCtx.drawImage(
-                                canvas,
-                                0, secData.table.theadCanvasTop, canvas.width, secData.table.theadCanvasH,
-                                0, runningH + headerGap, canvas.width, tableH
-                            );
-                        }
-
-                        // 3. Draw content slice below headers
-                        const destY = runningH + headerGap + tableH;
-                        sCtx.drawImage(
-                            canvas,
-                            0, currY, canvas.width, contentH,
-                            0, destY, canvas.width, contentH
-                        );
-
-                        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
-                        const slicePdfH = (totalSliceH * contentWidth) / canvas.width;
-
-                        // Position calculation:
-                        // Page 1 (Cover): 100% symmetrically centered vertically on the A4 sheet!
-                        const finalY = (pageNum === 1 && isCover)
-                            ? Math.max(0, Math.floor((pdfHeight - slicePdfH) / 2))
-                            : marginTop;
-
-                        if (pageNum > 1) pdf.addPage();
-                        pdf.addImage(sliceData, 'JPEG', marginLeft, finalY, contentWidth, slicePdfH);
-
-                        // Print page number footer on content pages (not on cover)
-                        if (!isCover || pageNum > 1) {
-                            pdf.setFontSize(8);
-                            pdf.setTextColor(148, 163, 184);
-                            pdf.text('SIPEDAS BPS Kabupaten Tasikmalaya  \u2022  Halaman ' + pageNum, marginLeft, pdfHeight - 16);
-                        }
-                        pageNum++;
-
-                        // Advance currY to the next row boundary
-                        let nextY = cutY;
-                        if (hasTable && secData.table.rows.length > 0) {
-                            const nextRow = secData.table.rows.find(r => r.top >= cutY - 2);
-                            if (nextRow && nextRow.top > cutY) {
-                                nextY = nextRow.top;
-                            }
-                        }
-                        if (nextY <= currY) {
-                            currY = cutY + 1;
-                        } else {
-                            currY = nextY;
-                        }
-                        isFirstPageOfSec = false;
                     }
                 }
-            } else {
-                for (let srcY = 0; srcY < totalSrcHeight; srcY += maxCanvasSliceH) {
-                    const contentH = Math.min(maxCanvasSliceH, totalSrcHeight - srcY);
-                    if (contentH <= 0) break;
+            }
 
-                    const sliceCanvas = document.createElement('canvas');
-                    sliceCanvas.width = canvas.width;
-                    sliceCanvas.height = contentH;
-                    const sCtx = sliceCanvas.getContext('2d');
-                    sCtx.fillStyle = '#ffffff';
-                    sCtx.fillRect(0, 0, sliceCanvas.width, contentH);
-                    sCtx.drawImage(canvas, 0, srcY, canvas.width, contentH, 0, 0, canvas.width, contentH);
+            // B. KOMPONEN: GRAFIK VISUAL DERET WAKTU
+            if (optChart && chartImages.length > 0) {
+                const chartCardH = isLandscape ? 385 : 430;
+                const chartTitleH = 30;
 
-                    const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
-                    const slicePdfH = (contentH * contentWidth) / canvas.width;
+                for (let cIdx = 0; cIdx < chartImages.length; cIdx++) {
+                    const cImg = chartImages[cIdx];
+                    const isFirstChart = (cIdx === 0);
+                    const totalNeeded = (isFirstChart ? chartTitleH : 0) + chartCardH + 10;
 
-                    if (pageNum > 1) pdf.addPage();
-                    pdf.addImage(sliceData, 'JPEG', marginLeft, marginTop, contentWidth, slicePdfH);
-                    pdf.setFontSize(8);
-                    pdf.setTextColor(148, 163, 184);
-                    pdf.text('SIPEDAS BPS Kabupaten Tasikmalaya  \u2022  Halaman ' + pageNum, marginLeft, pdfHeight - 16);
-                    pageNum++;
+                    // Cegah Orphan Header: Jika judul + grafik tidak muat, pindah ke halaman baru
+                    ensureSpace(totalNeeded);
+
+                    if (isFirstChart) {
+                        const chartTitleEl = document.createElement('div');
+                        chartTitleEl.style.cssText = 'font-size:13px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:5px; margin-top:4px; margin-bottom:10px; letter-spacing:0.3px; flex-shrink:0;';
+                        chartTitleEl.textContent = 'GRAFIK VISUAL DERET WAKTU';
+                        currentPage.querySelector('.ts-pdf-content-body').appendChild(chartTitleEl);
+                        currentUsedH += chartTitleH;
+                    }
+
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'ts-pdf-chart-card';
+                    cardDiv.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; text-align:center; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); flex-shrink:0;';
+
+                    if (cImg.title) {
+                        cardDiv.innerHTML = `<div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:8px; text-align:left; border-bottom:1px solid #f1f5f9; padding-bottom:5px;">${escHtml(cImg.title)}</div>`;
+                    }
+
+                    const imgEl = document.createElement('img');
+                    imgEl.src = cImg.dataUrl;
+                    imgEl.style.cssText = 'width:100%; max-width:1080px; height:auto; display:block; margin:0 auto; object-fit:contain; border-radius:6px;';
+                    cardDiv.appendChild(imgEl);
+
+                    currentPage.querySelector('.ts-pdf-content-body').appendChild(cardDiv);
+                    currentUsedH += chartCardH;
                 }
+            }
+
+            // C. KOMPONEN: TABEL DATA TABULAR
+            if (optTable) {
+                const tableEl = document.getElementById('ts-grid');
+                if (tableEl) {
+                    const tabularTrs = Array.from(document.querySelectorAll('#ts-grid-body tr'));
+                    if (tabularTrs.length > 0) {
+                        const tabTitleH = 30;
+                        const tabTheadH = 48;
+                        const tabRowH = 23;
+                        const minRowsToStart = 5;
+                        const minNeeded = tabTitleH + tabTheadH + (minRowsToStart * tabRowH); // ~190px
+
+                        // Cegah tabel terpecah canggung di bawah grafik: jika sisa ruang < 190px, buat halaman baru
+                        ensureSpace(minNeeded);
+
+                        const tabTitleEl = document.createElement('div');
+                        tabTitleEl.style.cssText = 'font-size:13px; font-weight:800; color:#0f2b5c; border-bottom:1.5px solid #e2e8f0; padding-bottom:5px; margin-top:4px; margin-bottom:10px; letter-spacing:0.3px; flex-shrink:0;';
+                        tabTitleEl.textContent = 'TABEL DATA TABULAR';
+                        currentPage.querySelector('.ts-pdf-content-body').appendChild(tabTitleEl);
+                        currentUsedH += tabTitleH;
+
+                        // 2-Level Thead Resmi: Baris 1 (Tahun) & Baris 2 (Indikator + Satuan)
+                        const tabularTheadHtml = `
+                            <thead style="background:#f1f5f9;">
+                                <tr>
+                                    <th rowspan="2" style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:center; font-size:9.5px; vertical-align:middle; min-width:150px;">Rincian</th>
+                                    ${years.map(y => `<th colspan="${activeVKs.length}" style="background:#f1f5f9; color:#0f172a; font-weight:700; border:1px solid #cbd5e1; padding:5px 8px; text-align:center; font-size:10px; border-left:1.5px solid #cbd5e1;">${escHtml(y)}</th>`).join('')}
+                                </tr>
+                                <tr>
+                                    ${years.map(y => activeVKs.map((vk, vIdx) => {
+                                        const uCfg = getUnitConfigForVK(vk);
+                                        const uLbl = uCfg ? uCfg.label : (vkUnits && vkUnits[vk] ? vkUnits[vk] : '');
+                                        const uClean = uLbl ? ` (${String(uLbl).trim().replace(/^\(+|\)+$/g, '')})` : '';
+                                        const dotColor = (typeof getIndicatorColor === 'function') ? getIndicatorColor(vk) : '#2563eb';
+                                        const bLeft = vIdx === 0 ? 'border-left:1.5px solid #cbd5e1;' : 'border-left:1px dashed #cbd5e1;';
+                                        return `<th style="background:#f8fafc; color:#334155; font-weight:600; border:1px solid #cbd5e1; ${bLeft} padding:3.5px 5px; text-align:center; font-size:8.5px; white-space:nowrap;">
+                                            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dotColor};margin-right:3px;vertical-align:middle;"></span>${escHtml(vk + uClean)}</th>`;
+                                    }).join('')).join('')}
+                                </tr>
+                            </thead>
+                        `;
+
+                        let tIdx = 0;
+                        while (tIdx < tabularTrs.length) {
+                            const availH = usableContentH - currentUsedH - tabTheadH - 8;
+                            const maxFit = Math.max(1, Math.floor(availH / tabRowH));
+                            const batch = tabularTrs.slice(tIdx, tIdx + maxFit);
+                            tIdx += batch.length;
+
+                            const tbl = document.createElement('table');
+                            tbl.style.cssText = 'width:100%; border-collapse:collapse; font-size:9.5px; font-family:"Inter", sans-serif; margin-bottom:10px;';
+                            tbl.innerHTML = tabularTheadHtml + `<tbody>${batch.map(tr => tr.outerHTML).join('')}</tbody>`;
+
+                            // Sanitasi: hilangkan tautan/tombol interaktif dan seragamkan styling cell
+                            tbl.querySelectorAll('a, button, .bi-box-arrow-up-right').forEach(el => el.remove());
+                            tbl.querySelectorAll('td').forEach((td, colIdx) => {
+                                td.style.border = '1px solid #e2e8f0';
+                                td.style.padding = '3.5px 6px';
+                                td.style.fontSize = '9px';
+                                td.style.color = '#334155';
+                                if (colIdx === 0) td.style.textAlign = 'left';
+                                else td.style.textAlign = 'right';
+                            });
+                            tbl.querySelectorAll('tr:nth-child(even) td').forEach(td => {
+                                td.style.backgroundColor = '#f8fafc';
+                            });
+
+                            currentPage.querySelector('.ts-pdf-content-body').appendChild(tbl);
+                            currentUsedH += tabTheadH + (batch.length * tabRowH) + 10;
+
+                            if (tIdx < tabularTrs.length) {
+                                const nextPageNum = pageElements.length + 1;
+                                currentPage = createContentPage(nextPageNum);
+                                stagingContainer.appendChild(currentPage);
+                                pageElements.push(currentPage);
+                                currentUsedH = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Update Total Halaman ("Halaman X dari Y") dan Footer Penutup Resmi
+            const totalPages = pageElements.length;
+            pageElements.forEach((p, idx) => {
+                if (idx === 0) return; // Sampul memiliki footer khusus
+                const pNumEl = p.querySelector('.ts-pdf-page-number');
+                if (pNumEl) {
+                    pNumEl.textContent = `Halaman ${idx + 1} dari ${totalPages}`;
+                }
+            });
+
+            const lastPage = pageElements[totalPages - 1];
+            const lastFtr = lastPage.querySelector('.ts-pdf-page-footer');
+            if (lastFtr) {
+                lastFtr.innerHTML = `
+                    <div>Dokumen digenerasi secara otomatis oleh SIPEDAS BPS Kabupaten Tasikmalaya \u2022 SIPEDAS \u00A9 2026</div>
+                    <div>Halaman ${totalPages} dari ${totalPages}</div>
+                `;
+            }
+
+            // Render Setiap Halaman ke jsPDF
+            await new Promise(r => setTimeout(r, 250));
+
+            for (let i = 0; i < pageElements.length; i++) {
+                const pEl = pageElements[i];
+                const pageCanvas = await html2canvas(pEl, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+                const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+                if (i > 0) pdf.addPage();
+                pdf.addImage(pageImgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             }
 
             pdf.save(`${fileNameBase}.pdf`);
 
-            if (reportContainer && reportContainer.parentNode) {
-                reportContainer.parentNode.removeChild(reportContainer);
+            if (stagingContainer && stagingContainer.parentNode) {
+                stagingContainer.parentNode.removeChild(stagingContainer);
             }
 
             Swal.close();
@@ -14610,11 +14456,12 @@ async function executeTimeSeriesExport() {
         console.error('Error during TS export:', error);
 
         // Ensure cleanup
-
+        const sEl = document.getElementById('ts-export-staging');
+        if (sEl && sEl.parentNode) sEl.parentNode.removeChild(sEl);
+        const pEl = document.getElementById('ts-export-png-report');
+        if (pEl && pEl.parentNode) pEl.parentNode.removeChild(pEl);
         const tempEl = document.getElementById('ts-export-temp-report');
-
         if (tempEl && tempEl.parentNode) tempEl.parentNode.removeChild(tempEl);
-        else if (reportContainer && reportContainer.parentNode) reportContainer.parentNode.removeChild(reportContainer);
 
 
 

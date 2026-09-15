@@ -264,6 +264,12 @@
     border: none !important;
 }
 
+@media (min-width: 768px) {
+    .welcome-banner.ts-hero-banner {
+        padding: 1.75rem 2.25rem !important;
+    }
+}
+
 .ts-hero-title {
     font-size: 1.2rem !important;
 }

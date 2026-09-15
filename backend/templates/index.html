@@ -2548,16 +2548,16 @@
         <div class="modal-dialog modal-dialog-centered modal-lg modal-export-responsive">
             <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
                 <!-- Modal Header: Executive Pure White / Clean Minimalist -->
-                <div class="modal-header px-4 py-3.5 bg-white border-bottom">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle" style="width: 42px; height: 42px;">
+                <div class="modal-header px-3 px-sm-4 py-2.5 py-sm-3.5 bg-white border-bottom">
+                    <div class="d-flex align-items-center gap-2.5 gap-sm-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle modal-ts-header-icon" style="width: 42px; height: 42px;">
                             <i class="bi bi-cloud-arrow-down-fill fs-5"></i>
                         </div>
                         <div>
                             <h5 class="modal-title fw-bold mb-0 text-dark" id="modalTsExportTitle" style="font-size: 1.05rem; letter-spacing: -0.2px;">
                                 Unduh Laporan & Grafik Deret Waktu
                             </h5>
-                            <div class="text-muted small" style="font-size: 0.78rem; margin-top: 2px;">
+                            <div class="text-muted small modal-ts-header-subtitle" style="font-size: 0.78rem; margin-top: 2px;">
                                 Kustomisasi format dokumen dan komponen data yang ingin disertakan
                             </div>
                         </div>
@@ -2565,34 +2565,34 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body p-4 modal-body-light">
+                <div class="modal-body p-3 p-sm-4 modal-body-light">
                     <!-- 1. Pilihan Format File (PDF vs PNG) -->
-                    <div class="mb-4 pb-1">
-                        <label class="form-label fw-bold text-dark mb-2.5" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                    <div class="mb-3 mb-sm-4 pb-1">
+                        <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.86rem; letter-spacing: 0.2px;">
                             1. PILIH FORMAT BERKAS:
                         </label>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <label class="ts-export-format-card p-3.5 rounded-3 border d-flex align-items-start gap-3 cursor-pointer w-100 position-relative active" id="ts-export-card-pdf" onclick="selectExportFormat('pdf')" style="padding: 16px 18px;">
-                                    <input type="radio" name="ts-export-format" value="pdf" id="ts-export-radio-pdf" checked class="form-check-input mt-1" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
-                                    <div>
-                                        <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.9rem;">
-                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> Dokumen PDF (.pdf)
+                        <div class="row g-2 g-sm-3">
+                            <div class="col-6 col-sm-6">
+                                <label class="ts-export-format-card rounded-3 border d-flex align-items-center align-items-sm-start cursor-pointer w-100 position-relative active" id="ts-export-card-pdf" onclick="selectExportFormat('pdf')">
+                                    <input type="radio" name="ts-export-format" value="pdf" id="ts-export-radio-pdf" checked class="form-check-input mt-0 mt-sm-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-1.5 gap-sm-2" style="font-size: 0.88rem;">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> <span class="text-truncate">PDF (.pdf)</span>
                                         </div>
-                                        <div class="text-muted small mt-1.5" style="font-size: 0.76rem; line-height: 1.4;">
+                                        <div class="text-muted small mt-1.5 ts-export-format-desc" style="font-size: 0.76rem; line-height: 1.4;">
                                             Laporan resmi SIPEDAS siap cetak / arsip (A4) lengkap dengan cover, grafik, dan tabel data.
                                         </div>
                                     </div>
                                 </label>
                             </div>
-                            <div class="col-sm-6">
-                                <label class="ts-export-format-card p-3.5 rounded-3 border d-flex align-items-start gap-3 cursor-pointer w-100 position-relative" id="ts-export-card-png" onclick="selectExportFormat('png')" style="padding: 16px 18px;">
-                                    <input type="radio" name="ts-export-format" value="png" id="ts-export-radio-png" class="form-check-input mt-1" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
-                                    <div>
-                                        <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.9rem;">
-                                            <i class="bi bi-file-earmark-image-fill text-primary fs-5"></i> Gambar High-Res (.png)
+                            <div class="col-6 col-sm-6">
+                                <label class="ts-export-format-card rounded-3 border d-flex align-items-center align-items-sm-start cursor-pointer w-100 position-relative" id="ts-export-card-png" onclick="selectExportFormat('png')">
+                                    <input type="radio" name="ts-export-format" value="png" id="ts-export-radio-png" class="form-check-input mt-0 mt-sm-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-1.5 gap-sm-2" style="font-size: 0.88rem;">
+                                            <i class="bi bi-file-earmark-image-fill text-primary fs-5"></i> <span class="text-truncate">PNG (.png)</span>
                                         </div>
-                                        <div class="text-muted small mt-1.5" style="font-size: 0.76rem; line-height: 1.4;">
+                                        <div class="text-muted small mt-1.5 ts-export-format-desc" style="font-size: 0.76rem; line-height: 1.4;">
                                             Gambar grafis resolusi tinggi (High DPI) sangat tajam untuk bahan paparan dan presentasi.
                                         </div>
                                     </div>
@@ -2602,8 +2602,8 @@
                     </div>
 
                     <!-- 2. Pilihan Komponen yang Disertakan -->
-                    <div class="mb-4 pb-1">
-                        <div class="d-flex align-items-center justify-content-between mb-2.5">
+                    <div class="mb-3 mb-sm-4 pb-1">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
                             <label class="form-label fw-bold text-dark mb-0" style="font-size: 0.86rem; letter-spacing: 0.2px;">
                                 2. KOMPONEN YANG INGIN DISERTAKAN:
                             </label>
@@ -2611,7 +2611,7 @@
                         </div>
 
                         <!-- Quick Presets (Segmented Pill Group) -->
-                        <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 10px;">
+                        <div class="d-flex align-items-center flex-wrap mb-2.5" style="gap: 8px;">
                             <span class="text-secondary small fw-bold" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Cepat:</span>
                             <div class="ts-export-preset-group" id="ts-export-preset-container">
                                 <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
@@ -2629,16 +2629,16 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-3 border shadow-xs d-flex flex-column" style="padding: 14px; gap: 10px;">
+                        <div class="bg-white rounded-3 border shadow-xs d-flex flex-column ts-export-components-box" style="padding: 14px; gap: 10px;">
                             <!-- Komponen A: Grafik Visual -->
                             <label class="d-flex align-items-start rounded-3 ts-export-component-item cursor-pointer" style="padding: 12px 14px; gap: 12px; margin: 0;">
                                 <input type="checkbox" id="ts-export-opt-chart" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
                                 <div class="w-100">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;">Grafik Visual Deret Waktu</span>
-                                        <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Grafik Visual</span>
+                                        <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Grafik Visual Deret Waktu</span>
+                                        <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Grafik Visual</span>
                                     </div>
-                                    <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Diagram garis pergerakan tren data dari tahun ke tahun beserta titik simpul warna.</div>
+                                    <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Diagram garis pergerakan tren data dari tahun ke tahun beserta titik simpul warna.</div>
                                 </div>
                             </label>
 
@@ -2647,10 +2647,10 @@
                                 <input type="checkbox" id="ts-export-opt-table" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
                                 <div class="w-100">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <span class="fw-bold text-dark" style="font-size: 0.86rem;">Tabel Data Deret Waktu</span>
-                                        <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Matriks Tabel</span>
+                                        <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Tabel Data Deret Waktu</span>
+                                        <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Matriks Tabel</span>
                                     </div>
-                                    <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Matriks tabel data tabular per rincian wilayah/entitas sesuai satuan aktif yang dipilih.</div>
+                                    <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Matriks tabel data tabular per rincian wilayah/entitas sesuai satuan aktif yang dipilih.</div>
                                 </div>
                             </label>
 
@@ -2660,10 +2660,10 @@
                                     <input type="checkbox" id="ts-export-opt-insights" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="toggleInsightsSuboptions(this.checked); syncExportPresetState();">
                                     <div class="w-100">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <span class="fw-bold text-dark" style="font-size: 0.86rem;">Analisis Tren & Peringkat Pertumbuhan</span>
-                                            <span class="badge bg-light text-muted border px-2.5 py-1" style="font-size: 0.71rem;">Wawasan & Peringkat</span>
+                                            <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Analisis Tren & Peringkat Pertumbuhan</span>
+                                            <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Wawasan & Peringkat</span>
                                         </div>
-                                        <div class="text-muted small mt-1" style="font-size: 0.76rem; line-height: 1.35;">Metrik pertumbuhan tahunan, Top Gainer, Top Decliner, dan tabel urutan pertumbuhan rincian.</div>
+                                        <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Metrik pertumbuhan tahunan, Top Gainer, Top Decliner, dan tabel urutan pertumbuhan rincian.</div>
                                     </div>
                                 </label>
 

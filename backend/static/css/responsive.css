@@ -1369,6 +1369,10 @@
     /* Preset Cepat: Baris Penuh dengan Chip Scroll Horizontal */
     .ts-export-preset-wrapper {
         margin-bottom: 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
     }
 
     .ts-export-preset-label {

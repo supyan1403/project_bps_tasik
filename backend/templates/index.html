@@ -2573,9 +2573,9 @@
                         </label>
                         <div class="row g-2 g-sm-3">
                             <div class="col-6 col-sm-6">
-                                <label class="ts-export-format-card rounded-3 border d-flex align-items-center align-items-sm-start cursor-pointer w-100 position-relative active" id="ts-export-card-pdf" onclick="selectExportFormat('pdf')">
-                                    <input type="radio" name="ts-export-format" value="pdf" id="ts-export-radio-pdf" checked class="form-check-input mt-0 mt-sm-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
-                                    <div class="overflow-hidden">
+                                <label class="ts-export-format-card p-3 rounded-3 border d-flex align-items-start gap-2.5 gap-sm-3 cursor-pointer w-100 position-relative active" id="ts-export-card-pdf" onclick="selectExportFormat('pdf')">
+                                    <input type="radio" name="ts-export-format" value="pdf" id="ts-export-radio-pdf" checked class="form-check-input mt-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden flex-grow-1">
                                         <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
                                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> <span class="text-truncate">PDF (.pdf)</span>
                                         </div>
@@ -2586,9 +2586,9 @@
                                 </label>
                             </div>
                             <div class="col-6 col-sm-6">
-                                <label class="ts-export-format-card rounded-3 border d-flex align-items-center align-items-sm-start cursor-pointer w-100 position-relative" id="ts-export-card-png" onclick="selectExportFormat('png')">
-                                    <input type="radio" name="ts-export-format" value="png" id="ts-export-radio-png" class="form-check-input mt-0 mt-sm-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
-                                    <div class="overflow-hidden">
+                                <label class="ts-export-format-card p-3 rounded-3 border d-flex align-items-start gap-2.5 gap-sm-3 cursor-pointer w-100 position-relative" id="ts-export-card-png" onclick="selectExportFormat('png')">
+                                    <input type="radio" name="ts-export-format" value="png" id="ts-export-radio-png" class="form-check-input mt-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden flex-grow-1">
                                         <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
                                             <i class="bi bi-file-earmark-image-fill text-primary fs-5"></i> <span class="text-truncate">PNG (.png)</span>
                                         </div>
@@ -2611,11 +2611,9 @@
                         </div>
 
                         <!-- Quick Presets (Segmented Pill Group) -->
-                        <div class="mb-3 ts-export-preset-wrapper">
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Pilihan Cepat:</span>
-                            </div>
-                            <div class="ts-export-preset-group w-100" id="ts-export-preset-container">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2.5 ts-export-preset-wrapper">
+                            <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Pilihan Cepat:</span>
+                            <div class="ts-export-preset-group" id="ts-export-preset-container">
                                 <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
                                     Laporan Lengkap (Semua)
                                 </button>

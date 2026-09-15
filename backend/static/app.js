@@ -11035,15 +11035,15 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
         if (rawKeywords.length === 1) {
 
-            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Deret Waktu: <span class="fw-bold" style="color:var(--primary, #1e40af);">${escHtml(rawKeywords[0])}</span></span></div>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:rgba(30,64,175,0.08); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary fs-5"></i><span style="font-size:0.95rem; font-weight:600; color:var(--text-primary, #1e293b);">Deret Waktu: <span class="fw-bold" style="color:var(--primary, #1e40af);">${escHtml(rawKeywords[0])}</span></span></div>`;
 
         } else if (rawKeywords.length > 1) {
 
-            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span><span class="badge bg-primary text-white ms-1" style="font-size:0.72rem;">${rawKeywords.length} Indikator</span></div>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:rgba(30,64,175,0.08); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary fs-5"></i><span style="font-size:0.95rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span><span class="badge bg-primary text-white ms-1" style="font-size:0.72rem;">${rawKeywords.length} Indikator</span></div>`;
 
         } else {
 
-            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style="background:rgba(30,64,175,0.06); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary"></i><span style="font-size:0.92rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span></div>`;
+            titleEl.innerHTML = `<div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:rgba(30,64,175,0.08); border-left:3px solid var(--primary, #1e40af);"><i class="bi bi-graph-up-arrow text-primary fs-5"></i><span style="font-size:0.95rem; font-weight:600; color:var(--text-primary, #1e293b);">Hasil Analisis Deret Waktu</span></div>`;
 
         }
 

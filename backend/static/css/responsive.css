@@ -133,6 +133,11 @@
     #btn-ts-toggle-all-years {
         white-space: nowrap;
     }
+
+    /* Fix alignment: tombol sejajar baris pertama label ("Pilih") */
+    .ts-wizard-col--year > div:first-child {
+        align-items: flex-start !important;
+    }
 }
 
 /* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */

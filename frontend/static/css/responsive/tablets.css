@@ -1,0 +1,138 @@
+/* ===================== BREAKPOINT 1: TABLET LANDSCAPE & TOUCH: < 1200px ===================== */
+@media (max-width: 1199.98px) {
+    html {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Kunci scroll background saat modal atau dialog aktif agar tidak memunculkan scrollbar ganda */
+    html:has(body.modal-open),
+    html:has(body.swal2-shown),
+    html.modal-open,
+    html.swal2-shown,
+    body.modal-open,
+    body.swal2-shown {
+        overflow: hidden !important;
+        height: 100% !important;
+        touch-action: none;
+    }
+
+    .d-flex.vh-100 {
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+
+    .main-content {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+        padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+
+    .widget-value {
+        font-size: 1.4rem;
+    }
+
+    .ts-wizard-box {
+        height: 240px;
+        min-height: 240px;
+        max-height: 240px;
+    }
+
+    .ts-insight-search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .dropzone-modern {
+        min-height: 180px;
+        padding: 24px 16px;
+    }
+
+    .welcome-banner {
+        padding: 1rem 1.25rem;
+    }
+
+    .welcome-banner h4 {
+        font-size: 1.1rem;
+    }
+
+    .welcome-banner p {
+        font-size: 0.82rem;
+    }
+
+    .data-tabel-section-title {
+        font-size: 0.9rem;
+    }
+
+    .glass-panel {
+        padding: 0.85rem 1rem;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 1.2rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.82rem !important;
+    }
+}
+
+/* ===================== BREAKPOINT 2: TABLET PORTRAIT: < 992px ===================== */
+@media (max-width: 991.98px) {
+    .ts-wizard-box {
+        height: 220px;
+        min-height: 220px;
+        max-height: 220px;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-title {
+        font-size: 1.15rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .ts-hero-desc {
+        font-size: 0.78rem !important;
+    }
+
+    .welcome-banner.ts-hero-banner .banner-badge {
+        font-size: 0.68rem !important;
+        padding: 3px 8px !important;
+    }
+
+}
+
+/* ===================== BREAKPOINT 2b: TABLET PORTRAIT ONLY (768px–991px) ===================== */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    /* Fix Step 2 wizard column ratio: 65/35 agar header "Pilih Semua" tidak pecah */
+    .ts-wizard-col--indicator { flex: 0 0 60% !important; max-width: 60% !important; }
+    .ts-wizard-col--year { flex: 0 0 40% !important; max-width: 40% !important; }
+
+    /* Fix Step 2 header: label wrap natural, tidak dempet */
+    .ts-wizard-col--year .form-label {
+        font-size: 0.82rem !important;
+    }
+
+    /* Fix tombol Pilih Semua: teks tidak wrap */
+    #btn-ts-toggle-all-years {
+        white-space: nowrap;
+    }
+
+    /* Fix alignment: tombol sejajar baris pertama label ("Pilih") */
+    .ts-wizard-col--year > div:first-child {
+        align-items: flex-start !important;
+    }
+}
+

@@ -1,0 +1,594 @@
+    <!-- Master Dictionary Modal (Bootstrap) -->
+    <div class="modal fade" id="masterDictionaryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-book text-primary"></i> Kamus Master (Master Dictionary)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="master-dict-list" class="mb-2">
+                        <p class="text-muted small">Memuat...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="input-group">
+                        <input id="master-dict-new-word" type="text" class="form-control" placeholder="Kata baru...">
+                        <button onclick="addMasterWord()" class="btn btn-success">+ Tambah</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Inspeksi Anomali Tabel (Anomaly Table Inspector) -->
+    <div class="modal fade" id="anomalyTableModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 92vw; width: 1340px; margin: 1.75rem auto;">
+            <div class="modal-content border-0 shadow-lg modal-content-custom">
+                <div class="modal-header bg-white border-bottom px-4 py-3.5 d-flex align-items-center justify-content-between" style="padding: 1.25rem 2rem !important;">
+                    <div class="min-w-0 flex-grow-1 me-3">
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50 px-3 py-1.5 fw-semibold rounded-pill" id="anom-modal-badge-type" style="font-size: 0.8rem;">
+                                <i class="bi bi-exclamation-triangle"></i> Anomali Format Angka
+                            </span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-1.5 rounded-pill" id="anom-modal-doc-year" style="font-size: 0.8rem;"></span>
+                            <span class="badge bg-info bg-opacity-10 text-info px-3 py-1.5 rounded-pill" id="anom-modal-location" style="font-size: 0.8rem;">Tasikmalaya</span>
+                        </div>
+                        <h5 class="modal-title fw-bold text-dark text-break mb-0 modal-title-custom" id="anom-modal-title">
+                            Inspeksi Tabel Anomali
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Tutup" style="padding: 0.75rem; border-radius: 8px;"></button>
+                </div>
+                
+                <div class="modal-body p-4 modal-body-light" style="padding: 1.75rem 2rem !important;">
+                    <!-- Banner Alert Anomali -->
+                    <div class="card border-warning border-1 shadow-sm anomaly-banner" id="anom-modal-banner">
+                        <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="text-warning lh-1 p-3 bg-white rounded-3 shadow-sm flex-shrink-0 d-flex align-items-center justify-content-center" id="anom-modal-icon" style="width: 52px; height: 52px; font-size: 1.75rem;"><i class="bi bi-exclamation-triangle"></i></div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1 anomaly-banner-title" id="anom-modal-banner-title">Rincian Anomali Data</h6>
+                                    <div class="text-secondary small fw-medium" id="anom-modal-banner-msg" style="font-size: 0.875rem; line-height: 1.5;">
+                                        Memuat informasi anomali...
+                                    </div>
+                                    <div class="mt-2 small text-muted" id="anom-modal-meta-info" style="font-size: 0.84rem;"></div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap align-items-center flex-shrink-0">
+                                <button type="button" class="btn btn-success fw-semibold px-3.5 py-2 shadow-sm d-flex align-items-center gap-2" id="anom-modal-btn-safe" onclick="markCurrentModalAnomalySafe()" style="border-radius: 8px; font-size: 0.875rem;">
+                                    <i class="bi bi-check-circle-fill"></i> Tandai Aman
+                                </button>
+                                <button type="button" class="btn btn-primary fw-medium px-3.5 py-2 shadow-sm" id="anom-modal-btn-save" onclick="saveAnomalyModalEdits()" style="display:none; border-radius: 8px; font-size: 0.875rem;">
+                                    <i class="bi bi-save"></i> Simpan Perubahan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Petunjuk & Indikator -->
+                    <div class="d-flex align-items-center justify-content-between mb-3 px-1 flex-wrap gap-2">
+                        <div class="small text-muted d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-block px-3 py-1 rounded-pill border border-info border-opacity-50 legend-blue">
+                                    Sel Biru
+                                </span>
+                                <span id="anom-legend-prev-label" class="fw-medium text-secondary" style="font-size: 0.84rem;">= Nilai Awal / Asal</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-block px-3 py-1 rounded-pill border border-warning border-opacity-50 legend-yellow">
+                                    Sel Kuning
+                                </span>
+                                <span id="anom-legend-curr-label" class="fw-medium text-secondary" style="font-size: 0.84rem;">= Nilai Terindikasi Anomali</span>
+                            </div>
+                        </div>
+                        <div class="small text-muted fw-semibold" id="anom-modal-row-count" style="font-size: 0.84rem;"></div>
+                    </div>
+
+                    <!-- Grid Table Wrapper -->
+                    <div class="table-responsive bg-white rounded-3 border shadow-sm table-wrapper-border" style="max-height: 480px; overflow: auto; border-radius: 12px !important;">
+                        <table class="table table-hover mb-0" id="anom-modal-table" style="font-size: 0.875rem; border-collapse: separate !important; border-spacing: 0 !important; width: 100%;">
+                            <thead class="sticky-top" id="anom-modal-thead" style="z-index: 10;">
+                                <tr><th>Memuat...</th></tr>
+                            </thead>
+                            <tbody id="anom-modal-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-between align-items-center" style="padding: 1rem 2rem !important;">
+                        <span class="text-muted small" style="font-size: 0.84rem;"><i class="bi bi-lightbulb text-warning"></i> Tip: Anda dapat langsung memperbaiki angka pada sel yang salah lalu klik tombol simpan.</span>
+                    <button type="button" class="btn btn-secondary px-4 py-2 fw-medium shadow-sm btn-secondary-custom" data-bs-dismiss="modal" style="border-radius: 8px; font-size: 0.875rem;">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRATINJAU SNIPPET TABEL (#7) -->
+    <div class="modal fade" id="tableSnippetModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="modal-header px-4 px-md-5 py-3.5 border-bottom bg-white d-flex align-items-start justify-content-between">
+                    <div class="d-flex align-items-start min-w-0 flex-grow-1">
+                        <div class="modal-title w-100" id="snippet-table-title" style="word-break: break-word; white-space: normal;">
+                            Pratinjau Tabel
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none ms-3 mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 px-md-5 py-3.5 bg-light bg-opacity-50">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <span class="text-muted small fw-semibold d-flex align-items-center gap-2" style="font-size: 0.84rem;">
+                            <i class="bi bi-info-circle text-primary fs-6"></i> Menampilkan 5 baris pertama data:
+                        </span>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill small fw-semibold" id="snippet-badge-year">
+                                <i class="bi bi-calendar3 me-1"></i> Tahun
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 rounded-pill small fw-medium" id="snippet-badge-bab">
+                                <i class="bi bi-folder2 me-1"></i> Bab
+                            </span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1 rounded-pill small fw-medium" id="snippet-badge-size">
+                                <i class="bi bi-grid-3x3 me-1"></i> 0 Baris × 0 Kolom
+                            </span>
+                            <span class="badge bg-white text-muted border px-2.5 py-1 small fw-medium shadow-2xs">Mode Ringkas</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive rounded-3 border bg-white shadow-xs" style="max-height: 380px; overflow: auto;">
+                        <table class="table table-sm table-bordered table-hover mb-0" id="snippet-table-content" style="font-size: 0.86rem; width: 100%;">
+                            <thead class="table-light sticky-top" id="snippet-thead"></thead>
+                            <tbody id="snippet-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top px-4 px-md-5 py-4 d-flex justify-content-between align-items-center flex-wrap" style="gap: 16px;">
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 12px;">
+                        <button type="button" class="btn btn-primary btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-editor" onclick="openEditorFromSnippet()">
+                            <i class="bi bi-pencil-square"></i> Buka Penuh (Editor)
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm text-dark px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-ts" onclick="openTimeSeriesFromSnippet()">
+                            <i class="bi bi-graph-up-arrow"></i> Deret Waktu
+                        </button>
+                        <div class="d-none d-sm-block separator-v my-0" style="height: 24px; margin: 0 4px;"></div>
+                        <button type="button" class="btn btn-success btn-sm px-3.5 py-2.5 fw-medium d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-excel" onclick="downloadExcelFromSnippet()">
+                            <i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3.5 py-2.5 d-inline-flex align-items-center gap-2 shadow-xs" id="snippet-btn-csv" onclick="downloadCsvFromSnippet()">
+                            <i class="bi bi-filetype-csv"></i> CSV
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-light border btn-sm px-4 py-2.5 fw-semibold text-muted" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BUAT TABEL BARU (#modal-create-table) -->
+    <div class="modal fade" id="modal-create-table" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
+                <!-- Header: Clean Minimalist Pure White -->
+                <div class="modal-header px-4 py-3.5 bg-white border-bottom">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle" style="width: 40px; height: 40px;">
+                            <i class="bi bi-table fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-dark" style="font-size: 1.05rem; letter-spacing: -0.2px;">
+                                Tambah Tabel Baru
+                            </h5>
+                            <div class="text-muted small" style="font-size: 0.78rem; margin-top: 2px;">
+                                Buat struktur tabel statistik baru dan masukkan ke dalam basis data
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="background: var(--bs-body-bg, #ffffff); padding: 1.35rem 1.6rem !important;">
+                    <form id="form-create-table" onsubmit="event.preventDefault(); submitCreateTable();">
+                        <div class="row g-3" style="margin-bottom: 1.25rem !important;">
+                            <div class="col-md-6 col-12">
+                                <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
+                                    <label class="form-label small fw-semibold text-dark mb-0">1. Publikasi Induk <span class="text-danger">*</span></label>
+                                    <a href="javascript:void(0)" onclick="openCreateDocModal(true)" class="badge bg-primary-subtle text-primary text-decoration-none border border-primary border-opacity-25 px-2.5 py-1 d-inline-flex align-items-center rounded-pill" style="font-size:0.7rem; cursor:pointer;" title="Tambah buku publikasi baru jika belum terdaftar">
+                                        + Publikasi Baru
+                                    </a>
+                                </div>
+                                <select id="create-table-doc-id" class="form-select" required onchange="updateCreateTableBabOptions()">
+                                    <option value="">-- Pilih Dokumen Publikasi --</option>
+                                </select>
+                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Buku publikasi BPS tempat tabel ini dikelompokkan.</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
+                                    <label class="form-label small fw-semibold text-dark mb-0">2. Bab Dokumen <span class="text-danger">*</span></label>
+                                    <a href="javascript:void(0)" onclick="openCreateBabModalFromTable()" class="badge bg-primary-subtle text-primary text-decoration-none border border-primary border-opacity-25 px-2.5 py-1 d-inline-flex align-items-center rounded-pill" style="font-size:0.7rem; cursor:pointer;" title="Tambah bab baru jika belum ada">
+                                        + Tambah Bab
+                                    </a>
+                                </div>
+                                <select id="create-table-bab-num" class="form-select" required onchange="updateCreateTableNumberPrefix()">
+                                    <option value="1">Bab 1: Geografi & Iklim</option>
+                                    <option value="2">Bab 2: Pemerintahan</option>
+                                    <option value="3">Bab 3: Kependudukan & Ketenagakerjaan</option>
+                                    <option value="4">Bab 4: Sosial & Kesejahteraan Rakyat</option>
+                                    <option value="5" selected>Bab 5: Pertanian, Peternakan, Perikanan</option>
+                                    <option value="6">Bab 6: Industri, Energi & Konstruksi</option>
+                                    <option value="7">Bab 7: Perdagangan, Hotel & Pariwisata</option>
+                                    <option value="8">Bab 8: Keuangan Daerah & Harga</option>
+                                    <option value="9">Bab 9: Koperasi & UMKM</option>
+                                    <option value="10">Bab 10: Pengeluaran Penduduk</option>
+                                    <option value="11">Bab 11: Pendapatan Regional (PDRB)</option>
+                                    <option value="12">Bab 12: PDRB Lapangan Usaha</option>
+                                    <option value="13">Bab 13: Perbandingan Antar Kab/Kota</option>
+                                </select>
+                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Bab isi publikasi tempat tabel berada.</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3" style="margin-bottom: 1.25rem !important;">
+                            <div class="col-md-4 col-12">
+                                <div class="d-flex align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
+                                    <label class="form-label small fw-semibold text-dark mb-0">3. Nomor Tabel <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="create-table-number" class="form-control" placeholder="Contoh: Tabel 5.4.6" required>
+                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Format: Tabel [Bab].[SubBab].[No]</div>
+                            </div>
+                            <div class="col-md-8 col-12">
+                                <div class="d-flex align-items-center" style="margin-bottom: 0.5rem; min-height: 24px;">
+                                    <label class="form-label small fw-semibold text-dark mb-0">4. Judul Tabel <span class="text-danger">*</span></label>
+                                </div>
+                                <input type="text" id="create-table-title" class="form-control" placeholder="Contoh: Produksi Komoditas Peternakan Baru Menurut Kecamatan" required>
+                                <div class="form-text text-muted mt-1.5" style="font-size:0.73rem;">Deskripsi judul lengkap tabel statistik.</div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-3 bg-light border" style="padding: 1.1rem 1.25rem !important; margin-bottom: 1.25rem !important;">
+                            <div class="fw-semibold small text-dark mb-2.5">
+                                <span>5. Struktur Kolom Awal</span>
+                            </div>
+                            <div class="row g-2.5">
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label text-muted mb-1.5" style="font-size:0.74rem; font-weight:600;">Kolom Entitas (Baris)</label>
+                                    <input type="text" id="create-table-col-entity" class="form-control form-control-sm" value="Kecamatan" placeholder="e.g. Kecamatan / Rincian" required>
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <label class="form-label text-muted mb-1.5" style="font-size:0.74rem; font-weight:600;">Nama Kolom Nilai</label>
+                                    <input type="text" id="create-table-col-name" class="form-control form-control-sm" value="Hasil Produksi" placeholder="e.g. Hasil Produksi" required>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label text-muted mb-1.5" style="font-size:0.74rem; font-weight:600;">Satuan Data</label>
+                                    <input type="text" id="create-table-col-unit" class="form-control form-control-sm" value="Ton" placeholder="e.g. Ton, Kg, Jiwa, Ha, %">
+                                </div>
+                                <div class="col-md-2 col-6">
+                                    <label class="form-label text-muted mb-1.5" style="font-size:0.74rem; font-weight:600;">Tahun Data</label>
+                                    <input type="text" id="create-table-col-year" class="form-control form-control-sm" placeholder="e.g. 2026">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-3 border d-flex align-items-start info-box-blue" style="padding: 1rem 1.25rem !important; gap: 1rem;">
+                            <label class="custom-switch-wrapper pt-0.5" for="create-table-auto-kecamatan">
+                                <input type="checkbox" id="create-table-auto-kecamatan" class="custom-switch-input" checked onchange="onToggleKecamatanSwitch()">
+                                <span class="custom-switch-track"></span>
+                            </label>
+                            <div class="flex-grow-1">
+                                <label class="form-check-label fw-semibold text-dark small d-block cursor-pointer mb-1" for="create-table-auto-kecamatan" style="font-size:0.85rem;">
+                                    Isi Otomatis dengan 39 Kecamatan di Kabupaten Tasikmalaya
+                                </label>
+                                <div class="text-muted" id="create-table-auto-desc" style="font-size: 0.74rem; line-height: 1.45;">
+                                    Membuat 39 baris rincian standar wilayah Kabupaten Tasikmalaya (Cipatujah s/d Sukaresik & Total Kabupaten) secara otomatis.
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 py-2" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold shadow-sm" onclick="submitCreateTable()">
+                        Buat & Buka Editor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH PUBLIKASI BARU (#modal-create-doc) -->
+    <div class="modal fade" id="modal-create-doc" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 18px; overflow: hidden;">
+                <!-- Header: Clean Minimalist Pure White -->
+                <div class="modal-header px-4 py-3.5 bg-white border-bottom">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle" style="width: 40px; height: 40px;">
+                            <i class="bi bi-journal-plus fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-dark" style="font-size: 1.05rem; letter-spacing: -0.2px;">
+                                Tambah Publikasi Baru
+                            </h5>
+                            <div class="text-muted small" style="font-size: 0.78rem; margin-top: 2px;">
+                                Daftarkan buku dokumen publikasi BPS baru ke dalam sistem basis data
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4" style="background: var(--bs-body-bg, #ffffff);">
+                    <form id="form-create-doc" onsubmit="event.preventDefault(); submitCreateDoc();">
+                        <div class="row g-2.5" style="margin-bottom: 1.25rem !important;">
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Tahun Publikasi <span class="text-danger">*</span></label>
+                                <input type="number" id="create-doc-year" class="form-control" value="2027" min="1990" max="2100" required oninput="onDocYearChange()">
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Tahun rilis/terbit buku.</div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Tahun Data <span class="text-danger">*</span></label>
+                                <input type="number" id="create-doc-data-year" class="form-control" value="2026" min="1990" max="2100" required oninput="this.dataset.userEdited='true'">
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Tahun kejadian riil data.</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <label class="form-label small fw-semibold text-dark mb-1">Nama / Judul Dokumen Publikasi <span class="text-danger">*</span></label>
+                                <input type="text" id="create-doc-filename" class="form-control" placeholder="Contoh: Kabupaten Tasikmalaya Dalam Angka 2027" required>
+                                <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Judul resmi buku publikasi BPS.</div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Template Chips Minimalis & Rapi -->
+                        <div class="rounded-3 bg-light border" style="padding: 0.85rem 1.1rem !important; margin-bottom: 1.25rem !important;">
+                            <div class="text-muted fw-semibold mb-2" style="font-size: 0.74rem;">
+                                <span>Pilihan Cepat Format Judul:</span>
+                            </div>
+                            <div class="d-flex flex-wrap" style="gap: 0.45rem;">
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kabupaten Tasikmalaya Dalam Angka')">
+                                    Kabupaten Tasikmalaya Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Statistik Daerah Kabupaten Tasikmalaya')">
+                                    Statistik Daerah Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('Kecamatan Dalam Angka')">
+                                    Kecamatan Dalam Angka <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 text-start rounded-pill shadow-2xs" style="font-size:0.74rem;" onclick="quickSetDocTitle('PDRB Kabupaten Tasikmalaya Menurut Lapangan Usaha')">
+                                    PDRB Kab. Tasikmalaya <span class="badge-doc-yr text-primary fw-bold">2027</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mode Pembuatan (Manual / Upload PDF) Minimalis -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark mb-2 d-block" style="font-size: 0.82rem;">
+                                Metode Pembuatan Dokumen
+                            </label>
+                            
+                            <div class="d-flex flex-column" style="gap: 0.55rem;">
+                                <div class="doc-mode-option border rounded-3 cursor-pointer active d-flex align-items-start" style="padding: 0.75rem 1rem !important; gap: 0.75rem;" id="doc-mode-box-empty" onclick="setDocCreationMode('empty')">
+                                    <input class="form-check-input flex-shrink-0 cursor-pointer m-0" type="radio" name="doc-creation-mode" id="doc-mode-empty" value="empty" checked style="width: 1.15rem; height: 1.15rem; margin-top: 0.1rem !important; cursor:pointer;">
+                                    <div class="flex-grow-1">
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-0.5" for="doc-mode-empty" style="font-size: 0.84rem;">
+                                            Buat Publikasi Kosong
+                                        </label>
+                                        <div class="text-muted" style="font-size: 0.73rem; line-height: 1.35;">
+                                            Membuat entri publikasi baru langsung di basis data (siap untuk input manual, tambah tabel, atau template Excel).
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="doc-mode-option border rounded-3 cursor-pointer d-flex align-items-start" style="padding: 0.75rem 1rem !important; gap: 0.75rem;" id="doc-mode-box-pdf" onclick="setDocCreationMode('pdf')">
+                                    <input class="form-check-input flex-shrink-0 cursor-pointer m-0" type="radio" name="doc-creation-mode" id="doc-mode-pdf" value="pdf" style="width: 1.15rem; height: 1.15rem; margin-top: 0.1rem !important; cursor:pointer;">
+                                    <div class="flex-grow-1">
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block mb-0.5" for="doc-mode-pdf" style="font-size: 0.84rem;">
+                                            Unggah Berkas Buku Publikasi (PDF)
+                                        </label>
+                                        <div class="text-muted" style="font-size: 0.73rem; line-height: 1.35;">
+                                            Unggah buku PDF BPS untuk ekstraksi otomatis daftar isi/bab dan tabel statistik.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PDF Upload Container (Muncul jika mode PDF dipilih) -->
+                        <div id="create-doc-pdf-container" class="mt-3 p-3 bg-light rounded-3 border" style="display: none; padding: 0.85rem 1.1rem !important;">
+                            <label class="form-label small fw-semibold text-dark mb-1.5" style="font-size:0.82rem;">Berkas PDF Publikasi</label>
+                            <input type="file" id="create-doc-file" class="form-control form-control-sm" accept="application/pdf">
+                            <div class="form-text text-muted mt-1" style="font-size:0.72rem;">Pilih berkas PDF publikasi BPS.</div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 py-2" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary btn-sm px-4 py-2 fw-semibold shadow-sm" onclick="submitCreateDoc()">
+                        Simpan Publikasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- (Modal Ganti Password kini dikelola 100% via SweetAlert2 agar identik dengan Login Modal) -->
+
+    <!-- Modal Ekspor Kustom PDF & PNG (Deret Waktu) -->
+    <div class="modal fade" id="modal-ts-export-custom" tabindex="-1" aria-labelledby="modalTsExportTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg modal-export-responsive">
+            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                <!-- Modal Header: Executive Pure White / Clean Minimalist -->
+                <div class="modal-header px-3 px-sm-4 py-2.5 py-sm-3.5 bg-white border-bottom align-items-center">
+                    <div class="d-flex align-items-center flex-grow-1 overflow-hidden me-2">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle modal-ts-header-icon me-3" style="width: 42px; height: 42px;">
+                            <i class="bi bi-cloud-arrow-down-fill fs-5"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h5 class="modal-title fw-bold mb-0 text-dark" id="modalTsExportTitle" style="font-size: 1.05rem; letter-spacing: -0.2px;">
+                                Unduh Laporan & Grafik Deret Waktu
+                            </h5>
+                            <div class="text-muted small modal-ts-header-subtitle" style="font-size: 0.78rem; margin-top: 2px;">
+                                Kustomisasi format dokumen dan komponen data yang ingin disertakan
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-3 p-sm-4 modal-body-light">
+                    <!-- 1. Pilihan Format File (PDF vs PNG) -->
+                    <div class="mb-3 mb-sm-4 pb-1 ts-export-section">
+                        <label class="form-label fw-bold text-dark mb-2 ts-export-section-title" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                            1. PILIH FORMAT BERKAS:
+                        </label>
+                        <div class="row g-2 g-sm-3">
+                            <div class="col-6 col-sm-6">
+                                <label class="ts-export-format-card p-3 rounded-3 border d-flex align-items-start gap-2.5 gap-sm-3 cursor-pointer w-100 position-relative active" id="ts-export-card-pdf" onclick="selectExportFormat('pdf')">
+                                    <input type="radio" name="ts-export-format" value="pdf" id="ts-export-radio-pdf" checked class="form-check-input mt-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden flex-grow-1">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> <span class="text-truncate">PDF (.pdf)</span>
+                                        </div>
+                                        <div class="text-muted small mt-1.5 ts-export-format-desc" style="font-size: 0.76rem; line-height: 1.4;">
+                                            Laporan resmi SIPEDAS siap cetak / arsip (A4) lengkap dengan cover, grafik, dan tabel data.
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6 col-sm-6">
+                                <label class="ts-export-format-card p-3 rounded-3 border d-flex align-items-start gap-2.5 gap-sm-3 cursor-pointer w-100 position-relative" id="ts-export-card-png" onclick="selectExportFormat('png')">
+                                    <input type="radio" name="ts-export-format" value="png" id="ts-export-radio-png" class="form-check-input mt-1" style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;">
+                                    <div class="overflow-hidden flex-grow-1">
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
+                                            <i class="bi bi-file-earmark-image-fill text-primary fs-5"></i> <span class="text-truncate">PNG (.png)</span>
+                                        </div>
+                                        <div class="text-muted small mt-1.5 ts-export-format-desc" style="font-size: 0.76rem; line-height: 1.4;">
+                                            Gambar grafis resolusi tinggi (High DPI) sangat tajam untuk bahan paparan dan presentasi.
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Pilihan Komponen yang Disertakan -->
+                    <div class="mb-3 mb-sm-4 pb-1 ts-export-section">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="form-label fw-bold text-dark mb-0 ts-export-section-title" style="font-size: 0.86rem; letter-spacing: 0.2px;">
+                                2. KOMPONEN YANG INGIN DISERTAKAN:
+                            </label>
+                            <span class="badge bg-primary-subtle text-primary border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.73rem;">Bebas dipilih</span>
+                        </div>
+
+                        <!-- Quick Presets (Segmented Pill Group) -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2.5 ts-export-preset-wrapper">
+                            <span class="text-secondary small fw-bold ts-export-preset-label" style="font-size: 0.76rem; letter-spacing: 0.2px;">Preset Pilihan Cepat:</span>
+                            <div class="ts-export-preset-group" id="ts-export-preset-container">
+                                <button type="button" class="ts-export-preset-btn active" data-preset="all" onclick="applyExportPreset('all')">
+                                    Laporan Lengkap (Semua)
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="chart" onclick="applyExportPreset('chart')">
+                                    Hanya Grafik
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="table" onclick="applyExportPreset('table')">
+                                    Hanya Tabel
+                                </button>
+                                <button type="button" class="ts-export-preset-btn" data-preset="chart_insights" onclick="applyExportPreset('chart_insights')">
+                                    Grafik + Tren
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3 border shadow-xs d-flex flex-column ts-export-components-box" style="padding: 14px; gap: 10px;">
+                            <!-- Komponen A: Grafik Visual -->
+                            <label class="d-flex align-items-start rounded-3 ts-export-component-item cursor-pointer" style="padding: 12px 14px; gap: 12px; margin: 0;">
+                                <input type="checkbox" id="ts-export-opt-chart" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
+                                <div class="w-100">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Grafik Visual Deret Waktu</span>
+                                        <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Grafik Visual</span>
+                                    </div>
+                                    <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Diagram garis pergerakan tren data dari tahun ke tahun beserta titik simpul warna.</div>
+                                </div>
+                            </label>
+
+                            <!-- Komponen B: Tabel Data -->
+                            <label class="d-flex align-items-start rounded-3 ts-export-component-item cursor-pointer" style="padding: 12px 14px; gap: 12px; margin: 0;">
+                                <input type="checkbox" id="ts-export-opt-table" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="syncExportPresetState()">
+                                <div class="w-100">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Tabel Data Deret Waktu</span>
+                                        <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Matriks Tabel</span>
+                                    </div>
+                                    <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Matriks tabel data tabular per rincian wilayah/entitas sesuai satuan aktif yang dipilih.</div>
+                                </div>
+                            </label>
+
+                            <!-- Komponen C: Analisis Tren & Peringkat Pertumbuhan -->
+                            <div class="rounded-3 ts-export-component-item" style="padding: 12px 14px; margin: 0;">
+                                <label class="d-flex align-items-start cursor-pointer w-100 mb-0" style="gap: 12px;">
+                                    <input type="checkbox" id="ts-export-opt-insights" class="form-check-input mt-1" checked style="width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;" onchange="toggleInsightsSuboptions(this.checked); syncExportPresetState();">
+                                    <div class="w-100">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="fw-bold text-dark ts-export-component-title" style="font-size: 0.86rem;">Analisis Tren & Peringkat Pertumbuhan</span>
+                                            <span class="badge bg-light text-muted border px-2.5 py-1 ts-export-component-badge" style="font-size: 0.71rem;">Wawasan & Peringkat</span>
+                                        </div>
+                                        <div class="text-muted small mt-1 ts-export-component-desc" style="font-size: 0.76rem; line-height: 1.35;">Metrik pertumbuhan tahunan, Top Gainer, Top Decliner, dan tabel urutan pertumbuhan rincian.</div>
+                                    </div>
+                                </label>
+
+                                <!-- Sub-opsi Cakupan Tren -->
+                                <div id="ts-export-insights-suboptions" class="border-top" style="padding-left: 29px; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-top: 10px;">
+                                    <span class="text-secondary small fw-bold" style="font-size: 0.75rem;">Pilihan Format Tren:</span>
+                                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                        <label class="radio-label">
+                                            <input type="radio" name="ts-export-insights-scope" value="both" checked class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                                            <span class="fw-medium">Semua (Card + Tabel Peringkat)</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="ts-export-insights-scope" value="card_only" class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                                            <span class="fw-medium">Card Ringkasan Saja</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="ts-export-insights-scope" value="table_only" class="form-check-input mt-0" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                                            <span class="fw-medium">Tabel Peringkat Saja</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Pengaturan Tambahan PDF -->
+                    <div id="ts-export-pdf-options" class="bg-white rounded-3 border shadow-xs ts-export-section" style="padding: 18px 20px;">
+                        <label class="form-label fw-bold text-dark mb-2.5 ts-export-section-title" style="font-size: 0.85rem; letter-spacing: 0.2px;">
+                            3. PENGATURAN TATA LETAK LAPORAN:
+                        </label>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-sm-6">
+                                <label class="small text-muted fw-medium mb-1.5" style="font-size: 0.76rem;">Orientasi Kertas:</label>
+                                <select id="ts-export-pdf-orientation" class="form-select form-select-sm" style="font-size: 0.82rem; padding: 6px 10px;">
+                                    <option value="landscape" selected>Landscape / Mendatar (Direkomendasikan)</option>
+                                    <option value="portrait">Portrait / Tegak</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="small text-muted fw-medium mb-1.5 d-none d-sm-block" style="font-size: 0.76rem;">Header Dokumen:</label>
+                                <div class="form-check form-switch pt-1 pb-1">
+                                    <input class="form-check-input" type="checkbox" id="ts-export-include-header" checked style="cursor: pointer;">
+                                    <label class="form-check-label small text-dark fw-medium" for="ts-export-include-header" style="font-size: 0.8rem; cursor: pointer;">Sertakan Header & Logo SIPEDAS</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-white border-top px-4 py-3 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-light btn-sm px-3.5 py-1.5 text-muted fw-semibold" data-bs-dismiss="modal" style="font-size: 0.82rem;">
+                        Batal
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm px-4 py-1.5 fw-semibold d-flex align-items-center gap-2 shadow-sm" id="btn-ts-do-export" onclick="executeTimeSeriesExport()" style="font-size: 0.85rem;">
+                        <i class="bi bi-download"></i> Mulai Mengunduh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>

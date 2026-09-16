@@ -1,3 +1,4 @@
+from services.table_service import sanitize_row_data, parse_csv_for_db, natural_sort_key, get_safe_windows_path
 import os
 import re
 import csv
@@ -708,3 +709,313 @@ def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(
         return {"anomalies": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =====================================================================
+# RELOCATED FROM MAIN.PY (MODULAR ARCHITECTURE)
+# =====================================================================
+@router.post("/tables/{table_id}/load")
+def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(status_code=404, detail="Table not found")
+    
+    # Hapus row yang sudah ada jika re-load
+    db.query(models.TableRow).filter(models.TableRow.table_id == table_id).delete()
+    
+    try:
+        safe_path = get_safe_windows_path(table.csv_path)
+        headers, records, units, years = parse_csv_for_db(safe_path)
+        
+        # Simpan metadata kolom langsung ke database
+        table.headers = headers
+        table.units = units
+        table.years = years
+        
+        anomaly_count = 0
+        for row_idx, record in enumerate(records):
+            normalize_record_first_col(record, headers)
+            is_anomaly = False
+            # Deteksi anomali: hanya tandai jika mengandung "?"
+            for key, val in record.items():
+                str_val = str(val).strip()
+                if "?" in str_val or str_val == "":
+                    is_anomaly = True
+                    break
+            
+            if is_anomaly:
+                anomaly_count += 1
+                
+            db_row = models.TableRow(table_id=table.id, data=record, is_anomaly=is_anomaly, sort_order=row_idx)
+            db.add(db_row)
+        db.commit()
+        return {"message": f"Loaded {len(records)} rows successfully. Found {anomaly_count} anomalies."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading CSV: {str(e)}")
+
+# ===== PENCARIAN TABEL =====
+@router.get("/tables/search")
+def search_tables(
+    q: str = "",
+    year: int = None,
+    document_id: int = None,
+    bab: int = None,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    """Search tables by keyword or numbering. Supports document_id and bab filters."""
+    try:
+        query = db.query(
+            models.ExtractedTable,
+            models.Document.year,
+            models.Document.filename
+        ).join(
+            models.Document,
+            models.ExtractedTable.document_id == models.Document.id
+        )
+
+        if document_id:
+            query = query.filter(models.ExtractedTable.document_id == document_id)
+
+        if bab is not None:
+            query = query.filter(
+                (models.ExtractedTable.table_name.ilike(f"Tabel {bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel_{bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"{bab}.%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel {bab}-%")) |
+                (models.ExtractedTable.table_name.ilike(f"Tabel_{bab}-%"))
+            )
+
+        if q:
+            kw = q.strip().lower()
+            # Clean common prefixes like "tabel " or "tabel_" if user typed it
+            kw_clean = re.sub(r'^(tabel[\s_]*)', '', kw)
+            
+            # If search term is a number/dot pattern, e.g. "2.1.1" or "2"
+            if re.match(r'^[\d.]+$', kw_clean):
+                query = query.filter(
+                    (models.ExtractedTable.table_name.ilike(f"Tabel {kw_clean}%")) |
+                    (models.ExtractedTable.table_name.ilike(f"Tabel_{kw_clean}%")) |
+                    (models.ExtractedTable.table_name.ilike(f"%{kw_clean}%"))
+                )
+            else:
+                query = query.filter(
+                    models.ExtractedTable.table_name.ilike(f"%{kw}%")
+                )
+
+        if year:
+            query = query.filter(models.Document.year == year)
+
+        results = query.order_by(models.ExtractedTable.id).limit(limit).all()
+
+        tables_out = []
+        for t, doc_year, doc_name in results:
+            if not t:
+                continue
+            table_name_str = t.table_name or ""
+            # Extract chapter number safely
+            m = re.search(r'Tabel[\s_]*(\d+)', table_name_str, re.IGNORECASE)
+            bab_num = int(m.group(1)) if m else None
+            tables_out.append({
+                "id": t.id,
+                "table_name": table_name_str,
+                "document_id": t.document_id,
+                "document_year": doc_year,
+                "document_name": doc_name,
+                "bab_num": bab_num
+            })
+
+        return {"tables": tables_out, "total": len(tables_out)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database search failed: {str(e)}")
+
+
+@router.get("/tables/{table_id}")
+def get_table_info(table_id: int, db: Session = Depends(get_db)):
+    """Get table basic info including whether DB data exists."""
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Table not found")
+    doc = db.query(models.Document).filter(models.Document.id == table.document_id).first()
+    has_db = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).first() is not None
+    return {
+        "id": table.id,
+        "table_name": table.table_name or "",
+        "csv_path": table.csv_path or "",
+        "document_id": table.document_id,
+        "document_name": doc.filename if doc else "",
+        "document_year": doc.year if doc else None,
+        "has_db_data": has_db
+    }
+
+
+@router.put("/tables/{table_id}/db_rows")
+def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Batch update database rows from edit mode."""
+    rows = payload.get("rows", [])
+    for row_data in rows:
+        row_id = row_data.get("id")
+        data = sanitize_row_data(row_data.get("data", {}))
+        is_anomaly = row_data.get("is_anomaly", False)
+        if row_id:
+            row = db.query(models.TableRow).filter(models.TableRow.id == row_id, models.TableRow.table_id == table_id).first()
+            if row:
+                row.data = data
+                row.is_anomaly = is_anomaly
+    db.commit()
+    return {"message": f"{len(rows)} baris tersimpan"}
+
+# Get table data from DB with CSV header metadata (unit, year) for unified rendering
+@router.get("/tables/{table_id}/data")
+def get_table_data(table_id: int, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, s-maxage=120, stale-while-revalidate=300"
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).order_by(models.TableRow.sort_order.asc(), models.TableRow.id.asc()).all()
+    
+    headers = get_table_headers(db, table)
+    units = table.units if table and table.units else ([""] * len(headers) if headers else [])
+    years = table.years if table and table.years else ([""] * len(headers) if headers else [])
+    
+    # Hitung tipe data per kolom (column_types):
+    # Kolom 0 selalu text (nama wilayah / label), kolom 1 ke atas default number kecuali kolom keterangan
+    column_types = []
+    text_indicators = ["kategori", "keterangan", "status", "nama", "uraian", "deskripsi", "jenis", "sektor", "bulan"]
+    for idx, h in enumerate(headers):
+        if idx == 0:
+            column_types.append("text")
+        else:
+            h_lower = str(h).lower()
+            if any(w in h_lower for w in text_indicators) and not any(char.isdigit() for char in h_lower):
+                column_types.append("text")
+            else:
+                column_types.append("number")
+            
+    return {
+        "headers": headers, 
+        "units": units,
+        "years": years,
+        "column_types": column_types,
+        "rows": [{"id": r.id, "data": r.data, "is_anomaly": r.is_anomaly} for r in rows]
+    }
+
+@router.put("/data/{row_id}")
+def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Row not found")
+    row.data = sanitize_row_data(payload.get("data", {}))
+    db.commit()
+    log_activity(db, "edit_row", f"row_id={row_id}", {"table_id": row.table_id})
+    return {"message": "Updated successfully"}
+
+@router.put("/data/{row_id}/safe")
+def mark_row_safe(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Row not found")
+    row.is_anomaly = False
+    db.commit()
+    return {"message": "Row marked as safe"}
+
+@router.put("/tables/{table_id}/safe-all")
+def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    db.query(models.TableRow).filter(models.TableRow.table_id == table_id).update({"is_anomaly": False})
+    db.commit()
+    log_activity(db, "safe_anomaly", f"table_id={table_id}")
+    return {"message": "All rows marked as safe"}
+
+@router.delete("/data/{row_id}")
+def delete_row(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Row not found")
+    table_id = row.table_id
+    db.delete(row)
+    db.commit()
+    log_activity(db, "delete_row", f"row_id={row_id}", {"table_id": table_id})
+    return {"message": "Deleted successfully"}
+
+def get_clean_chapter_name(level1: str) -> str:
+    CHAPTER_NAMES = {
+        "1": "Geografi dan Iklim",
+        "2": "Pemerintahan",
+        "3": "Penduduk dan Ketenagakerjaan",
+        "4": "Sosial dan Kesejahteraan Rakyat",
+        "5": "Pertanian, Kehutanan, dan Perikanan",
+        "6": "Industri, Pertambangan, Energi, dan Air",
+        "7": "Pariwisata",
+        "8": "Transportasi dan Komunikasi",
+        "9": "Koperasi dan Usaha Mikro Kecil Menengah (UMKM)",
+        "10": "Pengeluaran dan Konsumsi Penduduk",
+        "11": "Perdagangan",
+        "12": "Pendapatan Regional",
+        "13": "Perbandingan Regional / Antar Wilayah"
+    }
+    return CHAPTER_NAMES.get(str(level1).strip(), f"Bab {level1}")
+
+def get_clean_table_name(table_name: str) -> str:
+    if not table_name:
+        return ""
+    # 1. Hapus awalan nomor tabel (contoh: "Tabel 4.4.2 - " atau "Tabel 4.4.2 ")
+    name = re.sub(r'^(?:Tabel[\s_]*\d+(?:\.\d+)*\s*(?:-\s*|:\s*|)\s*)', '', table_name, flags=re.IGNORECASE)
+    # 2. Hapus .csv di akhir jika ada
+    name = re.sub(r'\.csv$', '', name, flags=re.IGNORECASE)
+    # 3. Hapus referensi halaman seperti (Hal 46), (Hal 47, 48), (Halaman 12), dll.
+    name = re.sub(r'\s*\((?:Hal|Halaman|hlm)[\s\d,\-–—\.\?]+\)', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\s*\(\s*\d+[\s,\d\-–—\.]*\)\s*$', '', name)
+    # 4. Hapus 'Tahun 2022', 'Pada Tahun 2021-2022', 'Year 2025' atau sisa 'Tahun' di ujung akhir
+    year_token = r'(?:19|20)\d{2}[*\d]?'
+    year_conn = r'(?:\s*(?:[-–—/]|dan|and|sd|s/d|to|,)\s*' + year_token + r')*'
+    name = re.sub(r'[,.\s]+(?:(?:pada|di)\s+)?(?:tahun|years?)\s*(?:' + year_token + year_conn + r'.*)?$', '', name, flags=re.IGNORECASE)
+    # 5. Hapus tahun langsung jika tanpa kata 'tahun', misal ', 2022' atau ' 2021-2025'
+    name = re.sub(r'[,.\s]+' + year_token + year_conn + r'.*$', '', name, flags=re.IGNORECASE)
+    # 6. Hapus sisa kata 'Tahun' / 'Year' jika masih ada di ujung akhir
+    name = re.sub(r'[,.\s]+(?:(?:pada|di)\s+)?(?:tahun|years?)\s*$', '', name, flags=re.IGNORECASE)
+    return re.sub(r'[,.\-\s–—]+$', '', name).strip()
+
+
+@router.get("/tables/{table_id}/neighbors")
+def get_table_neighbors(table_id: int, db: Session = Depends(get_db)):
+    """Get next and previous table IDs within the same document."""
+    table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
+    if not table:
+        raise HTTPException(404, "Table not found")
+    
+    siblings = db.query(models.ExtractedTable).filter(
+        models.ExtractedTable.document_id == table.document_id
+    ).all()
+    
+    def natural_sort_key(t):
+        name = t.table_name or ""
+        match = re.search(r'(\d+(?:\.\d+)+)', name)
+        if match:
+            try:
+                parts = [int(p) for p in match.group(1).split('.')]
+                return (0, parts, name.lower())
+            except ValueError:
+                pass
+        return (1, [], name.lower())
+        
+    siblings.sort(key=natural_sort_key)
+    
+    prev_id = None
+    next_id = None
+    curr_idx = -1
+    for i, s in enumerate(siblings):
+        if s.id == table_id:
+            curr_idx = i
+            if i > 0:
+                prev_id = siblings[i - 1].id
+            if i < len(siblings) - 1:
+                next_id = siblings[i + 1].id
+            break
+    
+    return {
+        "prev_id": prev_id,
+        "next_id": next_id,
+        "prev_name": siblings[curr_idx - 1].table_name if curr_idx > 0 else None,
+        "next_name": siblings[curr_idx + 1].table_name if curr_idx < len(siblings) - 1 else None,
+        "current_index": curr_idx,
+        "total_in_doc": len(siblings)
+    }
+

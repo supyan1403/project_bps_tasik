@@ -394,3 +394,85 @@ def get_system_info(admin: dict = Depends(require_admin)):
         pass
 
     return info
+
+
+# =====================================================================
+# RELOCATED FROM MAIN.PY (MODULAR ARCHITECTURE)
+# =====================================================================
+@router.post("/fix-table-names")
+def fix_truncated_table_names(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """
+    Memperbaiki nama tabel yang terpotong:
+    1. Cari metadata.json di seluruh folder ekstraksi untuk ambil judul LENGKAP
+    2. Fallback: pakai nama file CSV jika metadata tidak ditemukan
+    """
+    import os
+    import glob
+    import unicodedata
+    
+    extract_root = os.path.join(os.path.expanduser("~"), "BPS_Data", "hasil_ekstraksi_web")
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(project_root, "outputs")
+    
+    full_title_map = {}
+    
+    meta_files = glob.glob(os.path.join(extract_root, "**", "metadata.json"), recursive=True)
+    if os.path.exists(outputs_dir):
+        outputs_meta = glob.glob(os.path.join(outputs_dir, "**", "metadata.json"), recursive=True)
+        meta_files.extend(outputs_meta)
+    
+    for meta_path in meta_files:
+        try:
+            with open(meta_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            tm = data.get("title_mapping", {})
+            for csv_fn, full_title in tm.items():
+                csv_fn_norm = csv_fn.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+                full_title_norm = full_title.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+                if csv_fn_norm not in full_title_map or len(full_title_norm) > len(full_title_map[csv_fn_norm]):
+                    full_title_map[csv_fn_norm] = full_title_norm
+        except Exception:
+            continue
+    
+    tables = db.query(models.ExtractedTable).all()
+    fixed = []
+    skipped = []
+    for t in tables:
+        old_name = t.table_name or ""
+        csv_path = t.csv_path or ""
+        csv_file = os.path.basename(csv_path)
+        
+        if not csv_file:
+            skipped.append({"id": t.id, "reason": "no_csv_path"})
+            continue
+        
+        csv_file_norm = csv_file.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+        csv_noext = csv_file_norm.rsplit(".", 1)[0].strip() if csv_file_norm.lower().endswith(".csv") else csv_file_norm
+        full_title = full_title_map.get(csv_file_norm) or full_title_map.get(csv_noext)
+        
+        if full_title:
+            new_name = full_title.replace(" __SLASH__ ", "/").replace("__SLASH__", "/").strip()
+        else:
+            csv_name = csv_file.rsplit(".", 1)[0] if csv_file.lower().endswith(".csv") else csv_file
+            csv_name_clean = csv_name.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
+            if len(csv_name_clean) <= len(old_name) or csv_name_clean == old_name:
+                skipped.append({"id": t.id, "reason": "no_longer_name"})
+                continue
+            new_name = csv_name_clean
+        
+        if unicodedata.normalize('NFKC', new_name) == unicodedata.normalize('NFKC', old_name):
+            skipped.append({"id": t.id, "reason": "same_name"})
+            continue
+        
+        t.table_name = new_name
+        fixed.append({"id": t.id, "old": old_name, "new": new_name, "source": "metadata" if full_title else "csv_filename"})
+    
+    db.commit()
+    return {
+        "message": f"{len(fixed)} nama tabel diperbaiki, {len(skipped)} dilewati",
+        "fixed": len(fixed),
+        "skipped": len(skipped),
+        "details": fixed[:50]
+    }
+
+# ===== TABLE NEIGHBORS =====

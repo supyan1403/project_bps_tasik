@@ -1,0 +1,63 @@
+            <div id="page-publikasi" class="page-section">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="glass-panel">
+                            <h5 class="fw-semibold">Upload Publikasi Baru</h5>
+                            <form id="upload-form">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-muted mb-1">Tahun Publikasi (Buku) <span class="text-danger">*</span></label>
+                                        <input type="number" id="pdf-year" name="year" class="form-control form-control-sm" placeholder="e.g. 2026" required oninput="if(document.getElementById('pdf-data-year') && !document.getElementById('pdf-data-year').dataset.edited){document.getElementById('pdf-data-year').value = this.value ? parseInt(this.value)-1 : '';}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-muted mb-1">Tahun Data (Riil)</label>
+                                        <input type="number" id="pdf-data-year" name="data_year" class="form-control form-control-sm" placeholder="e.g. 2025" oninput="this.dataset.edited='true'">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-text text-muted mt-0.5" style="font-size:0.72rem;">Sesuai standar BPS, Publikasi 2026 menyajikan Data Tahun 2025 (T-1).</div>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-muted">File PDF</label>
+                                    <div id="pdf-drop-zone" class="dropzone-modern">
+                                        <div id="pdf-drop-text" class="text-dropzone">
+                                            <i class="bi bi-cloud-arrow-up text-primary dropzone-icon"></i><br>
+                                            <span class="fw-semibold text-dark">Seret & lepas PDF di sini</span>, atau <span class="text-primary text-decoration-underline">pilih file</span>
+                                            <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Mendukung buku publikasi resmi BPS (PDF)</div>
+                                        </div>
+                                        <input type="file" id="pdf-file" name="file" class="form-control form-control-sm mt-2" accept="application/pdf" required style="display:none;">
+                                    </div>
+                                </div>
+                                <div id="pdf-upload-progress" style="display:none;" class="mb-2">
+                                    <div class="progress" style="height:6px;">
+                                        <div id="pdf-upload-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                                    </div>
+                                    <small id="pdf-upload-status" class="text-muted">Mengunggah...</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Upload & Proses</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="glass-panel">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                <div>
+                                    <h5 class="fw-semibold mb-0">Daftar Publikasi</h5>
+                                    <small class="text-muted" style="font-size:0.75rem;">Seluruh dokumen dan buku publikasi BPS yang terdaftar di sistem</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2 shadow-sm" onclick="openCreateDocModal()">
+                                        <i class="bi bi-journal-plus"></i> Tambah Publikasi Baru
+                                    </button>
+                                    <button onclick="loadDocuments()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 px-2.5 py-1.5 rounded-2">
+                                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="docs-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: Import Excel -->

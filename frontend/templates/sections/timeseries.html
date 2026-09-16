@@ -1,0 +1,618 @@
+            <div id="page-timeseries" class="page-section {% if initial_role != 'admin' %}active{% endif %}">
+                <!-- Hero Banner Analisis Deret Waktu -->
+                <div class="welcome-banner ts-hero-banner text-white p-3.5 p-md-4 rounded-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
+                    <!-- 1. Background Dot Matrix Pattern -->
+                    <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.65; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
+
+                    <!-- 2. Statistical Wave & Trend Line Curves (SVG Graphic Motif) -->
+                    <div style="position: absolute; right: 0; bottom: 0; top: 0; width: 72%; max-width: 860px; pointer-events: none; z-index: 1; opacity: 0.45; overflow: hidden; mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 15%, rgba(0,0,0,0.6) 38%, #000000 68%); -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 15%, rgba(0,0,0,0.6) 38%, #000000 68%);">
+                        <svg viewBox="0 0 900 240" preserveAspectRatio="xMaxYMid slice" style="width: 100%; height: 100%;">
+                            <defs>
+                                <linearGradient id="ts-curve-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"></stop>
+                                    <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.15"></stop>
+                                    <stop offset="60%" stop-color="#60a5fa" stop-opacity="0.85"></stop>
+                                    <stop offset="100%" stop-color="#93c5fd" stop-opacity="0.95"></stop>
+                                </linearGradient>
+                                <linearGradient id="ts-curve-grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#fbbf24" stop-opacity="0"></stop>
+                                    <stop offset="30%" stop-color="#fbbf24" stop-opacity="0"></stop>
+                                    <stop offset="50%" stop-color="#fbbf24" stop-opacity="0.2"></stop>
+                                    <stop offset="75%" stop-color="#f59e0b" stop-opacity="0.75"></stop>
+                                    <stop offset="100%" stop-color="#fde047" stop-opacity="0.95"></stop>
+                                </linearGradient>
+                                <linearGradient id="ts-area-grad-blue" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"></stop>
+                                    <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.0"></stop>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Subtle Chart Guidelines -->
+                            <line x1="160" y1="65" x2="900" y2="65" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4,6" stroke-width="1"></line>
+                            <line x1="100" y1="120" x2="900" y2="120" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4,6" stroke-width="1"></line>
+                            <line x1="60" y1="175" x2="900" y2="175" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,6" stroke-width="1"></line>
+
+                            <!-- Background Area Fill -->
+                            <path d="M 0,185 C 160,190 280,145 420,150 C 560,155 640,90 760,80 C 820,75 865,60 900,55 L 900,240 L 0,240 Z" fill="url(#ts-area-grad-blue)"></path>
+
+                            <!-- Secondary Baseline Trend (Dotted) -->
+                            <path d="M 0,205 C 180,210 320,180 500,175 C 660,170 760,130 900,105" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.8" stroke-dasharray="5,6"></path>
+
+                            <!-- Primary Statistical Wave (Cyan) -->
+                            <path d="M 0,185 C 160,190 280,145 420,150 C 560,155 640,90 760,80 C 820,75 865,60 900,55" fill="none" stroke="url(#ts-curve-grad-cyan)" stroke-width="2.5"></path>
+
+                            <!-- Accent Statistical Peak Wave (Amber) -->
+                            <path d="M 120,205 C 260,205 350,125 490,130 C 620,135 710,100 840,70" fill="none" stroke="url(#ts-curve-grad-amber)" stroke-width="2"></path>
+
+                            <!-- Floating Data Nodes / Points with Luminescent Glow -->
+                            <circle cx="420" cy="150" r="9" fill="#38bdf8" fill-opacity="0.22"></circle>
+                            <circle cx="420" cy="150" r="4" fill="#38bdf8" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="490" cy="130" r="9" fill="#fbbf24" fill-opacity="0.22"></circle>
+                            <circle cx="490" cy="130" r="3.8" fill="#fbbf24" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="760" cy="80" r="11" fill="#60a5fa" fill-opacity="0.28"></circle>
+                            <circle cx="760" cy="80" r="4.8" fill="#60a5fa" stroke="#ffffff" stroke-width="2"></circle>
+
+                            <circle cx="840" cy="70" r="9.5" fill="#f59e0b" fill-opacity="0.25"></circle>
+                            <circle cx="840" cy="70" r="4" fill="#f59e0b" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="650" cy="140" r="3" fill="#ffffff" fill-opacity="0.75"></circle>
+                        </svg>
+                    </div>
+
+                    <!-- 3. Subtle Ambient Light Glows -->
+                    <div style="position: absolute; right: 15%; top: -25%; width: 320px; height: 320px; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+                    <div style="position: absolute; right: -2%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+
+                    <!-- 4. Banner Content -->
+                    <div class="position-relative" style="z-index: 2;">
+                        <!-- Top Bar: Badge & Feature Pills -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2 pb-1">
+                            <span class="badge banner-badge d-inline-flex align-items-center gap-2" style="letter-spacing: 0.4px;">
+                                <i class="bi bi-graph-up text-warning" style="font-size: 0.95rem;"></i>
+                                <span>MODUL ANALISIS DERET WAKTU (TIME SERIES)</span>
+                            </span>
+
+                            <div class="d-none d-md-flex align-items-center flex-wrap" style="gap: 10px;">
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-calendar-range text-info" style="font-size: 0.82rem;"></i>
+                                    <span>Lintas Tahun Terpadu</span>
+                                </div>
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-lightning-charge text-warning" style="font-size: 0.82rem;"></i>
+                                    <span>Indikator Pertumbuhan Otomatis</span>
+                                </div>
+                                <div class="d-inline-flex align-items-center rounded-pill pill-dark-sm gap-2">
+                                    <i class="bi bi-file-earmark-arrow-down text-success" style="font-size: 0.82rem;"></i>
+                                    <span>Ekspor Excel, CSV, PDF &amp; PNG</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="mt-1">
+                            <h1 class="fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap ts-hero-title" style="letter-spacing: -0.3px; line-height: 1.3;">
+                                Eksplorasi Deret Waktu &amp; <span class="text-brand-ts">Tren Statistik</span>
+                            </h1>
+                            
+                            <p class="mb-2 text-white text-opacity-85 fw-normal ts-hero-desc" style="font-size: 0.94rem; line-height: 1.6; max-width: 680px;">
+                                Analisis tren data statistik lintas tahun, pantau laju pertumbuhan indikator, dan bandingkan capaian antarwilayah secara akurat.
+                            </p>
+                            
+                            <!-- Workflow Steps (Clean Text-Only Stepper, Desktop Only) -->
+                            <div class="d-none d-md-flex align-items-center flex-wrap" style="font-size: 0.86rem; color: rgba(255, 255, 255, 0.9); gap: 14px;">
+                                <span class="fw-semibold text-warning d-inline-flex align-items-center gap-2" style="letter-spacing: 0.2px;">
+                                    <i class="bi bi-info-circle" style="font-size: 0.95rem;"></i>
+                                    <span>Alur Cepat :</span>
+                                </span>
+                                <span class="text-white fw-medium">Pilih Indikator Master</span>
+                                <i class="bi bi-chevron-right text-white text-opacity-40" style="font-size: 0.72rem;"></i>
+                                <span class="text-white fw-medium">Pilih Tahun Data</span>
+                                <i class="bi bi-chevron-right text-white text-opacity-40" style="font-size: 0.72rem;"></i>
+                                <span class="text-white fw-medium">Klik Tampilkan Data</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel ts-hero-container" style="position:relative;z-index:1; padding: 22px 24px;">
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom ts-header-divider">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-gradient-ts" style="font-size: 1.1rem;">Parameter Pemilihan Data Deret Waktu</h5>
+                            <p class="text-muted small mb-0">Tentukan kombinasi indikator master dan rentang tahun publikasi yang ingin dianalisis.</p>
+                        </div>
+                    </div>
+
+                    <!-- Telusuri Wizard -->
+                    <div class="row g-3" id="ts-wizard">
+                        <div class="col-12">
+                            <div class="row g-3">
+                                <!-- Step 1: Pilih Indikator Master -->
+                                <div class="col-12 ts-wizard-col--indicator d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between mb-2" style="min-height: 26px;">
+                                        <label class="form-label fw-semibold text-muted mb-0" style="font-size:0.88rem;"><span class="ts-step-badge">1</span>Pilih Indikator Master</label>
+                                    </div>
+                                    <input type="text" id="ts-wizard-search" class="form-control form-control-sm mb-2" placeholder="Cari indikator master..." oninput="filterTSIndicators(this.value)" style="font-size:0.85rem; padding: 7px 12px; height: 35px;">
+                                    <div id="ts-wizard-kolom-checkboxes" class="ts-wizard-box ts-wizard-box--enhanced d-flex flex-column gap-0">
+                                        <div class="text-loading"><i>Memuat master kolom...</i></div>
+                                    </div>
+                                </div>
+                                <!-- Step 2: Pilih Tahun Data -->
+                                <div class="col-12 ts-wizard-col--year d-flex flex-column">
+                                    <div class="d-flex align-items-center justify-content-between mb-2" style="min-height: 26px;">
+                                        <label class="form-label fw-semibold text-muted mb-0" style="font-size:0.88rem;"><span class="ts-step-badge">2</span>Pilih Tahun Data</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-xs btn-outline-primary py-1 px-3 fw-semibold" id="btn-ts-toggle-all-years" onclick="toggleSelectAllYearsBtn()" style="font-size:0.85rem; height:32px; border-radius:6px; display:none;" title="Pilih atau batal pilih semua tahun">Pilih Semua</button>
+                                            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none ts-collapse-btn" id="btn-toggle-year-picker" onclick="toggleYearPicker()" title="Perkecil / Besarkan pemilih tahun">
+                                                <i class="bi bi-chevron-up" id="year-picker-chevron"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="ts-year-search" class="form-control form-control-sm mb-2" placeholder="Cari tahun..." oninput="filterTSYears(this.value)" style="font-size:0.85rem; padding: 7px 12px; height: 35px;">
+                                    <div id="ts-wizard-tahun-checkboxes" class="ts-wizard-box ts-wizard-box--enhanced d-flex flex-wrap gap-2 ts-year-picker-body">
+                                        <span class="text-muted" style="font-size:0.75rem;">Pilih indikator terlebih dahulu</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3 pt-2">
+                                <div class="col-12 text-end d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm px-3 py-1.5" onclick="resetWizard()" style="font-size:0.85rem; border-radius:8px;">Atur Ulang</button>
+                                    <button class="btn btn-primary btn-sm px-4 py-1.5 fw-semibold shadow-sm" id="btn-ts-wizard-tampilkan" onclick="showTimeSeriesFromWizard()" disabled style="font-size:0.85rem; border-radius:8px;">Tampilkan Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 id="ts-result-title" class="mt-4 mb-2 fw-bold text-dark" style="font-size: 0.95rem; display:none;">Hasil Analisis Deret Waktu</h5>
+                <div id="ts-result-badges-outside" class="d-flex flex-wrap align-items-center gap-2 mt-2 mb-2 pt-0.5" style="display:none;"></div>
+
+                <div class="glass-panel mt-2" id="ts-results-container">
+                    <div id="ts-results-loading" class="text-center text-muted py-4" style="display:none;"><i>Mencari data ke database...</i></div>
+                    <div id="ts-results-content" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <!-- Unified Export Dropdown (Always Accessible) -->
+                                <div class="dropdown" id="ts-unified-export-dropdown">
+                                    <button class="btn btn-primary btn-sm dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm px-4 py-2" type="button" id="btn-ts-main-export" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem; border-radius: 8px; font-weight: 600;">
+                                        <i class="bi bi-download"></i> <span>Unduh / Ekspor</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="btn-ts-main-export">
+                                        <li class="dropdown-header-custom">Laporan Visual & Dokumen</li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="openTimeSeriesExportModal()">
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">Laporan Resmi (PDF / PNG)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Termasuk grafik, tren, & tabel</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="dropdown-header-custom">Matriks Data Mentah Tabular</li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="exportTimeSeriesExcel()">
+                                                <i class="bi bi-file-earmark-excel text-success fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">Microsoft Excel (.xlsx)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Seluruh angka & baris tabel</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="javascript:void(0)" onclick="exportTimeSeriesCSV()">
+                                                <i class="bi bi-filetype-csv text-primary fs-5 me-1"></i>
+                                                <div>
+                                                    <div class="fw-semibold text-dark" style="font-size: 0.84rem;">File CSV (.csv)</div>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.25;">Format teks dipisah koma</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm" id="btn-ts-back" onclick="backToTablePicker()" style="display:none; border-radius: 8px;">← Kembali</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Insights Summary Bar -->
+                        <div id="ts-quick-summary-container" class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-3 mb-3 align-items-stretch" style="display:none;">
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-start" style="border-top: 3px solid #1e40af;">
+                                    <div class="text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px; color:#475569;">Total Titik Data</div>
+                                    <div class="fs-5 fw-bold text-dark" id="ts-stat-total-points">-</div>
+                                    <div class="text-muted mt-1" style="font-size:0.72rem;">Data Tersedia</div>
+                                </div>
+                            </div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-start" style="border-top: 3px solid #16a34a;">
+                                    <div class="text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px; color:#475569;">Rentang Nilai</div>
+                                    <div class="fs-5 fw-bold text-success" id="ts-stat-range">-</div>
+                                    <div id="ts-stat-range-total" class="text-muted mt-1" style="font-size:0.72rem;"></div>
+                                </div>
+                            </div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-start" style="border-top: 3px solid #d97706;">
+                                    <div class="text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px; color:#475569;">Tahun Observasi</div>
+                                    <div class="fs-5 fw-bold" style="color: #d97706;" id="ts-stat-years">-</div>
+                                </div>
+                            </div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-start" style="border-top: 3px solid #475569;">
+                                    <div class="text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px; color:#475569;">Jumlah Rincian</div>
+                                    <div class="fs-5 fw-bold" style="color:#475569;" id="ts-stat-total-entities">-</div>
+                                    <div class="text-muted mt-1" style="font-size:0.72rem;">Rincian</div>
+                                </div>
+                            </div>
+                            <div class="col d-flex">
+                                <div class="ts-insight-card p-3 w-100 h-100 d-flex flex-column justify-content-start" style="border-top: 3px solid #1e293b;">
+                                    <div class="text-uppercase small mb-1" style="font-size:0.72rem; font-weight:700; letter-spacing:0.4px; color:#475569;">Indikator Aktif</div>
+                                    <div class="fs-5 fw-bold" style="color:#1e293b;" id="ts-stat-active-indicators">-</div>
+                                    <div class="text-muted mt-1" style="font-size:0.72rem;">Indikator Dipilih</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Mode Switcher Toolbar (Executive Segmented Control) -->
+                        <details class="ts-collapsible-mobile" open>
+                        <summary class="ts-collapsible-header">Mode Tampilan</summary>
+                        <div class="ts-collapsible-body">
+                        <div class="rounded-3" id="ts-view-mode-bar" style="display:none;">
+                            <div class="ts-segmented-control" id="ts-view-mode-group">
+                                <button type="button" class="ts-segmented-btn active" id="btn-ts-view-chart" onclick="setTimeSeriesViewMode('chart')">
+                                    <i class="bi bi-graph-up"></i> <span>Grafik</span>
+                                </button>
+                                <button type="button" class="ts-segmented-btn" id="btn-ts-view-table" onclick="setTimeSeriesViewMode('table')">
+                                    <i class="bi bi-table"></i> <span>Tabel Data</span>
+                                </button>
+                                <button type="button" class="ts-segmented-btn" id="btn-ts-view-both" onclick="setTimeSeriesViewMode('both')">
+                                    <i class="bi bi-layout-split"></i> <span>Keduanya</span>
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                        </details>
+
+                        <!-- SECTION 1: CHART VIEW (Fokus Visual & Analisis Tren) -->
+                        <div id="ts-view-section-chart">
+                            <!-- Chart Controls Card: Unit Converter + Display Options (Badge & Tooltip) + Entity Filter -->
+                            <details class="ts-collapsible-mobile" open>
+                            <summary class="ts-collapsible-header">Filter & Konversi</summary>
+                            <div id="ts-chart-control-card" class="ts-data-control-card mt-2" style="display:none; padding: 18px 22px;">
+                                <!-- Top Row: Unit Converter (Left) & Display Options (Right) -->
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-4 pb-3 mb-3" id="ts-chart-top-control-bar">
+                                    <div id="ts-chart-unit-wrapper" class="d-flex flex-column" style="display:none;">
+                                        <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
+                                        <div id="ts-chart-unit-btn-group" class="d-flex flex-column gap-1 mt-1"></div>
+                                    </div>
+                                    <div id="ts-chart-unit-no-conversion" class="d-flex flex-column" style="display:none;">
+                                        <span class="ts-filter-section-title"><i class="bi bi-info-circle text-secondary me-2"></i> Konversi Satuan</span>
+                                        <span style="font-size:0.78rem; color:var(--text-secondary, #64748b); margin-top:2px;">Indikator ini tidak memiliki satuan yang bisa dikonversi.</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-2 ms-auto" id="ts-chart-display-toggles-container">
+                                        <span class="ts-filter-section-title"><i class="bi bi-sliders text-primary me-2"></i> OPSI TAMPILAN:</span>
+                                        <div class="d-flex align-items-center flex-wrap pt-0.5" style="gap: 12px;">
+                                            <label class="ts-filter-chip active" id="ts-chart-badge-toggle-chip" style="margin:0;">
+                                                <input type="checkbox" id="ts-chart-growth-badge-toggle" checked>
+                                                <span>Badge Naik/Turun</span>
+                                            </label>
+                                            <label class="ts-filter-chip active" id="ts-chart-tooltip-toggle-chip" style="margin:0;">
+                                                <input type="checkbox" id="ts-chart-tooltip-toggle" checked>
+                                                <span>Tooltip</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Bottom Row: Entity Filter -->
+                                <div class="d-flex flex-column gap-2 w-100" id="ts-chart-entity-wrapper">
+                                    <span class="ts-filter-section-title"><i class="bi bi-funnel-fill text-primary me-2"></i> FILTER RINCIAN:</span>
+                                    <div id="ts-entity-checklist-chart" class="d-flex align-items-center"></div>
+                                </div>
+                            </div>
+                            </details>
+
+                            <!-- Chart Title (Outside Glass Panel) -->
+                            <div id="ts-chart-title-1" class="mb-2" style="font-size:1.05rem; font-weight:700; color:var(--text-primary, #1e293b); display:none; letter-spacing:0.2px;"></div>
+
+                            <!-- Time Series Chart Area -->
+                            <div id="ts-chart-container" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
+                                
+                                
+                                <!-- Kustom Legenda (Scrollable Ringkas) -->
+                                <div id="ts-custom-legend" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                            
+                            <!-- Area Render Grafik -->
+                            <div class="d-flex align-items-start" style="position:relative;">
+                                <!-- Scrollable Chart Area -->
+                                <div id="ts-chart-scrollable">
+                                    <div id="ts-chart-wrapper">
+                                        <canvas id="timeSeriesChart" height="320" style="touch-action: pan-x pan-y;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Second Chart (for multi-VK) -->
+                        <div id="ts-chart-container-2" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
+                            <div id="ts-chart-title-2" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+                            <div id="ts-custom-legend-2" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                            <div class="d-flex align-items-start" style="position:relative;">
+                                <div id="ts-chart-scrollable-2">
+                                    <div id="ts-chart-wrapper-2">
+                                        <canvas id="timeSeriesChart2" height="320" style="touch-action: pan-x pan-y;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Third Chart (for 3+ VKs) -->
+                        <div id="ts-chart-container-3" class="ts-chart-glass-panel p-3 rounded-3 mb-3" style="position:relative; width:100%; display:none;">
+                            <div id="ts-chart-title-3" style="font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
+                            <div id="ts-custom-legend-3" class="ts-custom-legend-scrollable" style="display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:15px; font-family:'Outfit',sans-serif; font-size:11px;"></div>
+                            <div class="d-flex align-items-start" style="position:relative;">
+                                <div id="ts-chart-scrollable-3">
+                                    <div id="ts-chart-wrapper-3">
+                                        <canvas id="timeSeriesChart3" height="320" style="touch-action: pan-x pan-y;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Trend Insights — Collapsible -->
+                        <details class="ts-collapsible-mobile ts-trend-collapsible">
+                        <summary class="ts-collapsible-header ts-trend-header"><div><div>Wawasan Tren & Pertumbuhan</div><div class="ts-trend-subtitle">Analisis pertumbuhan, tren wilayah, dan perbandingan antar kecamatan</div></div></summary>
+                        <div class="ts-collapsible-body">
+                        <div id="ts-insights-drawer" class="ts-insights-drawer mb-3">
+                            <div class="ts-insights-card p-3 p-md-4 rounded-3">
+
+                                <!-- 3 Highlight Metric Cards -->
+                                <div class="row row-cols-1 row-cols-md-3 g-3 mb-4" id="ts-insights-metric-cards">
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-gainer p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                 <span class="ts-stat-tag text-success fw-bold" style="font-size: 0.64rem;">KENAIKAN TERTINGGI</span>
+                                                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 fw-bold" id="ts-gainer-badge" style="font-size: 0.66rem;">+0%</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-gainer-name">-</div>
+                                             <div class="text-muted small mt-1" style="font-size: 0.64rem;" id="ts-gainer-detail">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-decliner p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                 <span class="ts-stat-tag text-danger fw-bold" style="font-size: 0.64rem;">PENURUNAN TERBESAR</span>
+                                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 fw-bold" id="ts-decliner-badge" style="font-size: 0.66rem;">-0%</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 text-truncate mt-1.5" id="ts-decliner-name">-</div>
+                                             <div class="text-muted small mt-1" style="font-size: 0.64rem;" id="ts-decliner-detail">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="ts-highlight-stat-card ts-stat-avg p-3 rounded-3 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                 <span class="ts-stat-tag text-primary fw-bold" style="font-size: 0.64rem;">RATA-RATA PERTUMBUHAN</span>
+                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 fw-bold" id="ts-avg-badge" style="font-size: 0.66rem;">0% / thn</span>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 mt-1.5" id="ts-trend-summary">Tren Keseluruhan</div>
+                                             <div class="text-muted small mt-1" style="font-size: 0.64rem;" id="ts-trend-detail">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Growth Ranking Section with Filter Toolbar Directly Above Table -->
+                                <div class="pt-3 border-top">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-1">
+                                         <label class="fw-bold text-dark small mb-0" style="font-size: 0.7rem;">
+                                             <span>Peringkat Pertumbuhan Rincian</span>
+                                         </label>
+                                         <span class="text-muted" style="font-size: 0.64rem;" id="ts-growth-table-count">-</span>
+                                    </div>
+
+                                    <!-- Filter Toolbar (Top-aligned Labels) -->
+                                    <div class="p-3 rounded-3 mb-3 border ts-insight-filter-bar">
+                                        <div class="row g-2.5 align-items-end">
+                                            <!-- 1. Varian Rincian (muncul jika query memiliki > 1 varian) -->
+                                            <div class="col-12 col-sm-6 col-md-3 flex-column" id="ts-insight-variant-container" style="display:none;">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-variant">
+                                                    Varian Rincian:
+                                                </label>
+                                                <select id="ts-insight-select-variant" class="ts-insight-select w-100" onchange="onInsightVariantFilterChanged()"></select>
+                                            </div>
+
+                                            <!-- 2. Searchable Checklist Dropdown for Rincian -->
+                                            <div class="col-12 col-sm-6 col-md-3">
+                                                <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-entity">
+                                                    Rincian:
+                                                </label>
+                                                <div class="dropdown w-100" id="ts-insight-entity-dropdown-container">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-entity" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
+                                                        <span class="text-truncate" id="ts-insight-entity-btn-text">Semua Rincian</span>
+                                                    </button>
+                                                    <div class="dropdown-menu p-2 shadow" style="max-height:300px; width:260px;" id="ts-insight-entity-menu" onclick="event.stopPropagation();">
+                                                        <div class="px-1 pb-2 mb-1 border-bottom">
+                                                            <input type="text" id="ts-insight-entity-search" class="form-control form-control-sm" placeholder="Cari rincian..." style="font-size:0.78rem;">
+                                                        </div>
+                                                        <div class="d-flex align-items-center gap-2 px-2 py-1 mb-1 border-bottom">
+                                                            <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-bold text-primary" id="btn-ts-insight-select-all" style="font-size:0.78rem;">Pilih Semua</button>
+                                                            <span class="text-muted" style="font-size:0.75rem;">|</span>
+                                                            <button type="button" class="btn btn-link btn-xs p-0 text-decoration-none fw-semibold text-danger" id="btn-ts-insight-clear-all" style="font-size:0.78rem;">Hapus Semua</button>
+                                                        </div>
+                                                        <div id="ts-insight-entity-list" style="max-height:180px; overflow-y:auto;"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. Multi-Select Checklist Filter Tren -->
+                                             <div class="col-12 col-sm-4 col-md-3 col-lg-2">
+                                                 <label class="ts-insight-filter-label mb-1.5" for="btn-ts-insight-trend">
+                                                     Filter Tren:
+                                                 </label>
+                                                 <div class="dropdown w-100" id="ts-insight-trend-dropdown-container">
+                                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle ts-insight-select w-100 text-start d-flex align-items-center justify-content-between" type="button" id="btn-ts-insight-trend" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="font-size:0.82rem;">
+                                                         <span class="text-truncate" id="ts-insight-trend-btn-text">Semua Tren</span>
+                                                     </button>
+                                                     <div class="dropdown-menu p-2 shadow" style="width:230px;" id="ts-insight-trend-menu">
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; border-bottom:1px solid #e2e8f0; margin-bottom:4px; cursor:pointer;">
+                                                             <input type="checkbox" id="ts-insight-trend-check-all" checked style="width:16px;height:16px;">
+                                                             <span>Pilih Semua</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="up" checked style="width:16px;height:16px;">
+                                                             <span class="text-success fw-semibold">▲ Peningkatan (Naik)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="down" checked style="width:16px;height:16px;">
+                                                             <span class="text-danger fw-semibold">▼ Penurunan (Turun)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="stagnant" checked style="width:16px;height:16px;">
+                                                             <span class="text-secondary">― Stagnan / Tetap (0%)</span>
+                                                         </label>
+                                                         <label class="dropdown-item px-1 py-1" style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;">
+                                                             <input type="checkbox" class="ts-insight-trend-cb" data-trend="empty" checked style="width:16px;height:16px;">
+                                                             <span class="text-muted">- Belum Lengkap / Strip</span>
+                                                         </label>
+                                                     </div>
+                                                 </div>
+                                             </div>
+
+                                            <!-- 4 & 5. Tahun Awal & Tahun Akhir (Selalu Sejajar Berdampingan dengan Jarak Lega) -->
+                                            <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+                                                <div class="row gx-3 gy-2">
+                                                    <!-- Tahun Awal -->
+                                                    <div class="col-6">
+                                                        <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-start">
+                                                            Tahun Awal:
+                                                        </label>
+                                                        <select id="ts-insight-select-year-start" class="ts-insight-select w-100" style="min-width: 135px;" onchange="onInsightFilterChanged()"></select>
+                                                    </div>
+                                                    <!-- Tahun Akhir -->
+                                                    <div class="col-6">
+                                                        <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-year-end">
+                                                            Tahun Akhir:
+                                                        </label>
+                                                        <select id="ts-insight-select-year-end" class="ts-insight-select w-100" style="min-width: 135px;" onchange="onInsightFilterChanged()"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 6. Indikator / Master Kolom (hanya muncul jika > 1 kolom) -->
+                                            <div class="col-12 col-md-4 col-lg-3 flex-column" id="ts-insight-indicator-container" style="display:none;">
+                                                <label class="ts-insight-filter-label mb-1.5" for="ts-insight-select-indicator">
+                                                    Indikator:
+                                                </label>
+                                                <select id="ts-insight-select-indicator" class="ts-insight-select w-100" onchange="onInsightFilterChanged()"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Table Area -->
+                                    <div class="table-responsive rounded-2 border" style="max-height: 260px; overflow-y: auto;">
+                                        <table class="table table-sm table-hover mb-0" style="font-size: 0.82rem;" id="ts-growth-ranking-table">
+                                            <thead class="table-light sticky-top" style="z-index: 2; font-size: 0.75rem; text-transform: uppercase;">
+                                                <tr>
+                                                    <th style="width: 50px; text-align: center;">No.</th>
+                                                    <th>Rincian</th>
+                                                    <th style="text-align: right;" id="ts-th-year-start">Awal</th>
+                                                    <th style="text-align: right;" id="ts-th-year-end">Akhir</th>
+                                                    <th style="text-align: right;">Selisih Nominal</th>
+                                                    <th style="text-align: right;">Perubahan (%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ts-growth-ranking-tbody">
+                                                <tr><td colspan="6" class="text-center py-3 text-muted">Memuat peringkat...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        </details>
+                        </div> <!-- /#ts-view-section-chart -->
+
+                        <!-- SECTION 2: TABLE VIEW (Fokus Data Tabular & Ekspor) -->
+                        <div id="ts-view-section-table" style="display:none;">
+                        <details class="ts-collapsible-mobile" open>
+                        <summary class="ts-collapsible-header">Filter & Konversi</summary>
+                        <!-- Unified TS Data Controls Card: Unit Converter + Column Filters + Display Toggles + Entity Checklist -->
+                        <div id="ts-data-control-card" class="ts-data-control-card mt-2" style="display:none; padding: 18px 22px;">
+                            <!-- Top Control Bar: Unit Converter -->
+                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-4 pb-3 mb-3" id="ts-top-control-bar">
+                                <!-- Universal Unit Converter Bar (if active) -->
+                                <div id="ts-unit-converter-container" class="d-flex flex-column" style="display:none;">
+                                    <span class="ts-filter-section-title"><i class="bi bi-arrow-left-right text-primary me-2"></i> Konversi Satuan</span>
+                                    <div id="ts-unit-btn-group" class="d-flex flex-column gap-1 mt-1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Value Key (Column) Filter: Dedicated Full-Width Section -->
+                            <div id="ts-valuekey-picker" class="d-flex flex-column gap-2 w-100"></div>
+                            
+                            <!-- Variant Subtype Picker: Placed above Entity Checklist -->
+                            <div id="ts-tipe-rincian-picker" style="display:none;"></div>
+
+                            <!-- Entity (Rincian) Filter: Positioned Underneath Variant Picker -->
+                            <div class="d-flex flex-column gap-2 w-100 pt-3 mt-3 border-top" id="ts-entity-checklist-wrapper">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <span class="ts-filter-section-title"><i class="bi bi-funnel-fill text-primary me-2"></i> FILTER RINCIAN:</span>
+                                </div>
+                                <div id="ts-entity-checklist" class="d-flex align-items-center"></div>
+                            </div>
+                        </div>
+                        </details>
+
+                        <!-- Toolbar Tabel & Tombol Ekspor Data Tabular & Lacak Sumber Data -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 mb-2 flex-nowrap gap-2 pt-2 border-top" style="overflow-x: auto; scrollbar-width: none;">
+                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                <h6 class="mb-0 fw-bold text-dark text-nowrap" style="font-size: 0.95rem;">
+                                    Tabel Data Deret Waktu
+                                </h6>
+                            </div>
+                            <div class="d-flex align-items-center flex-nowrap gap-2 flex-shrink-0">
+                                <!-- Admin Data Lineage -->
+                                <button class="btn btn-outline-primary btn-sm align-items-center gap-1.5 shadow-sm admin-only" id="btn-ts-toggle-sources" onclick="toggleTimeSeriesSources()" title="Lacak Asal Sumber Data (Publikasi, Tabel, dan Kolom Asal)" style="display:none;">
+                                    <i class="bi bi-diagram-3"></i> <span>Lacak Asal Sumber Data</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive rounded-3 border shadow-sm" style="max-height: 650px; overflow: auto; scrollbar-gutter: stable;">
+                            <table class="table table-sm align-middle mb-0" id="ts-grid">
+                                <thead id="ts-grid-head"></thead>
+                                <tbody id="ts-grid-body"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Panel Rekapitulasi Sumber Data (Lineage) - Admin Only -->
+                        <div id="ts-sources-lineage-container" class="mt-3 p-3 rounded-3 border shadow-sm admin-only" style="display:none; background: #ffffff;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size:0.92rem;">
+                                    <i class="bi bi-journal-bookmark-fill text-primary"></i> Rekapitulasi Asal Sumber Data (Publikasi, Tabel & Kolom)
+                                </h6>
+                                <span class="badge bg-primary-subtle text-primary border" style="font-size:0.75rem; font-weight:600;">Data Lineage & Audit</span>
+                            </div>
+                            <p class="text-muted small mb-2" style="font-size:0.8rem;">
+                                Tabel berikut merangkum dari publikasi buku BPS mana, tabel mana, dan nama kolom asli mana setiap nilai deret waktu diperoleh. Klik <b>"Buka Tabel"</b> untuk memeriksa data tabel aslinya.
+                            </p>
+                            <div class="table-responsive rounded-2 border">
+                                <table class="table table-sm table-hover align-middle mb-0" style="font-size:0.83rem;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:90px; text-align:center;">Tahun Data</th>
+                                            <th>Indikator Terpilih</th>
+                                            <th>Publikasi Asal (BPS)</th>
+                                            <th>Tabel Asal</th>
+                                            <th>Nama Kolom Asli di Tabel</th>
+                                            <th style="width:120px; text-align:center;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ts-sources-lineage-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="ts-results-empty" class="text-center text-danger py-4" style="display:none;">Data tidak ditemukan untuk kata kunci tersebut.</div>
+                    <div id="ts-table-picker" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- PAGE 7: Admin -->

@@ -43,6 +43,9 @@ scratch/
 *.png
 !backend/static/*.png
 !backend/static/*.svg
+!frontend/static/*.png
+!frontend/static/*.svg
+
 server_err.txt
 history_search.txt
 temp_script*.py

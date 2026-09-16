@@ -1,0 +1,104 @@
+            <div id="page-import" class="page-section">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="glass-panel h-100 mb-0">
+                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">1</span> Download Template</h5>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Sumber Header (Publikasi Acuan)</label>
+                                <select id="import-src-doc" class="form-select" onchange="importLoadTables()">
+                                    <option value="">-- Pilih publikasi --</option>
+                                </select>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold text-muted">Tahun Publikasi</label>
+                                    <input type="number" id="import-pub-year" class="form-control form-control-sm" placeholder="e.g. 2026" onchange="syncImportColYear()">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold text-muted">Tahun Data (Kolom)</label>
+                                    <input type="number" id="import-col-year" class="form-control form-control-sm" placeholder="e.g. 2025">
+                                </div>
+                                <div class="col-12">
+                                    <div class="text-muted" style="font-size:0.75rem; line-height:1.4;"><i class="bi bi-lightbulb text-warning"></i> <strong>Otomatis:</strong> Publikasi 2026 → Data 2025 (T-1). Otomatis masuk ke baris 3 & sheet Info.</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Bab</label>
+                                <select id="import-src-bab" class="form-select" onchange="importOnBabChange()">
+                                    <option value="">-- Pilih Bab --</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Pilih Tabel Spesifik</label>
+                                <select id="import-src-table" class="form-select" onchange="importOnTableChange()">
+                                    <option value="">-- Pilih Tabel --</option>
+                                </select>
+                            </div>
+                            <div class="row g-2 mt-3">
+                                <div class="col-sm-6">
+                                    <button class="btn btn-download-main w-100 py-2 d-flex align-items-center justify-content-center gap-1.5" onclick="importDownloadTemplate()" style="font-size:0.88rem;">
+                                        <i class="bi bi-file-earmark-arrow-down"></i> Download Tabel Ini
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button class="btn btn-download-zip w-100 py-2 d-flex align-items-center justify-content-center gap-1.5" onclick="importDownloadBabZip()" style="font-size:0.88rem;">
+                                        <i class="bi bi-file-earmark-zip"></i> Download Bab (ZIP)
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="import-template-hint" class="small text-muted mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="glass-panel h-100 mb-0 d-flex flex-column">
+                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">2</span> Import / Upload Template</h5>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Tahun Target (Publikasi Lama) <span class="text-muted">- opsional</span></label>
+                                <input type="number" id="import-year" class="form-control" placeholder="e.g. 2019">
+                                <div class="form-text">Kosongkan jika template sudah punya Tahun Publikasi di sheet Info.</div>
+                            </div>
+                            <div class="mb-3 flex-grow-1 d-flex flex-column">
+                                <label class="form-label small fw-semibold text-muted">File .xlsx (Single / Multi-File)</label>
+                                <div id="excel-drop-zone" class="dropzone-modern flex-grow-1 d-flex flex-column align-items-center justify-content-center">
+                                    <div id="excel-drop-text" class="text-dropzone">
+                                        <i class="bi bi-file-earmark-spreadsheet text-success dropzone-icon"></i><br>
+                                        <span class="fw-semibold text-dark">Seret & lepas 1 atau banyak file .xlsx di sini</span>, atau <span class="text-success text-decoration-underline">pilih file</span>
+                                        <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Dapat memilih banyak file sekaligus (Multi-File Import)</div>
+                                    </div>
+                                    <input type="file" id="import-file" class="form-control mt-2" accept=".xlsx" multiple style="display:none;">
+                                </div>
+                            </div>
+                            <div id="excel-upload-progress" style="display:none;" class="mb-2">
+                                <div class="progress" style="height:6px;">
+                                    <div id="excel-upload-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                                </div>
+                                <small id="excel-upload-status" class="text-muted">Mengunggah...</small>
+                            </div>
+                            <button class="btn btn-success w-100" onclick="importUploadExcel()">⬆ Upload & Import File</button>
+                            <div id="import-result" class="small mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Status Publikasi Hasil Import & Entri Tabel -->
+                    <div class="col-12 mt-2">
+                        <div class="glass-panel p-3.5">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 pb-2 border-bottom">
+                                <div>
+                                    <h6 class="fw-bold mb-0 d-flex align-items-center gap-2" style="font-size:0.95rem;">
+                                        <i class="bi bi-journal-bookmark text-primary fs-5"></i> Daftar Publikasi & Entri Tabel BPS
+                                    </h6>
+                                    <small class="text-muted" style="font-size:0.76rem;">Daftar publikasi yang dikelola melalui template Excel dan penambahan tabel web</small>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm px-2.5 py-1 d-inline-flex align-items-center gap-1 rounded-2" onclick="loadImportedExcelPublications()" style="font-size:0.75rem;">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh Status
+                                </button>
+                            </div>
+                            <div id="excel-imported-pub-list" class="d-flex flex-column gap-2.5">
+                                <div class="text-center text-muted py-3" style="font-size:0.82rem;">Memuat daftar publikasi...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: Browser Dokumen & Tabel -->

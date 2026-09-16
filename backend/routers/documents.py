@@ -1,3 +1,4 @@
+from services.table_service import parse_csv_for_db, get_safe_windows_path
 import os
 import io
 import re
@@ -550,3 +551,70 @@ def get_document_tables(doc_id: int, response: Response, db: Session = Depends(g
         _DOC_TABLES_CACHE[doc_id] = tables
 
     return tables
+
+
+# =====================================================================
+# RELOCATED FROM MAIN.PY (MODULAR ARCHITECTURE)
+# =====================================================================
+@router.post("/documents/{doc_id}/load-all")
+def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    loaded_count = 0
+    errors = 0
+    for t in tables:
+        try:
+            db.query(models.TableRow).filter(models.TableRow.table_id == t.id).delete()
+            safe_path = get_safe_windows_path(t.csv_path)
+            headers, records, units, years = parse_csv_for_db(safe_path)
+            t.headers = headers
+            t.units = units
+            t.years = years
+            for row_idx, record in enumerate(records):
+                is_anomaly = False
+                for key, val in record.items():
+                    str_val = str(val).strip()
+                    if "?" in str_val:
+                        is_anomaly = True
+                        break
+                db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly, sort_order=row_idx)
+                db.add(db_row)
+            loaded_count += 1
+        except Exception:
+            errors += 1
+    db.commit()
+    log_activity(db, "reload_all", f"doc_id={doc_id}", {"loaded": loaded_count, "errors": errors})
+    return {"message": f"Berhasil me-load {loaded_count} tabel ke database. Gagal: {errors} tabel."}
+
+@router.post("/documents/{doc_id}/bab/{bab_num}/load-all")
+def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
+    loaded_count = 0
+    errors = 0
+
+    for t in tables:
+        match = re.search(r'Tabel[\s_]*(\d+)', t.table_name, re.IGNORECASE)
+        if match and int(match.group(1)) == bab_num:
+            try:
+                db.query(models.TableRow).filter(models.TableRow.table_id == t.id).delete()
+                safe_path = get_safe_windows_path(t.csv_path)
+                headers, records, units, years = parse_csv_for_db(safe_path)
+                t.headers = headers
+                t.units = units
+                t.years = years
+                for row_idx, record in enumerate(records):
+                    is_anomaly = False
+                    for key, val in record.items():
+                        str_val = str(val).strip()
+                        if "?" in str_val:
+                            is_anomaly = True
+                            break
+                    db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly, sort_order=row_idx)
+                    db.add(db_row)
+                loaded_count += 1
+            except Exception:
+                errors += 1
+    db.commit()
+    log_activity(db, "reload_chapter", f"bab {bab_num}", {"doc_id": doc_id, "loaded": loaded_count, "errors": errors})
+    return {"message": f"Berhasil me-load {loaded_count} tabel Bab {bab_num} ke database. Gagal: {errors} tabel."}
+
+# ===== FIX TRUNCATED TABLE NAMES =====

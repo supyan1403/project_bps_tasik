@@ -1,0 +1,466 @@
+            <!-- PAGE 1: Dashboard -->
+            <div id="page-dashboard" class="page-section {% if initial_role == 'admin' %}active{% endif %}">
+                <div class="welcome-banner text-white px-4 py-4 px-md-5 py-md-5 rounded-4 mb-4 position-relative overflow-hidden d-flex flex-column justify-content-center" style="min-height: 180px; background: linear-gradient(135deg, #091e42 0%, #112d69 50%, #1d4ed8 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 12px 28px -6px rgba(9, 30, 66, 0.35);">
+                    <!-- 1. Background Dot Matrix Pattern -->
+                    <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.2px, transparent 1.2px); background-size: 24px 24px; opacity: 0.65; mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); -webkit-mask-image: radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 75%); pointer-events: none; z-index: 1;"></div>
+
+                    <!-- 2. Statistical Wave & Trend Line Curves (SVG Graphic Motif) -->
+                    <div style="position: absolute; right: 0; bottom: 0; top: 0; width: 72%; max-width: 860px; pointer-events: none; z-index: 1; opacity: 0.45; overflow: hidden; mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 15%, rgba(0,0,0,0.6) 38%, #000000 68%); -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.12) 15%, rgba(0,0,0,0.6) 38%, #000000 68%);">
+                        <svg viewBox="0 0 900 240" preserveAspectRatio="xMaxYMid slice" style="width: 100%; height: 100%;">
+                            <defs>
+                                <linearGradient id="curve-grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"></stop>
+                                    <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.15"></stop>
+                                    <stop offset="60%" stop-color="#60a5fa" stop-opacity="0.85"></stop>
+                                    <stop offset="100%" stop-color="#93c5fd" stop-opacity="0.95"></stop>
+                                </linearGradient>
+                                <linearGradient id="curve-grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#fbbf24" stop-opacity="0"></stop>
+                                    <stop offset="30%" stop-color="#fbbf24" stop-opacity="0"></stop>
+                                    <stop offset="50%" stop-color="#fbbf24" stop-opacity="0.2"></stop>
+                                    <stop offset="75%" stop-color="#f59e0b" stop-opacity="0.75"></stop>
+                                    <stop offset="100%" stop-color="#fde047" stop-opacity="0.95"></stop>
+                                </linearGradient>
+                                <linearGradient id="area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"></stop>
+                                    <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.0"></stop>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Subtle Chart Guidelines -->
+                            <line x1="160" y1="65" x2="900" y2="65" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4,6" stroke-width="1"></line>
+                            <line x1="100" y1="120" x2="900" y2="120" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4,6" stroke-width="1"></line>
+                            <line x1="60" y1="175" x2="900" y2="175" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,6" stroke-width="1"></line>
+
+                            <!-- Background Area Fill -->
+                            <path d="M 0,185 C 160,190 280,145 420,150 C 560,155 640,90 760,80 C 820,75 865,60 900,55 L 900,240 L 0,240 Z" fill="url(#area-grad)"></path>
+
+                            <!-- Secondary Baseline Trend (Dotted) -->
+                            <path d="M 0,205 C 180,210 320,180 500,175 C 660,170 760,130 900,105" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.8" stroke-dasharray="5,6"></path>
+
+                            <!-- Primary Statistical Wave (Cyan) -->
+                            <path d="M 0,185 C 160,190 280,145 420,150 C 560,155 640,90 760,80 C 820,75 865,60 900,55" fill="none" stroke="url(#curve-grad-cyan)" stroke-width="2.5"></path>
+
+                            <!-- Accent Statistical Peak Wave (Amber) -->
+                            <path d="M 120,205 C 260,205 350,125 490,130 C 620,135 710,100 840,70" fill="none" stroke="url(#curve-grad-amber)" stroke-width="2"></path>
+
+                            <!-- Floating Data Nodes / Points with Luminescent Glow -->
+                            <circle cx="420" cy="150" r="9" fill="#38bdf8" fill-opacity="0.22"></circle>
+                            <circle cx="420" cy="150" r="4" fill="#38bdf8" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="490" cy="130" r="9" fill="#fbbf24" fill-opacity="0.22"></circle>
+                            <circle cx="490" cy="130" r="3.8" fill="#fbbf24" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="760" cy="80" r="11" fill="#60a5fa" fill-opacity="0.28"></circle>
+                            <circle cx="760" cy="80" r="4.8" fill="#60a5fa" stroke="#ffffff" stroke-width="2"></circle>
+
+                            <circle cx="840" cy="70" r="9.5" fill="#f59e0b" fill-opacity="0.25"></circle>
+                            <circle cx="840" cy="70" r="4" fill="#f59e0b" stroke="#ffffff" stroke-width="1.8"></circle>
+
+                            <circle cx="650" cy="140" r="3" fill="#ffffff" fill-opacity="0.75"></circle>
+                        </svg>
+                    </div>
+
+                    <!-- 3. Subtle Ambient Light Glows -->
+                    <div style="position: absolute; right: 15%; top: -25%; width: 320px; height: 320px; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+                    <div style="position: absolute; right: -2%; bottom: -30%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(0,0,0,0) 70%); filter: blur(35px); pointer-events: none;"></div>
+
+                    <!-- Top Right Live Status & Clock -->
+                    <div class="welcome-banner-clock-container position-absolute" style="top: 20px; right: 24px; z-index: 3;">
+                        <div class="d-inline-flex align-items-center gap-2 rounded-pill pill-dark py-1 px-3" style="font-size: 0.78rem;">
+                            <span class="position-relative d-inline-flex me-1" style="width: 7px; height: 7px;">
+                                <span class="position-absolute w-100 h-100 rounded-circle bg-success" style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.75;"></span>
+                                <span class="rounded-circle bg-success" style="width: 7px; height: 7px;"></span>
+                            </span>
+                            <span class="fw-bold text-online me-1" style="font-size: 0.74rem; letter-spacing: 0.5px;">ONLINE</span>
+                            <span class="text-white text-opacity-30 me-1">|</span>
+                            <i class="bi bi-clock text-info" style="font-size: 0.78rem;"></i>
+                            <span id="banner-live-clock" class="fw-bold text-white font-monospace" style="letter-spacing: 0.6px; font-size: 0.78rem;">--:--:--</span>
+                            <span class="banner-clock-date-divider text-white text-opacity-30 mx-1">|</span>
+                            <span id="banner-live-date" class="banner-clock-date text-white text-opacity-85 fw-medium" style="font-size: 0.78rem;">Memuat tanggal...</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Content (Vertically Centered along Y-Axis) -->
+                    <div class="position-relative my-auto" style="z-index: 2;">
+                        <h1 class="welcome-banner-title fs-2 fw-bold text-white mb-2 d-flex align-items-center gap-2 flex-wrap" style="letter-spacing: -0.4px; line-height: 1.25;">
+                            Selamat Datang di <span class="text-brand-sipedas">SIPEDAS</span>
+                        </h1>
+                        <p class="welcome-banner-desc mb-0 text-white text-opacity-85 fw-normal" style="font-size: 0.94rem; line-height: 1.55; max-width: 680px;">
+                            <span class="d-none d-md-inline">Sistem Integrasi, Pencarian, dan Analisis Data Statistik terpadu untuk percepatan diseminasi data Kabupaten Tasikmalaya.</span>
+                            <span class="d-md-none">Portal integrasi &amp; analisis data statistik resmi Kabupaten Tasikmalaya.</span>
+                        </p>
+
+                        <!-- Admin Capabilities Badges (Hanya tampil saat mode Admin aktif) -->
+                        <div class="admin-only d-flex align-items-center flex-wrap gap-2 mt-3" style="display: none;">
+                            <span class="badge rounded-pill fw-medium d-inline-flex align-items-center" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.74rem; padding: 6px 12px; letter-spacing: 0.2px; line-height: 1.2;">
+                                Ekstraksi PDF
+                            </span>
+                            <span class="badge rounded-pill fw-medium d-inline-flex align-items-center" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.74rem; padding: 6px 12px; letter-spacing: 0.2px; line-height: 1.2;">
+                                Manajemen Database
+                            </span>
+                            <span class="badge rounded-pill fw-medium d-inline-flex align-items-center" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.74rem; padding: 6px 12px; letter-spacing: 0.2px; line-height: 1.2;">
+                                Pemantauan Anomali Data
+                            </span>
+                            <span class="badge rounded-pill fw-medium d-inline-flex align-items-center" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.95); font-size: 0.74rem; padding: 6px 12px; letter-spacing: 0.2px; line-height: 1.2;">
+                                Backup &amp; Restore
+                            </span>
+                        </div>
+
+                        <!-- Hidden span to prevent JS reference error -->
+                        <span id="welcome-role-text" style="display:none;"></span>
+                    </div>
+                </div>
+
+                <!-- ADMIN DASHBOARD (gabungan: ANALITIK DATA ENGINE + Charts + Admin-only) -->
+                <div id="dashboard-admin-view">
+                    <!-- 1. ANALITIK DATA ENGINE: 5 kartu statistik -->
+                    <div class="dashboard-analytics-header d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                        <div class="analytics-title-group d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill" style="font-size: 0.72rem; font-weight: 600;">
+                                <i class="bi bi-cpu-fill me-1 text-primary"></i> ANALITIK DATA ENGINE
+                            </span>
+                            <h5 class="fw-bold text-dark mb-0 fs-6">Karakteristik &amp; Kedalaman Database SIPEDAS</h5>
+                        </div>
+                        <div class="analytics-actions-group d-flex align-items-center gap-3">
+                            <small class="text-muted" style="font-size: 0.78rem;"><i class="bi bi-database-check me-1.5 text-success"></i>Live Query Database BPS</small>
+                            <button id="btn-refresh-dashboard" onclick="loadDashboardStats(true)" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-2 shadow-2xs" style="font-size:0.75rem; font-weight:500;" title="Muat ulang seluruh metrik &amp; statistik">
+                                <i id="icon-refresh-dashboard" class="bi bi-arrow-clockwise"></i> <span id="text-refresh-dashboard">Perbarui</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
+                        <!-- Total Titik Nilai -->
+                        <div class="col">
+                            <div class="glass-panel stat-card-glass stat-card-glow-emerald h-100 p-3.5 mb-0">
+                                <div class="stat-card-pattern"></div>
+                                <svg class="stat-card-watermark" viewBox="0 0 160 100" preserveAspectRatio="none" fill="none">
+                                    <defs>
+                                        <linearGradient id="sc-grad-emerald" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.22"/>
+                                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,90 Q40,40 80,65 T160,20 L160,100 L0,100 Z" fill="url(#sc-grad-emerald)"/>
+                                    <path d="M0,75 Q45,65 90,45 T160,35" stroke="#10b981" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4,4"/>
+                                    <path d="M0,90 Q40,40 80,65 T160,20" stroke="#10b981" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="40" cy="52" r="3" fill="#10b981" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="80" cy="65" r="3.5" fill="#10b981" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="120" cy="42" r="3" fill="#10b981" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="155" cy="22" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+                                </svg>
+                                <div class="position-relative" style="z-index: 2;">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Titik Nilai</span>
+                                        <div class="rounded-circle p-1.5 bg-success bg-opacity-10 text-success">
+                                            <i class="bi bi-database-fill-check fs-6"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="fs-3 fw-bold text-dark" id="stat-total-pts">-</div>
+                                        <span class="badge badge-green">Titik Nilai</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.72rem;">Jumlah Sel Data Terisi</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Tabel -->
+                        <div class="col">
+                            <div class="glass-panel stat-card-glass stat-card-glow-blue h-100 p-3.5 mb-0">
+                                <div class="stat-card-pattern"></div>
+                                <svg class="stat-card-watermark" viewBox="0 0 160 100" preserveAspectRatio="none" fill="none">
+                                    <defs>
+                                        <linearGradient id="sc-grad-blue" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.22"/>
+                                            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <rect x="25" y="60" width="12" height="40" rx="2" fill="#3b82f6" fill-opacity="0.12"/>
+                                    <rect x="55" y="45" width="12" height="55" rx="2" fill="#3b82f6" fill-opacity="0.16"/>
+                                    <rect x="85" y="30" width="12" height="70" rx="2" fill="#3b82f6" fill-opacity="0.20"/>
+                                    <rect x="115" y="18" width="12" height="82" rx="2" fill="#3b82f6" fill-opacity="0.24"/>
+                                    <path d="M0,85 Q40,65 80,45 T160,15 L160,100 L0,100 Z" fill="url(#sc-grad-blue)"/>
+                                    <path d="M0,95 Q50,75 100,50 T160,30" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4,4"/>
+                                    <path d="M0,85 Q40,65 80,45 T160,15" stroke="#3b82f6" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="61" cy="55" r="3" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="91" cy="40" r="3.5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="121" cy="28" r="3" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="155" cy="17" r="4.5" fill="#3b82f6" stroke="#ffffff" stroke-width="2"/>
+                                </svg>
+                                <div class="position-relative" style="z-index: 2;">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Tabel</span>
+                                        <div class="rounded-circle p-1.5 bg-primary bg-opacity-10 text-primary">
+                                            <i class="bi bi-table fs-6"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="fs-3 fw-bold text-dark" id="stat-total-tables">-</div>
+                                        <span class="badge badge-blue">Tabel</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.72rem;">Tabel Data Terintegrasi</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Baris -->
+                        <div class="col">
+                            <div class="glass-panel stat-card-glass stat-card-glow-orange h-100 p-3.5 mb-0">
+                                <div class="stat-card-pattern"></div>
+                                <svg class="stat-card-watermark" viewBox="0 0 160 100" preserveAspectRatio="none" fill="none">
+                                    <defs>
+                                        <linearGradient id="sc-grad-orange" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#f97316" stop-opacity="0.22"/>
+                                            <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,95 Q35,55 70,75 T130,35 T160,25 L160,100 L0,100 Z" fill="url(#sc-grad-orange)"/>
+                                    <path d="M0,80 Q50,85 100,45 T160,40" stroke="#f97316" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4,4"/>
+                                    <path d="M0,95 Q35,55 70,75 T130,35 T160,25" stroke="#f97316" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="35" cy="65" r="3" fill="#f97316" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="70" cy="75" r="3.5" fill="#f97316" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="105" cy="55" r="3" fill="#f97316" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="130" cy="35" r="3.5" fill="#f97316" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="155" cy="27" r="4.5" fill="#f97316" stroke="#ffffff" stroke-width="2"/>
+                                </svg>
+                                <div class="position-relative" style="z-index: 2;">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Baris</span>
+                                        <div class="rounded-circle p-1.5 bg-orange bg-opacity-10 icon-orange">
+                                            <i class="bi bi-list-columns-reverse fs-6"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="fs-3 fw-bold text-dark" id="stat-total-rows">-</div>
+                                        <span class="badge badge-orange">Baris</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.72rem;">Baris Record Data Statistik</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Publikasi -->
+                        <div class="col">
+                            <div class="glass-panel stat-card-glass stat-card-glow-cyan h-100 p-3.5 mb-0">
+                                <div class="stat-card-pattern"></div>
+                                <svg class="stat-card-watermark" viewBox="0 0 160 100" preserveAspectRatio="none" fill="none">
+                                    <defs>
+                                        <linearGradient id="sc-grad-cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#0284c7" stop-opacity="0.22"/>
+                                            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,90 Q45,35 90,60 T160,18 L160,100 L0,100 Z" fill="url(#sc-grad-cyan)"/>
+                                    <path d="M0,70 Q55,75 110,40 T160,35" stroke="#0284c7" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4,4"/>
+                                    <path d="M0,90 Q45,35 90,60 T160,18" stroke="#0284c7" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="45" cy="48" r="3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="90" cy="60" r="3.5" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="125" cy="38" r="3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="155" cy="20" r="4.5" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                </svg>
+                                <div class="position-relative" style="z-index: 2;">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="text-muted small fw-semibold" style="font-size: 0.78rem;">Total Publikasi</span>
+                                        <div class="rounded-circle p-1.5 bg-info bg-opacity-10 text-info">
+                                            <i class="bi bi-journal-bookmark-fill fs-6"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="fs-3 fw-bold text-dark" id="stat-total-docs">-</div>
+                                        <span class="badge badge-cyan">Publikasi</span>
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.72rem;">Buku Publikasi Terintegrasi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Charts: Bar Chart Sebaran Tabel (30%) + Bar Chart Ref Year (70%) -->
+                    <div class="row g-3 mb-5">
+                        <div class="col-xl-5 col-lg-5 col-md-12">
+                            <div class="glass-panel chart-card-glass h-100 p-4">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                        <div class="min-w-0 flex-grow-1">
+                                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; line-height: 1.3;">Sebaran Tabel per Tahun</h6>
+                                            <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem; line-height: 1.3;">Distribusi tabel berdasarkan tahun terbit</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select class="form-select form-select-sm chart-year-filter select-filter" id="barChartYearFilter" onchange="filterBarChart(this.value)">
+                                            <option value="all">Semua</option>
+                                            <option value="5">5 Tahun</option>
+                                            <option value="10">10 Tahun</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="position:relative; height:260px;">
+                                    <div class="chart-loading-overlay" id="loading-dashboard-bar-chart">
+                                        <div class="chart-loading-content">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                            <div class="chart-loading-text">Memuat sebaran tabel...</div>
+                                        </div>
+                                    </div>
+                                    <canvas id="dashboardBarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-7 col-lg-7 col-md-12">
+                            <div class="glass-panel chart-card-glass h-100 p-4">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2 flex-wrap">
+                                        <div class="min-w-0 flex-grow-1">
+                                            <h6 class="fw-bold mb-0 text-dark" id="ref-chart-title" style="font-size: 0.95rem; line-height: 1.3;">Sebaran Banyak Titik Nilai Data per Tahun</h6>
+                                            <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem; line-height: 1.3;" id="ref-chart-subtitle">Distribusi titik nilai sel data statistik berdasarkan tahun kejadian riil</small>
+                                        </div>
+                                        <div class="chart-toggle-pill-group d-inline-flex p-1 rounded-pill flex-shrink-0" role="group">
+                                        <button type="button" class="chart-toggle-btn rounded-pill fw-semibold active" id="btn-chart-view-points" onclick="switchRefChartView('points')">
+                                            Titik Data
+                                        </button>
+                                        <button type="button" class="chart-toggle-btn rounded-pill fw-semibold" id="btn-chart-view-rows" onclick="switchRefChartView('rows')">
+                                            Baris Record
+                                        </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select class="form-select form-select-sm chart-year-filter select-filter" id="refChartYearFilter" onchange="filterRefChart(this.value)">
+                                            <option value="all">Semua</option>
+                                            <option value="5">5 Tahun</option>
+                                            <option value="10">10 Tahun</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="position:relative; height:260px;">
+                                    <div class="chart-loading-overlay" id="loading-dashboard-ref-chart">
+                                        <div class="chart-loading-content">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                            <div class="chart-loading-text">Memuat sebaran titik data riil...</div>
+                                        </div>
+                                    </div>
+                                    <canvas id="dashboardRefYearChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Trend Chart (Wider) + Publikasi Terbaru (Compact) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-xl-7 col-lg-7 col-md-12">
+                            <div class="glass-panel chart-card-glass h-100 p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3 gap-2 flex-wrap">
+                                    <div class="min-w-0 flex-grow-1">
+                                        <h6 class="fw-bold mb-0" id="trend-chart-title" style="font-size: 0.95rem;">Tren Pertumbuhan Titik Data</h6>
+                                        <small class="text-muted d-block mt-0.5" style="font-size: 0.73rem;" id="trend-chart-subtitle">Akumulasi titik nilai sel data statistik berdasarkan tahun publikasi</small>
+                                    </div>
+                                    <div class="chart-toggle-pill-group d-inline-flex p-1 rounded-pill flex-shrink-0 mt-0.5" role="group">
+                                        <button type="button" class="chart-toggle-btn rounded-pill fw-semibold active" id="btn-trend-view-points" onclick="switchTrendChartView('points')">
+                                            Titik Data
+                                        </button>
+                                        <button type="button" class="chart-toggle-btn rounded-pill fw-semibold" id="btn-trend-view-rows" onclick="switchTrendChartView('rows')">
+                                            Baris Record
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="position:relative; height:280px;">
+                                    <div class="chart-loading-overlay" id="loading-dashboard-trend-chart">
+                                        <div class="chart-loading-content">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                            <div class="chart-loading-text">Memuat tren pertumbuhan data...</div>
+                                        </div>
+                                    </div>
+                                    <canvas id="dashboardTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-5 col-lg-5 col-md-12">
+                            <div class="glass-panel chart-card-glass h-100 p-4 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 flex-shrink-0">
+                                    <div>
+                                        <h6 class="fw-bold mb-0" style="font-size: 0.95rem;">Publikasi Rilis Terbaru</h6>
+                                        <small class="text-muted" style="font-size: 0.73rem;">Dokumen statistik terkini BPS</small>
+                                    </div>
+                                </div>
+                                <div id="recent-docs-list" class="d-flex flex-column gap-3 overflow-y-auto pe-1.5" style="height: 280px; scrollbar-width: thin;">
+                                    <div class="text-center py-4 text-muted small">
+                                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                        <div>Memuat publikasi terbaru...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. ADMIN-ONLY: Anomali Panel -->
+                    <div id="admin-db-clean-banner" class="alert alert-success d-none align-items-center gap-2" role="alert">
+                        <span class="fs-5"><i class="bi bi-check-circle-fill text-success"></i></span> Database Bersih! Seluruh data terekstrak dalam kondisi prima tanpa data anomali.
+                    </div>
+
+                    <div id="admin-anomalies-panel" class="glass-panel mb-4" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h5 class="mb-0 fw-semibold">Daftar Tabel dengan Data Anomali</h5>
+                            <button onclick="markAllDbAnomaliesSafe()" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-check-circle"></i> Tandai Semua Aman di Database
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold">Nama Tabel</th>
+                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
+                                        <th class="fw-semibold text-center" style="width:120px;">Jumlah Anomali</th>
+                                        <th class="fw-semibold text-center" style="width:110px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-anomalies-tbody">
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Memuat data anomali...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 6. ADMIN-ONLY: Log Aktivitas -->
+                    <div class="glass-panel mb-4 p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Riwayat Aktivitas Admin</h6>
+                                <small class="text-muted d-block mt-0.5" style="font-size:0.75rem;">Catatan aksi yang dilakukan di sistem</small>
+                            </div>
+                            <span class="badge bg-secondary bg-opacity-10 text-muted px-2.5 py-1 rounded-pill" style="font-size:0.72rem;">10 Terakhir</span>
+                        </div>
+                        <div class="table-responsive rounded-3 border" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light border-bottom" style="position: sticky; top: 0; z-index: 1;">
+                                    <tr>
+                                        <th class="ps-4 py-3 fw-semibold text-muted" style="font-size:0.8rem; letter-spacing:0.3px;">WAKTU</th>
+                                        <th class="py-3 fw-semibold text-muted" style="font-size:0.8rem; letter-spacing:0.3px;">AKSI</th>
+                                        <th class="py-3 fw-semibold text-muted" style="font-size:0.8rem; letter-spacing:0.3px;">TARGET</th>
+                                        <th class="pe-4 py-3 fw-semibold text-muted" style="font-size:0.8rem; letter-spacing:0.3px;">DETAIL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-recent-tbody">
+                                    <tr><td colspan="4" class="text-center text-muted py-4">Memuat riwayat aktivitas...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 7. ADMIN-ONLY: Backup Widget -->
+                    <div class="glass-panel mb-4 p-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">Backup Database</h6>
+                                <div id="dashboard-backup-info" class="small text-muted">Memuat info backup...</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button onclick="loadDashboardBackupInfo()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                                <button onclick="backupDatabase(event)" id="btn-dashboard-backup" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5"><i class="bi bi-shield-check"></i> Backup Sekarang</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: Publikasi -->

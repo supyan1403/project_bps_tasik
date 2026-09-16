@@ -14,9 +14,11 @@ import sys
 # === KONFIGURASI ===
 # Path static root di server (sesuaikan jika berbeda)
 STATIC_ROOTS = [
+    "/var/www/sipedas/frontend/static",
     "/var/www/sipedas/backend/static",
     "/var/www/sipedas/static",
 ]
+
 NGINX_CONF_DIR = "/etc/nginx"
 
 def find_nginx_conf():

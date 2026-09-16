@@ -1,0 +1,176 @@
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column flex-shrink-0 border-end bg-white">
+            <!-- Official BPS Style SIPEDAS Brand Lockup (Klik Logo untuk Buka / Tutup Sidebar) -->
+            <div class="sipedas-brand-lockup d-flex align-items-center border-bottom border-light position-relative cursor-pointer" onclick="toggleSidebar()" role="button" tabindex="0" title="Klik Logo untuk Buka / Tutup Sidebar">
+                <div class="d-flex align-items-center overflow-hidden sipedas-brand-main w-100">
+                    <img src="/static/logo_sipedas.png?v=20260823_opt3_s" alt="Logo SIPEDAS" class="bps-brand-logo" style="cursor: pointer;">
+                    <div class="bps-brand-text d-flex flex-column justify-content-center" style="line-height: 1.15; cursor: pointer;">
+                        <span class="bps-brand-name" style="font-family:'Inter', sans-serif; font-weight:900; font-style:italic; font-size:1.15rem; letter-spacing:-0.3px; margin-bottom:2px; line-height:1.1;">SIPEDAS</span>
+                        <span class="bps-brand-title" style="font-weight:800; font-style:italic; font-size:0.65rem; letter-spacing:-0.1px; line-height:1.15; white-space:nowrap;">BADAN PUSAT STATISTIK</span>
+                        <span class="bps-brand-subtitle" style="font-weight:800; font-style:italic; font-size:0.58rem; letter-spacing:-0.1px; line-height:1.15; white-space:nowrap;">KABUPATEN TASIKMALAYA</span>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav flex-column mb-auto gap-1">
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium {% if initial_role == 'admin' %}active{% endif %}" id="nav-dashboard" onclick="navigate('dashboard', this)" title="Dashboard">
+                        <i class="bi bi-grid"></i> <span class="nav-link-text">Dashboard</span>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-publikasi" onclick="navigate('publikasi', this)" title="Ekstraksi PDF">
+                        <i class="bi bi-filetype-pdf"></i> <span class="nav-link-text">Ekstraksi PDF</span>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-import" onclick="navigate('import', this)" title="Import Excel">
+                        <i class="bi bi-filetype-xlsx"></i> <span class="nav-link-text">Import Excel</span>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only position-relative" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-tabel" onclick="navigate('tabel', this)" title="Data Tabel">
+                        <i class="bi bi-table"></i> <span class="nav-link-text">Data Tabel</span>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled">
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium {% if initial_role != 'admin' %}active{% endif %}" id="nav-timeseries" onclick="navigate('timeseries', this)" title="Analisis Deret Waktu">
+                        <i class="bi bi-graph-up"></i> <span class="nav-link-text">Analisis Deret Waktu</span>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin" onclick="toggleAdminSubmenu()" title="Manajemen Database">
+                        <i class="bi bi-database"></i> <span class="nav-link-text">Manajemen Database</span>
+                        <span id="admin-submenu-icon" class="submenu-arrow ms-auto">▶</span>
+                    </div>
+                    <!-- Inline Submenu (Ketika Sidebar Terbuka) -->
+                    <div id="admin-submenu" style="display:none;">
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-backup" onclick="navigateAdminTab('backup', this)"><i class="bi bi-cloud-arrow-up"></i> <span class="nav-link-text">Backup Database</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-db" onclick="navigateAdminTab('db', this)"><i class="bi bi-hdd-stack"></i> <span class="nav-link-text">Database</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-master" onclick="navigateAdminTab('master', this)"><i class="bi bi-book"></i> <span class="nav-link-text">Master Kolom</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-header" onclick="navigateAdminTab('header', this)"><i class="bi bi-exclamation-triangle"></i> <span class="nav-link-text">Anomali Header</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-data" onclick="navigateAdminTab('data', this)"><i class="bi bi-exclamation-diamond"></i> <span class="nav-link-text">Anomali Data</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-password" onclick="openSettingsModal()"><i class="bi bi-key"></i> <span class="nav-link-text">Ganti Password</span></div>
+                    </div>
+                    <!-- Floating Popover (Ketika Sidebar Tertutup) -->
+                    <div class="sidebar-floating-popover shadow-lg" id="flyout-admin-submenu">
+                        <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
+                            <i class="bi bi-database"></i> Manajemen Database
+                        </div>
+                        <div class="popover-body p-1.5 d-flex flex-column gap-1">
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-backup" data-tab="backup" onclick="navigateAdminTab('backup', this)">
+                                <i class="bi bi-cloud-arrow-up"></i> <span>Backup Database</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-db" data-tab="db" onclick="navigateAdminTab('db', this)">
+                                <i class="bi bi-hdd-stack"></i> <span>Database</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-master" data-tab="master" onclick="navigateAdminTab('master', this)">
+                                <i class="bi bi-book"></i> <span>Master Kolom</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-header" data-tab="header" onclick="navigateAdminTab('header', this)">
+                                <i class="bi bi-exclamation-triangle"></i> <span>Anomali Header</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-data" data-tab="data" onclick="navigateAdminTab('data', this)">
+                                <i class="bi bi-exclamation-diamond"></i> <span>Anomali Data</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-password" onclick="openSettingsModal()">
+                                <i class="bi bi-key"></i> <span>Ganti Password</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item list-unstyled admin-only position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none;"{% endif %}>
+                    <div class="nav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-sistem" onclick="toggleSistemSubmenu()" title="Sistem">
+                        <i class="bi bi-gear"></i> <span class="nav-link-text">Sistem</span>
+                        <span id="sistem-submenu-icon" class="submenu-arrow ms-auto">▶</span>
+                    </div>
+                    <div id="sistem-submenu" style="display:none;">
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-sistem-maintenance" onclick="navigateSistemTab('maintenance', this)"><i class="bi bi-tools"></i> <span class="nav-link-text">Mode Pemeliharaan</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-sistem-logs" onclick="navigateSistemTab('logs', this)"><i class="bi bi-journal-text"></i> <span class="nav-link-text">Log Aktivitas</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-sistem-cache" onclick="navigateSistemTab('cache', this)"><i class="bi bi-trash3"></i> <span class="nav-link-text">Bersihkan Cache</span></div>
+                    </div>
+                    <div class="sidebar-floating-popover shadow-lg" id="flyout-sistem-submenu">
+                        <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
+                            <i class="bi bi-gear"></i> Sistem
+                        </div>
+                        <div class="popover-body p-1.5 d-flex flex-column gap-1">
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-sistem-maintenance" data-tab="maintenance" onclick="navigateSistemTab('maintenance', this)">
+                                <i class="bi bi-tools"></i> <span>Mode Pemeliharaan</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-sistem-logs" data-tab="logs" onclick="navigateSistemTab('logs', this)">
+                                <i class="bi bi-journal-text"></i> <span>Log Aktivitas</span>
+                            </div>
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-sistem-cache" data-tab="cache" onclick="navigateSistemTab('cache', this)">
+                                <i class="bi bi-trash3"></i> <span>Bersihkan Cache</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Theme removed -->
+
+            <!-- Sidebar Footer Container (Didorong ke dasar sidebar secara rapi) -->
+            <div class="sidebar-footer-container position-relative mt-auto w-100" style="z-index: 2;">
+                <!-- Garis Pembatas (Divider) tepat di atas Akun / Tombol Login -->
+                <div class="sidebar-divider mb-2"></div>
+
+                <!-- Footer Action Button (Di bawah garis pembatas) -->
+                <div class="sidebar-footer-action">
+                    <!-- Login Button (Ketika mode Operator / Tamu) -->
+                    <button type="button" id="btn-admin-login" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-0" onclick="adminLogin()" title="Login Admin SIPEDAS" {% if initial_role == 'admin' %}style="display:none !important;"{% endif %}>
+                        <i class="bi bi-shield-lock"></i> <span class="sidebar-btn-text">Login Admin SIPEDAS</span>
+                    </button>
+
+                    <!-- User Account Profile Card & Dropdown (Ketika Mode Admin Aktif) -->
+                    <div id="sidebar-user-widget" class="sidebar-user-widget position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none !important;"{% else %}style="display:block !important;"{% endif %}>
+                        <div id="sidebar-user-btn" class="sidebar-user-card nav-link d-flex align-items-center justify-content-between p-2 rounded-3 cursor-pointer" onclick="toggleUserMenu(event)" role="button" tabindex="0" title="Akun Administrator">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="sidebar-user-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
+                                    <i class="bi bi-shield-check text-white"></i>
+                                    <span class="sidebar-user-online-dot"></span>
+                                </div>
+                                <div class="sidebar-user-info d-flex flex-column text-truncate">
+                                    <span class="sidebar-user-name fw-bold" style="font-size:0.83rem; line-height:1.2;">Administrator</span>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted sidebar-user-chevron ms-auto" style="font-size:0.75rem; transition: transform 0.2s ease;"></i>
+                        </div>
+
+                        <!-- Dropdown / Popover Menu Akun Admin (Ketika Expanded / Di-klik) -->
+                        <div id="sidebar-user-dropdown" class="sidebar-user-dropdown shadow-lg rounded-3 border bg-white position-absolute" style="display:none;">
+                            <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2" style="background: var(--bg-page);">
+                                <i class="bi bi-person-check text-primary"></i>
+                                <div>
+                                    <div class="fw-bold" style="font-size:0.78rem; line-height:1.2;">Admin SIPEDAS</div>
+                                    <div class="text-muted" style="font-size:0.68rem;">Kontrol Penuh Sistem</div>
+                                </div>
+                            </div>
+                            <div class="p-1.5 d-flex flex-column gap-1">
+                                <button type="button" class="btn btn-sm text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 border-0 w-100 sidebar-user-menu-item text-danger" onclick="adminLogout(); hideUserMenu();">
+                                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Floating Popover (Ketika Sidebar Tertutup / Hover Sama Seperti Manajemen Database) -->
+                        <div class="sidebar-floating-popover shadow-lg" id="flyout-user-submenu">
+                            <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-shaded text-primary"></i> Administrator
+                            </div>
+                            <div class="popover-body p-1.5 d-flex flex-column gap-1">
+                                <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-danger fw-medium" onclick="adminLogout()">
+                                    <i class="bi bi-box-arrow-right text-danger"></i> <span>Logout</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fallback logout button to preserve any legacy scripts -->
+                    <button type="button" id="btn-admin-logout" class="d-none" style="display:none !important;"></button>
+                </div>
+            </div>
+
+            <!-- Sidebar Clean Ultra-Minimalist Ambient Background -->
+            <div class="sidebar-bg-mesh" style="position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; contain: strict; transform: translateZ(0); background: radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 60%);"></div>
+        </div>

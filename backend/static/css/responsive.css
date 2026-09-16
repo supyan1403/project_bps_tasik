@@ -115,6 +115,16 @@
         font-size: 0.68rem !important;
         padding: 3px 8px !important;
     }
+
+    /* Fix Step 2 wizard column ratio: 65/35 agar header "Pilih Semua" tidak pecah */
+    .ts-wizard-col--indicator { flex: 0 0 65% !important; max-width: 65% !important; }
+    .ts-wizard-col--year { flex: 0 0 35% !important; max-width: 35% !important; }
+
+    /* Fix Step 2 header: label tidak wrap, tetap rapi */
+    .ts-wizard-col--year .form-label {
+        white-space: nowrap;
+        font-size: 0.82rem !important;
+    }
 }
 
 /* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */

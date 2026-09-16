@@ -125,6 +125,11 @@
         white-space: nowrap;
         font-size: 0.82rem !important;
     }
+
+    /* Fix tombol Pilih Semua: teks tidak wrap */
+    #btn-ts-toggle-all-years {
+        white-space: nowrap;
+    }
 }
 
 /* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */

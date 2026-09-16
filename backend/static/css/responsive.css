@@ -120,9 +120,8 @@
     .ts-wizard-col--indicator { flex: 0 0 65% !important; max-width: 65% !important; }
     .ts-wizard-col--year { flex: 0 0 35% !important; max-width: 35% !important; }
 
-    /* Fix Step 2 header: label tidak wrap, tetap rapi */
+    /* Fix Step 2 header: label wrap natural, tidak dempet */
     .ts-wizard-col--year .form-label {
-        white-space: nowrap;
         font-size: 0.82rem !important;
     }
 

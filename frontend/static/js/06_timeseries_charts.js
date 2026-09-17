@@ -2363,17 +2363,27 @@ function toggleUserMenu(e) {
         const rect = card.getBoundingClientRect();
         dropdown.style.display = 'block';
         dropdown.style.position = 'fixed';
-        
-        // Posisikan tepat di samping kanan kartu akun (selaras vertikal)
-        const dropHeight = dropdown.offsetHeight || 105;
-        let targetTop = rect.top + (rect.height / 2) - (dropHeight / 2);
-        if (targetTop < 10) targetTop = 10;
-        if (targetTop + dropHeight > window.innerHeight - 10) {
-            targetTop = window.innerHeight - dropHeight - 10;
-        }
 
-        dropdown.style.top = Math.round(targetTop) + 'px';
-        dropdown.style.left = Math.round(rect.right + 12) + 'px';
+        // Deteksi mobile: sidebar sempit, dropdown harus ke bawah
+        const isMobile = window.innerWidth < 768 ||
+            document.body.classList.contains('mobile-sidebar-active') ||
+            (document.querySelector('.sidebar')?.classList.contains('mobile-open'));
+
+        if (isMobile) {
+            // Mobile: dropdown muncul di BAWAH kartu admin
+            let targetTop = rect.bottom + 8;
+            if (targetTop + dropHeight > window.innerHeight - 10) {
+                targetTop = Math.max(10, window.innerHeight - dropHeight - 10);
+            }
+            dropdown.style.top = Math.round(targetTop) + 'px';
+            dropdown.style.left = '8px';
+            dropdown.classList.add('dropdown-below');
+        } else {
+            // Desktop: dropdown muncul di SEBELAH KANAN kartu admin
+            dropdown.style.top = Math.round(targetTop) + 'px';
+            dropdown.style.left = Math.round(rect.right + 12) + 'px';
+            dropdown.classList.remove('dropdown-below');
+        }
         card.classList.add('active');
     }
 }
@@ -2383,6 +2393,7 @@ function hideUserMenu() {
     const card = document.getElementById('sidebar-user-btn');
     if (dropdown) {
         dropdown.style.display = 'none';
+        dropdown.classList.remove('dropdown-below');
         if (dropdown._originalParent && dropdown.parentNode !== dropdown._originalParent) {
             dropdown._originalParent.appendChild(dropdown);
         }

@@ -1005,6 +1005,16 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
     transform: rotate(45deg);
 }
 
+/* Caret panah mengarah ke atas (mobile: dropdown di bawah kartu) */
+.sidebar-user-dropdown.dropdown-below::before {
+    top: -6px;
+    left: 20px;
+    margin-top: 0;
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    transform: rotate(-45deg);
+}
+
 @keyframes userFlyoutSlideIn {
     from {
         opacity: 0;
@@ -1014,6 +1024,21 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
         opacity: 1;
         transform: translateX(0) scale(1);
     }
+}
+
+@keyframes userFlyoutSlideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.sidebar-user-dropdown.dropdown-below {
+    animation: userFlyoutSlideInDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar-user-menu-item {

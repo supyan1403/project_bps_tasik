@@ -2369,6 +2369,8 @@ function toggleUserMenu(e) {
             document.body.classList.contains('mobile-sidebar-active') ||
             (document.querySelector('.sidebar')?.classList.contains('mobile-open'));
 
+        const dropHeight = dropdown.offsetHeight || 105;
+
         if (isMobile) {
             // Mobile: dropdown muncul di BAWAH kartu admin
             let targetTop = rect.bottom + 8;

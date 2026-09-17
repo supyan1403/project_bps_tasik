@@ -37,6 +37,7 @@ class TimeSeriesExportRequest(BaseModel):
 
 @router.get("/timeseries/catalog")
 def timeseries_catalog(db: Session = Depends(get_db)):
+    """Mengambil katalog lengkap tabel deret waktu beserta info bab dan tahun."""
     rows = db.query(models.ExtractedTable.id, models.ExtractedTable.table_name, models.Document.year).join(
         models.Document, models.ExtractedTable.document_id == models.Document.id
     ).all()
@@ -67,6 +68,7 @@ def timeseries_catalog(db: Session = Depends(get_db)):
 
 @router.get("/timeseries/table-details")
 def timeseries_table_details(table_prefix: str, db: Session = Depends(get_db)):
+    """Mengambil detail indikator dan tahun yang tersedia untuk prefix tabel tertentu."""
     prefix_clean = table_prefix.strip()
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.table_name.like(f"%{prefix_clean}%")).all()
     if not tables:
@@ -80,7 +82,7 @@ def timeseries_table_details(table_prefix: str, db: Session = Depends(get_db)):
         col_years = get_column_years_from_db(db, table, doc_year)
         for col_name, yrs in col_years.items():
             all_indicators.setdefault(col_name, set()).update(yrs)
-    result = [{"name": col_name, "years": sorted(list(yrs))} for col_name, yrs in all_indicators.items()]
+    result = [{"name": col_name, "years": sorted(yrs)} for col_name, yrs in all_indicators.items()]
     return {"status": "success", "indicators": result}
 
 # In-memory TTL cache for indicator-years (15 minutes)
@@ -90,6 +92,7 @@ _INDICATOR_YEARS_TTL = 900  # 15 minutes
 _INDICATOR_CACHE_LOCK = threading.Lock()
 
 def invalidate_indicator_cache():
+    """Menghapus cache indikator-tahun agar data diperbarui pada permintaan berikutnya."""
     global _INDICATOR_YEARS_CACHE, _INDICATOR_YEARS_CACHE_TIME
     with _INDICATOR_CACHE_LOCK:
         _INDICATOR_YEARS_CACHE = None
@@ -97,6 +100,7 @@ def invalidate_indicator_cache():
 
 @router.get("/timeseries/indicator-years")
 def timeseries_indicator_years(response: Response, db: Session = Depends(get_db)):
+    """Mengambil daftar semua indikator beserta tahun-tahun yang tersedia di seluruh tabel."""
     global _INDICATOR_YEARS_CACHE, _INDICATOR_YEARS_CACHE_TIME
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
 
@@ -136,7 +140,7 @@ def timeseries_indicator_years(response: Response, db: Session = Depends(get_db)
             bab_name = None
         result.append({
             "name": name,
-            "years": sorted(list(info["years"])),
+            "years": sorted(info["years"]),
             "bab_num": raw_bab,
             "bab_name": bab_name,
             "order": info["order"]
@@ -249,8 +253,8 @@ def timeseries_data_by_indicators(indicators: str = "", years: str = "", db: Ses
     return {"status": "success", "data": deduped}
 
 @router.get("/search/timeseries")
-def search_timeseries(keyword: str = "", start_year: int = None, end_year: int = None, db: Session = Depends(get_db)):
-    """Legacy keyword-based time series search wrapper."""
+def search_timeseries(keyword: str = "", start_year: int | None = None, end_year: int | None = None, db: Session = Depends(get_db)):
+    """Mencari data deret waktu berdasarkan kata kunci dan rentang tahun."""
     if not keyword:
         return {"status": "success", "data": []}
     
@@ -260,6 +264,7 @@ def search_timeseries(keyword: str = "", start_year: int = None, end_year: int =
 
 @router.get("/timeseries/browse-data")
 def timeseries_browse_data(table_id: int, db: Session = Depends(get_db)):
+    """Mengambil data deret waktu lengkap untuk satu tabel tertentu."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(404, "Table not found")
@@ -298,6 +303,7 @@ def timeseries_browse_data(table_id: int, db: Session = Depends(get_db)):
 
 @router.get("/timeseries/table-columns")
 def timeseries_table_columns(table_ids: str, db: Session = Depends(get_db)):
+    """Mengambil daftar kolom gabungan dari beberapa tabel untuk analisis deret waktu."""
     ids = [int(x) for x in table_ids.split(",") if x.strip()]
     if not ids:
         return {"status": "success", "entity_key": "", "columns": []}
@@ -317,6 +323,7 @@ def timeseries_table_columns(table_ids: str, db: Session = Depends(get_db)):
 
 @router.post("/timeseries/export-excel")
 def export_timeseries_excel(req: TimeSeriesExportRequest):
+    """Mengekspor data deret waktu ke file Excel dengan format yang rapi."""
     years = req.years or []
     valueKeys = req.valueKeys or []
     vkUnits = req.vkUnits or {}

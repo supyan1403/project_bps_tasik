@@ -5,6 +5,7 @@ from typing import Any
 
 
 def get_safe_windows_path(path: str) -> str:
+    """Mengonversi path ke format UNC yang aman untuk Windows."""
     if not path:
         return path
     if os.name == 'nt':
@@ -33,11 +34,11 @@ def sanitize_row_data(data: dict) -> dict:
     return cleaned
 
 def parse_csv_for_db(safe_path: str) -> tuple[list[str], list[dict[str, Any]], list[str], list[str]]:
+    """Membaca file CSV dan mengembalikan headers, records, units, dan years."""
     raw_rows = []
     with open(safe_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.reader(f)
-        for row in reader:
-            raw_rows.append(row)
+        raw_rows = list(reader)
             
     if not raw_rows:
         return [], [], [], []
@@ -111,6 +112,7 @@ def parse_csv_for_db(safe_path: str) -> tuple[list[str], list[dict[str, Any]], l
     return headers, records, units, years
 
 def natural_sort_key(t):
+    """Menghasilkan kunci pengurutan natural untuk tabel berdasarkan nomor urut."""
     name = t.table_name or ""
     match = re.search(r'(\d+(?:\.\d+)+)', name)
     if match:

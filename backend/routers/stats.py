@@ -1,3 +1,4 @@
+import logging
 import re
 import threading
 import time
@@ -7,7 +8,10 @@ import models
 from database import get_db
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy import func, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
 
@@ -28,6 +32,7 @@ def invalidate_chart_cache():
 
 @router.get("")
 def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
+    """Mengembalikan ringkasan statistik dashboard secara keseluruhan."""
     global _OVERVIEW_CACHE, _OVERVIEW_CACHE_TIME
     response.headers["Cache-Control"] = "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800"
 
@@ -45,8 +50,8 @@ def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
                 _OVERVIEW_CACHE = payload
                 _OVERVIEW_CACHE_TIME = now
             return payload
-    except Exception:
-        pass
+    except SQLAlchemyError:
+        logger.debug("Tabel dashboard_cache belum tersedia, menggunakan kalkulasi langsung")
 
     total_docs = db.query(models.Document).count()
     total_tables = db.query(models.ExtractedTable).count()
@@ -63,7 +68,7 @@ def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
                  if k not in LABEL_KEYS and v is not None and str(v).strip().lower() not in EMPTY_MARKERS])
             for r in rows if r.data
         )
-    except Exception:
+    except (SQLAlchemyError, AttributeError, TypeError):
         total_data_points = 0
 
     avg_rows_per_table = round(total_rows / max(total_tables, 1), 1)
@@ -100,6 +105,7 @@ def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):
 
 @router.get("/chart")
 def get_chart_stats(response: Response, db: Session = Depends(get_db)):
+    """Mengembalikan data grafik statistik per tahun dan kategori tabel."""
     global _CHART_CACHE, _CHART_CACHE_TIME
     response.headers["Cache-Control"] = "public, max-age=1800, s-maxage=86400, stale-while-revalidate=604800"
 
@@ -117,8 +123,8 @@ def get_chart_stats(response: Response, db: Session = Depends(get_db)):
                 _CHART_CACHE = payload
                 _CHART_CACHE_TIME = now
             return payload
-    except Exception:
-        pass
+    except SQLAlchemyError:
+        logger.debug("Tabel dashboard_cache belum tersedia, menggunakan kalkulasi langsung")
 
     results = db.query(
         models.Document.year,

@@ -1,14 +1,18 @@
 import hashlib
 import json
+import logging
 import os
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import models
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -16,8 +20,8 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 _CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 try:
     os.makedirs(_CONFIG_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori config: {e}")
 _AUTH_CONFIG_FILE = os.path.join(_CONFIG_DIR, "auth_credentials.json")
 
 SESSION_MAX_AGE_HOURS = 8
@@ -34,7 +38,7 @@ def _get_client_ip(request: Request) -> str:
         return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
-def _hash_password(plain_password: str, salt: bytes = None) -> tuple[str, str]:
+def _hash_password(plain_password: str, salt: bytes | None = None) -> tuple[str, str]:
     """Mengenkripsi password menggunakan PBKDF2-HMAC-SHA256 dengan random salt 16-byte."""
     if salt is None:
         salt = secrets.token_bytes(16)
@@ -47,7 +51,7 @@ def _verify_password(plain_password: str, stored_hash_hex: str, stored_salt_hex:
         salt = bytes.fromhex(stored_salt_hex)
         computed_hash = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt, 100_000).hex()
         return secrets.compare_digest(computed_hash, stored_hash_hex)
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 def _get_or_create_admin_credentials():
@@ -58,35 +62,38 @@ def _get_or_create_admin_credentials():
                 data = json.load(f)
                 if "password_hash" in data and "salt" in data:
                     return data["password_hash"], data["salt"]
-        except Exception:
-            pass
+        except (OSError, json.JSONDecodeError, KeyError) as e:
+            logger.warning(f"Gagal membaca file kredensial admin: {e}")
 
     # Wajib set env var SIPEDAS_ADMIN_PASSWORD di production
     default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD")
     if not default_plain:
-        print("[WARNING] SIPEDAS_ADMIN_PASSWORD belum di-set. Menggunakan default sementara.")
-        default_plain = "ganti_password_saya"
+        raise RuntimeError(
+            "SIPEDAS_ADMIN_PASSWORD belum di-set. "
+            "Harap set environment variable ini sebelum menjalankan aplikasi."
+        )
     p_hash, salt = _hash_password(default_plain)
     try:
         with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
-            json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now().isoformat()}, f, indent=2)
-    except Exception as e:
+            json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now(timezone.utc).isoformat()}, f, indent=2)
+    except (OSError, TypeError) as e:
         print(f"Warning: Failed to save auth credentials: {e}")
     return p_hash, salt
 
 def _update_admin_password(new_plain_password: str):
     p_hash, salt = _hash_password(new_plain_password)
     with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now().isoformat()}, f, indent=2)
+        json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now(timezone.utc).isoformat()}, f, indent=2)
 
 def _clean_expired_sessions(db: Session):
-    cutoff = datetime.utcnow() - timedelta(hours=SESSION_MAX_AGE_HOURS)
+    """Hapus sesi pengguna yang sudah kedaluwarsa."""
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=SESSION_MAX_AGE_HOURS)
     db.query(models.UserSession).filter(models.UserSession.last_active < cutoff).delete()
     db.commit()
 
 def create_session(role: str = "admin", db: Session = None) -> str:
     sid = secrets.token_hex(32)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     if db:
         session = models.UserSession(id=sid, role=role, created_at=now, last_active=now)
         db.add(session)
@@ -94,22 +101,24 @@ def create_session(role: str = "admin", db: Session = None) -> str:
     return sid
 
 def destroy_session(session_id: str, db: Session = None):
+    """Hapus sesi pengguna dari database."""
     if db and session_id:
         db.query(models.UserSession).filter(models.UserSession.id == session_id).delete()
         db.commit()
 
 def require_admin(request: Request, db: Session = Depends(get_db)):
+    """Periksa apakah pengguna adalah admin yang terautentikasi."""
     session_id = request.cookies.get("sipedas_session")
     if not session_id:
         raise HTTPException(status_code=401, detail="Unauthorized: silakan login sebagai admin.")
     sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
     if not sess:
         raise HTTPException(status_code=401, detail="Unauthorized: silakan login sebagai admin.")
-    sess.last_active = datetime.utcnow()
+    sess.last_active = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     return {"role": sess.role}
 
-def log_activity(db: Session, action: str, target: str = "", detail: dict = None):
+def log_activity(db: Session, action: str, target: str = "", detail: dict | None = None):
     """Catat aktivitas admin ke database."""
     log = models.ActivityLog(action=action, target=target, detail=detail or {})
     db.add(log)
@@ -117,6 +126,7 @@ def log_activity(db: Session, action: str, target: str = "", detail: dict = None
 
 @router.post("/login")
 def auth_login(payload: dict, request: Request, response: Response, db: Session = Depends(get_db)):
+    """Proses login admin dengan rate limiting."""
     client_ip = _get_client_ip(request)
     now_ts = time.time()
 
@@ -173,6 +183,7 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
 
 @router.post("/logout")
 def auth_logout(request: Request, response: Response, db: Session = Depends(get_db)):
+    """Proses logout dan hapus sesi admin."""
     session_id = request.cookies.get("sipedas_session")
     if session_id:
         destroy_session(session_id, db)
@@ -182,6 +193,7 @@ def auth_logout(request: Request, response: Response, db: Session = Depends(get_
 
 @router.get("/me")
 def auth_me(request: Request, db: Session = Depends(get_db)):
+    """Ambil informasi role pengguna saat ini."""
     session_id = request.cookies.get("sipedas_session")
     if session_id:
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
@@ -234,7 +246,7 @@ def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict
             if end_dt.tzinfo is not None:
                 now_dt = datetime.now(timezone.utc)
             else:
-                now_dt = datetime.now()
+                now_dt = datetime.now(ZoneInfo("Asia/Jakarta")).replace(tzinfo=None)
 
             diff_seconds = (end_dt - now_dt).total_seconds()
             if diff_seconds < 60:
@@ -244,7 +256,7 @@ def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict
                 )
         except HTTPException:
             raise
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             raise HTTPException(status_code=400, detail=f"Format waktu selesai tidak valid: {e}")
 
     _update_maintenance_db(mode, end_time)

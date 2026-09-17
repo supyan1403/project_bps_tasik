@@ -1,4 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def _utcnow():
+    """Return naive UTC datetime (compatible with SQLAlchemy DateTime columns)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 from database import Base
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String
@@ -13,7 +18,7 @@ class Document(Base):
     year = Column(Integer)
     data_year = Column(Integer, nullable=True)
     status = Column(String(50), default="ready")  # ready, extracting, error
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     tables = relationship("ExtractedTable", back_populates="document", cascade="all, delete-orphan")
 
@@ -47,14 +52,14 @@ class UserSession(Base):
 
     id = Column(String(64), primary_key=True)  # session_id (token_hex)
     role = Column(String(20), nullable=False, default="pegawai")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_active = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
+    last_active = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=_utcnow, index=True)
     action = Column(String(50), index=True)
     target = Column(String(255))
     detail = Column(JSON)
@@ -64,4 +69,4 @@ class SystemConfig(Base):
 
     key = Column(String(100), primary_key=True)
     value = Column(String(500), nullable=False, default="")
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)

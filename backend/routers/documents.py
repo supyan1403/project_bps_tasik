@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import asyncio
+import csv
 import json
+import logging
 import os
 import re
 import subprocess
@@ -23,9 +26,12 @@ from pydantic import BaseModel
 from routers.auth import log_activity, require_admin
 from services.table_service import get_safe_windows_path, parse_csv_for_db
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from pipeline import get_toc
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["Documents & Excel Import"])
 
@@ -37,8 +43,8 @@ EXTRACT_DIR = os.path.join(_BPS_DATA_ROOT, "hasil_ekstraksi_web")
 try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     os.makedirs(EXTRACT_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori: {e}")
 
 class ExtractRequest(BaseModel):
     start_page: int
@@ -62,6 +68,7 @@ class CreateBabRequest(BaseModel):
     title: str
 
 def sanitize_template_filename(table_name: str) -> str:
+    """Membersihkan nama tabel menjadi nama file template Excel yang aman."""
     if not table_name:
         return "template.xlsx"
     clean_name = str(table_name).strip()
@@ -92,8 +99,8 @@ def run_extract_toc(doc_id: int, file_path: str, output_path: str):
             "--pdf", os.path.abspath(file_path),
             "--output_dir", os.path.abspath(output_path)
         ]
-        subprocess.run(cmd)
-    except Exception as e:
+        subprocess.run(cmd, check=False)
+    except (OSError, subprocess.SubprocessError) as e:
         print(f"Gagal ekstraksi TOC: {e!s}")
 
 def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: int, end_page: int):
@@ -122,7 +129,7 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
         env["OMP_NUM_THREADS"] = "1"
         env["MKL_NUM_THREADS"] = "1"
         env["NUMEXPR_NUM_THREADS"] = "1"
-        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
         if result.returncode != 0:
             error_msg = result.stderr[-450:] if len(result.stderr) > 450 else result.stderr
             doc.status = f"error: exit {result.returncode}. Log: ...{error_msg}"
@@ -130,7 +137,7 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
             return
         doc.status = "ready"
         db.commit()
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         doc.status = f"error: {e!s}"
         db.commit()
 
@@ -143,13 +150,17 @@ async def upload_document(
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
 ):
+    """Mengunggah dokumen publikasi PDF dan menyimpannya ke server."""
     MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100MB
     content = await file.read()
     if len(content) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=413, detail="File terlalu besar. Maksimal 100MB.")
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as f:
-        f.write(content)
+    file_path = os.path.join(UPLOAD_DIR, os.path.basename(file.filename))
+    loop = asyncio.get_event_loop()
+    def _write():
+        with open(file_path, "wb") as f:
+            f.write(content)
+    await loop.run_in_executor(None, _write)
     
     final_data_year = data_year if data_year is not None else (year - 1 if year else None)
     db_doc = models.Document(filename=file.filename, year=year, data_year=final_data_year, status="ready")
@@ -164,6 +175,7 @@ async def upload_document(
 
 @router.post("/documents/create", response_model=schemas.DocumentOut)
 def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Membuat entri dokumen publikasi secara manual tanpa upload file."""
     clean_filename = (doc_in.filename or "").strip()
     if not clean_filename:
         raise HTTPException(status_code=400, detail="Nama publikasi wajib diisi.")
@@ -189,6 +201,7 @@ def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends
 
 @router.get("/documents", response_model=list[schemas.DocumentOut])
 def get_documents(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Mengambil daftar dokumen publikasi beserta jumlah tabel yang terkait."""
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     results = (
         db.query(
@@ -221,6 +234,7 @@ _TOC_CACHE_LOCK = threading.Lock()
 
 @router.get("/documents/{doc_id}/toc")
 def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_db)):
+    """Mengambil daftar isi (table of contents) bab dari dokumen."""
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     
     with _TOC_CACHE_LOCK:
@@ -234,8 +248,8 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
     doc_dir = os.path.join(EXTRACT_DIR, f"doc_{doc_id}")
     try:
         os.makedirs(doc_dir, exist_ok=True)
-    except Exception:
-        pass
+    except OSError as e:
+        logger.warning(f"Gagal membuat direktori: {e}")
         
     toc_path = os.path.join(doc_dir, "toc.json")
     if os.path.exists(toc_path):
@@ -252,8 +266,8 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
                     with _TOC_CACHE_LOCK:
                         _TOC_CACHE[doc_id] = data
                     return data
-        except Exception:
-            pass
+        except (OSError, json.JSONDecodeError) as e:
+            logger.warning(f"Gagal membaca file TOC: {e}")
             
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     babs = set()
@@ -291,8 +305,8 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
         try:
             with open(toc_path, "w", encoding="utf-8") as f:
                 json.dump(auto_toc, f, indent=4)
-        except Exception:
-            pass
+        except (OSError, TypeError) as e:
+            logger.warning(f"Gagal menyimpan TOC: {e}")
         with _TOC_CACHE_LOCK:
             _TOC_CACHE[doc_id] = auto_toc
         return auto_toc
@@ -301,6 +315,7 @@ def get_document_toc(doc_id: int, response: Response, db: Session = Depends(get_
 
 @router.post("/documents/{doc_id}/detect_toc")
 def detect_document_toc(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mendeteksi daftar isi bab dari file PDF dokumen secara otomatis."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -322,6 +337,7 @@ def detect_document_toc(doc_id: int, db: Session = Depends(get_db), admin: dict 
 
 @router.post("/documents/{doc_id}/toc")
 def save_document_toc(doc_id: int, toc_data: list[TOCItem], db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menyimpan daftar isi (TOC) bab dokumen ke file JSON."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -334,11 +350,12 @@ def save_document_toc(doc_id: int, toc_data: list[TOCItem], db: Session = Depend
         with open(toc_path, "w", encoding="utf-8") as f:
             json.dump(dict_data, f, indent=4)
         return {"status": "success", "message": "TOC updated successfully"}
-    except Exception as e:
+    except (OSError, TypeError, ValueError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to save TOC: {e!s}")
 
 @router.delete("/documents/{doc_id}")
 def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus dokumen beserta file PDF, hasil ekstraksi, dan semua tabel terkait."""
     from routers.admin import backup_database
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
@@ -353,8 +370,8 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
     if os.path.exists(file_path):
         try:
             os.remove(file_path)
-        except Exception:
-            pass
+        except OSError as e:
+            logger.warning(f"Gagal menghapus file: {e}")
         
     output_path = os.path.join(EXTRACT_DIR, f"doc_{doc.id}")
     safe_output_path = get_safe_windows_path(output_path)
@@ -365,11 +382,11 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
             try:
                 os.chmod(path, stat.S_IWRITE)
                 func(path)
-            except Exception:
-                pass
+            except OSError as e:
+                logger.warning(f"Gagal menghapus file read-only: {e}")
         try:
             shutil.rmtree(safe_output_path, onerror=remove_readonly)
-        except Exception as e:
+        except OSError as e:
             raise HTTPException(status_code=500, detail=f"Gagal menghapus folder hasil ekstraksi: {e!s}")
         
     db.delete(doc)
@@ -384,6 +401,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
 
 @router.put("/documents/{doc_id}")
 def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memperbarui metadata dokumen publikasi (tahun, nama file, tahun data)."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
@@ -405,6 +423,7 @@ def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depen
 
 @router.put("/documents/{doc_id}/bab/{bab_num}")
 def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memperbarui judul bab tertentu pada dokumen."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
@@ -422,7 +441,7 @@ def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Se
         try:
             with open(toc_path, "r", encoding="utf-8") as f:
                 toc_data = json.load(f)
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             toc_data = []
             
     updated = False
@@ -452,15 +471,17 @@ def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Se
         with _TOC_CACHE_LOCK:
             _TOC_CACHE.pop(doc_id, None)
         return {"status": "success", "message": f"Bab {bab_num} berhasil disimpan", "title": new_title}
-    except Exception as e:
+    except (OSError, TypeError) as e:
         raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {e!s}")
 
 @router.post("/documents/{doc_id}/bab")
 def create_document_bab(doc_id: int, req: CreateBabRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Membuat bab baru pada dokumen publikasi."""
     return update_document_bab(doc_id=doc_id, bab_num=req.num, req=UpdateBabRequest(title=req.title), db=db, admin=admin)
 
 @router.delete("/documents/{doc_id}/bab/{bab_num}")
-def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)):
+def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus bab beserta semua tabel dan data terkait dari dokumen."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
@@ -477,8 +498,8 @@ def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)
                     p = get_safe_windows_path(t.csv_path)
                     if os.path.exists(p):
                         os.remove(p)
-                except Exception:
-                    pass
+                except OSError as e:
+                    logger.warning(f"Gagal menghapus file: {e}")
             db.delete(t)
             deleted_tables += 1
             
@@ -496,8 +517,8 @@ def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)
             ]
             with open(toc_path, "w", encoding="utf-8") as f:
                 json.dump(toc_data, f, indent=4)
-        except Exception:
-            pass
+        except (OSError, json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Gagal membaca file TOC: {e}")
             
     db.commit()
     with _DOC_TABLES_CACHE_LOCK:
@@ -509,6 +530,7 @@ def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)
 
 @router.post("/documents/{doc_id}/extract")
 def extract_document(doc_id: int, req: ExtractRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memulai proses ekstraksi tabel dari halaman tertentu dokumen PDF."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -524,6 +546,7 @@ _DOC_TABLES_CACHE_LOCK = threading.Lock()
 
 @router.get("/documents/{doc_id}/tables", response_model=list[schemas.ExtractedTableOut])
 def get_document_tables(doc_id: int, response: Response, db: Session = Depends(get_db)):
+    """Mengambil daftar tabel yang terkait dengan dokumen tertentu."""
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     
     with _DOC_TABLES_CACHE_LOCK:
@@ -533,11 +556,11 @@ def get_document_tables(doc_id: int, response: Response, db: Session = Depends(g
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     table_ids = [t.id for t in tables]
     if table_ids:
-        loaded_table_ids = set(
+        loaded_table_ids = {
             r[0] for r in db.query(models.TableRow.table_id)
             .filter(models.TableRow.table_id.in_(table_ids))
             .distinct().all()
-        )
+        }
     else:
         loaded_table_ids = set()
     for t in tables:
@@ -554,6 +577,7 @@ def get_document_tables(doc_id: int, response: Response, db: Session = Depends(g
 # =====================================================================
 @router.post("/documents/{doc_id}/load-all")
 def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memuat semua tabel dari dokumen ke database sekaligus."""
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     loaded_count = 0
     errors = 0
@@ -567,7 +591,7 @@ def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: 
             t.years = years
             for row_idx, record in enumerate(records):
                 is_anomaly = False
-                for key, val in record.items():
+                for val in record.values():
                     str_val = str(val).strip()
                     if "?" in str_val:
                         is_anomaly = True
@@ -575,7 +599,7 @@ def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: 
                 db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly, sort_order=row_idx)
                 db.add(db_row)
             loaded_count += 1
-        except Exception:
+        except (SQLAlchemyError, OSError, csv.Error):
             errors += 1
     db.commit()
     log_activity(db, "reload_all", f"doc_id={doc_id}", {"loaded": loaded_count, "errors": errors})
@@ -583,6 +607,7 @@ def load_all_document_tables(doc_id: int, db: Session = Depends(get_db), admin: 
 
 @router.post("/documents/{doc_id}/bab/{bab_num}/load-all")
 def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memuat semua tabel pada bab tertentu dari dokumen ke database."""
     tables = db.query(models.ExtractedTable).filter(models.ExtractedTable.document_id == doc_id).all()
     loaded_count = 0
     errors = 0
@@ -599,7 +624,7 @@ def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get
                 t.years = years
                 for row_idx, record in enumerate(records):
                     is_anomaly = False
-                    for key, val in record.items():
+                    for val in record.values():
                         str_val = str(val).strip()
                         if "?" in str_val:
                             is_anomaly = True
@@ -607,7 +632,7 @@ def load_all_chapter_tables(doc_id: int, bab_num: int, db: Session = Depends(get
                     db_row = models.TableRow(table_id=t.id, data=record, is_anomaly=is_anomaly, sort_order=row_idx)
                     db.add(db_row)
                 loaded_count += 1
-            except Exception:
+            except (SQLAlchemyError, OSError, csv.Error):
                 errors += 1
     db.commit()
     log_activity(db, "reload_chapter", f"bab {bab_num}", {"doc_id": doc_id, "loaded": loaded_count, "errors": errors})

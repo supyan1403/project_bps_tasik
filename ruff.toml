@@ -1,0 +1,8 @@
+[lint]
+ignore = ["B008"]
+
+[lint.per-file-ignores]
+"backend/routers/admin.py" = ["BLE001"]
+"backend/routers/documents.py" = ["BLE001"]
+"backend/routers/import_excel.py" = ["BLE001"]
+"backend/tests/*" = ["F401", "F811", "I001"]

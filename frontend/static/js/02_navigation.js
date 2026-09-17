@@ -735,9 +735,7 @@ function initBannerLiveClock() {
 
         const mins = String(now.getMinutes()).padStart(2, '0');
 
-        const secs = String(now.getSeconds()).padStart(2, '0');
-
-        clockEl.textContent = `${hrs}:${mins}:${secs}`;
+        clockEl.textContent = `${hrs}:${mins}`;
 
 
 

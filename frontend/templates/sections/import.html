@@ -1,8 +1,12 @@
             <div id="page-import" class="page-section">
+                <div class="mb-3">
+                    <h4 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;"><i class="bi bi-file-earmark-spreadsheet text-primary me-2"></i>Impor Excel</h4>
+                    <small class="text-muted">Unduh template Excel dan unggh data tabel baru ke sistem</small>
+                </div>
                 <div class="row g-4">
                     <div class="col-lg-6">
                         <div class="glass-panel h-100 mb-0">
-                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">1</span> Download Template</h5>
+                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">1</span> Unduh Template</h5>
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold text-muted">Sumber Header (Publikasi Acuan)</label>
                                 <select id="import-src-doc" class="form-select" onchange="importLoadTables()">
@@ -12,11 +16,11 @@
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <label class="form-label small fw-semibold text-muted">Tahun Publikasi</label>
-                                    <input type="number" id="import-pub-year" class="form-control form-control-sm" placeholder="e.g. 2026" onchange="syncImportColYear()">
+                                    <input type="number" id="import-pub-year" class="form-control form-control-sm" placeholder="mis. 2026" onchange="syncImportColYear()">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small fw-semibold text-muted">Tahun Data (Kolom)</label>
-                                    <input type="number" id="import-col-year" class="form-control form-control-sm" placeholder="e.g. 2025">
+                                    <input type="number" id="import-col-year" class="form-control form-control-sm" placeholder="mis. 2025">
                                 </div>
                                 <div class="col-12">
                                     <div class="text-muted" style="font-size:0.75rem; line-height:1.4;"><i class="bi bi-lightbulb text-warning"></i> <strong>Otomatis:</strong> Publikasi 2026 → Data 2025 (T-1). Otomatis masuk ke baris 3 & sheet Info.</div>
@@ -51,19 +55,19 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="glass-panel h-100 mb-0 d-flex flex-column">
-                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">2</span> Import / Upload Template</h5>
+                            <h5 class="fw-semibold d-flex align-items-center gap-2"><span class="ts-step-badge">2</span> Unggah Template</h5>
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold text-muted">Tahun Target (Publikasi Lama) <span class="text-muted">- opsional</span></label>
-                                <input type="number" id="import-year" class="form-control" placeholder="e.g. 2019">
+                                <input type="number" id="import-year" class="form-control" placeholder="mis. 2019">
                                 <div class="form-text">Kosongkan jika template sudah punya Tahun Publikasi di sheet Info.</div>
                             </div>
                             <div class="mb-3 flex-grow-1 d-flex flex-column">
-                                <label class="form-label small fw-semibold text-muted">File .xlsx (Single / Multi-File)</label>
+                                <label class="form-label small fw-semibold text-muted">File .xlsx (Satu / Multi-File)</label>
                                 <div id="excel-drop-zone" class="dropzone-modern flex-grow-1 d-flex flex-column align-items-center justify-content-center">
                                     <div id="excel-drop-text" class="text-dropzone">
                                         <i class="bi bi-file-earmark-spreadsheet text-success dropzone-icon"></i><br>
                                         <span class="fw-semibold text-dark">Seret & lepas 1 atau banyak file .xlsx di sini</span>, atau <span class="text-success text-decoration-underline">pilih file</span>
-                                        <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Dapat memilih banyak file sekaligus (Multi-File Import)</div>
+                                        <div class="text-muted" style="font-size:0.72rem; margin-top:2px;">Dapat memilih banyak file sekaligus (Impor Multi-File)</div>
                                     </div>
                                     <input type="file" id="import-file" class="form-control mt-2" accept=".xlsx" multiple style="display:none;">
                                 </div>
@@ -74,7 +78,7 @@
                                 </div>
                                 <small id="excel-upload-status" class="text-muted">Mengunggah...</small>
                             </div>
-                            <button class="btn btn-success w-100" onclick="importUploadExcel()">⬆ Upload & Import File</button>
+                            <button class="btn btn-primary w-100" onclick="importUploadExcel()">⬆ Unggah & Impor File</button>
                             <div id="import-result" class="small mt-2"></div>
                         </div>
                     </div>

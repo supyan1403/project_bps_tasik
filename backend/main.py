@@ -315,6 +315,11 @@ def get_favicon():
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
 
+@app.get("/robots.txt", include_in_schema=False)
+def get_robots_txt():
+    content = "User-agent: *\nDisallow: /api/\nAllow: /\n"
+    return Response(content=content, media_type="text/plain")
+
 @app.get("/502", include_in_schema=False)
 def preview_502_page(request: Request):
     """Endpoint untuk pengujian/pratinjau tampilan 502 Bad Gateway (status 200 agar tidak di-intercept Nginx default)."""

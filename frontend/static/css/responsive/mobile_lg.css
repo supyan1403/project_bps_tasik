@@ -232,18 +232,6 @@
         border-radius: 16px !important;
     }
 
-    .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 1.08rem !important;
-        margin-bottom: 0.3rem !important;
-        line-height: 1.25 !important;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.78rem !important;
-        line-height: 1.4 !important;
-        margin-bottom: 0 !important;
-    }
-
     .welcome-banner.ts-hero-banner .banner-badge {
         font-size: 0.70rem !important;
         padding: 3px 8px !important;
@@ -1479,17 +1467,6 @@
         min-height: auto !important;
         margin-bottom: 0.95rem !important;
         border-radius: 16px !important;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 1.08rem !important;
-        margin-bottom: 0.3rem !important;
-        line-height: 1.25 !important;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.78rem !important;
-        line-height: 1.4 !important;
     }
 
     .welcome-banner.ts-hero-banner .banner-badge {

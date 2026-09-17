@@ -122,52 +122,10 @@
                         <i class="bi bi-shield-lock"></i> <span class="sidebar-btn-text">Login Admin SIPEDAS</span>
                     </button>
 
-                    <!-- User Account Profile Card & Dropdown (Ketika Mode Admin Aktif) -->
-                    <div id="sidebar-user-widget" class="sidebar-user-widget position-relative has-flyout-submenu" {% if initial_role != 'admin' %}style="display:none !important;"{% else %}style="display:block !important;"{% endif %}>
-                        <div id="sidebar-user-btn" class="sidebar-user-card nav-link d-flex align-items-center justify-content-between p-2 rounded-3 cursor-pointer" onclick="toggleUserMenu(event)" role="button" tabindex="0" title="Akun Administrator">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="sidebar-user-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
-                                    <i class="bi bi-shield-check text-white"></i>
-                                    <span class="sidebar-user-online-dot"></span>
-                                </div>
-                                <div class="sidebar-user-info d-flex flex-column text-truncate">
-                                    <span class="sidebar-user-name fw-bold" style="font-size:0.83rem; line-height:1.2;">Administrator</span>
-                                </div>
-                            </div>
-                            <i class="bi bi-chevron-down text-muted sidebar-user-chevron ms-auto" style="font-size:0.75rem; transition: transform 0.2s ease;"></i>
-                        </div>
-
-                        <!-- Dropdown / Popover Menu Akun Admin (Ketika Expanded / Di-klik) -->
-                        <div id="sidebar-user-dropdown" class="sidebar-user-dropdown shadow-lg rounded-3 border bg-white position-absolute" style="display:none;">
-                            <div class="px-3 py-2 border-bottom d-flex align-items-center gap-2" style="background: var(--bg-page);">
-                                <i class="bi bi-person-check text-primary"></i>
-                                <div>
-                                    <div class="fw-bold" style="font-size:0.78rem; line-height:1.2;">Admin SIPEDAS</div>
-                                    <div class="text-muted" style="font-size:0.68rem;">Kontrol Penuh Sistem</div>
-                                </div>
-                            </div>
-                            <div class="p-1.5 d-flex flex-column gap-1">
-                                <button type="button" class="btn btn-sm text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 border-0 w-100 sidebar-user-menu-item text-danger" onclick="adminLogout(); hideUserMenu();">
-                                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Floating Popover (Ketika Sidebar Tertutup / Hover Sama Seperti Manajemen Database) -->
-                        <div class="sidebar-floating-popover shadow-lg" id="flyout-user-submenu">
-                            <div class="popover-header px-3 py-2 border-bottom fw-bold small d-flex align-items-center gap-2">
-                                <i class="bi bi-shield-shaded text-primary"></i> Administrator
-                            </div>
-                            <div class="popover-body p-1.5 d-flex flex-column gap-1">
-                                <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-danger fw-medium" onclick="adminLogout()">
-                                    <i class="bi bi-box-arrow-right text-danger"></i> <span>Logout</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hidden fallback logout button to preserve any legacy scripts -->
-                    <button type="button" id="btn-admin-logout" class="d-none" style="display:none !important;"></button>
+                    <!-- Logout Button (Ketika Mode Admin Aktif) -->
+                    <button type="button" id="btn-admin-logout-btn" class="btn btn-sm w-100 fw-semibold d-flex align-items-center rounded-3 mb-0 text-danger" style="display: none;" onclick="adminLogout()" title="Logout Admin SIPEDAS">
+                        <i class="bi bi-box-arrow-right"></i> <span class="sidebar-btn-text">Logout</span>
+                    </button>
                 </div>
             </div>
 

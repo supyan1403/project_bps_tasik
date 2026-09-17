@@ -14585,15 +14585,14 @@ function updateRoleUI(role) {
     }
 
     const btnLogin = document.getElementById('btn-admin-login');
-    const btnLogout = document.getElementById('btn-admin-logout');
+    const btnLogout = document.getElementById('btn-admin-logout-btn');
     const userWidget = document.getElementById('sidebar-user-widget');
 
     if (isAdmin) {
 
         if (btnLogin) btnLogin.style.setProperty('display', 'none', 'important');
-        if (userWidget) userWidget.style.setProperty('display', 'block', 'important');
-
-        if (btnLogout) btnLogout.style.setProperty('display', 'none', 'important');
+        if (userWidget) userWidget.style.setProperty('display', 'none', 'important');
+        if (btnLogout) btnLogout.style.removeProperty('display');
 
         document.querySelectorAll(".admin-only").forEach(el => el.style.removeProperty('display'));
 
@@ -14606,7 +14605,6 @@ function updateRoleUI(role) {
 
         if (btnLogin) btnLogin.style.setProperty('display', 'flex', 'important');
         if (userWidget) userWidget.style.setProperty('display', 'none', 'important');
-
         if (btnLogout) btnLogout.style.setProperty('display', 'none', 'important');
 
         document.querySelectorAll(".admin-only").forEach(el => el.style.setProperty('display', 'none', 'important'));

@@ -1,15 +1,13 @@
 import re
 import threading
 import time
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 from collections import defaultdict
 
 import models
 from database import get_db
-
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import func, text
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
 

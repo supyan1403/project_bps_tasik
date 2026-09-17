@@ -1,14 +1,14 @@
-import os
-import json
-import secrets
 import hashlib
+import json
+import os
+import secrets
 import time
 from datetime import datetime, timedelta
-from fastapi import APIRouter, HTTPException, Request, Response, Depends, Cookie
-from sqlalchemy.orm import Session
 
 import models
 from database import get_db
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -222,8 +222,9 @@ def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = 
 @router.post("/maintenance")
 def toggle_maintenance(payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     """Aktifkan/nonaktifkan maintenance mode. Hanya admin."""
-    from main import _update_maintenance_db, _maintenance_cache
     from datetime import datetime, timezone
+
+    from main import _maintenance_cache, _update_maintenance_db
 
     mode = str(payload.get("mode", "")).strip()
     end_time = str(payload.get("end_time", "")).strip()

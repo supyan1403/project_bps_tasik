@@ -1,5 +1,3 @@
-import json
-import time
 import psycopg2
 from psycopg2.extras import Json
 

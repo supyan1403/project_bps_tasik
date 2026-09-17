@@ -1,7 +1,7 @@
 import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-
 from sqlalchemy.pool import NullPool
 
 # Production: wajib set env DATABASE_URL. Development: default MySQL lokal XAMPP.

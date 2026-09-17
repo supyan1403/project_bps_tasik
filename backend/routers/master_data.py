@@ -1,11 +1,11 @@
+import json
 import os
 import re
-import json
-from typing import List, Dict, Any, Optional
+import sys
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -14,10 +14,7 @@ import models
 from database import get_db
 from routers.auth import require_admin
 from routers.tables import get_table_headers
-from routers.timeseries import (
-    get_clean_table_name,
-    _infer_unit_from_indicator
-)
+from routers.timeseries import _infer_unit_from_indicator, get_clean_table_name
 
 router = APIRouter(prefix="/api", tags=["Master Columns & Dictionaries"])
 
@@ -237,8 +234,7 @@ def search_columns_global(q: str = "", limit_headers: int = 50, limit_tables: in
                     "matches": []
                 }
             else:
-                if score > header_groups[h_clean]["score"]:
-                    header_groups[h_clean]["score"] = score
+                header_groups[h_clean]["score"] = max(header_groups[h_clean]["score"], score)
 
             header_groups[h_clean]["matches"].append({
                 "table_id": t.id,
@@ -503,7 +499,7 @@ def update_master_column(col_id: int, body: dict, admin: dict = Depends(require_
     col = next((c for c in columns if c["id"] == col_id), None)
     if not col:
         raise HTTPException(404, "Master column not found")
-    if "standard" in body and body["standard"]:
+    if body.get("standard"):
         col["standard"] = body["standard"]
     if "unit" in body:
         col["unit"] = body["unit"]

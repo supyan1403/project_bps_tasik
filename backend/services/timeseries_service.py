@@ -1,19 +1,11 @@
-import os
 import re
-import csv
-import json
-from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session
 
 import models
-from database import get_db
+from routers.tables import clean_bilingual_header, get_table_headers
+from sqlalchemy.orm import Session
+
 from pipeline import parse_indonesian_number
-from routers.tables import (
-    get_table_headers,
-    clean_bilingual_header,
-    get_safe_windows_path,
-    normalize_record_first_col
-)
+
 
 def extract_timeseries_year(year_val, default_year=None):
     if year_val is None or year_val == '':
@@ -278,11 +270,11 @@ def _format_scaled_indo_number(val_float) -> str:
         return ""
     if val_float == int(val_float):
         n = int(val_float)
-        return '{:,}'.format(n).replace(',', '.')
+        return f'{n:,}'.replace(',', '.')
     else:
         fixed = f"{val_float:.2f}"
         int_part, dec_part = fixed.split('.')
-        int_str = '{:,}'.format(int(int_part)).replace(',', '.')
+        int_str = f'{int(int_part):,}'.replace(',', '.')
         dec_clean = dec_part.rstrip('0')
         return f"{int_str},{dec_clean}" if dec_clean else int_str
 
@@ -318,11 +310,7 @@ def _normalize_indo_number(val: str, unit: str = "", table_name: str = "", heade
     
     mult = _get_unit_multiplier(unit, table_name, header)
     if mult == 1000.0:
-        if num >= 60000.0:
-            mult = 1.0
-        elif " " in s and len(s.replace(" ", "")) >= 6:
-            mult = 1.0
-        elif re.match(r'^[1-9]\d{0,2}\.\d{3}$', s):
+        if num >= 60000.0 or " " in s and len(s.replace(" ", "")) >= 6 or re.match(r'^[1-9]\d{0,2}\.\d{3}$', s):
             mult = 1.0
         elif s.count('.') > 1:
             parts = s.split('.')
@@ -427,7 +415,7 @@ def _classify_entity_type(entity_name: str) -> str:
         return "Total"
     return "Lainnya"
 
-def check_cell_format_anomaly(raw_val: str, prev_raw_val: str = None) -> Optional[str]:
+def check_cell_format_anomaly(raw_val: str, prev_raw_val: str = None) -> str | None:
     s = str(raw_val).strip()
     if not s or s in ["-", "...", "–", "—", ""]:
         return None

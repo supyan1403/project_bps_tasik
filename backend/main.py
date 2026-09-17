@@ -1,26 +1,23 @@
 import os
-import re
 import sys
-import time
 import threading
+import time
 from contextlib import asynccontextmanager
-from typing import List, Dict, Any, Union, Optional
-from fastapi import FastAPI, Depends, HTTPException, Request, Response, Cookie
-from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
+
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import models
-import schemas
-from database import engine, get_db, SessionLocal
-from services.table_service import get_safe_windows_path
+from database import SessionLocal, engine, get_db
 
 try:
     models.Base.metadata.create_all(bind=engine)
@@ -340,15 +337,16 @@ def invalidate_stats_cache():
 # =====================================================================
 # ROUTERS MOUNTING
 # =====================================================================
-from routers.auth import router as auth_router, _clean_expired_sessions
 from routers.admin import router as admin_router
+from routers.anomaly import router as anomaly_router
+from routers.auth import _clean_expired_sessions
+from routers.auth import router as auth_router
+from routers.documents import router as documents_router
+from routers.import_excel import router as import_excel_router
+from routers.master_data import router as master_data_router
 from routers.stats import router as stats_router
 from routers.tables import router as tables_router
-from routers.documents import router as documents_router
 from routers.timeseries import router as timeseries_router
-from routers.anomaly import router as anomaly_router
-from routers.master_data import router as master_data_router
-from routers.import_excel import router as import_excel_router
 
 app.include_router(auth_router)
 app.include_router(admin_router)

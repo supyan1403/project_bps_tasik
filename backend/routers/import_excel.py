@@ -1,20 +1,17 @@
 import io
+import json
 import os
 import re
-import json
 import zipfile
-from datetime import datetime
-from typing import Optional
-
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
 
 import models
+import openpyxl
 from database import get_db
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from routers.auth import log_activity, require_admin
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/import", tags=["Excel Import"])
 
@@ -63,8 +60,8 @@ def _build_template_workbook(
     headers: list,
     units: list,
     years: list,
-    pub_year: Optional[int] = None,
-    col_year: Optional[int] = None,
+    pub_year: int | None = None,
+    col_year: int | None = None,
 ) -> openpyxl.Workbook:
     wb = openpyxl.Workbook()
 
@@ -137,8 +134,8 @@ def _build_template_workbook(
 @router.get("/template")
 def download_single_template(
     table_id: int,
-    pub_year: Optional[int] = None,
-    col_year: Optional[int] = None,
+    pub_year: int | None = None,
+    col_year: int | None = None,
     db: Session = Depends(get_db),
 ):
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
@@ -172,8 +169,8 @@ def download_single_template(
 def download_bab_zip(
     doc_id: int,
     bab_num: int,
-    pub_year: Optional[int] = None,
-    col_year: Optional[int] = None,
+    pub_year: int | None = None,
+    col_year: int | None = None,
     db: Session = Depends(get_db),
 ):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
@@ -228,7 +225,7 @@ def download_bab_zip(
 @router.post("/excel")
 def import_excel_files(
     files: list[UploadFile] = File(...),
-    year: Optional[int] = Form(None),
+    year: int | None = Form(None),
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
 ):
@@ -363,7 +360,7 @@ def import_excel_files(
             })
 
         except Exception as e:
-            errors.append(f"{upload_file.filename}: {str(e)}")
+            errors.append(f"{upload_file.filename}: {e!s}")
 
     db.commit()
 

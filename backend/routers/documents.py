@@ -1,26 +1,31 @@
-from services.table_service import parse_csv_for_db, get_safe_windows_path
-import os
-import io
-import re
-import csv
+from __future__ import annotations
+
 import json
-import zipfile
+import os
+import re
 import subprocess
 import threading
-from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel
-import openpyxl
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, Response
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 import models
 import schemas
 from database import get_db
-from pipeline import get_toc
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Response,
+    UploadFile,
+)
+from pydantic import BaseModel
 from routers.auth import log_activity, require_admin
+from services.table_service import get_safe_windows_path, parse_csv_for_db
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from pipeline import get_toc
 
 router = APIRouter(prefix="/api", tags=["Documents & Excel Import"])
 
@@ -45,9 +50,9 @@ class TOCItem(BaseModel):
     end_page: int
 
 class UpdateDocumentRequest(BaseModel):
-    year: Optional[int] = None
-    data_year: Optional[int] = None
-    filename: Optional[str] = None
+    year: int | None = None
+    data_year: int | None = None
+    filename: str | None = None
 
 class UpdateBabRequest(BaseModel):
     title: str
@@ -99,7 +104,7 @@ def run_extract_toc(doc_id: int, file_path: str, output_path: str):
         ]
         subprocess.run(cmd)
     except Exception as e:
-        print(f"Gagal ekstraksi TOC: {str(e)}")
+        print(f"Gagal ekstraksi TOC: {e!s}")
 
 def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: int, end_page: int):
     db = next(get_db())
@@ -136,14 +141,14 @@ def run_extraction(doc_id: int, file_path: str, output_path: str, start_page: in
         doc.status = "ready"
         db.commit()
     except Exception as e:
-        doc.status = f"error: {str(e)}"
+        doc.status = f"error: {e!s}"
         db.commit()
 
 @router.post("/documents", response_model=schemas.DocumentOut)
 async def upload_document(
     background_tasks: BackgroundTasks,
     year: int = Form(...),
-    data_year: Optional[int] = Form(None),
+    data_year: int | None = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
@@ -192,7 +197,7 @@ def create_manual_document(doc_in: schemas.DocumentCreate, db: Session = Depends
     os.makedirs(doc_dir, exist_ok=True)
     return db_doc
 
-@router.get("/documents", response_model=List[schemas.DocumentOut])
+@router.get("/documents", response_model=list[schemas.DocumentOut])
 def get_documents(response: Response, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     results = (
@@ -323,10 +328,10 @@ def detect_document_toc(doc_id: int, db: Session = Depends(get_db), admin: dict 
             json.dump(toc_data, f, indent=4)
         return {"status": "success", "message": f"Deteksi Bab selesai. Menemukan {len(toc_data)} bab.", "data": toc_data}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal melakukan deteksi bab: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gagal melakukan deteksi bab: {e!s}")
 
 @router.post("/documents/{doc_id}/toc")
-def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+def save_document_toc(doc_id: int, toc_data: list[TOCItem], db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -340,7 +345,7 @@ def save_document_toc(doc_id: int, toc_data: List[TOCItem], db: Session = Depend
             json.dump(dict_data, f, indent=4)
         return {"status": "success", "message": "TOC updated successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save TOC: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save TOC: {e!s}")
 
 @router.delete("/documents/{doc_id}")
 def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
@@ -352,7 +357,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
     try:
         backup_database()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Penghapusan dibatalkan: backup otomatis gagal ({str(e)})")
+        raise HTTPException(status_code=500, detail=f"Penghapusan dibatalkan: backup otomatis gagal ({e!s})")
         
     file_path = get_safe_windows_path(os.path.join(UPLOAD_DIR, doc.filename))
     if os.path.exists(file_path):
@@ -364,7 +369,8 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
     output_path = os.path.join(EXTRACT_DIR, f"doc_{doc.id}")
     safe_output_path = get_safe_windows_path(output_path)
     if os.path.exists(safe_output_path):
-        import shutil, stat
+        import shutil
+        import stat
         def remove_readonly(func, path, excinfo):
             try:
                 os.chmod(path, stat.S_IWRITE)
@@ -374,7 +380,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
         try:
             shutil.rmtree(safe_output_path, onerror=remove_readonly)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Gagal menghapus folder hasil ekstraksi: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Gagal menghapus folder hasil ekstraksi: {e!s}")
         
     db.delete(doc)
     db.commit()
@@ -457,7 +463,7 @@ def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Se
             _TOC_CACHE.pop(doc_id, None)
         return {"status": "success", "message": f"Bab {bab_num} berhasil disimpan", "title": new_title}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {e!s}")
 
 @router.post("/documents/{doc_id}/bab")
 def create_document_bab(doc_id: int, req: CreateBabRequest, db: Session = Depends(get_db)):
@@ -526,7 +532,7 @@ def extract_document(doc_id: int, req: ExtractRequest, background_tasks: Backgro
 _DOC_TABLES_CACHE = {}
 _DOC_TABLES_CACHE_LOCK = threading.Lock()
 
-@router.get("/documents/{doc_id}/tables", response_model=List[schemas.ExtractedTableOut])
+@router.get("/documents/{doc_id}/tables", response_model=list[schemas.ExtractedTableOut])
 def get_document_tables(doc_id: int, response: Response, db: Session = Depends(get_db)):
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     

@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 import os
 import re
 from typing import Any
@@ -20,9 +21,12 @@ from services.table_service import (
     sanitize_row_data,
 )
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from pipeline import ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS, deduplicate_columns
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["Tables & Editor"])
 
@@ -44,10 +48,9 @@ def clean_bilingual_header(header: str) -> str:
     while len(words) > 1:
         last_word_lower = words[-1].lower()
         last_clean = re.sub(r'[^a-z]', '', last_word_lower)
-        if last_clean in ENGLISH_ONLY_WORDS and last_clean not in INDO_SAFE_WORDS:
-            if last_word_lower in [w.lower() for w in words[:-1]]:
-                words.pop()
-                continue
+        if last_clean in ENGLISH_ONLY_WORDS and last_clean not in INDO_SAFE_WORDS and last_word_lower in [w.lower() for w in words[:-1]]:
+            words.pop()
+            continue
         break
 
     deduped = []
@@ -59,6 +62,7 @@ def clean_bilingual_header(header: str) -> str:
     return result if result else header
 
 def get_table_headers(db: Session, table) -> list[str]:
+    """Mengambil daftar header kolom dari tabel, dari metadata atau baris data pertama."""
     if table and table.headers:
         return list(table.headers)
     if table:
@@ -68,6 +72,7 @@ def get_table_headers(db: Session, table) -> list[str]:
     return []
 
 def normalize_record_first_col(record: dict, headers: list):
+    """Menormalisasi spasi pada nilai kolom pertama (kolom entitas) di record."""
     if not headers or not record:
         return
     first_key = headers[0]
@@ -77,6 +82,7 @@ def normalize_record_first_col(record: dict, headers: list):
 
 @router.get("/tables/{table_id}/snippet")
 def get_table_snippet(table_id: int, response: Response, db: Session = Depends(get_db)):
+    """Mengambil cuplikan singkat tabel untuk pratinjau di frontend."""
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
@@ -104,11 +110,12 @@ def get_table_snippet(table_id: int, response: Response, db: Session = Depends(g
             "units": units,
             "rows": data_rows
         }
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/tables")
 def create_new_table(req: schemas.CreateTableRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Membuat tabel baru beserta baris data awal dari dokumen publikasi."""
     doc = db.query(models.Document).filter(models.Document.id == req.document_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan.")
@@ -183,6 +190,7 @@ def create_new_table(req: schemas.CreateTableRequest, db: Session = Depends(get_
 
 @router.delete("/tables/{table_id}")
 def delete_single_table(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus satu tabel beserta semua baris datanya dari database."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -196,6 +204,7 @@ def delete_single_table(table_id: int, db: Session = Depends(get_db), admin: dic
 @router.get("/tables/{table_id}/excel")
 @router.get("/tables/{table_id}/export_excel")
 def download_table_excel(table_id: int, db: Session = Depends(get_db)):
+    """Mengunduh tabel sebagai file Excel (.xlsx) dengan format yang rapi."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -290,6 +299,7 @@ def download_table_excel(table_id: int, db: Session = Depends(get_db)):
 
 @router.get("/tables/{table_id}/csv")
 def download_table_csv(table_id: int, db: Session = Depends(get_db)):
+    """Mengunduh tabel sebagai file CSV dengan BOM UTF-8."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -322,6 +332,7 @@ def download_table_csv(table_id: int, db: Session = Depends(get_db)):
 
 @router.get("/tables/{table_id}/csv_preview")
 def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
+    """Mengambil pratinjau seluruh data tabel dalam format CSV untuk editor."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -358,7 +369,7 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
             "row_ids": [r.id for r in all_rows],
             "is_anomalies": [bool(r.is_anomaly) for r in all_rows]
         }
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 class CSVRowUpdate(BaseModel):
@@ -366,6 +377,7 @@ class CSVRowUpdate(BaseModel):
 
 @router.put("/tables/{table_id}/csv/row/{row_index}")
 def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memperbarui data baris tertentu pada tabel berdasarkan indeks."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -386,6 +398,7 @@ def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Ses
 
 @router.delete("/tables/{table_id}/csv/row/{row_index}")
 def delete_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus baris tertentu dari tabel berdasarkan indeks."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -399,6 +412,7 @@ def delete_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db),
 
 @router.post("/tables/{table_id}/csv/insert_row/{row_index}")
 def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menyisipkan baris kosong baru pada posisi indeks tertentu di tabel."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -424,6 +438,7 @@ def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db),
 
 @router.post("/tables/{table_id}/csv/row")
 def add_csv_row(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menambahkan baris baru di awal tabel."""
     return insert_csv_row(table_id, 0, db)
 
 class CSVColumnAdd(BaseModel):
@@ -432,6 +447,7 @@ class CSVColumnAdd(BaseModel):
 
 @router.post("/tables/{table_id}/csv/column")
 def add_csv_column(table_id: int, payload: CSVColumnAdd, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menambahkan kolom baru ke tabel pada posisi yang ditentukan."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -486,6 +502,7 @@ def add_csv_column(table_id: int, payload: CSVColumnAdd, db: Session = Depends(g
 
 @router.delete("/tables/{table_id}/csv/column/{col_index}")
 def delete_csv_column(table_id: int, col_index: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus kolom tertentu dari tabel berdasarkan indeks."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -512,6 +529,7 @@ class TableRenamePayload(BaseModel):
 
 @router.put("/tables/{table_id}/rename")
 def rename_table(table_id: int, payload: TableRenamePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengganti nama tabel."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Table not found")
@@ -525,6 +543,7 @@ class ColumnRenamePayload(BaseModel):
 
 @router.put("/tables/{table_id}/csv/rename_column")
 def rename_csv_column(table_id: int, payload: ColumnRenamePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengganti nama kolom pada tabel."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -561,6 +580,7 @@ class CSVSavePayload(BaseModel):
 
 @router.put("/tables/{table_id}/csv/save")
 def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menyimpan seluruh data tabel (header, unit, tahun, baris) sekaligus."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
@@ -614,16 +634,17 @@ def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Dep
                     writer.writerow(years)
                     for row_arr in payload.rows:
                         writer.writerow(row_arr)
-            except Exception:
-                pass
+            except (OSError, csv.Error) as e:
+                logger.warning(f"Gagal menyimpan file CSV ke disk: {e}")
 
         log_activity(db, "save_table", table.table_name or f"table_id={table_id}", {"rows": len(payload.rows), "table_id": table_id})
         return {"message": "Data CSV berhasil disimpan"}
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/admin/tables")
 def admin_get_tables(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengambil daftar semua tabel untuk panel admin beserta jumlah baris."""
     tables = db.query(
         models.ExtractedTable.id, 
         models.ExtractedTable.table_name, 
@@ -654,16 +675,18 @@ def admin_get_tables(db: Session = Depends(get_db), admin: dict = Depends(requir
 
 @router.post("/admin/clear-loaded-data")
 def clear_loaded_data(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus semua baris data yang telah dimuat ke database."""
     try:
         db.query(models.TableRow).delete()
         db.commit()
         return {"message": "All loaded table rows have been cleared successfully."}
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to clear data: {e!s}")
 
 @router.put("/admin/safe-all")
 def mark_all_database_anomalies_safe(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menandai semua baris anomali di seluruh database sebagai aman."""
     count = db.query(models.TableRow).filter(models.TableRow.is_anomaly == True).count()
     db.query(models.TableRow).filter(models.TableRow.is_anomaly == True).update({"is_anomaly": False})
     db.commit()
@@ -672,6 +695,7 @@ def mark_all_database_anomalies_safe(db: Session = Depends(get_db), admin: dict 
 
 @router.get("/admin/all-data-anomalies")
 def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengambil semua baris yang ditandai sebagai anomali dari seluruh tabel."""
     try:
         rows = db.query(
             models.TableRow,
@@ -700,7 +724,7 @@ def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(
                 "data": r.data
             })
         return {"anomalies": results}
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -709,6 +733,7 @@ def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(
 # =====================================================================
 @router.post("/tables/{table_id}/load")
 def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memuat data dari file CSV ke database untuk tabel tertentu."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Table not found")
@@ -730,7 +755,7 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = D
             normalize_record_first_col(record, headers)
             is_anomaly = False
             # Deteksi anomali: hanya tandai jika mengandung "?"
-            for key, val in record.items():
+            for val in record.values():
                 str_val = str(val).strip()
                 if "?" in str_val or str_val == "":
                     is_anomaly = True
@@ -743,16 +768,16 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = D
             db.add(db_row)
         db.commit()
         return {"message": f"Loaded {len(records)} rows successfully. Found {anomaly_count} anomalies."}
-    except Exception as e:
+    except (SQLAlchemyError, OSError, csv.Error) as e:
         raise HTTPException(status_code=500, detail=f"Error loading CSV: {e!s}")
 
 # ===== PENCARIAN TABEL =====
 @router.get("/tables/search")
 def search_tables(
     q: str = "",
-    year: int = None,
-    document_id: int = None,
-    bab: int = None,
+    year: int | None = None,
+    document_id: int | None = None,
+    bab: int | None = None,
     limit: int = 50,
     db: Session = Depends(get_db)
 ):
@@ -819,7 +844,7 @@ def search_tables(
             })
 
         return {"tables": tables_out, "total": len(tables_out)}
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database search failed: {e!s}")
 
 
@@ -861,6 +886,7 @@ def save_db_rows(table_id: int, payload: dict, db: Session = Depends(get_db), ad
 # Get table data from DB with CSV header metadata (unit, year) for unified rendering
 @router.get("/tables/{table_id}/data")
 def get_table_data(table_id: int, response: Response, db: Session = Depends(get_db)):
+    """Mengambil data lengkap tabel beserta metadata header, unit, tahun, dan tipe kolom."""
     response.headers["Cache-Control"] = "public, s-maxage=120, stale-while-revalidate=300"
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).order_by(models.TableRow.sort_order.asc(), models.TableRow.id.asc()).all()
@@ -893,6 +919,7 @@ def get_table_data(table_id: int, response: Response, db: Session = Depends(get_
 
 @router.put("/data/{row_id}")
 def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Memperbarui data satu baris berdasarkan ID baris."""
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -903,6 +930,7 @@ def update_row_data(row_id: int, payload: dict, db: Session = Depends(get_db), a
 
 @router.put("/data/{row_id}/safe")
 def mark_row_safe(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menandai satu baris sebagai aman (bukan anomali)."""
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -912,6 +940,7 @@ def mark_row_safe(row_id: int, db: Session = Depends(get_db), admin: dict = Depe
 
 @router.put("/tables/{table_id}/safe-all")
 def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menandai semua baris pada tabel tertentu sebagai aman."""
     db.query(models.TableRow).filter(models.TableRow.table_id == table_id).update({"is_anomaly": False})
     db.commit()
     log_activity(db, "safe_anomaly", f"table_id={table_id}")
@@ -919,6 +948,7 @@ def mark_all_rows_safe(table_id: int, db: Session = Depends(get_db), admin: dict
 
 @router.delete("/data/{row_id}")
 def delete_row(row_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menghapus satu baris dari database berdasarkan ID."""
     row = db.query(models.TableRow).filter(models.TableRow.id == row_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Row not found")
@@ -929,6 +959,7 @@ def delete_row(row_id: int, db: Session = Depends(get_db), admin: dict = Depends
     return {"message": "Deleted successfully"}
 
 def get_clean_chapter_name(level1: str) -> str:
+    """Mengambil nama bab bersih dari nomor bab level 1."""
     CHAPTER_NAMES = {
         "1": "Geografi dan Iklim",
         "2": "Pemerintahan",
@@ -947,6 +978,7 @@ def get_clean_chapter_name(level1: str) -> str:
     return CHAPTER_NAMES.get(str(level1).strip(), f"Bab {level1}")
 
 def get_clean_table_name(table_name: str) -> str:
+    """Membersihkan nama tabel dari prefix, referensi halaman, dan tahun."""
     if not table_name:
         return ""
     # 1. Hapus awalan nomor tabel (contoh: "Tabel 4.4.2 - " atau "Tabel 4.4.2 ")

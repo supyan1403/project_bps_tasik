@@ -35,6 +35,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
+    """Membuat dan menghasilkan sesi database untuk dependency injection."""
     db = SessionLocal()
     try:
         yield db

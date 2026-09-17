@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 import os
 import re
 import zipfile
@@ -13,6 +14,8 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from routers.auth import log_activity, require_admin
 from sqlalchemy.orm import Session
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/import", tags=["Excel Import"])
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,8 +23,8 @@ _BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
 UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
 try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori upload: {e}")
 
 _HEADER_FILL = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
 _HEADER_FONT = Font(name="Calibri", bold=True, color="FFFFFF", size=11)
@@ -39,6 +42,7 @@ _THIN_BORDER = Border(
 
 
 def _sanitize_filename(name: str) -> str:
+    """Membersihkan nama file dari karakter yang tidak valid."""
     if not name:
         return "template.xlsx"
     clean = str(name).strip()
@@ -63,6 +67,7 @@ def _build_template_workbook(
     pub_year: int | None = None,
     col_year: int | None = None,
 ) -> openpyxl.Workbook:
+    """Membuat workbook template Excel untuk impor data tabel."""
     wb = openpyxl.Workbook()
 
     # --- Sheet "Info" ---
@@ -138,6 +143,7 @@ def download_single_template(
     col_year: int | None = None,
     db: Session = Depends(get_db),
 ):
+    """Mengunduh template Excel untuk satu tabel tertentu."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan.")
@@ -173,6 +179,7 @@ def download_bab_zip(
     col_year: int | None = None,
     db: Session = Depends(get_db),
 ):
+    """Mengunduh template Excel ZIP untuk seluruh tabel dalam satu bab."""
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Publikasi tidak ditemukan.")
@@ -229,6 +236,7 @@ def import_excel_files(
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
 ):
+    """Mengimpor file Excel yang diunggah ke dalam basis data."""
     if not files:
         raise HTTPException(status_code=400, detail="Tidak ada file yang diunggah.")
 
@@ -267,15 +275,15 @@ def import_excel_files(
 
                 try:
                     headers = json.loads(raw_kolom) if isinstance(raw_kolom, str) else raw_kolom or []
-                except Exception:
+                except (json.JSONDecodeError, TypeError):
                     headers = []
                 try:
                     units = json.loads(raw_satuan) if isinstance(raw_satuan, str) else raw_satuan or []
-                except Exception:
+                except (json.JSONDecodeError, TypeError):
                     units = []
                 try:
                     years = json.loads(raw_tahun) if isinstance(raw_tahun, str) else raw_tahun or []
-                except Exception:
+                except (json.JSONDecodeError, TypeError):
                     years = []
 
                 if not doc_year:
@@ -283,8 +291,8 @@ def import_excel_files(
                     if py:
                         try:
                             doc_year = int(py)
-                        except Exception:
-                            pass
+                        except (ValueError, TypeError) as e:
+                            logger.debug(f"Gagal mem-parse tahun publikasi: {e}")
 
             if not table_name:
                 table_name = upload_file.filename or "Tabel Import"

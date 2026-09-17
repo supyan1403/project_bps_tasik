@@ -8,6 +8,7 @@ from pipeline import parse_indonesian_number
 
 
 def extract_timeseries_year(year_val, default_year=None):
+    """Mengekstrak tahun dari nilai kolom deret waktu."""
     if year_val is None or year_val == '':
         return default_year
     s = str(year_val).strip()
@@ -17,6 +18,7 @@ def extract_timeseries_year(year_val, default_year=None):
     return default_year
 
 def _clean_header_for_master(header: str) -> str:
+    """Membersihkan nama kolom dari suffix nomor urut."""
     if not header:
         return ""
     h = clean_bilingual_header(header)
@@ -24,6 +26,7 @@ def _clean_header_for_master(header: str) -> str:
     return h.strip()
 
 def get_column_years_from_db(db: Session, table, doc_year: int) -> dict:
+    """Mengambil pemetaan kolom ke tahun dari basis data."""
     headers = get_table_headers(db, table)
     if not headers:
         return {}
@@ -47,7 +50,7 @@ def get_column_years_from_db(db: Session, table, doc_year: int) -> dict:
             if not any(char.isalpha() for char in h):
                 continue
             col_years.setdefault(_clean_header_for_master(h), set()).update(years_in_col0)
-        col_years = {k: sorted(list(v)) for k, v in col_years.items()}
+        col_years = {k: sorted(v) for k, v in col_years.items()}
     else:
         for idx, h in enumerate(headers):
             if idx == 0:
@@ -57,11 +60,12 @@ def get_column_years_from_db(db: Session, table, doc_year: int) -> dict:
             yr_val = years[idx] if idx < len(years) else ""
             col_year = extract_timeseries_year(yr_val, default_year=doc_year - 1)
             col_years.setdefault(_clean_header_for_master(h), set()).add(col_year)
-        col_years = {k: sorted(list(v)) for k, v in col_years.items()}
+        col_years = {k: sorted(v) for k, v in col_years.items()}
 
     return col_years
 
 def get_column_years_with_position(db: Session, table, doc_year: int) -> dict:
+    """Mengambil pemetaan kolom ke tahun beserta posisi indeks kolom."""
     headers = get_table_headers(db, table)
     if not headers:
         return {}
@@ -101,6 +105,7 @@ def get_column_years_with_position(db: Session, table, doc_year: int) -> dict:
     return result
 
 def get_clean_chapter_name(level1: str) -> str:
+    """Mengembalikan nama bab yang bersih berdasarkan nomor bab."""
     CHAPTER_NAMES = {
         "1": "Geografi dan Iklim",
         "2": "Pemerintahan",
@@ -119,6 +124,7 @@ def get_clean_chapter_name(level1: str) -> str:
     return CHAPTER_NAMES.get(str(level1).strip(), f"Bab {level1}")
 
 def get_clean_table_name(table_name: str) -> str:
+    """Membersihkan nama tabel dari prefix Tabel, tahun, dan halaman."""
     if not table_name:
         return ""
     name = re.sub(r'^(?:Tabel[\s_]*\d+(?:\.\d+)*\s*(?:-\s*|:\s*|)\s*)', '', table_name, flags=re.IGNORECASE)
@@ -145,6 +151,7 @@ _KECAMATAN_TASIK = [
 _KECAMATAN_SET = set(_KECAMATAN_TASIK)
 
 def normalize_entity_name(raw: str) -> str:
+    """Menormalisasi nama entitas seperti kecamatan, pendidikan, dsb."""
     if not raw:
         return raw
     s_raw = str(raw).strip()
@@ -227,6 +234,7 @@ def _get_timeseries_entity_sort_key(name: str):
     return (5, 0, s_lower)
 
 def normalize_entity_key(raw_key: str) -> str:
+    """Menormalisasi kunci entitas menjadi kategori standar."""
     if not raw_key:
         return "Rincian"
     k = raw_key.lower().strip()
@@ -403,7 +411,7 @@ def _classify_entity_type(entity_name: str) -> str:
     if not entity_name:
         return "Lainnya"
     name_lower = entity_name.lower().strip()
-    if name_lower.startswith("kab.") or name_lower.startswith("kabupaten") or name_lower.startswith("kota"):
+    if name_lower.startswith(("kab.", "kabupaten", "kota")):
         return "Kabupaten/Kota"
     if "provinsi" in name_lower or name_lower in ["jawa barat", "jawa tengah", "jawa timur", "banten", "dki jakarta"]:
         return "Provinsi"
@@ -415,7 +423,8 @@ def _classify_entity_type(entity_name: str) -> str:
         return "Total"
     return "Lainnya"
 
-def check_cell_format_anomaly(raw_val: str, prev_raw_val: str = None) -> str | None:
+def check_cell_format_anomaly(raw_val: str, prev_raw_val: str | None = None) -> str | None:
+    """Memeriksa format anomali pada nilai sel berdasarkan nilai sebelumnya."""
     s = str(raw_val).strip()
     if not s or s in ["-", "...", "–", "—", ""]:
         return None
@@ -447,6 +456,7 @@ def check_cell_format_anomaly(raw_val: str, prev_raw_val: str = None) -> str | N
     return None
 
 def detect_timeseries_anomalies(tables_data: list) -> list:
+    """Mendeteksi anomali deret waktu pada data tabel multi-tahun."""
     if not tables_data:
         return []
     entity_series = {}

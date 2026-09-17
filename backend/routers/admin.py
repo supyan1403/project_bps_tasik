@@ -1,8 +1,11 @@
+import asyncio
 import glob
 import json
+import logging
 import os
 import subprocess
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import models
 from database import engine, get_db
@@ -11,7 +14,10 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from routers.auth import log_activity, require_admin
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/admin", tags=["Admin & Backups"])
 
@@ -22,8 +28,8 @@ if not os.path.exists(os.path.dirname(BACKUP_DIR)):
 
 try:
     os.makedirs(BACKUP_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori backup: {e}")
 
 def cleanup_old_backups(keep: int = 10):
     """Hapus backup lama, sisakan N terbaru berdasarkan waktu modifikasi."""
@@ -35,8 +41,8 @@ def cleanup_old_backups(keep: int = 10):
     for f in files[keep:]:
         try:
             os.remove(f)
-        except Exception:
-            pass
+        except OSError as e:
+            logger.warning(f"Gagal menghapus file: {e}")
 
 def backup_database() -> str:
     """Buat dump .sql seluruh database ke BACKUP_DIR, kembali nama file backup."""
@@ -44,7 +50,7 @@ def backup_database() -> str:
     db_backend = url.get_backend_name().lower()
     db_name = url.database or "sipedas"
 
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(ZoneInfo("Asia/Jakarta")).strftime("%Y%m%d_%H%M%S")
     backup_name = f"bps_{db_name}_{ts}.sql"
     backup_path = os.path.join(BACKUP_DIR, backup_name)
 
@@ -85,7 +91,7 @@ def backup_database() -> str:
     try:
         lines = []
         lines.append(f"-- SIPEDAS Universal SQL Database Backup ({db_backend.upper()})")
-        lines.append(f"-- Backup Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f"-- Backup Date: {datetime.now(ZoneInfo('Asia/Jakarta')).strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append(f"-- Database: {db_name}")
         lines.append("")
 
@@ -176,11 +182,11 @@ def restore_database(backup_path: str) -> dict:
             try:
                 db.execute(text(stmt))
                 success_stmts += 1
-            except Exception:
+            except SQLAlchemyError as e:
                 # Lewati error duplikasi / minor
-                pass
+                logger.debug(f"Statement SQL dilewati: {e}")
         db.commit()
-    except Exception as e:
+    except (OSError, SQLAlchemyError, ValueError) as e:
         db.rollback()
         raise RuntimeError(f"Gagal me-restore database: {e!s}")
     finally:
@@ -222,7 +228,7 @@ def get_activity_logs(page: int = 1, limit: int = 20, db: Session = Depends(get_
             "page": page,
             "limit": limit
         }
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/backup")
@@ -237,7 +243,7 @@ def create_backup(admin: dict = Depends(require_admin), db: Session = Depends(ge
             "file": os.path.basename(path),
             "path": path
         }
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         raise HTTPException(status_code=500, detail=f"Backup gagal: {e!s}")
 
 @router.get("/backups")
@@ -252,10 +258,10 @@ def list_backups(admin: dict = Depends(require_admin)):
                     files.append({
                         "file": fn,
                         "size": os.path.getsize(fp),
-                        "modified": datetime.fromtimestamp(os.path.getmtime(fp)).strftime("%Y-%m-%d %H:%M:%S")
+                        "modified": datetime.fromtimestamp(os.path.getmtime(fp), tz=ZoneInfo("Asia/Jakarta")).strftime("%Y-%m-%d %H:%M:%S")
                     })
         return {"backups": files, "dir": BACKUP_DIR}
-    except Exception as e:
+    except OSError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/backups/{filename}")
@@ -288,7 +294,7 @@ def restore_existing_backup(req: RestoreRequest, admin: dict = Depends(require_a
         return res
     except HTTPException:
         raise
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         raise HTTPException(status_code=500, detail=f"Restore gagal: {e!s}")
 
 @router.post("/restore-upload")
@@ -298,18 +304,21 @@ async def restore_uploaded_backup(file: UploadFile = File(...), admin: dict = De
         if not file.filename.lower().endswith(".sql"):
             raise HTTPException(status_code=400, detail="File harus berekstensi .sql.")
         
-        safe_fn = f"upload_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.path.basename(file.filename)}"
+        safe_fn = f"upload_{datetime.now(ZoneInfo('Asia/Jakarta')).strftime('%Y%m%d_%H%M%S')}_{os.path.basename(file.filename)}"
         save_path = os.path.join(BACKUP_DIR, safe_fn)
         
         content = await file.read()
-        with open(save_path, "wb") as f:
-            f.write(content)
+        loop = asyncio.get_event_loop()
+        def _write():
+            with open(save_path, "wb") as f:
+                f.write(content)
+        await loop.run_in_executor(None, _write)
             
         res = restore_database(save_path)
         return res
     except HTTPException:
         raise
-    except Exception as e:
+    except (SQLAlchemyError, OSError) as e:
         raise HTTPException(status_code=500, detail=f"Restore gagal: {e!s}")
 
 @router.delete("/backups/{filename}")
@@ -324,7 +333,7 @@ def delete_backup_file(filename: str, admin: dict = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="File tidak ditemukan")
     except HTTPException:
         raise
-    except Exception as e:
+    except OSError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 # =====================================================================
@@ -368,12 +377,12 @@ def get_system_info(admin: dict = Depends(require_admin)):
             )).fetchone()
             if result and result[0]:
                 info["db_size"] = f"{result[0]} MB"
-        except Exception:
+        except SQLAlchemyError:
             info["db_size"] = "N/A"
 
         db.close()
-    except Exception:
-        pass
+    except (SQLAlchemyError, RuntimeError) as e:
+        logger.warning(f"Gagal mengambil data: {e}")
 
     # Uptime
     uptime_sec = int(_time.time() - _server_start_time)
@@ -391,8 +400,8 @@ def get_system_info(admin: dict = Depends(require_admin)):
     try:
         import fastapi
         info["fastapi_version"] = fastapi.__version__
-    except Exception:
-        pass
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"Gagal mengambil versi FastAPI: {e}")
 
     return info
 
@@ -432,7 +441,7 @@ def fix_truncated_table_names(db: Session = Depends(get_db), admin: dict = Depen
                 full_title_norm = full_title.replace(" __SLASH__ ", "/").replace("__SLASH__", "/")
                 if csv_fn_norm not in full_title_map or len(full_title_norm) > len(full_title_map[csv_fn_norm]):
                     full_title_map[csv_fn_norm] = full_title_norm
-        except Exception:
+        except (OSError, json.JSONDecodeError, KeyError):
             continue
     
     tables = db.query(models.ExtractedTable).all()

@@ -1,8 +1,11 @@
+import logging
 import os
 import sys
 import threading
 import time
 from contextlib import asynccontextmanager
+
+logger = logging.getLogger(__name__)
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +25,7 @@ from database import SessionLocal, engine, get_db
 
 try:
     models.Base.metadata.create_all(bind=engine)
-except Exception as e:
+except SQLAlchemyError as e:
     print(f"[db] Peringatan create_all dilewati atau izin terbatas: {e}")
 
 # ===== MIGRASI KOLOM BARU (idempoten) =====
@@ -42,26 +46,28 @@ def migrate_db_columns():
 try:
     migrate_db_columns()
     print("[migrate] Kolom database diverifikasi/diperbarui.")
-except Exception as e:
+except SQLAlchemyError as e:
     print(f"[migrate] Peringatan: gagal memigrasi kolom database: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Lifecycle startup dan shutdown aplikasi."""
     try:
         _db = next(get_db())
         _clean_expired_sessions(_db)
         _db.close()
-    except Exception as _e:
-        pass
+    except (SQLAlchemyError, RuntimeError) as _e:
+        logger.warning(f"Gagal membersihkan sesi kedaluwarsa: {_e}")
     try:
         reset_stuck_extractions()
-    except Exception as _e:
-        pass
+    except (SQLAlchemyError, RuntimeError) as _e:
+        logger.warning(f"Gagal mereset status ekstraksi: {_e}")
     yield
 
 app = FastAPI(title="BPS Extraction Dashboard API", lifespan=lifespan)
 
 def reset_stuck_extractions():
+    """Reset status ekstraksi yang terhenti menjadi ready."""
     db = next(get_db())
     try:
         stuck_docs = db.query(models.Document).filter(models.Document.status.like("extracting%")).all()
@@ -69,7 +75,7 @@ def reset_stuck_extractions():
             doc.status = "ready"
         db.commit()
         print(f"Reset {len(stuck_docs)} stuck document extraction status(es) to ready.")
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Gagal me-reset status ekstraksi terhenti: {e}")
 
 _PROD_DOMAIN = os.environ.get("SIPEDAS_DOMAIN", "")
@@ -91,6 +97,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Caching cerdas untuk aset statis (CSS, JS, Fonts, Gambar)
 @app.middleware("http")
 async def add_cache_control_header(request: Request, call_next):
+    """Tambahkan header cache-control untuk aset statis."""
     response = await call_next(request)
     if request.url.path.startswith("/static/"):
         response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
@@ -107,6 +114,7 @@ _maintenance_cache = {"active": False, "end": "", "ts": 0}
 _CACHE_TTL = 5  # detik
 
 def _is_maintenance():
+    """Periksa apakah mode pemeliharaan aktif."""
     now = time.time()
     if now - _maintenance_cache["ts"] < _CACHE_TTL:
         return _maintenance_cache["active"]
@@ -120,6 +128,7 @@ def _is_maintenance():
         # Auto-disable jika maintenance_end sudah lewat
         if val == "1" and end_val:
             from datetime import datetime, timezone
+            from zoneinfo import ZoneInfo
             try:
                 iso_clean = end_val.strip()
                 if iso_clean.endswith('Z'):
@@ -128,27 +137,29 @@ def _is_maintenance():
                 if end_dt.tzinfo is not None:
                     now_dt = datetime.now(timezone.utc)
                 else:
-                    now_dt = datetime.now()
+                    now_dt = datetime.now(ZoneInfo("Asia/Jakarta")).replace(tzinfo=None)
 
                 if now_dt >= end_dt:
                     val = "0"
                     _update_maintenance_db("0", "", log_reason=f"Waktu selesai pemeliharaan telah tercapai ({end_val})")
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 print(f"[MAINTENANCE] Gagal mem-parse waktu pemeliharaan '{end_val}': {e}")
         _maintenance_cache["active"] = (val == "1")
         _maintenance_cache["end"] = end_val
         _maintenance_cache["ts"] = now
-    except Exception:
-        pass
+    except (SQLAlchemyError, ValueError, TypeError):
+        logger.warning("Gagal membaca status pemeliharaan dari database")
     return _maintenance_cache["active"]
 
 def _maintenance_end():
+    """Ambil waktu selesai pemeliharaan dari cache."""
     if _maintenance_cache["ts"] and (time.time() - _maintenance_cache["ts"] < _CACHE_TTL):
         return _maintenance_cache["end"]
     _is_maintenance()  # refresh cache
     return _maintenance_cache["end"]
 
 def _update_maintenance_db(mode, end_time="", log_reason=""):
+    """Perbarui status pemeliharaan di database."""
     try:
         db = SessionLocal()
         for k, v in [("maintenance_mode", mode), ("maintenance_end", end_time)]:
@@ -166,12 +177,13 @@ def _update_maintenance_db(mode, end_time="", log_reason=""):
             db.add(log)
         db.commit()
         db.close()
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"[MAINTENANCE] Gagal mengupdate konfigurasi pemeliharaan: {e}")
     _maintenance_cache["ts"] = 0
 
 @app.middleware("http")
 async def maintenance_middleware(request: Request, call_next):
+    """Blokir akses non-admin saat mode pemeliharaan aktif."""
     if _is_maintenance():
         path = request.url.path
         # Static files tetap jalan
@@ -215,6 +227,7 @@ async def maintenance_middleware(request: Request, call_next):
 # =====================================================================
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
+    """Tangani error 404 not found."""
     path = request.url.path
     if path.startswith("/api/"):
         return JSONResponse(status_code=404, content={"detail": "Endpoint tidak ditemukan."})
@@ -222,6 +235,7 @@ async def not_found_handler(request: Request, exc):
 
 @app.exception_handler(500)
 async def internal_error_handler(request: Request, exc):
+    """Tangani error 500 internal server error."""
     path = request.url.path
     if path.startswith("/api/"):
         return JSONResponse(status_code=500, content={"detail": "Terjadi kesalahan internal server. Silakan coba lagi."})
@@ -229,6 +243,7 @@ async def internal_error_handler(request: Request, exc):
 
 @app.exception_handler(502)
 async def bad_gateway_handler(request: Request, exc):
+    """Tangani error 502 bad gateway."""
     path = request.url.path
     if path.startswith("/api/"):
         return JSONResponse(status_code=502, content={"detail": "Layanan sedang memuat ulang. Silakan coba lagi."})
@@ -236,6 +251,7 @@ async def bad_gateway_handler(request: Request, exc):
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc):
+    """Tangani semua exception yang tidak tertangani."""
     print(f"[ERROR] Unhandled exception at {request.url.path}: {exc}")
     path = request.url.path
     if path.startswith("/api/"):
@@ -270,11 +286,12 @@ try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     os.makedirs(EXTRACT_DIR, exist_ok=True)
     os.makedirs(BACKUP_DIR, exist_ok=True)
-except Exception as _e:
-    pass
+except OSError as _e:
+    logger.warning(f"Gagal membuat direktori penyimpanan: {_e}")
 
 @app.get("/")
 def read_root(request: Request, db: Session = Depends(get_db)):
+    """Halaman utama dashboard berdasarkan role pengguna."""
     role = "pegawai"
     session_id = request.cookies.get("sipedas_session")
     if session_id:
@@ -292,6 +309,7 @@ def read_root(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/login")
 def login_page(request: Request, db: Session = Depends(get_db)):
+    """Tampilkan halaman login admin."""
     session_id = request.cookies.get("sipedas_session")
     if session_id:
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
@@ -307,6 +325,7 @@ def login_page(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/favicon.ico", include_in_schema=False)
 def get_favicon():
+    """Sajikan file favicon aplikasi."""
     favicon_path = os.path.join(STATIC_DIR, "logo_sipedas.png")
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type="image/png")
@@ -314,6 +333,7 @@ def get_favicon():
 
 @app.get("/robots.txt", include_in_schema=False)
 def get_robots_txt():
+    """Sajikan file robots.txt untuk crawler."""
     content = "User-agent: *\nDisallow: /api/\nAllow: /\n"
     return Response(content=content, media_type="text/plain")
 
@@ -329,6 +349,7 @@ _STATS_TTL = 300  # 5 minutes
 _STATS_CACHE_LOCK = threading.Lock()
 
 def invalidate_stats_cache():
+    """Bersihkan cache statistik dashboard."""
     global _STATS_CACHE, _STATS_CACHE_TIME
     with _STATS_CACHE_LOCK:
         _STATS_CACHE = None
@@ -363,6 +384,7 @@ app.include_router(import_excel_router)
 # =====================================================================
 @app.get("/{path:path}")
 def catch_all(request: Request, path: str):
+    """Tangani semua URL yang tidak dikenali sebagai 404."""
     if path.startswith("api/"):
         raise HTTPException(status_code=404, detail="Endpoint tidak ditemukan.")
     return templates.TemplateResponse(request=request, name="404.html", status_code=404)

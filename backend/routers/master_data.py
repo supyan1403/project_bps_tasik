@@ -1,9 +1,11 @@
 import json
+import logging
 import os
 import re
 import sys
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,33 +18,39 @@ from routers.auth import require_admin
 from routers.tables import get_table_headers
 from routers.timeseries import _infer_unit_from_indicator, get_clean_table_name
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api", tags=["Master Columns & Dictionaries"])
 
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _DATA_DIR = os.path.join(_BASE_DIR, "data")
 try:
     os.makedirs(_DATA_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori data master: {e}")
 MASTER_COLUMNS_FILE = os.path.join(_DATA_DIR, "master_columns.json")
 
 MONTH_PATTERN = r'(?:Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Ag(?:ustus)?t?|Sep(?:tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)?)'
 
 def _load_master_columns() -> dict:
+    """Memuat data kolom master dari file JSON."""
     if not os.path.exists(MASTER_COLUMNS_FILE):
         return {"version": "", "document_id": None, "columns": [], "next_id": 1}
     with open(MASTER_COLUMNS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def _save_master_columns(data: dict):
+    """Menyimpan data kolom master ke file JSON."""
     with open(MASTER_COLUMNS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def _get_master_col_unit_map() -> dict:
+    """Membuat pemetaan nama kolom master ke satuan masing-masing."""
     data = _load_master_columns()
     return {c["standard"].lower().strip(): c.get("unit", "") for c in data.get("columns", []) if "standard" in c}
 
 def _clean_header_for_master(header: str) -> str:
+    """Membersihkan nama kolom dari nomor urut dan suffix tahun."""
     if not header:
         return header
     h = header.strip()
@@ -57,6 +65,7 @@ def _clean_header_for_master(header: str) -> str:
     return h
 
 def _tokenize(name: str) -> set:
+    """Memecah nama menjadi set token kata lowercase."""
     return set(re.findall(r'[\w]+', (name or "").lower()))
 
 _STOP_TITLE = {
@@ -66,11 +75,13 @@ _STOP_TITLE = {
 }
 
 def _title_keywords(table_name: str) -> list:
+    """Mengekstrak kata kunci dari nama tabel untuk pencocokan."""
     clean = get_clean_table_name(table_name)
     toks = re.findall(r'[\w]+', clean.lower())
     return [t for t in toks if t not in _STOP_TITLE and len(t) >= 3]
 
 def _match_single_header(header: str, title_keywords: list, master_cols: list) -> dict:
+    """Mencocokkan satu kolom tabel dengan kolom master terdekat."""
     import difflib
     h_clean = _clean_header_for_master(header)
     h_lower = h_clean.lower().strip()
@@ -120,6 +131,7 @@ def _match_single_header(header: str, title_keywords: list, master_cols: list) -
     }
 
 def suggest_master_columns(db: Session, table) -> list:
+    """Menghasilkan saran pencocokan kolom tabel dengan master kolom."""
     headers = get_table_headers(db, table)
     if not headers:
         return []
@@ -150,6 +162,7 @@ def suggest_master_columns(db: Session, table) -> list:
 
 @router.get("/documents/by-year")
 def get_document_by_year(year: int, db: Session = Depends(get_db)):
+    """Mengambil data dokumen berdasarkan tahun publikasi."""
     doc = db.query(models.Document).filter(models.Document.year == year).first()
     if not doc:
         raise HTTPException(404, f"No document found for year {year}")
@@ -157,6 +170,7 @@ def get_document_by_year(year: int, db: Session = Depends(get_db)):
 
 @router.get("/master/columns/usage")
 def get_column_usage(column_name: str, db: Session = Depends(get_db)):
+    """Mencari tabel yang menggunakan kolom tertentu."""
     target = column_name.lower().strip()
     tables = db.query(
         models.ExtractedTable,
@@ -186,6 +200,7 @@ def get_column_usage(column_name: str, db: Session = Depends(get_db)):
 
 @router.get("/master/columns/search")
 def search_columns_global(q: str = "", limit_headers: int = 50, limit_tables: int = 20, db: Session = Depends(get_db)):
+    """Mencari kolom secara global di seluruh tabel."""
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Minimal 2 karakter")
 
@@ -257,6 +272,7 @@ def search_columns_global(q: str = "", limit_headers: int = 50, limit_tables: in
 
 @router.get("/search/rows")
 def search_rows_all_tables(q: str = "", limit_tables: int = 50, limit_rows: int = 10, db: Session = Depends(get_db)):
+    """Mencari baris data di seluruh tabel berdasarkan kata kunci."""
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Minimal 2 karakter")
 
@@ -326,6 +342,7 @@ def search_rows_all_tables(q: str = "", limit_tables: int = 50, limit_rows: int 
 
 @router.post("/master/regenerate-columns")
 def regenerate_master_columns(document_id: int, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Membuat ulang daftar kolom master dari dokumen tertentu."""
     doc = db.query(models.Document).filter(models.Document.id == document_id).first()
     if not doc:
         raise HTTPException(404, "Document not found")
@@ -374,6 +391,7 @@ def regenerate_master_columns(document_id: int, db: Session = Depends(get_db), a
 
 @router.get("/master/columns")
 def get_master_columns(db: Session = Depends(get_db)):
+    """Mengambil seluruh data kolom master beserta jumlah penggunaannya."""
     data = _load_master_columns()
     try:
         tables = db.query(models.ExtractedTable).all()
@@ -389,12 +407,13 @@ def get_master_columns(db: Session = Depends(get_db)):
             for alias in col.get("aliases", []):
                 cnt += all_headers.get(alias.lower().strip(), 0)
             col["count"] = cnt
-    except Exception:
-        pass
+    except SQLAlchemyError as e:
+        logger.warning(f"Gagal menghitung penggunaan kolom master: {e}")
     return data
 
 @router.delete("/master/columns")
 def delete_all_master_columns(admin: dict = Depends(require_admin)):
+    """Menghapus semua kolom master sekaligus."""
     data = _load_master_columns()
     data["columns"] = []
     data["next_id"] = 1
@@ -403,6 +422,7 @@ def delete_all_master_columns(admin: dict = Depends(require_admin)):
 
 @router.post("/master/columns/add-from-table")
 def add_master_columns_from_table(body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menambahkan kolom master dari tabel tertentu."""
     table_id = body.get("table_id")
     selected = body.get("columns", [])
     if not table_id or not selected:
@@ -428,6 +448,7 @@ def add_master_columns_from_table(body: dict, db: Session = Depends(get_db), adm
 
 @router.get("/tables/{table_id}/master-suggestions")
 def get_table_master_suggestions(table_id: int, db: Session = Depends(get_db)):
+    """Mengambil saran pemetaan kolom master untuk tabel tertentu."""
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
         raise HTTPException(404, "Table not found")
@@ -435,6 +456,7 @@ def get_table_master_suggestions(table_id: int, db: Session = Depends(get_db)):
 
 @router.post("/tables/{table_id}/apply-master-mapping")
 def apply_master_mapping(table_id: int, body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menerapkan pemetaan kolom master ke kolom tabel tertentu."""
     mapping = body.get("mapping", {})
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
     if not table:
@@ -483,6 +505,7 @@ def apply_master_mapping(table_id: int, body: dict, db: Session = Depends(get_db
 
 @router.get("/master/columns/lookup")
 def lookup_master_column_unit(column_name: str):
+    """Mencari satuan kolom berdasarkan nama kolom master."""
     data = _load_master_columns()
     name_lower = column_name.lower().strip()
     for col in data.get("columns", []):
@@ -494,6 +517,7 @@ def lookup_master_column_unit(column_name: str):
 
 @router.put("/master/columns/{col_id}")
 def update_master_column(col_id: int, body: dict, admin: dict = Depends(require_admin)):
+    """Memperbarui data kolom master tertentu."""
     data = _load_master_columns()
     columns = data.get("columns", [])
     col = next((c for c in columns if c["id"] == col_id), None)
@@ -508,6 +532,7 @@ def update_master_column(col_id: int, body: dict, admin: dict = Depends(require_
 
 @router.delete("/master/columns/{col_id}")
 def delete_master_column(col_id: int, admin: dict = Depends(require_admin)):
+    """Menghapus kolom master tertentu berdasarkan ID."""
     data = _load_master_columns()
     columns = data.get("columns", [])
     new_columns = [c for c in columns if c["id"] != col_id]
@@ -519,6 +544,7 @@ def delete_master_column(col_id: int, admin: dict = Depends(require_admin)):
 
 @router.post("/master/columns/add")
 def add_master_column(body: dict, admin: dict = Depends(require_admin)):
+    """Menambahkan kolom master baru."""
     standard = (body.get("standard") or "").strip()
     if not standard:
         raise HTTPException(400, "Nama header wajib diisi")

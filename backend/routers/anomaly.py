@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import sys
@@ -7,6 +8,7 @@ import time
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,14 +21,16 @@ from routers.auth import require_admin
 from routers.tables import clean_bilingual_header, get_table_headers
 from routers.timeseries import check_cell_format_anomaly, extract_timeseries_year
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api", tags=["Anomaly & Data Quality"])
 
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _DATA_DIR = os.path.join(_BASE_DIR, "data")
 try:
     os.makedirs(_DATA_DIR, exist_ok=True)
-except Exception:
-    pass
+except OSError as e:
+    logger.warning(f"Gagal membuat direktori data anomaly: {e}")
 _TS_SAFE_PATH = os.path.join(_DATA_DIR, "safe_timeseries_anomalies.json")
 _MASTER_DICT_PATH = os.path.join(_DATA_DIR, "master_dictionary.json")
 _DISMISSED_PATH = os.path.join(_DATA_DIR, "dismissed_column_anomalies.json")
@@ -38,6 +42,7 @@ _TTL_CACHE = {}
 _TTL_CACHE_LOCK = threading.Lock()
 
 def _get_ttl_cache(key: str):
+    """Mengambil nilai cache berdasarkan kunci dengan TTL."""
     with _TTL_CACHE_LOCK:
         entry = _TTL_CACHE.get(key)
         if not entry:
@@ -49,10 +54,12 @@ def _get_ttl_cache(key: str):
         return value
 
 def _set_ttl_cache(key: str, value):
+    """Menyimpan nilai ke cache dengan TTL."""
     with _TTL_CACHE_LOCK:
         _TTL_CACHE[key] = (time.time(), value)
 
 def _clear_ttl_cache(keys=None):
+    """Menghapus isi cache berdasarkan daftar kunci atau seluruhnya."""
     with _TTL_CACHE_LOCK:
         if keys is None:
             _TTL_CACHE.clear()
@@ -61,43 +68,50 @@ def _clear_ttl_cache(keys=None):
                 _TTL_CACHE.pop(k, None)
 
 def _load_ts_safe() -> set:
+    """Memuat set kunci anomali deret waktu yang ditandai aman."""
     if os.path.exists(_TS_SAFE_PATH):
         try:
             with open(_TS_SAFE_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return set(data.get("safe_keys", [])) if isinstance(data, dict) else set(data)
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             return set()
     return set()
 
 def _save_ts_safe(safe_keys: set):
+    """Menyimpan set kunci anomali deret waktu yang aman."""
     try:
         with open(_TS_SAFE_PATH, "w", encoding="utf-8") as f:
-            json.dump({"safe_keys": sorted(list(safe_keys))}, f, indent=2, ensure_ascii=False)
-    except Exception as e:
+            json.dump({"safe_keys": sorted(safe_keys)}, f, indent=2, ensure_ascii=False)
+    except (OSError, TypeError) as e:
         print(f"Error saving safe timeseries: {e}")
 
 def _load_master_dict() -> dict:
+    """Memuat kamus kata master dari file JSON."""
     if os.path.exists(_MASTER_DICT_PATH):
         with open(_MASTER_DICT_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"words": []}
 
 def _save_master_dict(data: dict):
+    """Menyimpan kamus kata master ke file JSON."""
     with open(_MASTER_DICT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 def _load_dismissed() -> dict:
+    """Memuat daftar anomali kolom yang di-dismiss."""
     if os.path.exists(_DISMISSED_PATH):
         with open(_DISMISSED_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"dismissed": []}
 
 def _save_dismissed(data: dict):
+    """Menyimpan daftar anomali kolom yang di-dismiss."""
     with open(_DISMISSED_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 def _load_master_columns():
+    """Memuat data kolom master dari file JSON."""
     if not os.path.exists(MASTER_COLUMNS_FILE):
         return {"version": "", "document_id": None, "columns": [], "next_id": 1}
     with open(MASTER_COLUMNS_FILE, "r", encoding="utf-8") as f:
@@ -105,7 +119,7 @@ def _load_master_columns():
 
 @router.get("/admin/timeseries-anomalies")
 def get_timeseries_anomalies(refresh: bool = False, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
-    """Scan and return all time-series anomalies in multi-year tables across the database."""
+    """Memindai dan mengembalikan anomali deret waktu pada tabel multi-tahun."""
     cache_key = "timeseries-anomalies"
     if refresh:
         _clear_ttl_cache([cache_key])
@@ -203,11 +217,12 @@ def get_timeseries_anomalies(refresh: bool = False, db: Session = Depends(get_db
         payload = {"status": "success", "total_anomalies": len(anomalies), "anomalies": anomalies}
         _set_ttl_cache(cache_key, payload)
         return payload
-    except Exception as e:
+    except (SQLAlchemyError, OSError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/admin/timeseries-anomalies/mark-safe")
 def mark_timeseries_anomaly_safe(payload: dict = Body(...), db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menandai anomali deret waktu tertentu sebagai aman."""
     key = payload.get("key")
     table_id = payload.get("table_id")
     row_id = payload.get("row_id")
@@ -236,6 +251,7 @@ def mark_timeseries_anomaly_safe(payload: dict = Body(...), db: Session = Depend
 
 @router.post("/admin/timeseries-anomalies/mark-all-safe")
 def mark_all_timeseries_anomalies_safe(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menandai semua anomali deret waktu sebagai aman."""
     res = get_timeseries_anomalies(db=db)
     anomalies = res.get("anomalies", [])
     safe_keys = _load_ts_safe()
@@ -250,6 +266,7 @@ def mark_all_timeseries_anomalies_safe(db: Session = Depends(get_db), admin: dic
 
 @router.get("/admin/anomalies")
 def get_tables_with_anomalies(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengambil daftar tabel yang memiliki anomali data."""
     results = db.query(
         models.ExtractedTable.id,
         models.ExtractedTable.table_name,
@@ -279,6 +296,7 @@ def get_tables_with_anomalies(db: Session = Depends(get_db), admin: dict = Depen
 
 @router.get("/admin/all-data-anomalies")
 def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengambil semua anomali data dari baris yang ditandai."""
     cache_key = "all-data-anomalies"
     hit = _get_ttl_cache(cache_key)
     if hit is not None:
@@ -313,18 +331,20 @@ def get_all_data_anomalies(db: Session = Depends(get_db), admin: dict = Depends(
         payload = {"anomalies": results}
         _set_ttl_cache(cache_key, payload)
         return payload
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/master-dictionary")
 def get_master_dictionary():
+    """Mengembalikan seluruh isi kamus kata master."""
     return _load_master_dict()
 
 @router.post("/master-dictionary/words")
 def add_master_words(body: dict, admin: dict = Depends(require_admin)):
+    """Menambahkan kata-kata baru ke kamus master."""
     words = body.get("words", [])
     data = _load_master_dict()
-    existing = set(w.lower() for w in data["words"])
+    existing = {w.lower() for w in data["words"]}
     added = []
     for w in words:
         wl = w.lower()
@@ -337,6 +357,7 @@ def add_master_words(body: dict, admin: dict = Depends(require_admin)):
 
 @router.delete("/master-dictionary/words/{word}")
 def delete_master_word(word: str, admin: dict = Depends(require_admin)):
+    """Menghapus kata tertentu dari kamus master."""
     data = _load_master_dict()
     before = len(data["words"])
     data["words"] = [w for w in data["words"] if w.lower() != word.lower()]
@@ -345,10 +366,12 @@ def delete_master_word(word: str, admin: dict = Depends(require_admin)):
 
 @router.get("/dismissed-anomalies")
 def get_dismissed_anomalies():
+    """Mengembalikan daftar anomali yang telah di-dismiss."""
     return _load_dismissed()
 
 @router.post("/dismiss-column-anomaly")
 def dismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
+    """Menandai anomali kolom tertentu sebagai di-dismiss."""
     key = body.get("key", "")
     data = _load_dismissed()
     if key not in data["dismissed"]:
@@ -358,6 +381,7 @@ def dismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
 
 @router.post("/undismiss-column-anomaly")
 def undismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
+    """Membatalkan status dismiss pada anomali kolom."""
     key = body.get("key", "")
     data = _load_dismissed()
     data["dismissed"] = [k for k in data["dismissed"] if k != key]
@@ -366,20 +390,21 @@ def undismiss_column_anomaly(body: dict, admin: dict = Depends(require_admin)):
 
 @router.get("/admin/all-column-anomalies")
 def get_all_column_anomalies(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Mengambil semua anomali kolom dari seluruh tabel."""
     cache_key = "all-column-anomalies"
     hit = _get_ttl_cache(cache_key)
     if hit is not None:
         return hit
     try:
         master = _load_master_dict()
-        master_set = set(w.lower() for w in master["words"])
+        master_set = {w.lower() for w in master["words"]}
         dismissed = _load_dismissed()
         dismissed_set = set(dismissed["dismissed"])
         
         try:
             master_cols_data = _load_master_columns()
-            master_cols = set(c["standard"].lower().strip() for c in master_cols_data.get("columns", []) if "standard" in c)
-        except Exception:
+            master_cols = {c["standard"].lower().strip() for c in master_cols_data.get("columns", []) if "standard" in c}
+        except (OSError, json.JSONDecodeError, KeyError):
             master_cols = set()
         
         tables = db.query(
@@ -426,20 +451,21 @@ def get_all_column_anomalies(db: Session = Depends(get_db), admin: dict = Depend
         payload = {"anomalies": all_anomalies}
         _set_ttl_cache(cache_key, payload)
         return payload
-    except Exception as e:
+    except (SQLAlchemyError, OSError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/tables/{table_id}/column-anomalies")
 def get_column_anomalies(table_id: int, db: Session = Depends(get_db)):
+    """Mengambil anomali kolom untuk tabel tertentu."""
     master = _load_master_dict()
-    master_set = set(w.lower() for w in master["words"])
+    master_set = {w.lower() for w in master["words"]}
     dismissed = _load_dismissed()
     dismissed_set = set(dismissed["dismissed"])
     
     try:
         master_cols_data = _load_master_columns()
-        master_cols = set(c["standard"].lower().strip() for c in master_cols_data.get("columns", []) if "standard" in c)
-    except Exception:
+        master_cols = {c["standard"].lower().strip() for c in master_cols_data.get("columns", []) if "standard" in c}
+    except (OSError, json.JSONDecodeError, KeyError):
         master_cols = set()
     
     table = db.query(models.ExtractedTable).filter(models.ExtractedTable.id == table_id).first()
@@ -471,6 +497,7 @@ def get_column_anomalies(table_id: int, db: Session = Depends(get_db)):
 
 @router.post("/tables/{table_id}/apply-column-fix")
 def apply_column_fix(table_id: int, body: dict, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    """Menerapkan perubahan nama kolom pada tabel tertentu."""
     col_index = body.get("col_index")
     new_name = body.get("new_name", "").strip()
     if col_index is None or not new_name:
@@ -500,7 +527,7 @@ def apply_column_fix(table_id: int, body: dict, db: Session = Depends(get_db), a
             new_headers = [new_name if h == old_header_orig else h for h in table.headers]
             table.headers = new_headers
         db.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
     
     dismiss_key = f"{table_id}:{col_index}:{old_header_orig}"

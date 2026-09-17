@@ -82,13 +82,6 @@
         padding: 0.85rem 1rem;
     }
 
-    .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 1.2rem !important;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.82rem !important;
-    }
 }
 
 /* ===================== BREAKPOINT 2: TABLET PORTRAIT: < 992px ===================== */
@@ -97,14 +90,6 @@
         height: 220px;
         min-height: 220px;
         max-height: 220px;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-title {
-        font-size: 1.15rem !important;
-    }
-
-    .welcome-banner.ts-hero-banner .ts-hero-desc {
-        font-size: 0.78rem !important;
     }
 
     .welcome-banner.ts-hero-banner .banner-badge {

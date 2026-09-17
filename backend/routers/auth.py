@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 import models
 from database import get_db
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -97,15 +97,6 @@ def destroy_session(session_id: str, db: Session = None):
     if db and session_id:
         db.query(models.UserSession).filter(models.UserSession.id == session_id).delete()
         db.commit()
-
-def get_current_role(session_id: str = Cookie(None, alias="sipedas_session"), db: Session = Depends(get_db)):
-    if session_id:
-        sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
-        if sess:
-            sess.last_active = datetime.utcnow()
-            db.commit()
-            return sess.role
-    return "pegawai"
 
 def require_admin(request: Request, db: Session = Depends(get_db)):
     session_id = request.cookies.get("sipedas_session")

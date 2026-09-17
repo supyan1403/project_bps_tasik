@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import subprocess
 from datetime import datetime
@@ -70,7 +71,7 @@ def backup_database() -> str:
             if password:
                 cmd.insert(2, f"-p{password}")
             with open(backup_path, "w", encoding="utf-8", errors="replace") as f:
-                result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, check=False)
+                subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, check=False)
             fsize = os.path.getsize(backup_path) if os.path.exists(backup_path) else -1
             if os.path.exists(backup_path) and fsize > 0:
                 cleanup_old_backups()

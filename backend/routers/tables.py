@@ -67,16 +67,6 @@ def get_table_headers(db: Session, table) -> list[str]:
             return list(row.data.keys())
     return []
 
-def get_safe_windows_path(path: str) -> str:
-    if not path:
-        return path
-    abs_p = os.path.abspath(path)
-    if abs_p.startswith('\\\\?\\'):
-        return abs_p
-    if len(abs_p) >= 250 and os.name == 'nt':
-        return '\\\\?\\' + abs_p
-    return abs_p
-
 def normalize_record_first_col(record: dict, headers: list):
     if not headers or not record:
         return

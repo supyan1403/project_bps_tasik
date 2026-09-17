@@ -1,28 +1,23 @@
+import json
 import os
 import re
-import json
+import sys
 import threading
 import time
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException, Body
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-import sys
+from fastapi import APIRouter, Body, Depends, HTTPException
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import models
 from database import get_db
-from pipeline import parse_indonesian_number
 from routers.auth import require_admin
-from routers.tables import get_table_headers, clean_bilingual_header
-from routers.timeseries import (
-    extract_timeseries_year, 
-    check_cell_format_anomaly
-)
+from routers.tables import clean_bilingual_header, get_table_headers
+from routers.timeseries import check_cell_format_anomaly, extract_timeseries_year
 
 router = APIRouter(prefix="/api", tags=["Anomaly & Data Quality"])
 

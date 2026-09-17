@@ -1,16 +1,16 @@
-import os
 import glob
+import os
 import subprocess
 from datetime import datetime
-from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
-from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
-from sqlalchemy.engine import make_url
 
 import models
 from database import engine, get_db
-from routers.auth import require_admin, log_activity
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from routers.auth import log_activity, require_admin
+from sqlalchemy.engine import make_url
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/admin", tags=["Admin & Backups"])
 
@@ -78,6 +78,7 @@ def backup_database() -> str:
 
     # 2. Universal ORM Dump (Bekerja sempurna untuk PostgreSQL Supabase, SQLite, atau MySQL tanpa binary eksternal)
     import json
+
     from database import SessionLocal
     db = SessionLocal()
     try:
@@ -158,8 +159,8 @@ def restore_database(backup_path: str) -> dict:
         print(f"Warning: gagal membuat pre-restore auto backup: {eb}")
 
     # 2. Universal SQL execution via SQLAlchemy Session
-    from sqlalchemy import text
     from database import SessionLocal
+    from sqlalchemy import text
     db = SessionLocal()
     success_stmts = 0
     try:
@@ -174,13 +175,13 @@ def restore_database(backup_path: str) -> dict:
             try:
                 db.execute(text(stmt))
                 success_stmts += 1
-            except Exception as se:
+            except Exception:
                 # Lewati error duplikasi / minor
                 pass
         db.commit()
     except Exception as e:
         db.rollback()
-        raise RuntimeError(f"Gagal me-restore database: {str(e)}")
+        raise RuntimeError(f"Gagal me-restore database: {e!s}")
     finally:
         db.close()
 
@@ -236,7 +237,7 @@ def create_backup(admin: dict = Depends(require_admin), db: Session = Depends(ge
             "path": path
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Backup gagal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Backup gagal: {e!s}")
 
 @router.get("/backups")
 def list_backups(admin: dict = Depends(require_admin)):
@@ -287,7 +288,7 @@ def restore_existing_backup(req: RestoreRequest, admin: dict = Depends(require_a
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Restore gagal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Restore gagal: {e!s}")
 
 @router.post("/restore-upload")
 async def restore_uploaded_backup(file: UploadFile = File(...), admin: dict = Depends(require_admin)):
@@ -308,7 +309,7 @@ async def restore_uploaded_backup(file: UploadFile = File(...), admin: dict = De
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Restore gagal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Restore gagal: {e!s}")
 
 @router.delete("/backups/{filename}")
 def delete_backup_file(filename: str, admin: dict = Depends(require_admin)):
@@ -329,8 +330,8 @@ def delete_backup_file(filename: str, admin: dict = Depends(require_admin)):
 # SYSTEM INFO
 # =====================================================================
 
-import time as _time
 import platform
+import time as _time
 
 _server_start_time = _time.time()
 
@@ -339,7 +340,6 @@ _app_version = "2.0.0"
 @router.get("/system-info")
 def get_system_info(admin: dict = Depends(require_admin)):
     """Info sistem: versi, DB stats, uptime, dll."""
-    from database import engine
     from sqlalchemy import text
 
     info = {
@@ -406,8 +406,8 @@ def fix_truncated_table_names(db: Session = Depends(get_db), admin: dict = Depen
     1. Cari metadata.json di seluruh folder ekstraksi untuk ambil judul LENGKAP
     2. Fallback: pakai nama file CSV jika metadata tidak ditemukan
     """
-    import os
     import glob
+    import os
     import unicodedata
     
     extract_root = os.path.join(os.path.expanduser("~"), "BPS_Data", "hasil_ekstraksi_web")

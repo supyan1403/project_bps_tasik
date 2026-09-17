@@ -1,23 +1,28 @@
-from services.table_service import sanitize_row_data, parse_csv_for_db, natural_sort_key, get_safe_windows_path
-import os
-import re
 import csv
 import io
-from typing import List, Dict, Any, Optional
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
-from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException, Response
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+import os
+import re
+from typing import Any
 
 import models
+import openpyxl
 import schemas
 from database import get_db
-from routers.auth import require_admin, log_activity
-from pipeline import deduplicate_columns, ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import StreamingResponse
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+from pydantic import BaseModel
+from routers.auth import log_activity, require_admin
+from services.table_service import (
+    get_safe_windows_path,
+    parse_csv_for_db,
+    sanitize_row_data,
+)
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from pipeline import ENGLISH_ONLY_WORDS, INDO_SAFE_WORDS, deduplicate_columns
 
 router = APIRouter(prefix="/api", tags=["Tables & Editor"])
 
@@ -53,7 +58,7 @@ def clean_bilingual_header(header: str) -> str:
     result = " ".join(deduped).strip()
     return result if result else header
 
-def get_table_headers(db: Session, table) -> List[str]:
+def get_table_headers(db: Session, table) -> list[str]:
     if table and table.headers:
         return list(table.headers)
     if table:
@@ -275,8 +280,7 @@ def download_table_excel(table_id: int, db: Session = Depends(get_db)):
             if cell.value is not None:
                 s = str(cell.value)
                 w = sum(2 if ord(ch) > 127 else 1 for ch in s)
-                if w > max_len:
-                    max_len = w
+                max_len = max(max_len, w)
         ws.column_dimensions[col_letter].width = max(min(max_len + 4, 60), 14)
 
     ws.freeze_panes = 'A3' if has_units else 'A2'
@@ -368,7 +372,7 @@ def preview_table_csv(table_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 class CSVRowUpdate(BaseModel):
-    data: List[str]
+    data: list[str]
 
 @router.put("/tables/{table_id}/csv/row/{row_index}")
 def update_csv_row(table_id: int, row_index: int, payload: CSVRowUpdate, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
@@ -409,8 +413,7 @@ def insert_csv_row(table_id: int, row_index: int, db: Session = Depends(get_db),
     if not table:
         raise HTTPException(status_code=404, detail="Tabel tidak ditemukan")
     headers = get_table_headers(db, table)
-    if row_index < 0:
-        row_index = 0
+    row_index = max(row_index, 0)
     
     rows = db.query(models.TableRow).filter(models.TableRow.table_id == table_id).order_by(models.TableRow.sort_order.asc(), models.TableRow.id.asc()).all()
     if row_index >= len(rows):
@@ -561,10 +564,10 @@ def rename_csv_column(table_id: int, payload: ColumnRenamePayload, db: Session =
     return {"message": "Column renamed", "old_name": old_name, "new_name": new_name}
 
 class CSVSavePayload(BaseModel):
-    headers: List[str]
-    units: List[str]
-    years: List[str]
-    rows: List[List[str]]
+    headers: list[str]
+    units: list[str]
+    years: list[str]
+    rows: list[list[str]]
 
 @router.put("/tables/{table_id}/csv/save")
 def save_table_csv_all(table_id: int, payload: CSVSavePayload, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
@@ -667,7 +670,7 @@ def clear_loaded_data(db: Session = Depends(get_db), admin: dict = Depends(requi
         return {"message": "All loaded table rows have been cleared successfully."}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to clear data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to clear data: {e!s}")
 
 @router.put("/admin/safe-all")
 def mark_all_database_anomalies_safe(db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
@@ -751,7 +754,7 @@ def load_table_csv(table_id: int, db: Session = Depends(get_db), admin: dict = D
         db.commit()
         return {"message": f"Loaded {len(records)} rows successfully. Found {anomaly_count} anomalies."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error loading CSV: {e!s}")
 
 # ===== PENCARIAN TABEL =====
 @router.get("/tables/search")
@@ -827,7 +830,7 @@ def search_tables(
 
         return {"tables": tables_out, "total": len(tables_out)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database search failed: {e!s}")
 
 
 @router.get("/tables/{table_id}")

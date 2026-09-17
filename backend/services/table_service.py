@@ -1,7 +1,8 @@
+import csv
 import os
 import re
-import csv
-from typing import List, Dict, Any, Tuple
+from typing import Any
+
 
 def get_safe_windows_path(path: str) -> str:
     if not path:
@@ -31,7 +32,7 @@ def sanitize_row_data(data: dict) -> dict:
         cleaned[k] = v_clean
     return cleaned
 
-def parse_csv_for_db(safe_path: str) -> Tuple[List[str], List[Dict[str, Any]], List[str], List[str]]:
+def parse_csv_for_db(safe_path: str) -> tuple[list[str], list[dict[str, Any]], list[str], list[str]]:
     raw_rows = []
     with open(safe_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.reader(f)

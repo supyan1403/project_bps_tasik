@@ -1,45 +1,39 @@
+import io
 import os
 import re
-import csv
-import io
-import json
-from typing import List, Dict, Any, Optional
+import sys
 import threading
 import time
+from typing import Any
+
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
-from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import models
 from database import get_db
-from pipeline import parse_indonesian_number
-from routers.tables import (
-    get_table_headers, 
-    clean_bilingual_header, 
-    get_safe_windows_path, 
-    normalize_record_first_col
-)
+from routers.tables import get_table_headers
 
 router = APIRouter(prefix="/api", tags=["Time Series Analysis"])
 
 # Re-export all timeseries helper algorithms and business logic from services layer
 from services.timeseries_service import *
 
+
 class TimeSeriesExportRequest(BaseModel):
-    years: List[int]
-    valueKeys: List[str]
-    vkUnits: Optional[Dict[str, str]] = {}
-    entities: Optional[List[str]] = []
-    entityMap: Dict[str, Any]
+    years: list[int]
+    valueKeys: list[str]
+    vkUnits: dict[str, str] | None = {}
+    entities: list[str] | None = []
+    entityMap: dict[str, Any]
 
 @router.get("/timeseries/catalog")
 def timeseries_catalog(db: Session = Depends(get_db)):
@@ -54,7 +48,7 @@ def timeseries_catalog(db: Session = Depends(get_db)):
             continue
         seen.add(key)
         name = key[0]
-        m = re.match(r'(?:tabel\s*)?(\d+(?:\.\d+)*)', name, re.I)
+        m = re.match(r'(?:tabel\s*)?(\d+(?:\.\d+)*)', name, re.IGNORECASE)
         parts = m.group(1).split('.') if m else []
         level1 = parts[0] if len(parts) >= 1 else ''
         level2 = parts[0] + '.' + parts[1] if len(parts) >= 2 else ''
@@ -120,7 +114,7 @@ def timeseries_indicator_years(response: Response, db: Session = Depends(get_db)
 
     def _extract_bab(tname):
         if not tname: return None
-        m = re.search(r'Tabel[\s_]*(\d+)', tname, re.I) or re.search(r'(\d+)', tname)
+        m = re.search(r'Tabel[\s_]*(\d+)', tname, re.IGNORECASE) or re.search(r'(\d+)', tname)
         return int(m.group(1)) if m else None
 
     tables_ordered = sorted(tables, key=lambda t: (_extract_bab(t.table_name) or 9999, doc_year_map.get(t.document_id, 9999), t.id))
@@ -354,7 +348,7 @@ def export_timeseries_excel(req: TimeSeriesExportRequest):
     row2 = [""]
     for _ in years:
         for vk in valueKeys:
-            unit = f" ({vkUnits[vk]})" if vk in vkUnits and vkUnits[vk] else ""
+            unit = f" ({vkUnits[vk]})" if vkUnits.get(vk) else ""
             row2.append(f"{vk}{unit}")
     ws.append(row2)
 
@@ -411,8 +405,7 @@ def export_timeseries_excel(req: TimeSeriesExportRequest):
             if cell.value is not None:
                 s = str(cell.value)
                 w = sum(2 if ord(ch) > 127 else 1 for ch in s)
-                if w > max_len:
-                    max_len = w
+                max_len = max(max_len, w)
         ws.column_dimensions[col_letter].width = max(min(max_len + 4, 50), 14)
 
     ws.freeze_panes = 'B3'

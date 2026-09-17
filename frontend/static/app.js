@@ -14516,20 +14516,25 @@ function toggleUserMenu(e) {
             (document.querySelector('.sidebar')?.classList.contains('mobile-open'));
 
         const dropHeight = dropdown.offsetHeight || 105;
+        const sidebarWidth = Math.min(document.querySelector('.sidebar')?.offsetWidth || 285, window.innerWidth);
 
         if (isMobile) {
-            // Mobile: dropdown muncul di BAWAH kartu admin
+            // Mobile: dropdown muncul di BAWAH kartu admin, dalam area sidebar
             let targetTop = rect.bottom + 8;
             if (targetTop + dropHeight > window.innerHeight - 10) {
                 targetTop = Math.max(10, window.innerHeight - dropHeight - 10);
             }
             dropdown.style.top = Math.round(targetTop) + 'px';
-            dropdown.style.left = '8px';
+            dropdown.style.left = Math.max(4, rect.left) + 'px';
+            dropdown.style.width = Math.min(sidebarWidth - 8, 260) + 'px';
+            dropdown.style.right = 'auto';
             dropdown.classList.add('dropdown-below');
         } else {
             // Desktop: dropdown muncul di SEBELAH KANAN kartu admin
             dropdown.style.top = Math.round(targetTop) + 'px';
             dropdown.style.left = Math.round(rect.right + 12) + 'px';
+            dropdown.style.width = '';
+            dropdown.style.right = '';
             dropdown.classList.remove('dropdown-below');
         }
         card.classList.add('active');

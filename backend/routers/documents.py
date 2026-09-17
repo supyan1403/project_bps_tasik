@@ -61,16 +61,6 @@ class CreateBabRequest(BaseModel):
     num: int
     title: str
 
-def get_safe_windows_path(path: str) -> str:
-    if not path:
-        return path
-    abs_p = os.path.abspath(path)
-    if abs_p.startswith('\\\\?\\'):
-        return abs_p
-    if len(abs_p) >= 250 and os.name == 'nt':
-        return '\\\\?\\' + abs_p
-    return abs_p
-
 def sanitize_template_filename(table_name: str) -> str:
     if not table_name:
         return "template.xlsx"
@@ -393,7 +383,7 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), admin: dict = De
     return {"message": "Document deleted"}
 
 @router.put("/documents/{doc_id}")
-def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depends(get_db)):
+def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
@@ -414,7 +404,7 @@ def update_document(doc_id: int, req: UpdateDocumentRequest, db: Session = Depen
     }
 
 @router.put("/documents/{doc_id}/bab/{bab_num}")
-def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Session = Depends(get_db)):
+def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
     doc = db.query(models.Document).filter(models.Document.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Dokumen publikasi tidak ditemukan")
@@ -466,8 +456,8 @@ def update_document_bab(doc_id: int, bab_num: int, req: UpdateBabRequest, db: Se
         raise HTTPException(status_code=500, detail=f"Gagal menyimpan perubahan bab: {e!s}")
 
 @router.post("/documents/{doc_id}/bab")
-def create_document_bab(doc_id: int, req: CreateBabRequest, db: Session = Depends(get_db)):
-    return update_document_bab(doc_id=doc_id, bab_num=req.num, req=UpdateBabRequest(title=req.title), db=db)
+def create_document_bab(doc_id: int, req: CreateBabRequest, db: Session = Depends(get_db), admin: dict = Depends(require_admin)):
+    return update_document_bab(doc_id=doc_id, bab_num=req.num, req=UpdateBabRequest(title=req.title), db=db, admin=admin)
 
 @router.delete("/documents/{doc_id}/bab/{bab_num}")
 def delete_document_bab(doc_id: int, bab_num: int, db: Session = Depends(get_db)):

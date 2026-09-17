@@ -975,7 +975,7 @@ body.sidebar-collapsed .sidebar-user-card .sidebar-user-avatar i {
 }
 
 .sidebar-user-card.active .sidebar-user-chevron {
-    transform: rotate(90deg);
+    /* No rotation — chevron-down is always pointing down */
 }
 
 .sidebar-user-dropdown {

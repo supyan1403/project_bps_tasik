@@ -14838,6 +14838,12 @@ async function adminLogin() {
 
 function adminLogout() {
 
+    // Auto-close mobile sidebar agar modal terlihat jelas
+    const mobileSidebar = document.querySelector('.sidebar');
+    if (mobileSidebar && mobileSidebar.classList.contains('mobile-open') && typeof toggleMobileSidebar === 'function') {
+        toggleMobileSidebar();
+    }
+
     const isDark = document.body.classList.contains('dark-mode') || document.documentElement.getAttribute('data-bs-theme') === 'dark';
 
     Swal.fire({

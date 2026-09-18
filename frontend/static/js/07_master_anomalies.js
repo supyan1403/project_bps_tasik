@@ -456,34 +456,20 @@ async function loadHeaderAnomaliesPage() {
 
             var cleanTn = formatCleanTableName(a.table_name || '');
 
-            return '<tr class="anomali-row" data-table-name="' + (a.table_name || '').toLowerCase() + '" data-header="' + h.toLowerCase() + '" style="border-bottom:1px solid #f1f5f9;">' +
-
-                '<td style="padding:10px;"><input type="checkbox" class="anomali-checkbox" data-table-id="' + a.table_id + '" data-col-index="' + a.col_index + '" data-header="' + h + '"></td>' +
-
-                '<td style="padding:10px; font-weight:500; color:#334155; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escHtml(a.table_name || '') + '">' +
-
+            return '<tr class="anomali-row" data-table-name="' + (a.table_name || '').toLowerCase() + '" data-header="' + h.toLowerCase() + '">' +
+                '<td class="text-center"><input type="checkbox" class="anomali-checkbox" data-table-id="' + a.table_id + '" data-col-index="' + a.col_index + '" data-header="' + h + '"></td>' +
+                '<td class="fw-medium text-dark text-truncate" style="max-width:250px;" title="' + escHtml(a.table_name || '') + '">' +
                     '<span style="cursor:pointer; color:#4f46e5; text-decoration:underline;" onclick="previewCsv(' + a.table_id + ', \'' + tn + '\')">' + escHtml(cleanTn) + '</span>' +
-
                 '</td>' +
-
-                '<td style="padding:10px; text-align:center; color:var(--text-secondary, #64748b);">' + (a.document_year || '') + '</td>' +
-
-                '<td style="padding:10px; color:#334155; font-weight:600;">' + escHtml(a.header || '') + '</td>' +
-
-                '<td style="padding:10px; color:#b45309;"><span style="background:#fffbeb; padding:2px 6px; border-radius:4px; border:1px solid #fcd34d; font-size:0.75rem;">' + escHtml(words) + '</span></td>' +
-
-                '<td style="padding:10px;">' + saranHtml + '</td>' +
-
-                '<td style="padding:10px; text-align:center; white-space:nowrap;">' +
-
-                    '<button onclick="fixSaranColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#dbeafe; border:1px solid #93c5fd; color:#1e40af; padding:3px 8px; font-size:0.72rem; cursor:pointer; margin-right:4px;">Fix</button>' +
-
-                    '<button onclick="searchMasterColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:3px 8px; font-size:0.72rem; cursor:pointer; margin-right:4px;">Cari</button>' +
-
-                    '<button onclick="dismissAnomalyFromPage(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#dcfce7; border:1px solid #86efac; color:#166534; padding:3px 8px; font-size:0.72rem; cursor:pointer;">Aman</button>' +
-
+                '<td class="text-center text-muted" style="font-size:0.76rem;">' + (a.document_year || '') + '</td>' +
+                '<td class="fw-semibold text-dark">' + escHtml(a.header || '') + '</td>' +
+                '<td><span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50" style="font-size:0.72rem;">' + escHtml(words) + '</span></td>' +
+                '<td>' + saranHtml + '</td>' +
+                '<td class="text-center text-nowrap">' +
+                    '<button onclick="fixSaranColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#dbeafe; border:1px solid #93c5fd; color:#1e40af; padding:2px 7px; font-size:0.72rem; border-radius:5px; margin-right:4px;">Fix</button>' +
+                    '<button onclick="searchMasterColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:2px 7px; font-size:0.72rem; border-radius:5px; margin-right:4px;">Cari</button>' +
+                    '<button onclick="dismissAnomalyFromPage(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#dcfce7; border:1px solid #86efac; color:#166534; padding:2px 7px; font-size:0.72rem; border-radius:5px;">Aman</button>' +
                 '</td>' +
-
             '</tr>';
 
         }).join('');
@@ -999,23 +985,14 @@ async function renderMasterColumns() {
         const rowStyle = col.count === 0 ? 'style="background:#fef2f2;"' : '';
 
         html += `<tr ${rowStyle}>
-
-            <td class="small text-muted">${col.id}</td>
-
-            <td class="fw-semibold small" id="mc-name-${col.id}">${col.standard}</td>
-
-            <td class="small text-center" id="mc-unit-${col.id}">${unitDisplay}</td>
-
-            <td class="small text-center">${countHtml}</td>
-
-            <td>
-
-                <button onclick="editMasterColumn(${col.id})" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.7rem;">Edit</button>
-
-                <button onclick="deleteMasterColumn(${col.id})" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.7rem;">Hapus</button>
-
+            <td class="text-center text-muted" style="font-size:0.76rem;">${col.id}</td>
+            <td class="fw-semibold text-dark" id="mc-name-${col.id}">${col.standard}</td>
+            <td class="text-center" style="font-size:0.76rem;" id="mc-unit-${col.id}">${unitDisplay}</td>
+            <td class="text-center" style="font-size:0.76rem;">${countHtml}</td>
+            <td class="text-center">
+                <button onclick="editMasterColumn(${col.id})" class="btn btn-sm btn-outline-secondary py-0.5 px-2" style="font-size:0.72rem; border-radius:5px;">Edit</button>
+                <button onclick="deleteMasterColumn(${col.id})" class="btn btn-sm btn-outline-danger py-0.5 px-2" style="font-size:0.72rem; border-radius:5px;">Hapus</button>
             </td>
-
         </tr>`;
 
     });

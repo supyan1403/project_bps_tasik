@@ -189,14 +189,14 @@
 
                         <!-- DataGrid Container (Bersih, Luas & Terpadu) -->
                         <div class="table-responsive rounded-3 border bg-white shadow-2xs mb-3">
-                            <table class="table table-hover align-middle mb-0" style="font-size: 0.86rem; width: 100%;">
-                                <thead class="table-light border-bottom" style="background: #f8fafc;">
+                            <table class="table table-hover table-admin-compact align-middle mb-0" style="min-width: 860px; width: 100%;">
+                                <thead class="table-light border-bottom">
                                     <tr>
-                                        <th style="width: 80px;" class="text-center py-2.5">ID Tabel</th>
-                                        <th class="py-2.5">Judul Tabel Statistik</th>
-                                        <th style="width: 280px;" class="py-2.5">Publikasi BPS & Bab</th>
-                                        <th style="width: 140px;" class="text-center py-2.5">Tahun</th>
-                                        <th style="width: 170px;" class="text-center py-2.5">Volume Data</th>
+                                        <th style="width: 75px;" class="text-center">ID Tabel</th>
+                                        <th style="min-width: 280px;">Judul Tabel Statistik</th>
+                                        <th style="width: 260px; min-width: 240px;">Publikasi BPS & Bab</th>
+                                        <th style="width: 110px;" class="text-center">Tahun</th>
+                                        <th style="width: 140px;" class="text-center">Volume Data</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-table-list">
@@ -263,15 +263,15 @@
                                 <span id="master-columns-empty-count" class="small text-danger ms-2" style="display:none;"></span>
                             </div>
                         </div>
-                        <div class="table-responsive" style="max-height:500px; overflow-y:auto;">
-                            <table class="table table-sm table-hover" id="master-columns-table">
-                                <thead class="table-light sticky-top">
+                        <div class="table-responsive rounded-3 border bg-white mb-3" style="max-height:500px; overflow:auto;">
+                            <table class="table table-hover table-admin-compact align-middle mb-0" id="master-columns-table" style="min-width: 680px; width: 100%;">
+                                <thead class="table-light sticky-top" style="z-index: 5;">
                                     <tr>
-                                        <th style="width:60px;">No</th>
-                                        <th>Header Standar</th>
-                                        <th style="width:100px;">Satuan</th>
-                                        <th style="width:110px;">Jumlah Kolom</th>
-                                        <th style="width:160px;">Aksi</th>
+                                        <th style="width:60px;" class="text-center">No</th>
+                                        <th style="min-width:240px;">Header Standar</th>
+                                        <th style="width:100px;" class="text-center">Satuan</th>
+                                        <th style="width:120px;" class="text-center">Jumlah Kolom</th>
+                                        <th style="width:140px;" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="master-columns-body"></tbody>
@@ -299,16 +299,16 @@
                             <button onclick="fixSemuaSaranAnomali()" class="btn btn-outline-success btn-small">Fix Semua Saran</button>
                         </div>
                         <div class="table-responsive rounded-3 border bg-white shadow-sm" style="max-height: 600px; overflow: auto; scrollbar-gutter: stable;">
-                            <table class="table table-hover align-middle mb-0" style="table-layout: fixed; width: 100%;">
+                            <table class="table table-hover table-admin-compact align-middle mb-0" style="min-width: 900px; width: 100%;">
                                 <thead class="table-light sticky-top" style="z-index: 10;">
                                     <tr>
-                                        <th class="fw-bold text-dark" style="width: 40px; padding: 14px 8px;"><input type="checkbox" id="select-all-anomali" onclick="toggleSelectAllAnomali(this)"></th>
-                                        <th class="fw-bold text-dark" style="padding: 14px 16px;">Nama Tabel</th>
-                                        <th class="fw-bold text-dark text-center" style="width:70px; padding: 14px 8px;">Tahun</th>
-                                        <th class="fw-bold text-dark" style="padding: 14px 12px;">Nama Header</th>
-                                        <th class="fw-bold text-dark" style="padding: 14px 12px;">Kata Tidak Dikenal</th>
-                                        <th class="fw-bold text-dark" style="padding: 14px 12px;">Saran Master</th>
-                                        <th class="fw-bold text-dark text-center" style="width:220px; padding: 14px 16px;">Aksi</th>
+                                        <th class="text-center" style="width: 40px;"><input type="checkbox" id="select-all-anomali" onclick="toggleSelectAllAnomali(this)"></th>
+                                        <th style="min-width: 220px;">Nama Tabel</th>
+                                        <th class="text-center" style="width: 75px;">Tahun</th>
+                                        <th style="min-width: 140px;">Nama Header</th>
+                                        <th style="min-width: 150px;">Kata Tidak Dikenal</th>
+                                        <th style="min-width: 150px;">Saran Master</th>
+                                        <th class="text-center" style="width: 180px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="headeranom-tbody">
@@ -344,16 +344,16 @@
                             <button onclick="loadTimeSeriesAnomalies(true)" class="btn btn-outline-primary btn-small"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
                         </div>
                         <div class="table-responsive rounded-3 border bg-white shadow-sm" style="max-height: 600px; overflow: auto; scrollbar-gutter: stable;">
-                            <table class="table table-hover align-middle mb-0" id="admin-ts-anomalies-table" style="table-layout: fixed; width: 100%;">
+                            <table class="table table-hover table-admin-compact align-middle mb-0" id="admin-ts-anomalies-table" style="min-width: 950px; width: 100%;">
                                 <thead class="table-light sticky-top" style="z-index: 10;">
                                     <tr>
-                                        <th class="fw-bold text-dark" style="width: 23%; padding: 14px 16px;">Nama Tabel</th>
-                                        <th class="fw-bold text-dark text-center" style="width: 85px; padding: 14px 8px;">Publikasi</th>
-                                        <th class="fw-bold text-dark" style="width: 19%; padding: 14px 12px;">Entitas / Indikator</th>
-                                        <th class="fw-bold text-dark text-center" style="width: 105px; padding: 14px 8px;">Tahun</th>
-                                        <th class="fw-bold text-dark text-center" style="width: 135px; padding: 14px 8px;">Tipe</th>
-                                        <th class="fw-bold text-dark" style="width: auto; padding: 14px 14px;">Pesan & Analisis Anomali</th>
-                                        <th class="fw-bold text-dark text-center" style="width: 120px; padding: 14px 16px;">Aksi</th>
+                                        <th style="width: 22%; min-width: 200px;">Nama Tabel</th>
+                                        <th class="text-center" style="width: 85px;">Publikasi</th>
+                                        <th style="width: 18%; min-width: 160px;">Entitas / Indikator</th>
+                                        <th class="text-center" style="width: 95px;">Tahun</th>
+                                        <th class="text-center" style="width: 130px;">Tipe</th>
+                                        <th style="min-width: 200px;">Pesan & Analisis Anomali</th>
+                                        <th class="text-center" style="width: 110px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-ts-anomalies-tbody">
@@ -369,14 +369,14 @@
                     <!-- SUBTAB 2: ANOMALI SEL KOSONG / ? -->
                     <div id="subtab-admin-cell-anom" class="glass-panel" style="display:none;">
                         <h5 class="mb-3 fw-semibold">Rincian Baris Data Anomali (Tanda "?")</h5>
-                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                            <table class="table table-sm align-middle">
+                        <div class="table-responsive rounded-3 border bg-white shadow-sm" style="max-height: 600px; overflow: auto;">
+                            <table class="table table-hover table-admin-compact align-middle mb-0" style="min-width: 760px; width: 100%;">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th class="fw-semibold">Nama Tabel</th>
-                                        <th class="fw-semibold text-center" style="width:80px;">Tahun</th>
-                                        <th class="fw-semibold">Rincian Data</th>
-                                        <th class="fw-semibold text-center" style="width:110px;">Aksi</th>
+                                        <th style="width: 250px;">Nama Tabel</th>
+                                        <th class="text-center" style="width: 75px;">Tahun</th>
+                                        <th>Rincian Data</th>
+                                        <th class="text-center" style="width: 110px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-data-anomalies-tbody">

@@ -14997,66 +14997,39 @@ async function loadAdminBackups() {
 
         const base = API_BASE.replace(/\/api\/?$/, '');
 
-        list.innerHTML = `<div class="table-responsive bg-white rounded-3 border"><table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-
+        list.innerHTML = `<div class="table-responsive bg-white rounded-3 border mb-3"><table class="table table-hover table-admin-compact align-middle mb-0" style="min-width:680px; width:100%;">
             <thead class="table-light">
-
                 <tr>
-
-                    <th class="fw-semibold">Nama File Cadangan</th>
-
-                    <th class="fw-semibold text-center" style="width:110px;">Ukuran</th>
-
-                    <th class="fw-semibold text-center" style="width:160px;">Tanggal Dibuat</th>
-
-                    <th class="fw-semibold text-end pe-3" style="width:230px;">Aksi Kontrol</th>
-
+                    <th style="min-width:240px;">Nama File Cadangan</th>
+                    <th class="text-center" style="width:100px;">Ukuran</th>
+                    <th class="text-center" style="width:150px;">Tanggal Dibuat</th>
+                    <th class="text-center" style="width:200px;">Aksi Kontrol</th>
                 </tr>
-
             </thead><tbody>${files.map(f => {
-
                 const fnEsc = f.file.replace(/'/g, "\\'");
-
                 return `<tr>
-
-                    <td style="word-break:break-all;" class="fw-medium text-dark">
-
-                        <i class="bi bi-file-earmark-code text-teal me-1.5"></i>${escHtml(f.file)}
-
+                    <td class="fw-semibold text-dark text-nowrap">
+                        <span class="badge bg-light text-dark border font-monospace px-2 py-1" style="font-size:0.76rem;">
+                            <i class="bi bi-file-earmark-code text-teal me-1"></i>${escHtml(f.file)}
+                        </span>
                     </td>
-
-                    <td class="text-nowrap text-center text-muted small">${formatFileSize(f.size)}</td>
-
-                    <td class="text-nowrap text-center text-muted small">${f.modified}</td>
-
-                    <td class="text-end pe-3">
-
+                    <td class="text-nowrap text-center text-muted" style="font-size:0.76rem;">${formatFileSize(f.size)}</td>
+                    <td class="text-nowrap text-center text-muted" style="font-size:0.76rem;">${f.modified}</td>
+                    <td class="text-center">
                         <div class="d-inline-flex gap-1">
-
-                            <a href="${API_BASE}/admin/backups/${encodeURIComponent(f.file)}" download="${escHtml(f.file)}" class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem;" title="Unduh file SQL ini ke komputer">
+                            <a href="${API_BASE}/admin/backups/${encodeURIComponent(f.file)}" download="${escHtml(f.file)}" class="btn btn-sm btn-outline-secondary py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.72rem; border-radius:5px;" title="Unduh file SQL ini ke komputer">
                                 <i class="bi bi-download"></i> Unduh
                             </a>
-
-                            <button onclick="restoreBackup('${fnEsc}')" class="btn btn-sm btn-outline-teal py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem; border-color:#0d9488; color:#0d9488;" title="Pulihkan database dari file ini">
-
+                            <button onclick="restoreBackup('${fnEsc}')" class="btn btn-sm btn-outline-teal py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.72rem; border-color:#0d9488; color:#0d9488; border-radius:5px;" title="Pulihkan database dari file ini">
                                 <i class="bi bi-arrow-counterclockwise"></i> Restore
-
                             </button>
-
-                            <button onclick="deleteBackup('${fnEsc}')" class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.75rem;" title="Hapus file cadangan ini">
-
+                            <button onclick="deleteBackup('${fnEsc}')" class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1 shadow-none" style="font-size:0.72rem; border-radius:5px;" title="Hapus file cadangan ini">
                                 <i class="bi bi-trash"></i>
-
                             </button>
-
                         </div>
-
                     </td>
-
                 </tr>`;
-
             }).join('')}
-
             </tbody></table></div>`;
 
     } catch(e) {
@@ -15535,25 +15508,25 @@ function renderAdminTables() {
     let html = "";
     paginatedItems.forEach(t => {
         const rowCount = t.db_rows || 0;
-        const volumeBadge = `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-0.5 rounded-pill fw-semibold" style="font-size:0.75rem;"><i class="bi bi-grid-3x3 me-1"></i>${rowCount.toLocaleString('id-ID')} Baris</span>`;
+        const volumeBadge = `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size:0.72rem;"><i class="bi bi-grid-3x3 me-1"></i>${rowCount.toLocaleString('id-ID')} Baris</span>`;
         const docSourceHtml = formatDocumentSourceHtml(t.document_name, t.bab_num, t.year);
 
         html += `<tr class="cursor-pointer" onclick="viewState.selectedDocId=${t.document_id || ''}; viewState.selectedBabNum=${t.bab_num || 'null'}; navigateDataTabelTab('publikasi');" title="Klik untuk membuka data tabel di menu Data Tabel">
             <td class="text-center">
-                <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1 rounded-2 font-monospace fw-bold" style="font-size:0.78rem;">
+                <span class="badge bg-light text-primary border border-primary-subtle px-1.5 py-0.5 rounded-2 font-monospace fw-bold" style="font-size:0.74rem;">
                     #${t.id}
                 </span>
             </td>
             <td>
-                <div class="d-flex align-items-center flex-wrap" style="line-height:1.35;">${renderCleanTableTitleHtml(t.table_name)}</div>
+                <div class="d-flex align-items-center flex-wrap" style="line-height:1.4;">${renderCleanTableTitleHtml(t.table_name)}</div>
             </td>
             <td>
-                <div class="text-muted small d-flex align-items-center flex-wrap" style="font-size:0.8rem;">
+                <div class="text-muted small d-flex align-items-center flex-wrap" style="font-size:0.76rem;">
                     ${docSourceHtml}
                 </div>
             </td>
             <td class="text-center">
-                <span class="badge bg-light text-dark border px-2 py-0.5 rounded-pill" style="font-size:0.75rem;"><i class="bi bi-calendar3 me-1"></i>${t.year}</span>
+                <span class="badge bg-light text-dark border px-2 py-0.5 rounded-pill" style="font-size:0.72rem;"><i class="bi bi-calendar3 me-1"></i>${t.year}</span>
             </td>
             <td class="text-center">
                 ${volumeBadge}
@@ -15709,39 +15682,22 @@ async function loadAdminDataAnomalies() {
                 .join(" | ");
 
             return `
-
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-
-                    <td style="padding: 10px; font-weight: 500; color: #334155; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escHtml(a.table_name)}">
-
+                <tr>
+                    <td class="fw-medium text-dark text-truncate" style="max-width: 250px;" title="${escHtml(a.table_name)}">
                         <span style="cursor: pointer; color: #4f46e5; text-decoration: underline;" onclick="viewDataEditor(${a.table_id}, '${String(cleanName).replace(/'/g, "\\'")}')">
-
                             ${escHtml(cleanName)}
-
                         </span>
-
                     </td>
-
-                    <td style="padding: 10px; text-align: center; color: #64748b;">${a.document_year}</td>
-
-                    <td style="padding: 10px; font-size:0.8rem; color:var(--text-secondary, #475569); max-width:450px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${details.replace(/<[^>]*>/g, '')}">
-
+                    <td class="text-center text-muted" style="font-size:0.76rem;">${a.document_year}</td>
+                    <td style="font-size:0.76rem; color:var(--text-secondary, #475569); max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${details.replace(/<[^>]*>/g, '')}">
                         ${details}
-
                     </td>
-
-                    <td style="padding: 10px; text-align: center;">
-
-                        <button class="btn btn-small" style="background:#10b981; border-color:#10b981; color:white; padding:4px 10px; font-size:0.8rem; cursor:pointer;" onclick="viewDataEditor(${a.table_id}, '${String(cleanName).replace(/'/g, "\\'")}')">
-
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-action-compact" style="background:#10b981; border-color:#10b981; color:white; font-size:0.72rem; padding:2px 8px; border-radius:5px;" onclick="viewDataEditor(${a.table_id}, '${String(cleanName).replace(/'/g, "\\'")}')">
                             Perbaiki
-
                         </button>
-
                     </td>
-
                 </tr>
-
             `;
 
         }).join('');
@@ -16591,34 +16547,20 @@ async function loadHeaderAnomaliesPage() {
 
             var cleanTn = formatCleanTableName(a.table_name || '');
 
-            return '<tr class="anomali-row" data-table-name="' + (a.table_name || '').toLowerCase() + '" data-header="' + h.toLowerCase() + '" style="border-bottom:1px solid #f1f5f9;">' +
-
-                '<td style="padding:10px;"><input type="checkbox" class="anomali-checkbox" data-table-id="' + a.table_id + '" data-col-index="' + a.col_index + '" data-header="' + h + '"></td>' +
-
-                '<td style="padding:10px; font-weight:500; color:#334155; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escHtml(a.table_name || '') + '">' +
-
+            return '<tr class="anomali-row" data-table-name="' + (a.table_name || '').toLowerCase() + '" data-header="' + h.toLowerCase() + '">' +
+                '<td class="text-center"><input type="checkbox" class="anomali-checkbox" data-table-id="' + a.table_id + '" data-col-index="' + a.col_index + '" data-header="' + h + '"></td>' +
+                '<td class="fw-medium text-dark text-truncate" style="max-width:250px;" title="' + escHtml(a.table_name || '') + '">' +
                     '<span style="cursor:pointer; color:#4f46e5; text-decoration:underline;" onclick="previewCsv(' + a.table_id + ', \'' + tn + '\')">' + escHtml(cleanTn) + '</span>' +
-
                 '</td>' +
-
-                '<td style="padding:10px; text-align:center; color:var(--text-secondary, #64748b);">' + (a.document_year || '') + '</td>' +
-
-                '<td style="padding:10px; color:#334155; font-weight:600;">' + escHtml(a.header || '') + '</td>' +
-
-                '<td style="padding:10px; color:#b45309;"><span style="background:#fffbeb; padding:2px 6px; border-radius:4px; border:1px solid #fcd34d; font-size:0.75rem;">' + escHtml(words) + '</span></td>' +
-
-                '<td style="padding:10px;">' + saranHtml + '</td>' +
-
-                '<td style="padding:10px; text-align:center; white-space:nowrap;">' +
-
-                    '<button onclick="fixSaranColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#dbeafe; border:1px solid #93c5fd; color:#1e40af; padding:3px 8px; font-size:0.72rem; cursor:pointer; margin-right:4px;">Fix</button>' +
-
-                    '<button onclick="searchMasterColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:3px 8px; font-size:0.72rem; cursor:pointer; margin-right:4px;">Cari</button>' +
-
-                    '<button onclick="dismissAnomalyFromPage(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-small" style="background:#dcfce7; border:1px solid #86efac; color:#166534; padding:3px 8px; font-size:0.72rem; cursor:pointer;">Aman</button>' +
-
+                '<td class="text-center text-muted" style="font-size:0.76rem;">' + (a.document_year || '') + '</td>' +
+                '<td class="fw-semibold text-dark">' + escHtml(a.header || '') + '</td>' +
+                '<td><span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50" style="font-size:0.72rem;">' + escHtml(words) + '</span></td>' +
+                '<td>' + saranHtml + '</td>' +
+                '<td class="text-center text-nowrap">' +
+                    '<button onclick="fixSaranColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#dbeafe; border:1px solid #93c5fd; color:#1e40af; padding:2px 7px; font-size:0.72rem; border-radius:5px; margin-right:4px;">Fix</button>' +
+                    '<button onclick="searchMasterColumn(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:2px 7px; font-size:0.72rem; border-radius:5px; margin-right:4px;">Cari</button>' +
+                    '<button onclick="dismissAnomalyFromPage(' + a.table_id + ', ' + a.col_index + ', \'' + h + '\')" class="btn btn-sm" style="background:#dcfce7; border:1px solid #86efac; color:#166534; padding:2px 7px; font-size:0.72rem; border-radius:5px;">Aman</button>' +
                 '</td>' +
-
             '</tr>';
 
         }).join('');
@@ -17134,23 +17076,14 @@ async function renderMasterColumns() {
         const rowStyle = col.count === 0 ? 'style="background:#fef2f2;"' : '';
 
         html += `<tr ${rowStyle}>
-
-            <td class="small text-muted">${col.id}</td>
-
-            <td class="fw-semibold small" id="mc-name-${col.id}">${col.standard}</td>
-
-            <td class="small text-center" id="mc-unit-${col.id}">${unitDisplay}</td>
-
-            <td class="small text-center">${countHtml}</td>
-
-            <td>
-
-                <button onclick="editMasterColumn(${col.id})" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.7rem;">Edit</button>
-
-                <button onclick="deleteMasterColumn(${col.id})" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.7rem;">Hapus</button>
-
+            <td class="text-center text-muted" style="font-size:0.76rem;">${col.id}</td>
+            <td class="fw-semibold text-dark" id="mc-name-${col.id}">${col.standard}</td>
+            <td class="text-center" style="font-size:0.76rem;" id="mc-unit-${col.id}">${unitDisplay}</td>
+            <td class="text-center" style="font-size:0.76rem;">${countHtml}</td>
+            <td class="text-center">
+                <button onclick="editMasterColumn(${col.id})" class="btn btn-sm btn-outline-secondary py-0.5 px-2" style="font-size:0.72rem; border-radius:5px;">Edit</button>
+                <button onclick="deleteMasterColumn(${col.id})" class="btn btn-sm btn-outline-danger py-0.5 px-2" style="font-size:0.72rem; border-radius:5px;">Hapus</button>
             </td>
-
         </tr>`;
 
     });
@@ -17841,39 +17774,22 @@ async function loadTimeSeriesAnomalies(forceRefresh = false) {
             
 
             html += `<tr>
-
-                <td class="fw-semibold text-dark small" style="padding: 10px 14px; word-break: break-word;" title="${escHtml(a.table_name)}">${escHtml(cleanName)}</td>
-
-                <td class="text-center" style="padding: 10px 6px;">${docBadge}</td>
-
-                <td class="small" style="padding: 10px 12px; word-break: break-word;">
-
-                    <div class="fw-semibold text-dark">${escHtml(a.entitas)}</div>
-
-                    <div class="text-muted small">${escHtml(cleanInd)}</div>
-
+                <td class="fw-semibold text-dark text-truncate" style="max-width: 240px;" title="${escHtml(a.table_name)}">${escHtml(cleanName)}</td>
+                <td class="text-center text-muted" style="font-size:0.76rem;">${docBadge}</td>
+                <td style="max-width: 200px;">
+                    <div class="fw-semibold text-dark text-truncate">${escHtml(a.entitas)}</div>
+                    <div class="text-muted text-truncate" style="font-size:0.75rem;">${escHtml(cleanInd)}</div>
                 </td>
-
-                <td class="text-center small" style="padding: 10px 6px;">${a.prev_year} ➔ <b class="text-primary">${a.year}</b></td>
-
-                <td class="text-center" style="padding: 10px 6px;">${badgeType}</td>
-
-                <td class="small text-muted" style="padding: 10px 12px; word-break: break-word;">
-
-                    <div class="text-dark" style="line-height: 1.4;">${escHtml(a.message)}</div>
-
+                <td class="text-center text-nowrap" style="font-size:0.76rem;">${a.prev_year} ➔ <b class="text-primary">${a.year}</b></td>
+                <td class="text-center text-nowrap">${badgeType}</td>
+                <td class="text-muted" style="font-size:0.76rem; line-height: 1.35;">
+                    <div class="text-dark">${escHtml(a.message)}</div>
                 </td>
-
-                <td class="text-center" style="padding: 12px 14px;">
-
-                    <button onclick="openAnomalyTableModal(${idx});" class="btn-table-action">
-
+                <td class="text-center">
+                    <button onclick="openAnomalyTableModal(${idx});" class="btn btn-sm btn-outline-primary" style="font-size:0.72rem; padding:2px 8px; border-radius:5px;">
                         <i class="bi bi-eye"></i> Buka
-
                     </button>
-
                 </td>
-
             </tr>`;
 
         });

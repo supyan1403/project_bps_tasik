@@ -491,39 +491,22 @@ async function loadTimeSeriesAnomalies(forceRefresh = false) {
             
 
             html += `<tr>
-
-                <td class="fw-semibold text-dark small" style="padding: 10px 14px; word-break: break-word;" title="${escHtml(a.table_name)}">${escHtml(cleanName)}</td>
-
-                <td class="text-center" style="padding: 10px 6px;">${docBadge}</td>
-
-                <td class="small" style="padding: 10px 12px; word-break: break-word;">
-
-                    <div class="fw-semibold text-dark">${escHtml(a.entitas)}</div>
-
-                    <div class="text-muted small">${escHtml(cleanInd)}</div>
-
+                <td class="fw-semibold text-dark text-truncate" style="max-width: 240px;" title="${escHtml(a.table_name)}">${escHtml(cleanName)}</td>
+                <td class="text-center text-muted" style="font-size:0.76rem;">${docBadge}</td>
+                <td style="max-width: 200px;">
+                    <div class="fw-semibold text-dark text-truncate">${escHtml(a.entitas)}</div>
+                    <div class="text-muted text-truncate" style="font-size:0.75rem;">${escHtml(cleanInd)}</div>
                 </td>
-
-                <td class="text-center small" style="padding: 10px 6px;">${a.prev_year} ➔ <b class="text-primary">${a.year}</b></td>
-
-                <td class="text-center" style="padding: 10px 6px;">${badgeType}</td>
-
-                <td class="small text-muted" style="padding: 10px 12px; word-break: break-word;">
-
-                    <div class="text-dark" style="line-height: 1.4;">${escHtml(a.message)}</div>
-
+                <td class="text-center text-nowrap" style="font-size:0.76rem;">${a.prev_year} ➔ <b class="text-primary">${a.year}</b></td>
+                <td class="text-center text-nowrap">${badgeType}</td>
+                <td class="text-muted" style="font-size:0.76rem; line-height: 1.35;">
+                    <div class="text-dark">${escHtml(a.message)}</div>
                 </td>
-
-                <td class="text-center" style="padding: 12px 14px;">
-
-                    <button onclick="openAnomalyTableModal(${idx});" class="btn-table-action">
-
+                <td class="text-center">
+                    <button onclick="openAnomalyTableModal(${idx});" class="btn btn-sm btn-outline-primary" style="font-size:0.72rem; padding:2px 8px; border-radius:5px;">
                         <i class="bi bi-eye"></i> Buka
-
                     </button>
-
                 </td>
-
             </tr>`;
 
         });

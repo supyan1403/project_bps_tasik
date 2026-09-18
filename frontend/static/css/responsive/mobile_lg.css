@@ -852,8 +852,6 @@
         border: 1.5px solid var(--border, #e2e8f0) !important;
         background: var(--bg-input, #fff) !important;
         color: var(--text-primary, #0f172a) !important;
-        appearance: auto !important;
-        -webkit-appearance: auto !important;
     }
 
     .admin-filter-item .form-select:focus {
@@ -1775,7 +1773,8 @@
         padding: 0.35rem 2.4rem 0.35rem 0.65rem !important;
     }
 
-    .admin-filter-bar .form-control {
+    .admin-filter-bar .form-control,
+    .admin-filter-bar .input-group-text {
         font-size: 0.8rem !important;
         min-height: 40px !important;
         padding: 0.35rem 0.65rem !important;

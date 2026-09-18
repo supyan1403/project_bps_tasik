@@ -249,14 +249,39 @@ html.no-sidebar-transition .sidebar-user-info {
 
 .sidebar-footer-action .btn-outline-danger {
     border-width: 1.5px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-footer-action .btn-outline-danger::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.12) 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar-footer-action .btn-outline-danger:hover::before {
+    opacity: 1;
 }
 
 .sidebar-footer-action .btn-outline-danger:hover {
     transform: translateY(-1px) !important;
+    border-color: var(--danger-hover) !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
 }
 
 .sidebar-footer-action .btn-outline-danger:active {
     transform: scale(0.97) !important;
+}
+
+.sidebar-footer-action .btn-outline-danger i {
+    transition: transform 0.2s ease;
+}
+
+.sidebar-footer-action .btn-outline-danger:hover i {
+    transform: translateX(3px);
 }
 
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */

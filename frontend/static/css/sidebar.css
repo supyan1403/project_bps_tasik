@@ -276,12 +276,13 @@ html.no-sidebar-transition .sidebar-user-info {
     transform: scale(0.97) !important;
 }
 
-.sidebar-footer-action .btn-outline-danger i {
-    transition: transform 0.2s ease;
-}
-
-.sidebar-footer-action .btn-outline-danger:hover i {
-    transform: translateX(3px);
+/* Icon & Text Alignment Fix */
+.sidebar-footer-action .btn > i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */

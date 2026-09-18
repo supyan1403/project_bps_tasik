@@ -909,11 +909,7 @@
         justify-content: center !important;
     }
 
-    /* Admin filter search bar - simple radius fix, no layout override */
-    .admin-filter-bar .input-group {
-        border-radius: 10px !important;
-        overflow: hidden !important;
-    }
+    /* Admin filter search bar */
 
     .admin-filter-bar .input-group-text {
         border-radius: 10px 0 0 10px !important;
@@ -950,20 +946,6 @@
         box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12) !important;
     }
 
-    .admin-filter-bar .input-group {
-        width: 100% !important;
-    }
-
-    .admin-filter-bar .input-group-text {
-        padding: 0.4rem 0.75rem !important;
-        border-radius: 8px 0 0 8px !important;
-    }
-
-    .admin-filter-bar .form-control {
-        padding: 0.4rem 0.75rem !important;
-        border-radius: 0 8px 8px 0 !important;
-        font-size: 0.82rem !important;
-    }
 }
 
 /* ===================== BREAKPOINT 4: MEDIUM PHONE: < 576px ===================== */

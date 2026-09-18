@@ -943,7 +943,7 @@
         font-size: 0.82rem !important;
         color: var(--text-secondary, #94a3b8) !important;
     }
-}
+
     .admin-filter-bar {
         gap: 0.75rem !important;
     }

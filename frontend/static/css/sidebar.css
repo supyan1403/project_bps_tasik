@@ -166,6 +166,15 @@ html.no-sidebar-transition .sidebar-user-info {
     transition: color var(--transition-fast) !important;
 }
 
+/* Logout button icon should be red/white depending on context */
+#btn-admin-logout-btn i {
+    color: var(--danger) !important;
+}
+
+.sidebar-footer-action #btn-admin-logout-btn i {
+    color: var(--danger) !important;
+}
+
 .nav-link i::before,
 .theme-mode-icon::before,
 #btn-admin-login i::before,

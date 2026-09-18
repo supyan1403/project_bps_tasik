@@ -49,7 +49,7 @@ body.role-pegawai:not(.role-admin) .main-content {
     flex-shrink: 0;
     position: relative;
     contain: layout;
-    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
 }
 
 /* Zero-Flicker Transition Freeze during initial load & auth transitions */
@@ -142,7 +142,7 @@ html.no-sidebar-transition .sidebar-user-info {
     overflow: hidden;
     margin: 0 !important;
     width: 100%;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.3s ease-in-out !important;
 }
 
 .nav-link i,
@@ -443,7 +443,7 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         margin-right: 0 !important;
         pointer-events: none !important;
         transform: translateX(-8px);
-        transition: opacity 0.2s ease, max-width 0.2s ease, transform 0.2s ease;
+        transition: opacity 0.3s ease-in-out, max-width 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
 
     body:not(.sidebar-collapsed) .bps-brand-text,
@@ -452,6 +452,7 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     body:not(.sidebar-collapsed) .theme-mode-label,
     body:not(.sidebar-collapsed) .submenu-arrow {
         transform: translateX(0);
+        transition: opacity 0.3s ease-in-out, max-width 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
 
     body.sidebar-collapsed .theme-switch-pill {

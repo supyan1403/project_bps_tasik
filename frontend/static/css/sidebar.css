@@ -244,10 +244,19 @@ html.no-sidebar-transition .sidebar-user-info {
     padding: 0.6rem 1rem !important;
     font-size: 0.85rem !important;
     border-radius: 8px !important;
+    transition: all 0.2s ease !important;
 }
 
 .sidebar-footer-action .btn-outline-danger {
     border-width: 1.5px !important;
+}
+
+.sidebar-footer-action .btn-outline-danger:hover {
+    transform: translateY(-1px) !important;
+}
+
+.sidebar-footer-action .btn-outline-danger:active {
+    transform: scale(0.97) !important;
 }
 
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */

@@ -169,13 +169,28 @@ html.no-sidebar-transition .sidebar-user-info {
     transform: none !important;
 }
 
-/* Logout button icon should be red/white depending on context */
-#btn-admin-logout-btn i {
-    color: var(--danger) !important;
-}
-
+/* Logout button icon should be red normally, and white on hover */
+#btn-admin-logout-btn i,
 .sidebar-footer-action #btn-admin-logout-btn i {
     color: var(--danger) !important;
+    transition: color 0.15s ease !important;
+}
+
+#btn-admin-logout-btn:hover,
+.sidebar-footer-action #btn-admin-logout-btn:hover {
+    background-color: var(--danger) !important;
+    color: var(--text-white) !important;
+    border-color: var(--danger) !important;
+}
+
+#btn-admin-logout-btn:hover i,
+.sidebar-footer-action #btn-admin-logout-btn:hover i {
+    color: var(--text-white) !important;
+}
+
+#btn-admin-logout-btn:hover .sidebar-btn-text,
+.sidebar-footer-action #btn-admin-logout-btn:hover .sidebar-btn-text {
+    color: var(--text-white) !important;
 }
 
 .nav-link i::before,
@@ -956,6 +971,16 @@ body.mobile-sidebar-active {
         margin-left: 10px !important;
         visibility: visible !important;
         color: var(--danger) !important;
+    }
+
+    #btn-admin-logout-btn:hover i,
+    body.sidebar-collapsed #btn-admin-logout-btn:hover i {
+        color: var(--text-white) !important;
+    }
+
+    #btn-admin-logout-btn:hover .sidebar-btn-text,
+    body.sidebar-collapsed #btn-admin-logout-btn:hover .sidebar-btn-text {
+        color: var(--text-white) !important;
     }
 
     .main-content {

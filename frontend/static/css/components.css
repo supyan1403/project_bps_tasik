@@ -804,21 +804,37 @@ body.role-pegawai #btn-admin-login {
 
 /* ===================== FLATPICKR SIZE OVERRIDE ===================== */
 .flatpickr-calendar {
-    width: min(305px, 92vw) !important;
-    max-width: min(305px, 92vw) !important;
+    width: min(320px, 90vw) !important;
+    max-width: min(320px, 90vw) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
 }
 .flatpickr-day {
-    height: 30px !important;
-    line-height: 30px !important;
-    font-size: 0.78rem;
+    height: 34px !important;
+    line-height: 34px !important;
+    font-size: 0.82rem;
+    border-radius: 8px !important;
+}
+.flatpickr-day:hover {
+    background: #e8f0fe !important;
 }
 .flatpickr-months {
-    height: 38px !important;
+    height: 40px !important;
 }
 .flatpickr-current-month {
-    font-size: 0.85rem;
-    height: 38px !important;
-    line-height: 38px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    height: 40px !important;
+    line-height: 40px;
+}
+.flatpickr-time {
+    border-top: 1px solid #e5e7eb !important;
+    padding: 8px 4px !important;
+}
+.flatpickr-time input {
+    border-radius: 6px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
 }
 
 /* ===================== TOGGLE SWITCH ===================== */

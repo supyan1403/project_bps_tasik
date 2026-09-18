@@ -17309,7 +17309,7 @@ function _initMaintenanceFlatpickr() {
         minuteIncrement: 5,
         locale: 'id',
         minDate: new Date(Date.now() + 3 * 60 * 1000),
-        defaultDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        defaultDate: new Date(Date.now() + 60 * 60 * 1000),
         time_24hr: true,
         monthSelectorType: 'static',
         disableMobile: true

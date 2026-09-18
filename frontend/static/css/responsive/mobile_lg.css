@@ -830,8 +830,52 @@
         font-size: 1.25rem !important;
     }
 
-    .stat-card-glass .stat-card-label {
-        font-size: 0.74rem !important;
+    /* Admin Page - Hide 5 stat cards, show compact bar */
+    #tab-admin-db .row.row-cols-1.row-cols-sm-2.row-cols-md-3.row-cols-lg-5 {
+        display: none !important;
+    }
+
+    #admin-db-metrics-compact {
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        margin-bottom: 0.75rem;
+        background: var(--bg-card, #fff);
+        border: 1px solid var(--border, #e2e8f0);
+        border-radius: 10px;
+    }
+
+    .admin-db-metrics-compact .metric-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        color: var(--text-secondary, #64748b);
+        padding: 3px 8px;
+        background: var(--bg-hover, #f8fafc);
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    .admin-db-metrics-compact .metric-chip b {
+        color: var(--text-primary, #0f172a);
+        font-weight: 700;
+    }
+
+    .admin-db-metrics-compact .metric-chip i {
+        font-size: 0.82rem;
+        color: var(--primary, #2563eb);
+    }
+
+    .admin-db-metrics-compact .metric-chip.status-chip {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .admin-db-metrics-compact .metric-chip.status-chip i {
+        color: #059669;
     }
 
     /* Admin Page - Compact Buttons & Search */

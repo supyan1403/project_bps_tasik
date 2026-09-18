@@ -817,10 +817,6 @@
         border-radius: 6px !important;
     }
 
-    .admin-overview-card {
-        padding: 10px 14px !important;
-        gap: 10px !important;
-    }
 
     .stat-card-glass {
         padding: 14px 16px !important;
@@ -838,25 +834,33 @@
     #admin-db-metrics-compact {
         display: flex !important;
         align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-        padding: 8px 12px;
+        gap: 5px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding: 6px 10px !important;
         margin-bottom: 0.75rem;
         background: var(--bg-card, #fff);
         border: 1px solid var(--border, #e2e8f0);
         border-radius: 10px;
+        scrollbar-width: none !important;
+    }
+
+    #admin-db-metrics-compact::-webkit-scrollbar {
+        display: none !important;
     }
 
     .admin-db-metrics-compact .metric-chip {
-        display: inline-flex;
+        display: inline-flex !important;
         align-items: center;
-        gap: 4px;
-        font-size: 0.75rem;
+        gap: 3px !important;
+        font-size: 0.72rem !important;
         color: var(--text-secondary, #64748b);
-        padding: 3px 8px;
+        padding: 3px 7px !important;
         background: var(--bg-hover, #f8fafc);
         border-radius: 6px;
-        white-space: nowrap;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 
     .admin-db-metrics-compact .metric-chip b {
@@ -865,17 +869,17 @@
     }
 
     .admin-db-metrics-compact .metric-chip i {
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         color: var(--primary, #2563eb);
     }
 
     .admin-db-metrics-compact .metric-chip.status-chip {
-        background: #ecfdf5;
-        color: #059669;
+        background: #ecfdf5 !important;
+        color: #059669 !important;
     }
 
     .admin-db-metrics-compact .metric-chip.status-chip i {
-        color: #059669;
+        color: #059669 !important;
     }
 
     /* Admin Page - Compact Buttons & Search */
@@ -1782,10 +1786,6 @@
         padding: 7px 10px !important;
     }
 
-    .admin-overview-card {
-        padding: 8px 12px !important;
-        gap: 8px !important;
-    }
 
     .stat-card-glass {
         padding: 12px !important;

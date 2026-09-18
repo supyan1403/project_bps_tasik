@@ -522,10 +522,6 @@
         padding: 6px 8px !important;
     }
 
-    .admin-overview-card {
-        padding: 8px 10px !important;
-    }
-
     .stat-card-glass {
         padding: 10px !important;
     }
@@ -568,19 +564,27 @@
     /* Admin Page - Compact stats bar tighter */
     #admin-db-metrics-compact {
         gap: 4px !important;
-        padding: 6px 10px !important;
+        padding: 5px 8px !important;
         border-radius: 8px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
     }
 
     .admin-db-metrics-compact .metric-chip {
-        font-size: 0.72rem !important;
-        padding: 2px 6px !important;
-        gap: 3px !important;
+        font-size: 0.68rem !important;
+        padding: 2px 5px !important;
+        gap: 2px !important;
         border-radius: 5px !important;
+        flex-shrink: 0 !important;
     }
 
     .admin-db-metrics-compact .metric-chip i {
-        font-size: 0.78rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .admin-db-metrics-compact .metric-chip b {
+        font-size: 0.68rem !important;
     }
 }
 

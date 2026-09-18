@@ -17297,7 +17297,12 @@ let _maintenanceFlatpickr = null;
 function _initMaintenanceFlatpickr() {
     if (_maintenanceFlatpickr) return;
     const el = document.getElementById('maintenance-end-input');
-    if (!el || typeof flatpickr === 'undefined') return;
+    if (!el) return;
+    if (typeof flatpickr === 'undefined') {
+        el.placeholder = 'Error: Date picker gagal dimuat. Muat ulang halaman.';
+        el.disabled = true;
+        return;
+    }
     _maintenanceFlatpickr = flatpickr(el, {
         enableTime: true,
         dateFormat: 'd/m/Y H:i',
@@ -17305,10 +17310,9 @@ function _initMaintenanceFlatpickr() {
         locale: 'id',
         minDate: new Date(Date.now() + 3 * 60 * 1000),
         defaultDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
-        altInput: true,
-        altFormat: 'j F Y, H:i',
         time_24hr: true,
-        monthSelectorType: 'static'
+        monthSelectorType: 'static',
+        disableMobile: true
     });
 }
 
@@ -17317,6 +17321,8 @@ function _initMaintenanceFlatpickr() {
 let currentMaintenanceMode = '0';
 
 let currentMaintenanceEnd = '';
+
+let _userTogglingMaintenance = false;
 
 
 
@@ -17380,7 +17386,7 @@ function renderMaintenanceStatus() {
 
     if (toggle) toggle.checked = isActive;
 
-    if (dtGroup) dtGroup.style.display = isActive ? 'block' : 'none';
+    if (dtGroup && !_userTogglingMaintenance) dtGroup.style.display = isActive ? 'block' : 'none';
 
     if (endInfo) endInfo.style.display = isActive && currentMaintenanceEnd ? 'block' : 'none';
 
@@ -17410,9 +17416,12 @@ function renderMaintenanceStatus() {
     if (toggle) {
 
         toggle.onchange = function () {
-
+            _userTogglingMaintenance = true;
             dtGroup.style.display = this.checked ? 'block' : 'none';
-
+            if (this.checked && _maintenanceFlatpickr) {
+                _maintenanceFlatpickr.redraw();
+            }
+            _userTogglingMaintenance = false;
         };
 
     }

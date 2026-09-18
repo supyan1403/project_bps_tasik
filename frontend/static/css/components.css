@@ -804,8 +804,8 @@ body.role-pegawai #btn-admin-login {
 
 /* ===================== FLATPICKR SIZE OVERRIDE ===================== */
 .flatpickr-calendar {
-    width: 305px !important;
-    max-width: 305px !important;
+    width: min(305px, 92vw) !important;
+    max-width: min(305px, 92vw) !important;
 }
 .flatpickr-day {
     height: 30px !important;

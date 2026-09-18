@@ -982,3 +982,54 @@ body.dark-mode .col-type-tag.type-txt {
     color: var(--bps-brand);
     transition: color var(--transition-normal);
 }
+
+/* ==========================================================================
+   ADMIN & DATABASE MANAGEMENT TABLES (COMPACT & CLEAN SYSTEM)
+   ========================================================================== */
+.table-admin-compact {
+    font-size: 0.8rem !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    background: var(--bg-card, #ffffff);
+}
+
+.table-admin-compact thead th {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary, #64748b) !important;
+    background: var(--bg-page, #f8fafc) !important;
+    padding: 0.55rem 0.65rem !important;
+    border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    vertical-align: middle;
+}
+
+.table-admin-compact tbody td {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.8rem !important;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border, #f1f5f9) !important;
+    color: var(--text-primary, #1e293b);
+}
+
+.table-admin-compact tbody tr:hover td {
+    background-color: var(--bg-hover, rgba(241, 245, 249, 0.6)) !important;
+}
+
+.table-admin-compact .badge {
+    font-size: 0.72rem !important;
+    padding: 0.25rem 0.5rem !important;
+    font-weight: 600;
+}
+
+.table-admin-compact .btn-action-compact {
+    font-size: 0.72rem !important;
+    padding: 0.2rem 0.45rem !important;
+    border-radius: 5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+

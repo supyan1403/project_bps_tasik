@@ -239,6 +239,17 @@ html.no-sidebar-transition .sidebar-user-info {
     flex-shrink: 0;
 }
 
+/* Sidebar Footer Buttons */
+.sidebar-footer-action .btn {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+}
+
+.sidebar-footer-action .btn-outline-danger {
+    border-width: 1.5px !important;
+}
+
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */
 body:not(.sidebar-collapsed) .sidebar-floating-popover {
     display: none !important;

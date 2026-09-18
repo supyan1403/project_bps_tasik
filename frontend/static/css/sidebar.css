@@ -1189,7 +1189,6 @@ body.dark-mode .operator-header {
 
 #btn-admin-logout-btn,
 body.sidebar-collapsed #btn-admin-logout-btn,
-body.role-admin #btn-admin-logout-btn,
 body.role-pegawai #btn-admin-logout-btn {
     display: none !important;
     width: 0 !important;

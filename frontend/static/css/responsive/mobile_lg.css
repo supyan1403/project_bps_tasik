@@ -874,9 +874,6 @@
     }
 
     /* Admin Page - Compact Buttons & Search */
-    #page-admin .glass-panel.p-4 {
-        padding: 0.85rem 0.75rem !important;
-    }
 
     #page-admin h5.fw-bold {
         font-size: 1rem !important;
@@ -939,8 +936,8 @@
 
     .main-content {
         padding-top: calc(64px + env(safe-area-inset-top, 0px)) !important;
-        padding-left: 0.85rem !important;
-        padding-right: 0.85rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
         padding-bottom: 1rem !important;
     }
 

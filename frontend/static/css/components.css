@@ -1078,3 +1078,48 @@ body.dark-mode .search-type-select-styled:hover {
     background-color: rgba(30, 64, 175, 0.4) !important;
     color: #bfdbfe !important;
 }
+
+/* ===================== ADMIN SEARCH BAR (Unified Flex) ===================== */
+.admin-search-box {
+    display: flex;
+    align-items: center;
+    border-radius: 10px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-search-box:focus-within {
+    border-color: var(--primary, #2563eb) !important;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12) !important;
+}
+
+.admin-search-icon {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted, #94a3b8);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    padding-right: 0.5rem;
+}
+
+.admin-search-icon i {
+    pointer-events: none;
+}
+
+.admin-search-input {
+    border: none !important;
+    background: transparent !important;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    color: var(--text-primary, #0f172a);
+}
+
+.admin-search-input::placeholder {
+    color: var(--text-secondary, #94a3b8);
+}
+
+.admin-search-input:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}

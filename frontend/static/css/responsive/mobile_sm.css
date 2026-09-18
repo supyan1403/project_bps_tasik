@@ -564,23 +564,7 @@
         justify-content: center !important;
     }
 
-    /* Admin filter search bar - compact radius fix */
-    .admin-filter-bar .input-group {
-        border-radius: 8px !important;
-        overflow: hidden !important;
-    }
-
-    .admin-filter-bar .input-group-text {
-        border-radius: 8px 0 0 8px !important;
-        padding: 0.25rem 0.5rem !important;
-    }
-
-    .admin-filter-bar .form-control {
-        border-radius: 0 8px 8px 0 !important;
-        font-size: 0.8rem !important;
-        padding: 0.25rem 0.6rem !important;
-    }
-
+    /* Admin filter search bar — unified search box handles styling */
     /* Admin Page - Compact stats bar tighter */
     #admin-db-metrics-compact {
         gap: 4px !important;

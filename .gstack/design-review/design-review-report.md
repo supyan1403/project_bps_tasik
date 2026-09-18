@@ -143,6 +143,40 @@ Ini **bukan kesalahan** — ini pola arsitektur yang sudah dirancang. Sisi panel
 
 ---
 
+## Verifikasi Desain Responsif
+
+**Tanggal:** 17 September 2026  
+**Total tangkapan layar:** 14 (ponsel + tablet)
+
+### Ponsel (375×812)
+
+| Halaman | Status | Catatan |
+|---------|--------|---------|
+| Masuk | ✅ | Formulir terpusat, tombol penuh lebar |
+| Beranda | ✅ | 1 kolom, kartu stat bertumpuk, hero penuh lebar |
+| Tabel Data | ✅ | Pencarian penuh lebar, kartu publikasi bertumpuk |
+| Deret Waktu | ✅ | Wizard bertumpuk, checkbox terbaca |
+| Impor Excel | ✅ | Formulir & unggah bertumpuk, tombol penuh lebar |
+
+### Tablet (768×1024)
+
+| Halaman | Status | Catatan |
+|---------|--------|---------|
+| Masuk | ✅ | Formulir terpusat, rapi |
+| Beranda | ✅ | Sisi panel 285px, 2 kolom, badge 1 baris |
+| Tabel Data | ✅ | Grid 2 kolom bersih |
+| Deret Waktu | ✅ | Langkah 1 & 2 berdampingan |
+| Impor Excel | ✅ | Formulir & unggah, tombol sejajar |
+
+### Temuan
+
+Tidak ada masalah responsif. Aplikasi beradaptasi dengan benar di semua titik putus:
+- **Ponsel (< 768px):** Sisi panel tersembunyi, hamburger toggle, 1 kolom
+- **Tablet (≥ 768px):** Sisi panel terlihat (285px), 2 kolom
+- **Desktop (≥ 1024px):** Sisi panel penuh, 3 kolom
+
+---
+
 ## Rekomendasi
 
 | Prioritas | Tindakan | Status |
@@ -167,4 +201,4 @@ Setelah diterapkan ke server produksi, skor dapat mencapai **9/10**.
 
 ---
 
-*Laporan dihasilkan pada 17 September 2026 · 8 halaman ditinjau · 5 perbaikan diterapkan*
+*Laporan dihasilkan pada 17 September 2026 · 8 halaman ditinjau · 5 perbaikan diterapkan · 14 tangkapan layar responsif*

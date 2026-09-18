@@ -183,13 +183,41 @@ $ python -m pytest backend/tests/ -v
 
 ---
 
-## Desain Responsif
+## Desain Responsif (Verifikasi Penuh)
 
-| Tampilan | Status | Keterangan |
-|----------|--------|------------|
-| Tablet (768px) | ✅ BERHASIL | Sisi panel terlihat, diagram adaptif |
-| Ponsel (375px) | ✅ BERHASIL | Sisi panel runtuh, menu hamburger tersedia |
-| Halaman 404 | ✅ BERHASIL | Nomor besar, pesan dalam Bahasa Indonesia |
+**Total tangkapan layar:** 14 (7 ponsel + 7 tablet)
+
+### Ponsel (375×812 — iPhone SE)
+
+| Halaman | Status | Keterangan |
+|---------|--------|------------|
+| Masuk | ✅ BERHASIL | Formulir terpusat, kata sandi terlihat, tombol penuh lebar |
+| Beranda | ✅ BERHASIL | Kartu stat 1 kolom, banner hero penuh lebar, teks dapat dibaca |
+| Tabel Data | ✅ BERHASIL | Pencarian penuh lebar, kartu publikasi bertumpuk, tombol aksi terlihat |
+| Deret Waktu | ✅ BERHASIL | Wizard bertumpuk (langkah 1 & 2), checkbox terbaca, form dapat diakses |
+| Impor Excel | ✅ BERHASIL | Template & area unggah bertumpuk, tombol penuh lebar |
+
+### Tablet (768×1024 — iPad)
+
+| Halaman | Status | Keterangan |
+|---------|--------|------------|
+| Masuk | ✅ BERHASIL | Formulir terpusat, rapi |
+| Beranda | ✅ BERHASIL | Sisi panel terlihat (285px), kartu stat 2 kolom, badge dalam 1 baris |
+| Tabel Data | ✅ BERHASIL | Tata letak 2 kolom bersih, profesional |
+| Deret Waktu | ✅ BERHASIL | Langkah 1 & 2 berdampingan, wizard menggunakan ruang efisien |
+| Impor Excel | ✅ BERHASIL | Formulir & area unggah, tombol dalam baris |
+
+### Titik Putus Responsif
+
+| Titik Putus | Lebar | Perilaku |
+|-------------|-------|----------|
+| Ponsel | < 768px | Sisi panel disembunyikan, hamburger toggle, 1 kolom |
+| Tablet | ≥ 768px | Sisi panel terlihat (285px), 2 kolom |
+| Desktop | ≥ 1024px | Sisi panel penuh, 3 kolom |
+
+### Masalah Responsif
+
+Tidak ada masalah responsif yang ditemukan. Aplikasi beradaptasi dengan benar di semua titik putus.
 
 ---
 

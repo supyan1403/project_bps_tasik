@@ -49,7 +49,7 @@ body.role-pegawai:not(.role-admin) .main-content {
     flex-shrink: 0;
     position: relative;
     contain: layout;
-    transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Zero-Flicker Transition Freeze during initial load & auth transitions */
@@ -115,13 +115,13 @@ html.no-sidebar-transition .sidebar-user-info {
     white-space: nowrap !important;
     overflow: hidden !important;
     opacity: 1;
-    max-width: 180px;
+    max-width: 190px;
     margin-left: 10px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     flex-shrink: 0 !important;
-    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, margin-left 0.15s ease-out;
+    transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bps-brand-text span {
@@ -188,13 +188,27 @@ html.no-sidebar-transition .sidebar-user-info {
 
 .nav-link-text,
 .sidebar-btn-text,
-.theme-mode-label,
-.submenu-arrow {
+.theme-mode-label {
     white-space: nowrap !important;
     overflow: hidden !important;
     opacity: 1;
     max-width: 200px;
-    transition: opacity 0.12s ease-out, max-width 0.15s ease-out, margin-left 0.15s ease-out;
+    transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.submenu-arrow {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.65rem !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .nav-link-text,
@@ -294,10 +308,16 @@ html.no-sidebar-transition .sidebar-user-info {
 
 /* Collapsed State: Logout button tetap merah tapi icon center */
 body.sidebar-collapsed #btn-admin-logout-btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
     background: var(--danger-light) !important;
     border: 1px solid var(--danger-light-bg) !important;
     box-shadow: none !important;
-    padding: 8px !important;
     gap: 0 !important;
 }
 
@@ -305,11 +325,14 @@ body.sidebar-collapsed #btn-admin-logout-btn i {
     color: var(--danger) !important;
     font-size: 1.25rem !important;
     flex: 0 0 auto !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
 }
 
 body.sidebar-collapsed #btn-admin-logout-btn .sidebar-btn-text {
     display: none !important;
+    opacity: 0 !important;
+    max-width: 0 !important;
+    margin-left: 0 !important;
 }
 
 body.sidebar-collapsed #btn-admin-logout-btn:hover {
@@ -435,24 +458,39 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     body.sidebar-collapsed .bps-brand-text,
     body.sidebar-collapsed .nav-link-text,
     body.sidebar-collapsed .sidebar-btn-text,
-    body.sidebar-collapsed .theme-mode-label,
+    body.sidebar-collapsed .theme-mode-label {
+        opacity: 0 !important;
+        max-width: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        pointer-events: none !important;
+        transform: translateX(-6px);
+        transition: opacity 0.09s ease-in, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease-in !important;
+    }
+
     body.sidebar-collapsed .submenu-arrow {
         opacity: 0 !important;
         max-width: 0 !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
         pointer-events: none !important;
-        transform: translateX(-8px);
-        transition: opacity 0.3s ease-in-out, max-width 0.3s ease-in-out, transform 0.3s ease-in-out;
+        display: none !important;
+        transition: opacity 0.08s ease-in, max-width 0.2s ease-in !important;
     }
 
     body:not(.sidebar-collapsed) .bps-brand-text,
     body:not(.sidebar-collapsed) .nav-link-text,
     body:not(.sidebar-collapsed) .sidebar-btn-text,
-    body:not(.sidebar-collapsed) .theme-mode-label,
-    body:not(.sidebar-collapsed) .submenu-arrow {
+    body:not(.sidebar-collapsed) .theme-mode-label {
         transform: translateX(0);
-        transition: opacity 0.3s ease-in-out, max-width 0.3s ease-in-out, transform 0.3s ease-in-out;
+        transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.04s !important;
+    }
+
+    body:not(.sidebar-collapsed) .submenu-arrow {
+        opacity: 0.7 !important;
+        max-width: 20px !important;
+        margin-left: auto !important;
+        transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     body.sidebar-collapsed .theme-switch-pill {

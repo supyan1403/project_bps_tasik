@@ -50,7 +50,7 @@
                         <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-master" onclick="navigateAdminTab('master', this)"><i class="bi bi-book"></i> <span class="nav-link-text">Master Kolom</span></div>
                         <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-header" onclick="navigateAdminTab('header', this)"><i class="bi bi-exclamation-triangle"></i> <span class="nav-link-text">Anomali Header</span></div>
                         <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-data" onclick="navigateAdminTab('data', this)"><i class="bi bi-exclamation-diamond"></i> <span class="nav-link-text">Anomali Data</span></div>
-                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-password" onclick="openSettingsModal()"><i class="bi bi-key"></i> <span class="nav-link-text">Ganti Password</span></div>
+                        <div class="nav-link subnav-link d-flex align-items-center rounded-3 cursor-pointer text-muted fw-medium" id="nav-admin-password" onclick="if (typeof toggleMobileSidebar === 'function' && document.body.classList.contains('mobile-sidebar-active')) toggleMobileSidebar(); openSettingsModal()"><i class="bi bi-key"></i> <span class="nav-link-text">Ganti Password</span></div>
                     </div>
                     <!-- Floating Popover (Ketika Sidebar Tertutup) -->
                     <div class="sidebar-floating-popover shadow-lg" id="flyout-admin-submenu">
@@ -73,7 +73,7 @@
                             <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-data" data-tab="data" onclick="navigateAdminTab('data', this)">
                                 <i class="bi bi-exclamation-diamond"></i> <span>Anomali Data</span>
                             </div>
-                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-password" onclick="openSettingsModal()">
+                            <div class="popover-item d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-2 cursor-pointer text-muted fw-medium" id="popover-admin-password" onclick="if (typeof toggleMobileSidebar === 'function' && document.body.classList.contains('mobile-sidebar-active')) toggleMobileSidebar(); openSettingsModal()">
                                 <i class="bi bi-key"></i> <span>Ganti Password</span>
                             </div>
                         </div>

@@ -2422,13 +2422,16 @@ function updateRoleUI(role) {
 
         document.body.classList.toggle('role-pegawai', !isAdmin);
 
-        // Pastikan state sidebar-collapsed langsung terkunci sebelum browser render frame berikutnya
+        // Pastikan state sidebar-collapsed langsung terkunci sebelum browser render frame berikutnya (hanya desktop)
         const savedState = localStorage.getItem('sipedas_sidebar_collapsed');
         const hasCookie = document.cookie.indexOf('sipedas_sidebar_collapsed=true') !== -1;
         const isCollapsed = savedState === 'true' || (savedState === null && hasCookie);
-        if (isCollapsed) {
+        if (isCollapsed && window.innerWidth >= 992) {
             document.body.classList.add('sidebar-collapsed');
             document.documentElement.classList.add('sidebar-collapsed-early');
+        } else {
+            document.body.classList.remove('sidebar-collapsed');
+            document.documentElement.classList.remove('sidebar-collapsed-early');
         }
 
         requestAnimationFrame(() => {

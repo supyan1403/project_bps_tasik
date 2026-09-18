@@ -826,6 +826,10 @@ function toggleMobileSidebar() {
         document.body.classList.remove('mobile-sidebar-active');
         document.body.style.overflow = '';
     } else {
+        if (window.innerWidth < 992) {
+            document.body.classList.remove('sidebar-collapsed');
+            document.documentElement.classList.remove('sidebar-collapsed-early');
+        }
         overlay.style.display = 'block';
         requestAnimationFrame(() => {
             sidebar.classList.add('mobile-open');

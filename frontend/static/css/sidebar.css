@@ -310,43 +310,38 @@ html.no-sidebar-transition .sidebar-user-info {
     text-align: center;
 }
 
-/* Collapsed State: Logout button tetap merah dan icon tetap sejajar diam di tempat */
-body.sidebar-collapsed #btn-admin-logout-btn {
-    width: 100% !important;
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
-    padding: 0 10px !important;
-    margin: 0 !important;
-    justify-content: flex-start !important;
-    background: var(--danger-light) !important;
-    border: 1px solid var(--danger-light-bg) !important;
-    box-shadow: none !important;
-    border-radius: 10px !important;
-}
+/* Collapsed State (Khusus Desktop >= 992px): Logout button tetap merah dan icon tetap sejajar diam di tempat */
+@media (min-width: 992px) {
+    body.sidebar-collapsed #btn-admin-logout-btn {
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        padding: 0 10px !important;
+        margin: 0 !important;
+        justify-content: flex-start !important;
+        background: var(--danger-light) !important;
+        border: 1px solid var(--danger-light-bg) !important;
+        box-shadow: none !important;
+        border-radius: 10px !important;
+    }
 
-body.sidebar-collapsed #btn-admin-logout-btn i {
-    color: var(--danger) !important;
-    font-size: 1.25rem !important;
-    flex: 0 0 auto !important;
-    margin: 0 !important;
-    transform: none !important;
-}
+    body.sidebar-collapsed #btn-admin-logout-btn i {
+        color: var(--danger) !important;
+        font-size: 1.25rem !important;
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        transform: none !important;
+    }
 
-body.sidebar-collapsed #btn-admin-logout-btn .sidebar-btn-text {
-    display: none !important;
-    opacity: 0 !important;
-    max-width: 0 !important;
-    margin-left: 0 !important;
-}
+    body.sidebar-collapsed #btn-admin-logout-btn:hover {
+        background: var(--danger) !important;
+        border-color: var(--danger) !important;
+    }
 
-body.sidebar-collapsed #btn-admin-logout-btn:hover {
-    background: var(--danger) !important;
-    border-color: var(--danger) !important;
-}
-
-body.sidebar-collapsed #btn-admin-logout-btn:hover i {
-    color: var(--text-white) !important;
+    body.sidebar-collapsed #btn-admin-logout-btn:hover i {
+        color: var(--text-white) !important;
+    }
 }
 
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */
@@ -925,6 +920,42 @@ body.mobile-sidebar-active {
     .sidebar.mobile-open {
         transform: translateX(0);
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Mobile drawer: pastikan tombol logout selalu tampil penuh dengan icon + teks "Logout" */
+    #btn-admin-logout-btn,
+    body.sidebar-collapsed #btn-admin-logout-btn {
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 0 12px !important;
+        background-color: var(--danger-light) !important;
+        color: var(--danger) !important;
+        border: 1px solid var(--danger-light-bg) !important;
+        box-shadow: none !important;
+        border-radius: 10px !important;
+    }
+
+    #btn-admin-logout-btn i,
+    body.sidebar-collapsed #btn-admin-logout-btn i {
+        color: var(--danger) !important;
+        font-size: 1.15rem !important;
+        margin: 0 !important;
+    }
+
+    .sidebar-btn-text,
+    #btn-admin-logout-btn .sidebar-btn-text,
+    body.sidebar-collapsed #btn-admin-logout-btn .sidebar-btn-text {
+        display: inline-block !important;
+        opacity: 1 !important;
+        max-width: 200px !important;
+        margin-left: 10px !important;
+        visibility: visible !important;
+        color: var(--danger) !important;
     }
 
     .main-content {

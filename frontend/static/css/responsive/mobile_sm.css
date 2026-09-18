@@ -564,32 +564,22 @@
         justify-content: center !important;
     }
 
-    /* Admin filter search bar - extra small */
-    .admin-filter-bar .input-group-text {
-        min-width: 38px !important;
-        padding: 0.35rem 0.45rem !important;
+    /* Admin filter search bar - compact radius fix */
+    .admin-filter-bar .input-group {
+        border-radius: 8px !important;
+        overflow: hidden !important;
     }
 
-    .admin-filter-bar .input-group-text i {
-        font-size: 0.88rem !important;
+    .admin-filter-bar .input-group-text {
+        border-radius: 8px 0 0 8px !important;
+        padding: 0.25rem 0.5rem !important;
     }
 
     .admin-filter-bar .form-control {
-        padding: 0.35rem 0.65rem !important;
+        border-radius: 0 8px 8px 0 !important;
         font-size: 0.8rem !important;
-        min-height: 38px !important;
+        padding: 0.25rem 0.6rem !important;
     }
-    .admin-filter-item .form-select {
-        font-size: 0.78rem !important;
-        min-height: 38px !important;
-        padding: 0.3rem 2.2rem 0.3rem 0.6rem !important;
-    }
-
-    .admin-filter-bar .form-control,
-    .admin-filter-bar .input-group-text {
-        font-size: 0.78rem !important;
-        min-height: 38px !important;
-        padding: 0.3rem 0.6rem !important;
     }
 
     /* Admin Page - Compact stats bar tighter */

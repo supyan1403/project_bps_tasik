@@ -561,30 +561,32 @@
     }
 
     /* Admin filter search bar — unified search box handles styling */
-    /* Admin Page - Compact stats bar tighter */
+    /* Admin Page - Compact stats card bar */
     #admin-db-metrics-compact {
-        gap: 4px !important;
-        padding: 5px 8px !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
+        margin-bottom: 0.6rem;
+    }
+
+    .admin-mini-card {
+        padding: 8px 4px !important;
         border-radius: 8px !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
     }
 
-    .admin-db-metrics-compact .metric-chip {
-        font-size: 0.68rem !important;
-        padding: 2px 5px !important;
-        gap: 2px !important;
-        border-radius: 5px !important;
-        flex-shrink: 0 !important;
+    .admin-mini-icon {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        font-size: 0.8rem !important;
+        border-radius: 6px !important;
     }
 
-    .admin-db-metrics-compact .metric-chip i {
-        font-size: 0.75rem !important;
+    .admin-mini-card > div:last-child small {
+        font-size: 0.58rem !important;
     }
 
-    .admin-db-metrics-compact .metric-chip b {
-        font-size: 0.68rem !important;
+    .admin-mini-card > div:last-child .fw-bold {
+        font-size: 0.85rem !important;
     }
 }
 

@@ -2446,7 +2446,7 @@ function updateRoleUI(role) {
 
         if (btnLogin) btnLogin.style.setProperty('display', 'none', 'important');
         if (userWidget) userWidget.style.setProperty('display', 'none', 'important');
-        if (btnLogout) btnLogout.style.removeProperty('display');
+        if (btnLogout) btnLogout.style.setProperty('display', 'flex', 'important');
 
         document.querySelectorAll(".admin-only").forEach(el => el.style.removeProperty('display'));
 

@@ -537,6 +537,19 @@
     .glass-panel {
         padding: 0.85rem !important;
     }
+
+    /* Admin Filter Bar - Small Mobile */
+    .admin-filter-item .form-select {
+        font-size: 0.78rem !important;
+        min-height: 38px !important;
+        padding: 0.3rem 2.2rem 0.3rem 0.6rem !important;
+    }
+
+    .admin-filter-bar .form-control {
+        font-size: 0.78rem !important;
+        min-height: 38px !important;
+        padding: 0.3rem 0.6rem !important;
+    }
 }
 
 /* ===================== BREAKPOINT 6: EXTRA SMALL PHONE: < 375px ===================== */

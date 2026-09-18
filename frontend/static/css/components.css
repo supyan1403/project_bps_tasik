@@ -826,15 +826,27 @@ body.role-pegawai #btn-admin-login {
     font-weight: 600;
     height: 40px !important;
     line-height: 40px;
+    padding-left: 30px !important;
+    text-align: center !important;
+}
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    width: 30px !important;
+    padding: 0 !important;
 }
 .flatpickr-time {
     border-top: 1px solid #e5e7eb !important;
     padding: 8px 4px !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 4px !important;
 }
 .flatpickr-time input {
     border-radius: 6px !important;
     font-size: 0.95rem !important;
     font-weight: 600 !important;
+    width: 100% !important;
+    text-align: center !important;
 }
 
 /* ===================== TOGGLE SWITCH ===================== */

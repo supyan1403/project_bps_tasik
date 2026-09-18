@@ -49,7 +49,9 @@ body.role-pegawai:not(.role-admin) .main-content {
     flex-shrink: 0;
     position: relative;
     contain: layout;
-    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: width, min-width;
+    transform: translateZ(0);
+    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), min-width 0.35s cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* Zero-Flicker Transition Freeze during initial load & auth transitions */
@@ -121,7 +123,8 @@ html.no-sidebar-transition .sidebar-user-info {
     flex-direction: column !important;
     justify-content: center !important;
     flex-shrink: 0 !important;
-    transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(0);
+    transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s;
 }
 
 .bps-brand-text span {
@@ -193,7 +196,8 @@ html.no-sidebar-transition .sidebar-user-info {
     overflow: hidden !important;
     opacity: 1;
     max-width: 200px;
-    transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(0);
+    transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s;
 }
 
 .submenu-arrow {
@@ -208,7 +212,7 @@ html.no-sidebar-transition .sidebar-user-info {
     color: var(--text-muted) !important;
     opacity: 0.7;
     transform-origin: center;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
 .nav-link-text,
@@ -462,46 +466,55 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     body.sidebar-collapsed .theme-mode-label {
         opacity: 0 !important;
         max-width: 0 !important;
-        margin-left: 0 !important;
+        margin-left: 10px !important;
         margin-right: 0 !important;
         pointer-events: none !important;
-        transform: translateX(-6px);
-        transition: opacity 0.09s ease-in, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease-in !important;
+        transform: translateX(-4px) !important;
+        transition: opacity 0.14s ease-out, max-width 0.32s cubic-bezier(0.2, 0, 0, 1), transform 0.18s ease-out !important;
     }
 
     body.sidebar-collapsed .submenu-arrow {
         opacity: 0 !important;
         max-width: 0 !important;
-        margin-left: 0 !important;
+        margin-left: auto !important;
         margin-right: 0 !important;
         pointer-events: none !important;
-        display: none !important;
-        transition: opacity 0.08s ease-in, max-width 0.2s ease-in !important;
+        transform: scale(0.6) !important;
+        transition: opacity 0.12s ease-out, max-width 0.3s cubic-bezier(0.2, 0, 0, 1), transform 0.15s ease-out !important;
     }
 
     body:not(.sidebar-collapsed) .bps-brand-text,
     body:not(.sidebar-collapsed) .nav-link-text,
     body:not(.sidebar-collapsed) .sidebar-btn-text,
     body:not(.sidebar-collapsed) .theme-mode-label {
-        transform: translateX(0);
-        transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.04s !important;
+        transform: translateX(0) !important;
+        transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s !important;
     }
 
     body:not(.sidebar-collapsed) .submenu-arrow {
         opacity: 0.7 !important;
         max-width: 20px !important;
         margin-left: auto !important;
-        transition: opacity 0.16s ease-out 0.07s, max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: scale(1) !important;
+        transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s !important;
     }
 
     body.sidebar-collapsed .theme-switch-pill {
-        display: none !important;
         opacity: 0 !important;
         width: 0 !important;
         max-width: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         pointer-events: none !important;
+        transition: opacity 0.12s ease-out, max-width 0.3s cubic-bezier(0.2, 0, 0, 1), width 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+    }
+
+    body:not(.sidebar-collapsed) .theme-switch-pill {
+        opacity: 1 !important;
+        width: 36px !important;
+        max-width: 36px !important;
+        margin-left: auto !important;
+        transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), width 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
     }
 
     body.sidebar-collapsed #tabel-submenu,
@@ -553,15 +566,6 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         box-sizing: border-box !important;
     }
 
-    body.sidebar-collapsed .theme-switch-pill {
-        display: none !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        max-width: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        pointer-events: none !important;
-    }
 
     body.sidebar-collapsed .bps-brand-logo,
     body.sidebar-collapsed .nav-link i,
@@ -1234,10 +1238,7 @@ body.sidebar-collapsed #sidebar-user-btn > div {
 
 html.sidebar-collapsed-early body .sidebar-user-info,
 html.sidebar-collapsed-early body .sidebar-user-chevron,
-html.sidebar-collapsed-early body #sidebar-user-btn .sidebar-user-chevron,
-body.sidebar-collapsed .sidebar-user-info,
-body.sidebar-collapsed .sidebar-user-chevron,
-body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
+html.sidebar-collapsed-early body #sidebar-user-btn .sidebar-user-chevron {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
@@ -1247,6 +1248,27 @@ body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+body.sidebar-collapsed .sidebar-user-info,
+body.sidebar-collapsed .sidebar-user-chevron,
+body.sidebar-collapsed #sidebar-user-btn .sidebar-user-chevron {
+    width: 0 !important;
+    max-width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.14s ease-out, max-width 0.32s cubic-bezier(0.2, 0, 0, 1), width 0.32s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+body:not(.sidebar-collapsed) .sidebar-user-info,
+body:not(.sidebar-collapsed) .sidebar-user-chevron,
+body:not(.sidebar-collapsed) #sidebar-user-btn .sidebar-user-chevron {
+    opacity: 1 !important;
+    max-width: 140px !important;
+    transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), width 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
 html.sidebar-collapsed-early body .sidebar-user-avatar,

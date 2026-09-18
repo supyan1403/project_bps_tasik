@@ -809,6 +809,28 @@ body.role-pegawai #btn-admin-login {
     border-radius: 12px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
 }
+.flatpickr-months {
+    height: auto !important;
+    min-height: 44px !important;
+    overflow: visible !important;
+}
+.flatpickr-current-month {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    height: auto !important;
+    line-height: 44px !important;
+    padding: 0 35px !important;
+    text-align: center !important;
+}
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    width: 35px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
 .flatpickr-day {
     height: 40px !important;
     line-height: 40px !important;
@@ -817,22 +839,6 @@ body.role-pegawai #btn-admin-login {
 }
 .flatpickr-day:hover {
     background: #e8f0fe !important;
-}
-.flatpickr-months {
-    height: 44px !important;
-}
-.flatpickr-current-month {
-    font-size: 0.9rem;
-    font-weight: 600;
-    height: 44px !important;
-    line-height: 44px;
-    padding-left: 30px !important;
-    text-align: center !important;
-}
-.flatpickr-prev-month,
-.flatpickr-next-month {
-    width: 30px !important;
-    padding: 0 !important;
 }
 .flatpickr-time {
     border-top: 1px solid #e5e7eb !important;

@@ -285,6 +285,27 @@ html.no-sidebar-transition .sidebar-user-info {
     text-align: center;
 }
 
+/* Collapsed State: Logout button menjadi icon-only */
+body.sidebar-collapsed #btn-admin-logout-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 8px !important;
+}
+
+body.sidebar-collapsed #btn-admin-logout-btn i {
+    color: var(--text-secondary) !important;
+    font-size: 1.25rem !important;
+}
+
+body.sidebar-collapsed #btn-admin-logout-btn:hover {
+    background: var(--sidebar-hover) !important;
+}
+
+body.sidebar-collapsed #btn-admin-logout-btn:hover i {
+    color: var(--danger) !important;
+}
+
 /* Floating popover hanya untuk sidebar collapse — sembunyikan saat expanded */
 body:not(.sidebar-collapsed) .sidebar-floating-popover {
     display: none !important;

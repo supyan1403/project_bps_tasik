@@ -545,7 +545,8 @@
         padding: 0.3rem 2.2rem 0.3rem 0.6rem !important;
     }
 
-    .admin-filter-bar .form-control {
+    .admin-filter-bar .form-control,
+    .admin-filter-bar .input-group-text {
         font-size: 0.78rem !important;
         min-height: 38px !important;
         padding: 0.3rem 0.6rem !important;

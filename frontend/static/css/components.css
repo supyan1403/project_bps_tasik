@@ -810,22 +810,22 @@ body.role-pegawai #btn-admin-login {
     box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
 }
 .flatpickr-day {
-    height: 34px !important;
-    line-height: 34px !important;
-    font-size: 0.82rem;
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: 0.85rem;
     border-radius: 8px !important;
 }
 .flatpickr-day:hover {
     background: #e8f0fe !important;
 }
 .flatpickr-months {
-    height: 40px !important;
+    height: 44px !important;
 }
 .flatpickr-current-month {
     font-size: 0.9rem;
     font-weight: 600;
-    height: 40px !important;
-    line-height: 40px;
+    height: 44px !important;
+    line-height: 44px;
     padding-left: 30px !important;
     text-align: center !important;
 }

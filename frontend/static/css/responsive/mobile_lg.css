@@ -834,7 +834,72 @@
         font-size: 0.74rem !important;
     }
 
-    /* Admin Filter Bar - Mobile Full-Width Stack */
+    /* Admin Page - Compact Buttons & Search */
+    #page-admin .glass-panel.p-4 {
+        padding: 0.85rem 0.75rem !important;
+    }
+
+    #page-admin h5.fw-bold {
+        font-size: 1rem !important;
+    }
+
+    #page-admin .btn-outline-primary.btn-sm,
+    #page-admin .btn-primary.btn-sm,
+    #page-admin .btn-outline-danger.btn-sm {
+        font-size: 0.78rem !important;
+        padding: 5px 12px !important;
+        min-height: 34px !important;
+        border-radius: 8px !important;
+        gap: 4px !important;
+    }
+
+    #page-admin .btn-outline-primary.btn-sm i,
+    #page-admin .btn-primary.btn-sm i,
+    #page-admin .btn-outline-danger.btn-sm i {
+        font-size: 0.85rem !important;
+    }
+
+    /* Master Kolom action buttons row */
+    #page-admin .d-flex.gap-2 > .btn {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* Admin filter search bar - proper input group styling */
+    .admin-filter-bar .input-group {
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    .admin-filter-bar .input-group-text {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 42px !important;
+        padding: 0.4rem 0.5rem !important;
+        border-radius: 8px 0 0 8px !important;
+        background: var(--bg-input, #fff) !important;
+        border-color: var(--border, #e2e8f0) !important;
+    }
+
+    .admin-filter-bar .input-group-text i {
+        font-size: 0.95rem !important;
+        color: var(--text-muted, #64748b) !important;
+    }
+
+    .admin-filter-bar .form-control {
+        padding: 0.4rem 0.75rem !important;
+        border-radius: 0 8px 8px 0 !important;
+        font-size: 0.82rem !important;
+        min-height: 42px !important;
+        border-color: var(--border, #e2e8f0) !important;
+    }
+
+    .admin-filter-bar .form-control::placeholder {
+        font-size: 0.82rem !important;
+        color: var(--text-secondary, #94a3b8) !important;
+    }
+}
     .admin-filter-bar {
         gap: 0.75rem !important;
     }

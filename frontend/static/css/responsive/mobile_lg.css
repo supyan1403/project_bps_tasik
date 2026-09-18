@@ -832,54 +832,45 @@
     }
 
     #admin-db-metrics-compact {
-        display: flex !important;
-        align-items: center;
-        gap: 5px !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        padding: 6px 10px !important;
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 6px !important;
         margin-bottom: 0.75rem;
+    }
+
+    .admin-mini-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 10px 6px !important;
         background: var(--bg-card, #fff);
         border: 1px solid var(--border, #e2e8f0);
-        border-radius: 10px;
-        scrollbar-width: none !important;
+        border-radius: 10px !important;
+        text-align: center !important;
     }
 
-    #admin-db-metrics-compact::-webkit-scrollbar {
-        display: none !important;
+    .admin-mini-icon {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.9rem !important;
     }
 
-    .admin-db-metrics-compact .metric-chip {
-        display: inline-flex !important;
-        align-items: center;
-        gap: 3px !important;
-        font-size: 0.72rem !important;
-        color: var(--text-secondary, #64748b);
-        padding: 3px 7px !important;
-        background: var(--bg-hover, #f8fafc);
-        border-radius: 6px;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
+    .admin-mini-card > div:last-child {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1px !important;
+        width: 100% !important;
     }
 
-    .admin-db-metrics-compact .metric-chip b {
-        color: var(--text-primary, #0f172a);
-        font-weight: 700;
-    }
-
-    .admin-db-metrics-compact .metric-chip i {
-        font-size: 0.85rem;
-        color: var(--primary, #2563eb);
-    }
-
-    .admin-db-metrics-compact .metric-chip.status-chip {
-        background: #ecfdf5 !important;
-        color: #059669 !important;
-    }
-
-    .admin-db-metrics-compact .metric-chip.status-chip i {
-        color: #059669 !important;
+    .admin-mini-card-status {
+        border-color: #bbf7d0 !important;
     }
 
     /* Admin Page - Compact Buttons & Search */

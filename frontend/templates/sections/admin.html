@@ -97,13 +97,28 @@
                         </div>
                     </div>
 
-                    <!-- Compact inline stats for mobile (hidden on md+) -->
+                    <!-- Compact card-style stats for mobile -->
                     <div class="admin-db-metrics-compact d-none" id="admin-db-metrics-compact">
-                        <span class="metric-chip"><i class="bi bi-journal-bookmark"></i><b id="compact-docs">0</b></span>
-                        <span class="metric-chip"><i class="bi bi-table"></i><b id="compact-tables">0</b></span>
-                        <span class="metric-chip"><i class="bi bi-hdd-stack"></i><b id="compact-rows">0</b></span>
-                        <span class="metric-chip"><i class="bi bi-grid-3x3"></i><b id="compact-cells">0</b></span>
-                        <span class="metric-chip status-chip"><i class="bi bi-shield-check"></i>OK</span>
+                        <div class="admin-mini-card">
+                            <div class="admin-mini-icon" style="background:#f0f9ff;color:#0284c7;"><i class="bi bi-journal-bookmark"></i></div>
+                            <div><small class="text-muted d-block" style="font-size:0.65rem;font-weight:600;">PUBLIKASI</small><span class="fw-bold" id="compact-docs" style="font-size:1rem;">0</span></div>
+                        </div>
+                        <div class="admin-mini-card">
+                            <div class="admin-mini-icon" style="background:var(--primary-faint,#eff6ff);color:var(--primary,#1e40af);"><i class="bi bi-table"></i></div>
+                            <div><small class="text-muted d-block" style="font-size:0.65rem;font-weight:600;">TABEL</small><span class="fw-bold" id="compact-tables" style="font-size:1rem;">0</span></div>
+                        </div>
+                        <div class="admin-mini-card">
+                            <div class="admin-mini-icon" style="background:#eff6ff;color:#2563eb;"><i class="bi bi-hdd-stack"></i></div>
+                            <div><small class="text-muted d-block" style="font-size:0.65rem;font-weight:600;">BARIS</small><span class="fw-bold" id="compact-rows" style="font-size:1rem;">0</span></div>
+                        </div>
+                        <div class="admin-mini-card">
+                            <div class="admin-mini-icon" style="background:#ecfdf5;color:#059669;"><i class="bi bi-grid-3x3"></i></div>
+                            <div><small class="text-muted d-block" style="font-size:0.65rem;font-weight:600;">TITIK DATA</small><span class="fw-bold" id="compact-cells" style="font-size:1rem;">0</span></div>
+                        </div>
+                        <div class="admin-mini-card admin-mini-card-status">
+                            <div class="admin-mini-icon" style="background:#f0fdf4;color:#16a34a;"><i class="bi bi-shield-check"></i></div>
+                            <div><small class="text-muted d-block" style="font-size:0.65rem;font-weight:600;">STATUS</small><span class="fw-bold text-success" id="compact-status" style="font-size:1rem;">OK</span></div>
+                        </div>
                     </div>
 
                     <!-- 2. Glass Panel Inventaris Tabel -->

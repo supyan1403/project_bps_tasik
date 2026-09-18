@@ -509,17 +509,17 @@ kbd {
 }
 
 /* ===================== ROLE-BASED AUTH BUTTONS ===================== */
-#btn-admin-logout {
+#btn-admin-logout-btn {
     display: none !important;
 }
-body.role-admin #btn-admin-logout {
+body.role-admin #btn-admin-logout-btn {
     display: none !important;
 }
 body.role-admin #btn-admin-login {
     display: none !important;
 }
-body:not(.role-admin) #btn-admin-logout,
-body.role-pegawai #btn-admin-logout {
+body:not(.role-admin) #btn-admin-logout-btn,
+body.role-pegawai #btn-admin-logout-btn {
     display: none !important;
 }
 body:not(.role-admin) #btn-admin-login,
@@ -528,7 +528,7 @@ body.role-pegawai #btn-admin-login {
 }
 
 #btn-admin-login,
-#btn-admin-logout {
+#btn-admin-logout-btn {
     padding: 0.5rem 0.85rem;
     font-size: 0.82rem;
     transition: all var(--transition-normal);
@@ -547,12 +547,12 @@ body.role-pegawai #btn-admin-login {
     transform: translateY(-1px);
 }
 
-#btn-admin-logout {
+#btn-admin-logout-btn {
     background-color: var(--danger-light);
     color: var(--danger);
     border: 1px solid var(--danger-light-bg);
 }
-#btn-admin-logout:hover {
+#btn-admin-logout-btn:hover {
     background-color: var(--danger) !important;
     color: var(--text-white) !important;
     border-color: var(--danger) !important;

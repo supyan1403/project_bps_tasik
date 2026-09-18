@@ -49,7 +49,7 @@ body.role-pegawai:not(.role-admin) .main-content {
     flex-shrink: 0;
     position: relative;
     contain: layout;
-    transition: width 0.15s ease-out, min-width 0.15s ease-out;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Zero-Flicker Transition Freeze during initial load & auth transitions */
@@ -142,7 +142,7 @@ html.no-sidebar-transition .sidebar-user-info {
     overflow: hidden;
     margin: 0 !important;
     width: 100%;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .nav-link i,
@@ -246,14 +246,12 @@ html.no-sidebar-transition .sidebar-user-info {
 
 .sidebar-footer-container {
     flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Sidebar Footer Buttons */
 .sidebar-footer-action .btn {
-    padding: 0.6rem 1rem !important;
-    font-size: 0.85rem !important;
-    border-radius: 8px !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .sidebar-footer-action .btn-outline-danger {
@@ -444,7 +442,16 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         margin-left: 0 !important;
         margin-right: 0 !important;
         pointer-events: none !important;
-        transition: opacity 0.1s ease-out, max-width 0.15s ease-out;
+        transform: translateX(-8px);
+        transition: opacity 0.2s ease, max-width 0.2s ease, transform 0.2s ease;
+    }
+
+    body:not(.sidebar-collapsed) .bps-brand-text,
+    body:not(.sidebar-collapsed) .nav-link-text,
+    body:not(.sidebar-collapsed) .sidebar-btn-text,
+    body:not(.sidebar-collapsed) .theme-mode-label,
+    body:not(.sidebar-collapsed) .submenu-arrow {
+        transform: translateX(0);
     }
 
     body.sidebar-collapsed .theme-switch-pill {
@@ -531,6 +538,7 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         margin: 0 !important;
         padding: 0 !important;
         flex-shrink: 0 !important;
+        transition: transform 0.2s ease, margin 0.2s ease;
     }
 }
 

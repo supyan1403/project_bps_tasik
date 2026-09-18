@@ -538,7 +538,47 @@
         padding: 0.85rem !important;
     }
 
-    /* Admin Filter Bar - Small Mobile */
+    /* Admin Page - Extra Compact Buttons & Search */
+    #page-admin .glass-panel.p-4 {
+        padding: 0.75rem 0.65rem !important;
+    }
+
+    #page-admin .btn-outline-primary.btn-sm,
+    #page-admin .btn-primary.btn-sm,
+    #page-admin .btn-outline-danger.btn-sm {
+        font-size: 0.76rem !important;
+        padding: 4px 10px !important;
+        min-height: 32px !important;
+        border-radius: 7px !important;
+        gap: 3px !important;
+    }
+
+    #page-admin .btn-outline-primary.btn-sm i,
+    #page-admin .btn-primary.btn-sm i,
+    #page-admin .btn-outline-danger.btn-sm i {
+        font-size: 0.82rem !important;
+    }
+
+    #page-admin .d-flex.gap-2 > .btn {
+        flex: 1 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* Admin filter search bar - extra small */
+    .admin-filter-bar .input-group-text {
+        min-width: 38px !important;
+        padding: 0.35rem 0.45rem !important;
+    }
+
+    .admin-filter-bar .input-group-text i {
+        font-size: 0.88rem !important;
+    }
+
+    .admin-filter-bar .form-control {
+        padding: 0.35rem 0.65rem !important;
+        font-size: 0.8rem !important;
+        min-height: 38px !important;
+    }
     .admin-filter-item .form-select {
         font-size: 0.78rem !important;
         min-height: 38px !important;

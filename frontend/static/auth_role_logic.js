@@ -15,6 +15,13 @@ function togglePasswordVisibility(inputId, btnEl) {
 }
 
 async function openSettingsModal() {
+    // Tutup mobile sidebar otomatis jika sedang terbuka agar modal tidak tertutup oleh sidebar
+    if (typeof toggleMobileSidebar === 'function' && document.body.classList.contains('mobile-sidebar-active')) {
+        toggleMobileSidebar();
+    }
+    // Tutup floating popover jika ada
+    document.querySelectorAll('.sidebar-floating-popover').forEach(el => el.classList.remove('active'));
+
     const isDark = document.body.classList.contains('dark-mode') || document.documentElement.getAttribute('data-bs-theme') === 'dark';
     const { value: isSuccess } = await Swal.fire({
         html: `

@@ -910,6 +910,17 @@
     }
 
     /* Admin filter search bar */
+    .admin-filter-bar .input-group {
+        width: 100% !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+    }
+
+    .admin-filter-bar .input-group {
+        width: 100% !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+    }
 
     .admin-filter-bar .input-group-text {
         border-radius: 10px 0 0 10px !important;

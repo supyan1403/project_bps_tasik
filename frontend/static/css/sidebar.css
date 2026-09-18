@@ -169,7 +169,7 @@ html.no-sidebar-transition .sidebar-user-info {
 .nav-link i::before,
 .theme-mode-icon::before,
 #btn-admin-login i::before,
-#btn-admin-logout i::before {
+#btn-admin-logout-btn i::before {
     vertical-align: 0 !important;
     line-height: 1 !important;
     display: inline-block !important;
@@ -291,11 +291,18 @@ body.sidebar-collapsed #btn-admin-logout-btn {
     border: none !important;
     box-shadow: none !important;
     padding: 8px !important;
+    gap: 0 !important;
 }
 
 body.sidebar-collapsed #btn-admin-logout-btn i {
     color: var(--text-secondary) !important;
     font-size: 1.25rem !important;
+    flex: 0 0 auto !important;
+    margin: 0 auto !important;
+}
+
+body.sidebar-collapsed #btn-admin-logout-btn .sidebar-btn-text {
+    display: none !important;
 }
 
 body.sidebar-collapsed #btn-admin-logout-btn:hover {

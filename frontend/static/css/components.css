@@ -1065,6 +1065,79 @@ span.flatpickr-weekday {
     transform: translateY(0) !important;
 }
 
+/* Maintenance DateTime Input Control (Anti-wrap, sleek design) */
+.maintenance-input-wrap {
+    position: relative;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+}
+.maintenance-input-icon {
+    position: absolute;
+    left: 11px;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #64748b);
+    pointer-events: none;
+    z-index: 2;
+}
+.maintenance-input-control {
+    width: 100% !important;
+    padding: 0.45rem 2.2rem 0.45rem 2.2rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    background: var(--bg-card, #ffffff) !important;
+    border: 1.5px solid var(--border, #cbd5e1) !important;
+    border-radius: 8px !important;
+    color: var(--text-primary, #0f172a) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease-in-out !important;
+    height: 38px !important;
+    box-sizing: border-box !important;
+}
+.maintenance-input-control:hover {
+    border-color: var(--primary, #2563eb) !important;
+}
+.maintenance-input-control:focus {
+    outline: none !important;
+    border-color: var(--primary, #2563eb) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+.maintenance-input-action-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--text-secondary, #64748b);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    z-index: 2;
+}
+.maintenance-input-action-btn:hover {
+    background: var(--bg-page, #f1f5f9);
+    color: var(--primary, #2563eb);
+}
+
+.flatpickr-calendar.arrowBottom:after {
+    border-top-color: var(--bg-card, #ffffff) !important;
+}
+.flatpickr-calendar.arrowBottom:before {
+    border-top-color: var(--border, #e2e8f0) !important;
+}
+.flatpickr-calendar.arrowTop:after {
+    border-bottom-color: var(--bg-card, #ffffff) !important;
+}
+.flatpickr-calendar.arrowTop:before {
+    border-bottom-color: var(--border, #e2e8f0) !important;
+}
+
 /* ===================== TOGGLE SWITCH ===================== */
 .custom-switch-wrapper {
     display: inline-flex;

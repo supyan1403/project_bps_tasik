@@ -29,17 +29,12 @@
                                         </label>
                                     </div>
                                     <div id="maintenance-datetime-group" style="display:none;">
-                                        <label class="form-label small fw-semibold text-muted mb-1 d-flex justify-content-between align-items-center" for="maintenance-end-input">
-                                            <span><i class="bi bi-clock-history me-1 text-primary"></i>Waktu Selesai Pemeliharaan</span>
+                                        <label class="form-label small fw-semibold text-muted mb-1.5" for="maintenance-end-input">
+                                            <i class="bi bi-clock-history me-1 text-primary"></i>Waktu Selesai Pemeliharaan
                                         </label>
-                                        <div class="input-group input-group-sm mb-2">
-                                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-calendar-event"></i></span>
-                                            <input type="text" id="maintenance-end-input" class="form-control form-control-sm border-start-0" placeholder="Pilih tanggal & waktu..." style="background-color: var(--bg-card); cursor: pointer;" readonly>
-                                            <button class="btn btn-outline-secondary" type="button" onclick="if(window._maintenanceFlatpickr) window._maintenanceFlatpickr.open();" title="Buka Kalender"><i class="bi bi-pencil-square"></i></button>
-                                        </div>
 
-                                        <!-- Quick Presets -->
-                                        <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2.5" id="maintenance-quick-presets">
+                                        <!-- Quick Presets placed ABOVE input so never covered by calendar -->
+                                        <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2" id="maintenance-quick-presets">
                                             <span class="text-muted" style="font-size: 0.72rem;">Preset cepat:</span>
                                             <button type="button" class="maintenance-preset-btn" onclick="setMaintenancePreset(30)">+30m</button>
                                             <button type="button" class="maintenance-preset-btn" onclick="setMaintenancePreset(60)">+1 Jam</button>
@@ -48,13 +43,22 @@
                                             <button type="button" class="maintenance-preset-btn" onclick="setMaintenancePreset('tomorrow_morning')">Besok 08:00</button>
                                         </div>
 
+                                        <!-- Unified Input Wrapper (Anti-line break) -->
+                                        <div class="maintenance-input-wrap mb-2">
+                                            <i class="bi bi-calendar-event maintenance-input-icon"></i>
+                                            <input type="text" id="maintenance-end-input" class="maintenance-input-control" placeholder="Pilih tanggal & waktu..." readonly>
+                                            <button type="button" class="maintenance-input-action-btn" onclick="if(window._maintenanceFlatpickr) window._maintenanceFlatpickr.open();" title="Buka Kalender">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        </div>
+
                                         <!-- Realtime Duration Estimation Box -->
-                                        <div class="alert alert-light border py-1.5 px-2.5 mb-2 text-muted rounded-2 d-flex align-items-center gap-2" id="maintenance-estimate-box" style="display:none; font-size: 0.75rem;">
+                                        <div class="alert alert-light border py-1.5 px-2.5 mb-2 text-muted rounded-2 d-flex align-items-center gap-2" id="maintenance-estimate-box" style="display:none; font-size: 0.75rem; max-width: 360px;">
                                             <i class="bi bi-info-circle-fill text-primary flex-shrink-0"></i>
                                             <span id="maintenance-estimate-text">Estimasi durasi: -</span>
                                         </div>
 
-                                        <div class="form-text" style="font-size: 0.72rem; line-height: 1.4;">Format: Tanggal Jam (24 jam). Sistem akan otomatis menonaktifkan mode pemeliharaan saat waktu ini tercapai.</div>
+                                        <div class="form-text" style="font-size: 0.72rem; line-height: 1.4; max-width: 360px;">Format: Tanggal Jam (24 jam). Sistem akan otomatis menonaktifkan mode pemeliharaan saat waktu ini tercapai.</div>
                                     </div>
                                 </div>
                             </div>

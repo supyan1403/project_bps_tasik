@@ -1,4 +1,4 @@
-﻿/* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */
+/* ===================== BREAKPOINT 3: LARGE PHONE: < 768px ===================== */
 @media (max-width: 767.98px) {
     .widget {
         padding: 1rem;
@@ -908,6 +908,11 @@
 
     .admin-filter-item {
         margin-bottom: 0 !important;
+    }
+
+    .admin-search-box {
+        min-height: 42px !important;
+        height: 42px !important;
     }
 
     .admin-filter-item .form-select {

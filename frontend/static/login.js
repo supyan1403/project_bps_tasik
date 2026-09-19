@@ -15,6 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!loginForm || !pwInput) return;
 
+    // Desktop autofocus only (avoid opening keyboard automatically on mobile)
+    if (window.innerWidth >= 900) {
+        pwInput.focus();
+    }
+
+    // Keep mobile viewport stable when keyboard appears
+    if (window.innerWidth < 900) {
+        pwInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                if (document.body) document.body.scrollTop = 0;
+            }, 50);
+        });
+    }
+
     // Toggle password visibility
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {

@@ -822,8 +822,15 @@ body.role-pegawai #btn-admin-login {
 .flatpickr-current-month span.cur-month {
     font-size: 0.75rem !important;
 }
+.flatpickr-current-month .numInputWrapper {
+    width: auto !important;
+}
 .flatpickr-current-month input.cur-year {
     font-size: 0.75rem !important;
+    padding: 0 0 0 0.5ch !important;
+    border: 0 !important;
+    background: transparent !important;
+    width: auto !important;
 }
 .flatpickr-prev-month i,
 .flatpickr-next-month i {

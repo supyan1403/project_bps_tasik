@@ -325,9 +325,9 @@ function initInsightFilterOptions() {
         } else if (sel === 2 && tsInsightSelectedTrends.has('up') && tsInsightSelectedTrends.has('down')) {
             trendBtnText.textContent = 'Naik & Turun (2)';
         } else if (sel === 1) {
-            if (tsInsightSelectedTrends.has('up')) trendBtnText.textContent = 'â–² Kenaikan Saja';
-            else if (tsInsightSelectedTrends.has('down')) trendBtnText.textContent = 'â–¼ Penurunan Saja';
-            else if (tsInsightSelectedTrends.has('stagnant')) trendBtnText.textContent = 'â€• Stagnan Saja';
+            if (tsInsightSelectedTrends.has('up')) trendBtnText.textContent = '▲ Kenaikan Saja';
+            else if (tsInsightSelectedTrends.has('down')) trendBtnText.textContent = '▼ Penurunan Saja';
+            else if (tsInsightSelectedTrends.has('stagnant')) trendBtnText.textContent = '― Stagnan Saja';
             else if (tsInsightSelectedTrends.has('empty')) trendBtnText.textContent = '- Strip Saja';
         } else {
             trendBtnText.textContent = `${sel} Tren Terpilih`;
@@ -623,7 +623,7 @@ function computeAndRenderTimeSeriesInsights() {
 
         if (gainerNameEl) gainerNameEl.textContent = g.entity;
         if (gainerBadgeEl) gainerBadgeEl.textContent = gPct;
-        if (gainerDetailEl) gainerDetailEl.innerHTML = `${gStartFmt} â†’ ${gEndFmt}${uSuffix} (${gDeltaFmt})`;
+        if (gainerDetailEl) gainerDetailEl.innerHTML = `${gStartFmt} → ${gEndFmt}${uSuffix} (${gDeltaFmt})`;
     } else {
         if (gainerNameEl) gainerNameEl.textContent = 'Tidak Ada Kenaikan';
         if (gainerBadgeEl) gainerBadgeEl.textContent = '0%';
@@ -641,7 +641,7 @@ function computeAndRenderTimeSeriesInsights() {
 
         if (declinerNameEl) declinerNameEl.textContent = d.entity;
         if (declinerBadgeEl) declinerBadgeEl.textContent = dPct;
-        if (declinerDetailEl) declinerDetailEl.innerHTML = `${dStartFmt} â†’ ${dEndFmt}${uSuffix} (${dDeltaFmt})`;
+        if (declinerDetailEl) declinerDetailEl.innerHTML = `${dStartFmt} → ${dEndFmt}${uSuffix} (${dDeltaFmt})`;
     } else {
         if (declinerNameEl) declinerNameEl.textContent = 'Tidak Ada Penurunan';
         if (declinerBadgeEl) declinerBadgeEl.textContent = '0%';
@@ -750,7 +750,7 @@ function computeAndRenderTimeSeriesInsights() {
                 const isPos = item.pctChange > 0;
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
-                const icon = isPos ? 'â–² +' : (isNeg ? 'â–¼ ' : '');
+                const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
                 const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
                 pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
@@ -778,14 +778,14 @@ function computeAndRenderTimeSeriesInsights() {
                 const isPos = item.pctChange > 0;
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
-                const icon = isPos ? 'â–² +' : (isNeg ? 'â–¼ ' : '');
+                const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
                 const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
                 pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
 
             tableRowsHtml += `
                 <tr class="table-light fw-bold" style="background:#f1f5f9;">
-                    <td style="text-align:center; color:#3b82f6;">â˜…</td>
+                    <td style="text-align:center; color:#3b82f6;">★</td>
                     <td class="fw-bold text-dark">${escHtml(item.entity)} <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size:0.68rem;">Total</span></td>
                     <td style="text-align:right; font-variant-numeric:tabular-nums;">${startFmt}</td>
                     <td style="text-align:right; font-variant-numeric:tabular-nums; font-weight:700;">${endFmt}</td>
@@ -1666,7 +1666,7 @@ async function executeTimeSeriesExport() {
 
         const keywordTitle = tsCurrentKeyword ? tsCurrentKeyword.toUpperCase() : 'ANALISIS DERET WAKTU';
 
-        const yearPeriodStr = years.length > 1 ? `Periode: ${years[0]} â€“ ${years[years.length - 1]} (${years.length} Tahun)` : `Tahun: ${years[0]}`;
+        const yearPeriodStr = years.length > 1 ? `Periode: ${years[0]} – ${years[years.length - 1]} (${years.length} Tahun)` : `Tahun: ${years[0]}`;
 
 
 
@@ -1819,7 +1819,7 @@ async function executeTimeSeriesExport() {
                         <div style="display:flex; align-items:center; gap:12px;">
                             <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:36px; width:auto; object-fit:contain;">
                             <div>
-                                <div style="font-size:13px; font-weight:800; color:#0f2b5c;">SIPEDAS <span style="font-weight:600; color:#475569;">â€” Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span></div>
+                                <div style="font-size:13px; font-weight:800; color:#0f2b5c;">SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span></div>
                                 <div style="font-size:11px; font-weight:800; color:#1e293b; text-transform:uppercase; margin-top:2px;">Badan Pusat Statistik Kabupaten Tasikmalaya</div>
                             </div>
                         </div>
@@ -1921,7 +1921,7 @@ async function executeTimeSeriesExport() {
                             <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:32px; width:auto; object-fit:contain;">
                             <div>
                                 <div style="font-size:12px; font-weight:800; color:#0f2b5c; letter-spacing:0.3px; font-family:'Inter', sans-serif;">
-                                    SIPEDAS <span style="font-weight:600; color:#475569;">â€” Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                                    SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
                                 </div>
                                 <div style="font-size:10px; font-weight:800; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px; margin-top:1px; font-family:'Inter', sans-serif;">
                                     Badan Pusat Statistik Kabupaten Tasikmalaya
@@ -3451,7 +3451,7 @@ function renderAdminTables() {
 
 function toggleBackupIcon() {
     const icon = document.getElementById('admin-backup-icon');
-    if (icon) icon.textContent = icon.textContent.trim() === 'â–¶' ? 'â–¼' : 'â–¶';
+    if (icon) icon.textContent = icon.textContent.trim() === '▶' ? '▼' : '▶';
 }
 
 
@@ -4035,19 +4035,19 @@ function _showLegendEntityPopover(targetEl, entityName, years, dataPoints, color
             const isValid = (val !== null && val !== undefined && !isNaN(val));
             if (isValid) validValues.push(val);
 
-            let growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">â€”</span>`;
+            let growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">—</span>`;
             if (i > 0 && isValid) {
                 const prevVal = dataPoints[i - 1];
                 if (prevVal !== null && prevVal !== undefined && !isNaN(prevVal)) {
                     const diff = val - prevVal;
                     if (diff > 0.0001) {
                         const pct = prevVal !== 0 ? `+${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `+${formatIndoNumber(diff)}`;
-                        growthBadge = `<span style="background:rgba(34,197,94,0.16); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">â–² ${pct}</span>`;
+                        growthBadge = `<span style="background:rgba(34,197,94,0.16); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▲ ${pct}</span>`;
                     } else if (diff < -0.0001) {
                         const pct = prevVal !== 0 ? `${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `${formatIndoNumber(diff)}`;
-                        growthBadge = `<span style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">â–¼ ${pct}</span>`;
+                        growthBadge = `<span style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▼ ${pct}</span>`;
                     } else {
-                        growthBadge = `<span style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.22); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600; white-space:nowrap;">â€” 0%</span>`;
+                        growthBadge = `<span style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.22); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600; white-space:nowrap;">— 0%</span>`;
                     }
                 }
             } else if (i === 0 && isValid) {
@@ -4074,11 +4074,11 @@ function _showLegendEntityPopover(targetEl, entityName, years, dataPoints, color
         const last = validValues[validValues.length - 1];
         const totalDiff = last - first;
         if (totalDiff > 0.0001) {
-            trendBadge = `<span style="margin-left:auto; background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">â–² Naik (+${formatIndoNumber(totalDiff)})</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▲ Naik (+${formatIndoNumber(totalDiff)})</span>`;
         } else if (totalDiff < -0.0001) {
-            trendBadge = `<span style="margin-left:auto; background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">â–¼ Turun (${formatIndoNumber(totalDiff)})</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▼ Turun (${formatIndoNumber(totalDiff)})</span>`;
         } else {
-            trendBadge = `<span style="margin-left:auto; background:rgba(148,163,184,0.18); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-size:9.5px; font-weight:600; padding:1px 6px; border-radius:4px;">â€” Tetap (0)</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(148,163,184,0.18); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-size:9.5px; font-weight:600; padding:1px 6px; border-radius:4px;">— Tetap (0)</span>`;
         }
     }
 
@@ -4740,13 +4740,13 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                                 if (delta > 0) {
 
-                                    badgeText = `â–² +${formattedDelta}`;
+                                    badgeText = `▲ +${formattedDelta}`;
 
                                     isUp = true;
 
                                 } else if (delta < 0) {
 
-                                    badgeText = `â–¼ -${formattedDelta}`;
+                                    badgeText = `▼ -${formattedDelta}`;
 
                                     isUp = false;
 
@@ -6698,7 +6698,7 @@ async function matchColumnsToMaster(tableId, tableName) {
 
             <p style="font-size:0.8rem; color:var(--text-secondary, #64748b); margin-top:10px; text-align:left;">
 
-                <b>Persentase</b> = tingkat keyakinan pencocokan (hijau â‰¥90%, oranye â‰¥65%, merah &lt;65%).
+                <b>Persentase</b> = tingkat keyakinan pencocokan (hijau ≥90%, oranye ≥65%, merah &lt;65%).
 
                 Edit nilai master yang tersedia untuk menyesuaikan. Kosongkan input untuk melewati kolom.
 
@@ -6898,7 +6898,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <div style="display:flex; align-items:center; gap:8px;">
 
-                        <input type="text" id="${selectId(i)}" class="master-select-input" placeholder="â€ Cari & Pilih Master Kolom..." style="flex:1; min-width:220px; padding:8px 12px; border-radius:6px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; cursor:pointer;" readonly onclick="showCustomDropdown(${i})" title="Klik untuk memilih master kolom">
+                        <input type="text" id="${selectId(i)}" class="master-select-input" placeholder="🔍  Cari & Pilih Master Kolom..." style="flex:1; min-width:220px; padding:8px 12px; border-radius:6px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; cursor:pointer;" readonly onclick="showCustomDropdown(${i})" title="Klik untuk memilih master kolom">
 
                         ${sameKwCount > 1 ? `
 
@@ -6956,7 +6956,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                 <button type="button" style="background:#f1f5f9; color:var(--text-secondary, #475569); border:1px solid #cbd5e1; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('all')">Semua</button>
 
-                <button type="button" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('')">Â¢Ãƒâ€¦Ã¢â‚¬â„¢ Hapus Pilihan</button>
+                <button type="button" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('')">✕ Hapus Pilihan</button>
 
             </div>
 
@@ -6994,7 +6994,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <div class="custom-select-container" style="position: relative; flex: 1;">
 
-                        <input type="text" id="bulk-ren-sel" class="master-select-input" placeholder="â€ Cari & Pilih Master Kolom untuk diterapkan massal..." style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.9rem; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" readonly onclick="showBulkCustomDropdown()">
+                        <input type="text" id="bulk-ren-sel" class="master-select-input" placeholder="🔍  Cari & Pilih Master Kolom untuk diterapkan massal..." style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.9rem; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" readonly onclick="showBulkCustomDropdown()">
 
                         <div id="custom-dropdown-bulk" class="custom-select-dropdown" style="display: none; position: absolute; z-index: 10000; max-height: 380px; overflow-y: auto; background: #fff; border: 1.5px solid #2563eb; border-radius: 8px; margin-top: 6px; padding: 8px; width: 100%; box-shadow: 0 16px 36px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08);">
 
@@ -7012,7 +7012,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <button type="button" class="btn btn-sm" onclick="applyBulkMasterToChecked()" style="background: #2563eb; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 9px 18px; border-radius: 8px; border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25); cursor: pointer; white-space: nowrap;">
 
-                        <span>âš¡ Terapkan ke Kolom Tercentang</span>
+                        <span>⚡ Terapkan ke Kolom Tercentang</span>
 
                     </button>
 

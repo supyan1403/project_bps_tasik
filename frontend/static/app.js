@@ -1,6 +1,6 @@
 let __excelDragFiles = [];
 
-// Global error handler â€” tangkap unhandled JS errors
+// Global error handler — tangkap unhandled JS errors
 window.addEventListener('error', function(e) {
     const msg = (e.message || (e.error && e.error.message) || '').toString();
     if (
@@ -177,19 +177,19 @@ function formatCleanTableName(tableName) {
 
     // 2. Hapus referensi halaman seperti (Hal 46), (Hal 47, 48), (Halaman 12), (hlm. 10), dll.
 
-    s = s.replace(/\s*\((?:Hal|Halaman|hlm)[\s\d,\-â€“â€”\.\?]+\)/gi, '');
+    s = s.replace(/\s*\((?:Hal|Halaman|hlm)[\s\d,\-–—\.\?]+\)/gi, '');
 
     // 3. Hapus angka halaman dalam kurung di akhir jika hanya angka e.g. (198, 200)
 
-    s = s.replace(/\s*\(\s*\d+[\s,\d\-â€“â€”\.]*\)\s*$/g, '');
+    s = s.replace(/\s*\(\s*\d+[\s,\d\-–—\.]*\)\s*$/g, '');
 
     // 4. Hapus 'Tahun 2022', 'Pada Tahun 2021-2022', 'Year 2025' atau sisa 'Tahun' di ujung akhir
 
-    s = s.replace(/[,.\s]+(?:(?:pada|di)\s+)?(?:tahun|years?)\s*(?:(?:19|20)\d{2}[*\d]?(?:\s*(?:[-â€“â€”/]|dan|and|sd|s\/d|to|,)\s*(?:19|20)\d{2}[*\d]?)*.*)?$/i, '');
+    s = s.replace(/[,.\s]+(?:(?:pada|di)\s+)?(?:tahun|years?)\s*(?:(?:19|20)\d{2}[*\d]?(?:\s*(?:[-–—/]|dan|and|sd|s\/d|to|,)\s*(?:19|20)\d{2}[*\d]?)*.*)?$/i, '');
 
     // 5. Hapus tahun langsung jika tanpa kata 'tahun', misal ', 2022' atau ' 2021-2025'
 
-    s = s.replace(/[,.\s]+(?:19|20)\d{2}[*\d]?(?:\s*(?:[-â€“â€”/]|dan|and|sd|s\/d|to|,)\s*(?:19|20)\d{2}[*\d]?)*.*$/i, '');
+    s = s.replace(/[,.\s]+(?:19|20)\d{2}[*\d]?(?:\s*(?:[-–—/]|dan|and|sd|s\/d|to|,)\s*(?:19|20)\d{2}[*\d]?)*.*$/i, '');
 
     // 6. Hapus sisa kata 'Tahun' / 'Year' jika masih ada di ujung akhir
 
@@ -197,7 +197,7 @@ function formatCleanTableName(tableName) {
 
     // 7. Bersihkan sisa koma/strip/spasi di ujung kanan
 
-    return s.replace(/[,.\-\sâ€“â€”]+$/, '').trim();
+    return s.replace(/[,.\-\s–—]+$/, '').trim();
 
 }
 
@@ -208,7 +208,7 @@ function renderCleanTableTitleHtml(tableName, customClass = "") {
     // 1. Ekstrak nomor tabel di awal jika ada (e.g. 'Tabel 1.1.1 - ', '13.1 : ', '1.1.1 ')
     let num = '';
     let mainTitle = clean;
-    const numMatch = clean.match(/^(?:Tabel[\s_]*|)(\d+(?:\.\d+)*)\s*(?:[\-â€“â€”:]\s*|\.\s*|\s+)(.+)$/i);
+    const numMatch = clean.match(/^(?:Tabel[\s_]*|)(\d+(?:\.\d+)*)\s*(?:[\-–—:]\s*|\.\s*|\s+)(.+)$/i);
     if (numMatch && numMatch[1] && numMatch[2]) {
         num = numMatch[1].trim();
         mainTitle = numMatch[2].trim();
@@ -654,11 +654,11 @@ function extractHeaderKeyword(h) {
 
     // Leading year pattern:
 
-    s = s.replace(/^(?:tahun|thn|th\.?)?\s*\(?\d{4}(?:[\/\-]\d{2,4})?\)?\s*[-â€“â€”/:]*\s*/i, '');
+    s = s.replace(/^(?:tahun|thn|th\.?)?\s*\(?\d{4}(?:[\/\-]\d{2,4})?\)?\s*[-–—/:]*\s*/i, '');
 
     // Trailing year pattern:
 
-    s = s.replace(/\s*[-â€“â€”/:]*\s*(?:tahun|thn|th\.?)?\s*\(?\d{4}(?:[\/\-]\d{2,4})?\)?\s*$/i, '');
+    s = s.replace(/\s*[-–—/:]*\s*(?:tahun|thn|th\.?)?\s*\(?\d{4}(?:[\/\-]\d{2,4})?\)?\s*$/i, '');
 
     // Any remaining bracketed year like (2022) or (2021/2022)
 
@@ -666,7 +666,7 @@ function extractHeaderKeyword(h) {
 
     // Clean up trailing/leading dashes or punctuation
 
-    s = s.replace(/^[-â€“â€”/:\s]+|[-â€“â€”/:\s]+$/g, '').trim();
+    s = s.replace(/^[-–—/:\s]+|[-–—/:\s]+$/g, '').trim();
 
     return s || h.trim();
 
@@ -1113,7 +1113,7 @@ function filterMasterRegistration(q) {
 const API_BASE = "/api";
 
 // =====================================================================
-// GLOBAL FETCH INTERCEPTOR â€” detect 503 maintenance response
+// GLOBAL FETCH INTERCEPTOR — detect 503 maintenance response
 // =====================================================================
 const _originalFetch = window.fetch;
 window.fetch = async function(...args) {
@@ -1253,7 +1253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Handle /login path â€” trigger login modal otomatis
+    // Handle /login path — trigger login modal otomatis
     if (window.location.pathname === '/login') {
         if (currentUserRole === 'admin') {
             // Sudah admin, redirect ke root
@@ -1296,18 +1296,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             } catch(err) {}
         }
-        // Maintenance mode changed in another tab â†’ reload to show/hide maintenance page
+        // Maintenance mode changed in another tab → reload to show/hide maintenance page
         if (e.key === 'sipedas_maintenance_event' && e.newValue) {
             try {
                 const evt = JSON.parse(e.newValue);
                 localStorage.removeItem('sipedas_maintenance_event');
                 if (evt.mode === '1') {
-                    // Maintenance ON â†’ force maintenance view (skip admin bypass)
+                    // Maintenance ON → force maintenance view (skip admin bypass)
                     if (window.currentUserRole !== 'admin') {
                         window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
                     }
                 } else {
-                    // Maintenance OFF â†’ normal reload with cache bust
+                    // Maintenance OFF → normal reload with cache bust
                     window.location.href = '/?_t=' + Date.now();
                 }
             } catch(err) {}
@@ -1799,7 +1799,7 @@ function navigateToEditor(tableId, tableName, mode = 'csv') {
     let displayNameOnly = cleanName;
 
     // Pisahkan nomor tabel murni (misal: '1.1.2' dari 'Tabel 1.1.2' atau '1.1.2 - Judul')
-    const numMatch = cleanName.match(/^(?:Tabel[\s_]*|)(\d+(?:\.\d+)*)\s*(?:[\-â€“â€”:]\s*|\.\s*|\s+)(.+)$/i);
+    const numMatch = cleanName.match(/^(?:Tabel[\s_]*|)(\d+(?:\.\d+)*)\s*(?:[\-–—:]\s*|\.\s*|\s+)(.+)$/i);
     if (numMatch && numMatch[1] && numMatch[2]) {
         displayNum = numMatch[1].trim();
         displayNameOnly = numMatch[2].trim();
@@ -2598,7 +2598,7 @@ async function loadDashboardStats(isManual = false) {
                             </div>
                             <div class="d-flex align-items-center gap-2 recent-doc-subtext mt-1" style="font-size: 0.76rem;">
                                 <span class="d-inline-flex align-items-center"><i class="bi bi-calendar-event me-2 text-secondary"></i>Data ${d.year ? d.year - 1 : '-'}</span>
-                                <span class="opacity-40">â€¢</span>
+                                <span class="opacity-40">•</span>
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem; padding: 2.5px 8.5px; border-radius: 6px; font-weight: 600;">
                                     ${d.table_count || 0} Tabel
                                 </span>
@@ -3329,13 +3329,13 @@ function renderTrendChartMode(mode, animate = true) {
 
                     if (delta > 0) {
 
-                        badgeText = `â–² +${delta.toLocaleString('id-ID')}`;
+                        badgeText = `▲ +${delta.toLocaleString('id-ID')}`;
 
                         isUp = true;
 
                     } else if (delta < 0) {
 
-                        badgeText = `â–¼ -${Math.abs(delta).toLocaleString('id-ID')}`;
+                        badgeText = `▼ -${Math.abs(delta).toLocaleString('id-ID')}`;
 
                         isUp = false;
 
@@ -3584,11 +3584,11 @@ function renderTrendChartMode(mode, animate = true) {
 
                             const pct = prev > 0 ? ((diff / prev) * 100).toFixed(1) : '0';
 
-                            if (diff > 0) return ` ðŸ“ˆ Penambahan Data: â–² +${diff.toLocaleString('id-ID')} (+${pct}%)`;
+                            if (diff > 0) return ` 📈 Penambahan Data: ▲ +${diff.toLocaleString('id-ID')} (+${pct}%)`;
 
-                            if (diff < 0) return ` ðŸ“‰ Pengurangan Data: â–¼ -${Math.abs(diff).toLocaleString('id-ID')} (${pct}%)`;
+                            if (diff < 0) return ` 📉 Pengurangan Data: ▼ -${Math.abs(diff).toLocaleString('id-ID')} (${pct}%)`;
 
-                            return ` â†’ Penambahan Data: 0 (Tetap)`;
+                            return ` → Penambahan Data: 0 (Tetap)`;
 
                         }
 
@@ -3855,11 +3855,11 @@ async function loadDocuments() {
 
         let statusBadge = '';
 
-        if (doc.status === 'ready') statusBadge = '<span style="background:var(--badge-green-bg, #dcfce7);color:var(--badge-green-text, #15803d);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">âœ“ Siap</span>';
+        if (doc.status === 'ready') statusBadge = '<span style="background:var(--badge-green-bg, #dcfce7);color:var(--badge-green-text, #15803d);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">✓ Siap</span>';
 
         else if (doc.status.startsWith('extracting')) statusBadge = '<span style="background:var(--warning-light, #fef3c7);color:var(--warning-dark, #b45309);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">Â¢Â³ Ekstraksi...</span>';
 
-        else if (doc.status.startsWith('error')) statusBadge = `<span style="background:var(--danger-light, #fee2e2);color:var(--danger-dark, #b91c1c);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;" title="${escHtml(doc.status)}">âš ï¸ Gagal</span>`;
+        else if (doc.status.startsWith('error')) statusBadge = `<span style="background:var(--danger-light, #fee2e2);color:var(--danger-dark, #b91c1c);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;" title="${escHtml(doc.status)}">⚠️ Gagal</span>`;
 
         else statusBadge = `<span style="background:var(--bg-hover, #f1f5f9);color:var(--text-secondary, #475569);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">${doc.status.toUpperCase()}</span>`;
 
@@ -4126,7 +4126,7 @@ async function loadImportedExcelPublications() {
                         </div>
                         <div class="pub-card-subtext small d-flex gap-3 align-items-center flex-wrap" style="font-size:0.8rem; margin-left: 40px;">
                             <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-calendar3"></i> Tahun Publikasi: <strong class="pub-card-strong">${doc.year}</strong> (Data ${doc.year ? doc.year - 1 : '-'})</span>
-                            <span class="opacity-50">â€¢</span>
+                            <span class="opacity-50">•</span>
                             <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-table text-primary"></i> <strong class="text-primary">${count} Tabel</strong> Aktif</span>
                         </div>
                     </div>
@@ -4579,7 +4579,7 @@ async function importUploadExcel() {
 
         }
 
-        resultDiv.innerHTML = (data.message || 'Berhasil diimpor.') + ` &nbsp;<a href="javascript:void(0)" onclick="viewState.selectedDocId=${data.document_id}; viewState.selectedBabNum=null; navigateDataTabelTab('publikasi');" style="color:var(--info, #2563eb); font-weight:600; text-decoration:underline;">Buka publikasi â†’</a>`;
+        resultDiv.innerHTML = (data.message || 'Berhasil diimpor.') + ` &nbsp;<a href="javascript:void(0)" onclick="viewState.selectedDocId=${data.document_id}; viewState.selectedBabNum=null; navigateDataTabelTab('publikasi');" style="color:var(--info, #2563eb); font-weight:600; text-decoration:underline;">Buka publikasi →</a>`;
 
         showToast('success', 'Berhasil!', data.message || 'Tabel berhasil diimpor.', 4000);
 
@@ -4814,7 +4814,7 @@ async function openTocEditor(docId, filename) {
 
                         <input type="text" class="toc-title" value="${title}" placeholder="Judul Bab (e.g. Bab 1 - Geografi dan Iklim)" style="flex: 1; padding: 7px 10px; border: 1px solid var(--swal-cancel, #cbd5e1); border-radius: 6px; font-size: 0.88rem;">
 
-                        <button onclick="this.parentElement.remove()" style="background: var(--danger-light, #fee2e2); color: var(--danger, #ef4444); border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem; font-weight: bold;" title="Hapus Bab">âœ•</button>
+                        <button onclick="this.parentElement.remove()" style="background: var(--danger-light, #fee2e2); color: var(--danger, #ef4444); border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem; font-weight: bold;" title="Hapus Bab">✕</button>
 
                     </div>
 
@@ -4832,7 +4832,7 @@ async function openTocEditor(docId, filename) {
 
                     <input type="number" class="toc-end" value="${end}" placeholder="Akhir" style="width: 70px; padding: 6px; border: 1px solid var(--swal-cancel, #cbd5e1); border-radius: 4px; font-size: 0.85rem;">
 
-                    <button onclick="this.parentElement.remove()" style="background: var(--danger, #ef4444); color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem;">âœ•</button>
+                    <button onclick="this.parentElement.remove()" style="background: var(--danger, #ef4444); color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem;">✕</button>
 
                 </div>
 
@@ -5319,7 +5319,7 @@ async function openEditDocModal(docId, currentYear, currentDataYear, currentFile
 }
 
 async function editBabTitle(docId, babNum, currentTitle) {
-    let cleanCurrentTitle = (currentTitle || '').replace(/^Bab\s+\d+\s*[\-\â€“\â€”\.\:]\s*/i, '').trim();
+    let cleanCurrentTitle = (currentTitle || '').replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
     if (!cleanCurrentTitle || cleanCurrentTitle.toLowerCase() === `bab ${babNum}`) {
         cleanCurrentTitle = getBpsStandardTitle(babNum) || '';
     }
@@ -5570,7 +5570,7 @@ async function populateDocumentList() {
 
                     // Cari pola "Bab" diikuti angka biasa atau romawi
 
-                    const match = item.title.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\â€“\â€”\.\:]\s*(.*))?/i);
+                    const match = item.title.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\–\—\.\:]\s*(.*))?/i);
 
                     if (match) {
 
@@ -5905,7 +5905,7 @@ async function populateDocumentList() {
                 const bNum = parseInt(rawNum, 10);
                 if (!isNaN(bNum)) {
                     let chapterTitle = getChapterTitle(bNum) || "";
-                    chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\â€“\â€”\.\:]\s*/i, '').trim();
+                    chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
                     if (!chapterTitle || chapterTitle.toLowerCase() === `bab ${bNum}`) {
                         chapterTitle = getBpsStandardTitle(bNum) || `Bab ${bNum}`;
                     }
@@ -5929,7 +5929,7 @@ async function populateDocumentList() {
             if (match && match[1]) {
                 babNum = parseInt(match[1], 10);
                 let chapterTitle = getChapterTitle(babNum) || "";
-                chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\â€“\â€”\.\:]\s*/i, '').trim();
+                chapterTitle = chapterTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
                 if (!chapterTitle || chapterTitle.toLowerCase() === `bab ${babNum}`) {
                     chapterTitle = getBpsStandardTitle(babNum) || `Bab ${babNum}`;
                 }
@@ -6366,7 +6366,7 @@ async function _loadDbIntoEditor(tableId, tableName) {
 
         if (rows.length === 0) {
 
-            thead.innerHTML = "<tr><th>â€”</th></tr>";
+            thead.innerHTML = "<tr><th>—</th></tr>";
 
             tbody.innerHTML = `<tr><td style='color:var(--text-secondary, #64748b); padding:2rem; text-align:center;'>Belum ada data di database. Gunakan tombol <b>Load CSV</b> terlebih dahulu dari halaman Daftar Tabel.</td></tr>`;
 
@@ -6992,7 +6992,7 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false, highli
 
                                 <div style="padding: 2px 4px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px;" title="Terdeteksi Anomali">
 
-                                    <span style="color:var(--danger, #dc2626); font-size:0.65rem; font-weight:700;">âš ï¸</span>
+                                    <span style="color:var(--danger, #dc2626); font-size:0.65rem; font-weight:700;">⚠️</span>
 
                                 </div>
 
@@ -7043,7 +7043,7 @@ async function _loadCsvIntoEditor(tableId, tableName, isEditable = false, highli
 
                     
 
-                    return `<th data-col-name="${escHtml(h.toLowerCase())}">${isAnom ? 'âš ï¸ ' : ''}${displayHeader}</th>`;
+                    return `<th data-col-name="${escHtml(h.toLowerCase())}">${isAnom ? '⚠️ ' : ''}${displayHeader}</th>`;
 
                 }).join("")}</tr>`;
 
@@ -7188,7 +7188,7 @@ async function renameCsvColumn(tableId, colIndex, tableName) {
 
     const th = document.querySelector(`#data-grid-head tr th.editable-header:nth-child(${colIndex + 2})`);
 
-    const currentName = th ? th.innerText.replace('âœï¸Â¯Â¸', '').trim() : `Kolom ${colIndex + 1}`;
+    const currentName = th ? th.innerText.replace('✏️', '').trim() : `Kolom ${colIndex + 1}`;
 
 
 
@@ -7560,7 +7560,7 @@ async function addCsvColumn(tableId, tableName) {
 
         cancelButtonText: 'Batal',
 
-        confirmButtonText: 'Lanjut â†’',
+        confirmButtonText: 'Lanjut →',
 
         inputValidator: (value) => {
 
@@ -9137,7 +9137,7 @@ function checkClientCellFormatAnomaly(rawVal, prevRawVal = null) {
 
     const s = String(rawVal || '').trim();
 
-    if (!s || ['-', '...', 'â€“', 'â€”', ''].includes(s)) return null;
+    if (!s || ['-', '...', '–', '—', ''].includes(s)) return null;
 
 
 
@@ -9169,7 +9169,7 @@ function checkClientCellFormatAnomaly(rawVal, prevRawVal = null) {
 
     const p = prevRawVal ? String(prevRawVal || '').trim() : '';
 
-    const pValid = !!p && !['-', '...', 'â€“', 'â€”', ''].includes(p);
+    const pValid = !!p && !['-', '...', '–', '—', ''].includes(p);
 
 
 
@@ -9371,7 +9371,7 @@ function normalizeEntityName(name) {
 
     let n = name.trim();
 
-    // Bersihkan encoding artifacts: ?, ??, ??? â†’ hapus
+    // Bersihkan encoding artifacts: ?, ??, ??? → hapus
 
     n = n.replace(/\?{1,}/g, '');
 
@@ -9383,7 +9383,7 @@ function normalizeEntityName(name) {
 
     n = n.replace(/([^I\d\s])\1{2,}/g, '$1$1');
 
-    // Sisipkan spasi jika prefix menempel pada nama: "KabupatenBogor" â†’ "Kabupaten Bogor"
+    // Sisipkan spasi jika prefix menempel pada nama: "KabupatenBogor" → "Kabupaten Bogor"
 
     n = n.replace(/^(Kabupaten|Kota|Kab\.?|Kota)\s*([A-Z])/i, function(m, prefix, first) {
 
@@ -9441,7 +9441,7 @@ function normalizeEntityName(name) {
 
     if (kecamatanSet[noSpace]) return noSpace.charAt(0).toUpperCase() + noSpace.slice(1);
 
-    // Kabupaten/Kota tanpa prefix â†’ tambahkan prefix
+    // Kabupaten/Kota tanpa prefix → tambahkan prefix
 
     var kabKotaMap = {
 
@@ -10335,11 +10335,11 @@ function cleanIndicatorName(name) {
 
         n = n.replace(/\.\d+(?:\s*\([^)]*\))?\s*$/, '');
 
-        n = n.replace(/[\s,;â€“â€”(\-]+\d{4}(?:\s*[â€“\-/]\s*\d{4})?\s*\)?\s*$/, '');
+        n = n.replace(/[\s,;–—(\-]+\d{4}(?:\s*[–\-/]\s*\d{4})?\s*\)?\s*$/, '');
 
-        n = n.replace(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Ag(?:ustus)?t?|Sep(?:tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)?)[\s,;:.\-â€“]*\s*$/i, '');
+        n = n.replace(/(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Ag(?:ustus)?t?|Sep(?:tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)?)[\s,;:.\-–]*\s*$/i, '');
 
-        n = n.replace(/[\s,;:.\-â€“]+$/, '');
+        n = n.replace(/[\s,;:.\-–]+$/, '');
 
         n = n.trim();
 
@@ -10393,7 +10393,7 @@ function showTablePicker(tablesData, keyword) {
 
         <p style="margin-bottom: 0.75rem; font-weight: 600; color: #0369a1;">
 
-            â€ Ditemukan <strong>${groupKeys.length}</strong> varian/tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
+            🔍  Ditemukan <strong>${groupKeys.length}</strong> varian/tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
 
             <br><span style="font-weight: 400; font-size: 0.9rem;">Silakan pilih tabel spesifik yang ingin ditampilkan dalam analisis deret waktu:</span>
 
@@ -10471,7 +10471,7 @@ function _sortEntitiesWithKabLast(arr) {
     var eduRank = function(name) {
         if (!name) return 999;
         var s = String(name).toLowerCase();
-        if (s.includes('sekolah dasar') || s.includes('â‰¤ sd') || s.includes('<= sd') || s.includes('sd /')) return 1;
+        if (s.includes('sekolah dasar') || s.includes('≤ sd') || s.includes('<= sd') || s.includes('sd /')) return 1;
         if (s.includes('smp')) return 2;
         if (s.includes('sma') || s.includes('smk')) return 3;
         if (s.includes('perguruan tinggi') || s.includes('diploma') || s.includes('universitas')) return 4;
@@ -10541,7 +10541,7 @@ function formatIndoNumber(val) {
 
     var s = String(val).trim();
 
-    if (s === '' || s === '-' || s === '...' || s === 'â€”' || s === 'â€“') return null;
+    if (s === '' || s === '-' || s === '...' || s === '—' || s === '–') return null;
 
     var negative = s.indexOf('-') === 0;
 
@@ -10643,17 +10643,17 @@ function extractSubType(tableName, allNames) {
 
     // 1. Bersihkan prefix nomor tabel (contoh: "Tabel 3.1.2 - ", "3.1.2 ")
 
-    s = s.replace(/^Tabel\s*[\d.]+\s*[-â€“â€”:]*\s*/i, '');
+    s = s.replace(/^Tabel\s*[\d.]+\s*[-–—:]*\s*/i, '');
 
-    s = s.replace(/^\d+(\.\d+)+\s*[-â€“â€”:]*\s*/, '');
+    s = s.replace(/^\d+(\.\d+)+\s*[-–—:]*\s*/, '');
 
 
 
     // 2. Bersihkan suffix halaman (contoh: "(Hal 61)", "(Hal 68, 69, 70)", "(Halaman 10)")
 
-    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-â€“â€”]+\)\s*$/i, '');
+    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-–—]+\)\s*$/i, '');
 
-    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-â€“â€”]+\)/gi, '');
+    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-–—]+\)/gi, '');
 
 
 
@@ -10665,15 +10665,15 @@ function extractSubType(tableName, allNames) {
 
     // 4. Bersihkan penanda waktu/bulan/tahun di akhir (contoh: ", Desember 2024", "Tahun 2025", "2021-2022", "2023")
 
-    s = s.replace(/[\s,;â€“â€”\-]+(?:Desember|Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Des|Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Agust|Sep|Okt|Nov)?\s*(?:Tahun\s*)?\d{4}(?:\s*[-â€“â€”/]\s*\d{4})?\s*$/i, '');
+    s = s.replace(/[\s,;–—\-]+(?:Desember|Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Des|Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Agust|Sep|Okt|Nov)?\s*(?:Tahun\s*)?\d{4}(?:\s*[-–—/]\s*\d{4})?\s*$/i, '');
 
-    s = s.replace(/\s*Tahun\s*\d{4}(?:\s*[-â€“â€”/]\s*\d{4})?\s*$/i, '');
+    s = s.replace(/\s*Tahun\s*\d{4}(?:\s*[-–—/]\s*\d{4})?\s*$/i, '');
 
-    s = s.replace(/\s*\(\s*\d{4}(?:\s*[-â€“â€”/]\s*\d{4})?\s*\)\s*$/i, '');
+    s = s.replace(/\s*\(\s*\d{4}(?:\s*[-–—/]\s*\d{4})?\s*\)\s*$/i, '');
 
-    s = s.replace(/[\s,;â€“â€”\-]+\d{4}(?:\s*[-â€“â€”/]\s*\d{4})?\s*$/i, '');
+    s = s.replace(/[\s,;–—\-]+\d{4}(?:\s*[-–—/]\s*\d{4})?\s*$/i, '');
 
-    s = s.replace(/[\s,;â€“â€”\-]+$/, '').trim();
+    s = s.replace(/[\s,;–—\-]+$/, '').trim();
 
 
 
@@ -10711,7 +10711,7 @@ function extractSubType(tableName, allNames) {
 
         simplifiedDim = simplifiedDim.replace(/(?:,\s*|\s+)dan\s+Jenis\s+ASN\b/gi, '');
 
-        simplifiedDim = simplifiedDim.replace(/[\s,;â€“â€”\-]+$/, '').trim();
+        simplifiedDim = simplifiedDim.replace(/[\s,;–—\-]+$/, '').trim();
 
 
 
@@ -10763,7 +10763,7 @@ function extractSubType(tableName, allNames) {
 
     if (prefix && s.toLowerCase().startsWith(prefix.toLowerCase())) {
 
-        const sub = s.slice(prefix.length).replace(/^[\s,;â€“â€”\-:]+/, '').trim();
+        const sub = s.slice(prefix.length).replace(/^[\s,;–—\-:]+/, '').trim();
 
         if (sub) return normalizeSubType(sub);
 
@@ -10783,19 +10783,19 @@ function normalizeSubType(name) {
 
     let s = name.trim();
 
-    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-â€“â€”]+\)\s*$/i, '');
+    s = s.replace(/\s*\(\s*(?:Hal|Halaman)\s*[\d\s,.\-–—]+\)\s*$/i, '');
 
-    s = s.replace(/\s*\(\s*\d{4}\s*[-â€“â€”~]\s*\d{4}\s*\)\s*$/i, '');
+    s = s.replace(/\s*\(\s*\d{4}\s*[-–—~]\s*\d{4}\s*\)\s*$/i, '');
 
     s = s.replace(/\s*\(\s*\d{4}\s*\)\s*$/i, '');
 
-    s = s.replace(/\s*[-â€“â€”~]\s*\d{4}\s*$/i, '');
+    s = s.replace(/\s*[-–—~]\s*\d{4}\s*$/i, '');
 
-    s = s.replace(/\s*Tahun\s*\d{4}(?:\s*[-â€“â€”/]\s*\d{4})?\s*$/i, '');
+    s = s.replace(/\s*Tahun\s*\d{4}(?:\s*[-–—/]\s*\d{4})?\s*$/i, '');
 
     s = s.replace(/\s*\d{4}\s*$/i, '');
 
-    s = s.replace(/[\s,;â€“â€”\-]+$/, '').trim();
+    s = s.replace(/[\s,;–—\-]+$/, '').trim();
 
     return s;
 
@@ -11107,7 +11107,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
             <div style="display:flex; align-items:flex-start; gap:10px;">
 
-                <span style="font-size:1.25rem; line-height:1;">âš ï¸</span>
+                <span style="font-size:1.25rem; line-height:1;">⚠️</span>
 
                 <div style="flex-grow:1;">
 
@@ -11578,7 +11578,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
                     if (isAdmin && anom && val !== '-' && val !== '...') {
 
-                        cellDisplay = `<span title="${escHtml(anom.message)}" style="cursor:help; font-size:0.8rem; margin-right:3px;">âš ï¸</span><span style="font-weight:600; color:#b45309; background:#fef3c7; padding:1px 4px; border-radius:4px;" title="${escHtml(anom.message)}">${val}</span>`;
+                        cellDisplay = `<span title="${escHtml(anom.message)}" style="cursor:help; font-size:0.8rem; margin-right:3px;">⚠️</span><span style="font-weight:600; color:#b45309; background:#fef3c7; padding:1px 4px; border-radius:4px;" title="${escHtml(anom.message)}">${val}</span>`;
 
                     }
 
@@ -11849,7 +11849,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                     const minFmt = formatWithUnitScale(minVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                     const maxFmt = formatWithUnitScale(maxVal, { factor: 1, isInteger: firstVkCfg?.isInteger, maxDecimals: firstVkCfg?.maxDecimals });
                     const uSuffix = firstVkCfg ? ' ' + firstVkCfg.label : '';
-                    statRange.textContent = `${minFmt} â€“ ${maxFmt}${uSuffix}`;
+                    statRange.textContent = `${minFmt} – ${maxFmt}${uSuffix}`;
                     const statRangeTotal = document.getElementById('ts-stat-range-total');
                     if (statRangeTotal) {
                         if (summaryTotalVal !== null) {
@@ -11868,11 +11868,11 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
                 if (years.length > 0) {
                     const isConsecutive = years.every((y, i) => i === 0 || y === years[i - 1] + 1);
                     if (isConsecutive && years.length > 1) {
-                        statYears.textContent = `${years[0]} â€“ ${years[years.length - 1]}`;
+                        statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
                     } else if (years.length <= 3) {
                         statYears.textContent = years.join(' & ');
                     } else {
-                        statYears.textContent = `${years[0]} â€“ ${years[years.length - 1]}`;
+                        statYears.textContent = `${years[0]} – ${years[years.length - 1]}`;
                     }
                     let yearSubtitle = document.getElementById('ts-stat-years-subtitle');
                     if (!yearSubtitle) {
@@ -12471,9 +12471,9 @@ function initInsightFilterOptions() {
         } else if (sel === 2 && tsInsightSelectedTrends.has('up') && tsInsightSelectedTrends.has('down')) {
             trendBtnText.textContent = 'Naik & Turun (2)';
         } else if (sel === 1) {
-            if (tsInsightSelectedTrends.has('up')) trendBtnText.textContent = 'â–² Kenaikan Saja';
-            else if (tsInsightSelectedTrends.has('down')) trendBtnText.textContent = 'â–¼ Penurunan Saja';
-            else if (tsInsightSelectedTrends.has('stagnant')) trendBtnText.textContent = 'â€• Stagnan Saja';
+            if (tsInsightSelectedTrends.has('up')) trendBtnText.textContent = '▲ Kenaikan Saja';
+            else if (tsInsightSelectedTrends.has('down')) trendBtnText.textContent = '▼ Penurunan Saja';
+            else if (tsInsightSelectedTrends.has('stagnant')) trendBtnText.textContent = '― Stagnan Saja';
             else if (tsInsightSelectedTrends.has('empty')) trendBtnText.textContent = '- Strip Saja';
         } else {
             trendBtnText.textContent = `${sel} Tren Terpilih`;
@@ -12769,7 +12769,7 @@ function computeAndRenderTimeSeriesInsights() {
 
         if (gainerNameEl) gainerNameEl.textContent = g.entity;
         if (gainerBadgeEl) gainerBadgeEl.textContent = gPct;
-        if (gainerDetailEl) gainerDetailEl.innerHTML = `${gStartFmt} â†’ ${gEndFmt}${uSuffix} (${gDeltaFmt})`;
+        if (gainerDetailEl) gainerDetailEl.innerHTML = `${gStartFmt} → ${gEndFmt}${uSuffix} (${gDeltaFmt})`;
     } else {
         if (gainerNameEl) gainerNameEl.textContent = 'Tidak Ada Kenaikan';
         if (gainerBadgeEl) gainerBadgeEl.textContent = '0%';
@@ -12787,7 +12787,7 @@ function computeAndRenderTimeSeriesInsights() {
 
         if (declinerNameEl) declinerNameEl.textContent = d.entity;
         if (declinerBadgeEl) declinerBadgeEl.textContent = dPct;
-        if (declinerDetailEl) declinerDetailEl.innerHTML = `${dStartFmt} â†’ ${dEndFmt}${uSuffix} (${dDeltaFmt})`;
+        if (declinerDetailEl) declinerDetailEl.innerHTML = `${dStartFmt} → ${dEndFmt}${uSuffix} (${dDeltaFmt})`;
     } else {
         if (declinerNameEl) declinerNameEl.textContent = 'Tidak Ada Penurunan';
         if (declinerBadgeEl) declinerBadgeEl.textContent = '0%';
@@ -12896,7 +12896,7 @@ function computeAndRenderTimeSeriesInsights() {
                 const isPos = item.pctChange > 0;
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
-                const icon = isPos ? 'â–² +' : (isNeg ? 'â–¼ ' : '');
+                const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
                 const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
                 pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
@@ -12924,14 +12924,14 @@ function computeAndRenderTimeSeriesInsights() {
                 const isPos = item.pctChange > 0;
                 const isNeg = item.pctChange < 0;
                 const badgeClass = isPos ? 'bg-success-subtle text-success border-success-subtle' : (isNeg ? 'bg-danger-subtle text-danger border-danger-subtle' : 'bg-secondary-subtle text-secondary');
-                const icon = isPos ? 'â–² +' : (isNeg ? 'â–¼ ' : '');
+                const icon = isPos ? '▲ +' : (isNeg ? '▼ ' : '');
                 const pctFormatted = item.pctChange.toFixed(2).replace('.', ',');
                 pctBadge = `<span class="badge ${badgeClass} border px-2 py-1 fw-bold" style="font-size:0.76rem;">${icon}${pctFormatted}%</span>`;
             }
 
             tableRowsHtml += `
                 <tr class="table-light fw-bold" style="background:#f1f5f9;">
-                    <td style="text-align:center; color:#3b82f6;">â˜…</td>
+                    <td style="text-align:center; color:#3b82f6;">★</td>
                     <td class="fw-bold text-dark">${escHtml(item.entity)} <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size:0.68rem;">Total</span></td>
                     <td style="text-align:right; font-variant-numeric:tabular-nums;">${startFmt}</td>
                     <td style="text-align:right; font-variant-numeric:tabular-nums; font-weight:700;">${endFmt}</td>
@@ -13812,7 +13812,7 @@ async function executeTimeSeriesExport() {
 
         const keywordTitle = tsCurrentKeyword ? tsCurrentKeyword.toUpperCase() : 'ANALISIS DERET WAKTU';
 
-        const yearPeriodStr = years.length > 1 ? `Periode: ${years[0]} â€“ ${years[years.length - 1]} (${years.length} Tahun)` : `Tahun: ${years[0]}`;
+        const yearPeriodStr = years.length > 1 ? `Periode: ${years[0]} – ${years[years.length - 1]} (${years.length} Tahun)` : `Tahun: ${years[0]}`;
 
 
 
@@ -13965,7 +13965,7 @@ async function executeTimeSeriesExport() {
                         <div style="display:flex; align-items:center; gap:12px;">
                             <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:36px; width:auto; object-fit:contain;">
                             <div>
-                                <div style="font-size:13px; font-weight:800; color:#0f2b5c;">SIPEDAS <span style="font-weight:600; color:#475569;">â€” Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span></div>
+                                <div style="font-size:13px; font-weight:800; color:#0f2b5c;">SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span></div>
                                 <div style="font-size:11px; font-weight:800; color:#1e293b; text-transform:uppercase; margin-top:2px;">Badan Pusat Statistik Kabupaten Tasikmalaya</div>
                             </div>
                         </div>
@@ -14067,7 +14067,7 @@ async function executeTimeSeriesExport() {
                             <img src="/static/logo_sipedas.png" alt="SIPEDAS" style="height:32px; width:auto; object-fit:contain;">
                             <div>
                                 <div style="font-size:12px; font-weight:800; color:#0f2b5c; letter-spacing:0.3px; font-family:'Inter', sans-serif;">
-                                    SIPEDAS <span style="font-weight:600; color:#475569;">â€” Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
+                                    SIPEDAS <span style="font-weight:600; color:#475569;">— Sistem Integrasi, Pencarian, dan Analisis Data Statistik</span>
                                 </div>
                                 <div style="font-size:10px; font-weight:800; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px; margin-top:1px; font-family:'Inter', sans-serif;">
                                     Badan Pusat Statistik Kabupaten Tasikmalaya
@@ -15597,7 +15597,7 @@ function renderAdminTables() {
 
 function toggleBackupIcon() {
     const icon = document.getElementById('admin-backup-icon');
-    if (icon) icon.textContent = icon.textContent.trim() === 'â–¶' ? 'â–¼' : 'â–¶';
+    if (icon) icon.textContent = icon.textContent.trim() === '▶' ? '▼' : '▶';
 }
 
 
@@ -16256,7 +16256,7 @@ async function refreshMasterDictList() {
 
                     <span>${w}</span>
 
-                    <button onclick="deleteMasterWord('${w}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem;">âœ•</button>
+                    <button onclick="deleteMasterWord('${w}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem;">✕</button>
 
                 </div>
 
@@ -16640,7 +16640,7 @@ function updateSearchScopeIndicator() {
             const babTitle = (typeof window.__getChapterTitle === 'function') ? window.__getChapterTitle(viewState.selectedBabNum) : '';
             const babText = babTitle ? `Bab ${viewState.selectedBabNum}: ${babTitle}` : `Bab ${viewState.selectedBabNum}`;
             scopeEl.className = 'badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold';
-            scopeEl.textContent = `Cakupan: ${pubName} â€º ${babText}`;
+            scopeEl.textContent = `Cakupan: ${pubName} › ${babText}`;
             input.placeholder = `Cari tabel pada Bab ${viewState.selectedBabNum} (${pubName})...`;
         } else {
             scopeEl.className = 'badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold';
@@ -16777,8 +16777,8 @@ async function searchGlobalColumnsDirect() {
                 </div>`;
             });
             html += `<div class="bg-white rounded-3 border mb-2 overflow-hidden">
-                <div class="px-4 py-3 fw-semibold d-flex align-items-center gap-2 cursor-pointer user-select-none" onclick="const p=document.getElementById('${collapseId}');const ic=document.getElementById('icon-${collapseId}');if(p){const open=p.style.display!=='none';p.style.display=open?'none':'';if(ic)ic.textContent=open?'â–¶':'â–¼';}" style="background:var(--bg-subtle,#f1f5f9); font-size:0.85rem;">
-                    <span id="icon-${collapseId}" style="font-size:0.75rem; min-width:16px; color:var(--text-secondary,#64748b);">â–¶</span>
+                <div class="px-4 py-3 fw-semibold d-flex align-items-center gap-2 cursor-pointer user-select-none" onclick="const p=document.getElementById('${collapseId}');const ic=document.getElementById('icon-${collapseId}');if(p){const open=p.style.display!=='none';p.style.display=open?'none':'';if(ic)ic.textContent=open?'▶':'▼';}" style="background:var(--bg-subtle,#f1f5f9); font-size:0.85rem;">
+                    <span id="icon-${collapseId}" style="font-size:0.75rem; min-width:16px; color:var(--text-secondary,#64748b);">▶</span>
                     <span class="flex-grow-1" style="color:var(--text-primary,#1e293b); word-break:break-word;">${escHtml(colName)}</span>${unitHtml}
                     <span class="badge flex-shrink-0 fw-normal ms-auto" style="font-size:0.7rem; background:rgba(37,99,235,0.1); color:#2563eb;">${g.matches.length} tabel</span>
                 </div>
@@ -16831,7 +16831,7 @@ async function searchGlobalRowsDirect() {
             const collapseId = `row-group-${idx}`;
             let rowsHtml = '';
             g.matches.forEach(m => {
-                const valLabel = m.value ? ` â†’ <b>${escHtml(String(m.value))}</b>` : '';
+                const valLabel = m.value ? ` → <b>${escHtml(String(m.value))}</b>` : '';
                 const colInfo = m.col_name || (m.columns && m.columns.length > 0 ? m.columns.join(', ') : '');
                 rowsHtml += `<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="text-align:left;">
                     <div class="small" style="flex:1; min-width:0;">
@@ -16843,8 +16843,8 @@ async function searchGlobalRowsDirect() {
             });
             const matchCount = g.match_count || g.matches.length;
             html += `<div class="bg-white rounded-3 border mb-2 overflow-hidden">
-                <div class="px-4 py-3 fw-semibold d-flex align-items-center gap-2 cursor-pointer user-select-none" onclick="const p=document.getElementById('${collapseId}');const ic=document.getElementById('icon-${collapseId}');if(p){const open=p.style.display!=='none';p.style.display=open?'none':'';if(ic)ic.textContent=open?'â–¶':'â–¼';}" style="background:#f0fdf4; font-size:0.85rem;">
-                    <span id="icon-${collapseId}" style="font-size:0.75rem; min-width:16px; color:#16a34a;">â–¶</span>
+                <div class="px-4 py-3 fw-semibold d-flex align-items-center gap-2 cursor-pointer user-select-none" onclick="const p=document.getElementById('${collapseId}');const ic=document.getElementById('icon-${collapseId}');if(p){const open=p.style.display!=='none';p.style.display=open?'none':'';if(ic)ic.textContent=open?'▶':'▼';}" style="background:#f0fdf4; font-size:0.85rem;">
+                    <span id="icon-${collapseId}" style="font-size:0.75rem; min-width:16px; color:#16a34a;">▶</span>
                     <span class="flex-grow-1" style="color:var(--text-primary,#1e293b); word-break:break-word;">${escHtml(g.table_name || 'Tabel')}</span>
                     <span class="badge flex-shrink-0 fw-normal ms-auto" style="font-size:0.7rem; background:rgba(22,163,74,0.12); color:#16a34a;">${matchCount} kecocokan</span>
                 </div>
@@ -17104,7 +17104,7 @@ async function renderMasterColumns() {
 
 
 function switchDataTabelTab(tab) {
-    // Legacy function â€” tabs merged into unified search. No-op.
+    // Legacy function — tabs merged into unified search. No-op.
 }
 
 
@@ -17195,7 +17195,7 @@ function switchAdminTab(tab) {
 
         const bIcon = document.getElementById('admin-backup-icon');
 
-        if (bIcon) bIcon.textContent = 'â–¼';
+        if (bIcon) bIcon.textContent = '▼';
 
     }
 
@@ -17582,7 +17582,7 @@ async function saveMaintenanceMode() {
         if (targetMs - Date.now() < 2 * 60 * 1000) {
             Swal.fire({
                 title: 'Waktu Terlalu Singkat',
-                text: 'Waktu selesai pemeliharaan minimal 3â€“5 menit ke depan dari waktu sekarang agar tidak langsung kedaluwarsa saat berpindah halaman.',
+                text: 'Waktu selesai pemeliharaan minimal 3–5 menit ke depan dari waktu sekarang agar tidak langsung kedaluwarsa saat berpindah halaman.',
                 icon: 'warning',
                 confirmButtonColor: '#2563eb'
             });
@@ -17904,7 +17904,7 @@ async function loadTimeSeriesAnomalies(forceRefresh = false) {
 
         anomalies.forEach((a, idx) => {
 
-            const badgeType = '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50 px-2 py-1">âš ï¸ Anomali Format</span>';
+            const badgeType = '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50 px-2 py-1">⚠️ Anomali Format</span>';
 
             const docBadge = `<span class="badge bg-secondary bg-opacity-10 text-secondary">${a.doc_year || '-'}</span>`;
 
@@ -17921,7 +17921,7 @@ async function loadTimeSeriesAnomalies(forceRefresh = false) {
                     <div class="fw-semibold text-dark text-truncate">${escHtml(a.entitas)}</div>
                     <div class="text-muted text-truncate" style="font-size:0.75rem;">${escHtml(cleanInd)}</div>
                 </td>
-                <td class="text-center text-nowrap" style="font-size:0.76rem;">${a.prev_year} âž” <b class="text-primary">${a.year}</b></td>
+                <td class="text-center text-nowrap" style="font-size:0.76rem;">${a.prev_year} ➔ <b class="text-primary">${a.year}</b></td>
                 <td class="text-center text-nowrap">${badgeType}</td>
                 <td class="text-muted" style="font-size:0.76rem; line-height: 1.35;">
                     <div class="text-dark">${escHtml(a.message)}</div>
@@ -17987,9 +17987,9 @@ async function openAnomalyTableModalWithData(a) {
 
         badgeTypeEl.className = 'badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-50 px-2.5 py-1 fw-semibold';
 
-        badgeTypeEl.innerHTML = 'âš ï¸ Anomali Format Angka';
+        badgeTypeEl.innerHTML = '⚠️ Anomali Format Angka';
 
-        document.getElementById('anom-modal-icon').innerHTML = 'âš ï¸';
+        document.getElementById('anom-modal-icon').innerHTML = '⚠️';
 
     }
 
@@ -18007,7 +18007,7 @@ async function openAnomalyTableModalWithData(a) {
 
         Kolom / Indikator: <strong class="text-dark">${escHtml(cleanIndicator)}</strong> &nbsp;|&nbsp; 
 
-        Perubahan: <span class="badge bg-white text-dark border">${a.prev_year || '-'} (${a.prev_val || '-'})</span> âž” <span class="badge bg-primary">${a.year || '-'} (${a.current_val || '-'})</span>
+        Perubahan: <span class="badge bg-white text-dark border">${a.prev_year || '-'} (${a.prev_val || '-'})</span> ➔ <span class="badge bg-primary">${a.year || '-'} (${a.current_val || '-'})</span>
 
     `;
 
@@ -18641,7 +18641,7 @@ async function searchGlobalRows() {
                         <span class="badge bg-secondary ms-2">${totalLabel}</span>
                     </div>
 
-                    <div>${docLabel} <span class="text-muted small ms-1">âž”</span></div>
+                    <div>${docLabel} <span class="text-muted small ms-1">➔</span></div>
 
                 </div>
 
@@ -18796,7 +18796,7 @@ async function searchGlobalColumns() {
 
                         <span class="badge bg-secondary ms-1">${totalLabel}</span></div>
 
-                    <div>${scoreLabel} <span class="text-muted small ms-1">âž”</span></div>
+                    <div>${scoreLabel} <span class="text-muted small ms-1">➔</span></div>
 
                 </div>
 
@@ -19226,7 +19226,7 @@ async function searchMasterColumn(tableId, colIndex, headerText) {
 
         Swal.fire({
 
-            title: `â€ Master Kolom untuk "${headerText}"`,
+            title: `🔍  Master Kolom untuk "${headerText}"`,
 
             html: html,
 
@@ -19570,19 +19570,19 @@ function _showLegendEntityPopover(targetEl, entityName, years, dataPoints, color
             const isValid = (val !== null && val !== undefined && !isNaN(val));
             if (isValid) validValues.push(val);
 
-            let growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">â€”</span>`;
+            let growthBadge = `<span style="color:#64748b; font-size:10px; font-weight:500;">—</span>`;
             if (i > 0 && isValid) {
                 const prevVal = dataPoints[i - 1];
                 if (prevVal !== null && prevVal !== undefined && !isNaN(prevVal)) {
                     const diff = val - prevVal;
                     if (diff > 0.0001) {
                         const pct = prevVal !== 0 ? `+${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `+${formatIndoNumber(diff)}`;
-                        growthBadge = `<span style="background:rgba(34,197,94,0.16); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">â–² ${pct}</span>`;
+                        growthBadge = `<span style="background:rgba(34,197,94,0.16); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▲ ${pct}</span>`;
                     } else if (diff < -0.0001) {
                         const pct = prevVal !== 0 ? `${((diff / Math.abs(prevVal)) * 100).toFixed(2).replace('.', ',')}%` : `${formatIndoNumber(diff)}`;
-                        growthBadge = `<span style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">â–¼ ${pct}</span>`;
+                        growthBadge = `<span style="background:rgba(239,68,68,0.16); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:700; white-space:nowrap;">▼ ${pct}</span>`;
                     } else {
-                        growthBadge = `<span style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.22); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600; white-space:nowrap;">â€” 0%</span>`;
+                        growthBadge = `<span style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.22); padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600; white-space:nowrap;">— 0%</span>`;
                     }
                 }
             } else if (i === 0 && isValid) {
@@ -19609,11 +19609,11 @@ function _showLegendEntityPopover(targetEl, entityName, years, dataPoints, color
         const last = validValues[validValues.length - 1];
         const totalDiff = last - first;
         if (totalDiff > 0.0001) {
-            trendBadge = `<span style="margin-left:auto; background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">â–² Naik (+${formatIndoNumber(totalDiff)})</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(34,197,94,0.18); color:#4ade80; border:1px solid rgba(34,197,94,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▲ Naik (+${formatIndoNumber(totalDiff)})</span>`;
         } else if (totalDiff < -0.0001) {
-            trendBadge = `<span style="margin-left:auto; background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">â–¼ Turun (${formatIndoNumber(totalDiff)})</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.35); font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:4px;">▼ Turun (${formatIndoNumber(totalDiff)})</span>`;
         } else {
-            trendBadge = `<span style="margin-left:auto; background:rgba(148,163,184,0.18); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-size:9.5px; font-weight:600; padding:1px 6px; border-radius:4px;">â€” Tetap (0)</span>`;
+            trendBadge = `<span style="margin-left:auto; background:rgba(148,163,184,0.18); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); font-size:9.5px; font-weight:600; padding:1px 6px; border-radius:4px;">— Tetap (0)</span>`;
         }
     }
 
@@ -20275,13 +20275,13 @@ function renderTimeSeriesChart(selectedVk, entities, allEntities, years, entityM
 
                                 if (delta > 0) {
 
-                                    badgeText = `â–² +${formattedDelta}`;
+                                    badgeText = `▲ +${formattedDelta}`;
 
                                     isUp = true;
 
                                 } else if (delta < 0) {
 
-                                    badgeText = `â–¼ -${formattedDelta}`;
+                                    badgeText = `▼ -${formattedDelta}`;
 
                                     isUp = false;
 
@@ -22233,7 +22233,7 @@ async function matchColumnsToMaster(tableId, tableName) {
 
             <p style="font-size:0.8rem; color:var(--text-secondary, #64748b); margin-top:10px; text-align:left;">
 
-                <b>Persentase</b> = tingkat keyakinan pencocokan (hijau â‰¥90%, oranye â‰¥65%, merah &lt;65%).
+                <b>Persentase</b> = tingkat keyakinan pencocokan (hijau ≥90%, oranye ≥65%, merah &lt;65%).
 
                 Edit nilai master yang tersedia untuk menyesuaikan. Kosongkan input untuk melewati kolom.
 
@@ -22433,7 +22433,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <div style="display:flex; align-items:center; gap:8px;">
 
-                        <input type="text" id="${selectId(i)}" class="master-select-input" placeholder="â€ Cari & Pilih Master Kolom..." style="flex:1; min-width:220px; padding:8px 12px; border-radius:6px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; cursor:pointer;" readonly onclick="showCustomDropdown(${i})" title="Klik untuk memilih master kolom">
+                        <input type="text" id="${selectId(i)}" class="master-select-input" placeholder="🔍  Cari & Pilih Master Kolom..." style="flex:1; min-width:220px; padding:8px 12px; border-radius:6px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; cursor:pointer;" readonly onclick="showCustomDropdown(${i})" title="Klik untuk memilih master kolom">
 
                         ${sameKwCount > 1 ? `
 
@@ -22491,7 +22491,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                 <button type="button" style="background:#f1f5f9; color:var(--text-secondary, #475569); border:1px solid #cbd5e1; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('all')">Semua</button>
 
-                <button type="button" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('')">Â¢Ãƒâ€¦Ã¢â‚¬â„¢ Hapus Pilihan</button>
+                <button type="button" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:14px; padding:3px 10px; font-size:0.76rem; cursor:pointer;" onclick="selectColumnsByKeyword('')">✕ Hapus Pilihan</button>
 
             </div>
 
@@ -22529,7 +22529,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <div class="custom-select-container" style="position: relative; flex: 1;">
 
-                        <input type="text" id="bulk-ren-sel" class="master-select-input" placeholder="â€ Cari & Pilih Master Kolom untuk diterapkan massal..." style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.9rem; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" readonly onclick="showBulkCustomDropdown()">
+                        <input type="text" id="bulk-ren-sel" class="master-select-input" placeholder="🔍  Cari & Pilih Master Kolom untuk diterapkan massal..." style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.9rem; background: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" readonly onclick="showBulkCustomDropdown()">
 
                         <div id="custom-dropdown-bulk" class="custom-select-dropdown" style="display: none; position: absolute; z-index: 10000; max-height: 380px; overflow-y: auto; background: #fff; border: 1.5px solid #2563eb; border-radius: 8px; margin-top: 6px; padding: 8px; width: 100%; box-shadow: 0 16px 36px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08);">
 
@@ -22547,7 +22547,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                     <button type="button" class="btn btn-sm" onclick="applyBulkMasterToChecked()" style="background: #2563eb; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 9px 18px; border-radius: 8px; border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25); cursor: pointer; white-space: nowrap;">
 
-                        <span>âš¡ Terapkan ke Kolom Tercentang</span>
+                        <span>⚡ Terapkan ke Kolom Tercentang</span>
 
                     </button>
 
@@ -23765,7 +23765,7 @@ function initFlyoutPopovers() {
 
 
 
-        // Hover masuk ke popover sendiri â†’ batalkan hide
+        // Hover masuk ke popover sendiri → batalkan hide
 
         popover.addEventListener('mouseenter', () => {
 
@@ -24153,7 +24153,7 @@ async function openCreateTableModal(defaultDocId = null, defaultBabNum = null) {
 
                     cleanName = cleanName.replace(/\b\w/g, l => l.toUpperCase());
 
-                    const pubTitle = d.year ? `Publikasi ${d.year} â€” ${cleanName}` : cleanName;
+                    const pubTitle = d.year ? `Publikasi ${d.year} — ${cleanName}` : cleanName;
 
                     const isSelected = (defaultDocId && d.id === defaultDocId) || (!defaultDocId && d.year === 2026);
                     opts += `<option value="${d.id}" data-year="${d.year || ''}" data-data-year="${d.data_year || ''}" ${isSelected ? 'selected' : ''}>${escHtml(pubTitle)}</option>`;
@@ -24229,7 +24229,7 @@ async function updateCreateTableBabOptions(selectBabNum = null) {
                         let bNum = item.bab_num || item.num;
                         let rawTitle = item.title || "";
                         
-                        const m = rawTitle.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\â€“\â€”\.\:]\s*(.*))?/i);
+                        const m = rawTitle.match(/Bab\s+(\d+|[IVXLCDM]+)(?:\s*[\-\–\—\.\:]\s*(.*))?/i);
                         if (m) {
                             if (!bNum) {
                                 bNum = parseInt(m[1], 10);
@@ -24241,7 +24241,7 @@ async function updateCreateTableBabOptions(selectBabNum = null) {
                         }
                         if (!bNum) bNum = idx + 1;
 
-                        let cleanTitle = rawTitle.replace(/^Bab\s+\d+\s*[\-\â€“\â€”\.\:]\s*/i, '').trim();
+                        let cleanTitle = rawTitle.replace(/^Bab\s+\d+\s*[\-\–\—\.\:]\s*/i, '').trim();
                         if (!cleanTitle || cleanTitle.toLowerCase() === `bab ${bNum}`) {
                             cleanTitle = (typeof window.__getChapterTitle === 'function' ? window.__getChapterTitle(bNum) : '') || getBpsStandardTitle(bNum) || `Bab ${bNum}`;
                         }

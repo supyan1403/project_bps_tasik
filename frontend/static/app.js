@@ -17307,7 +17307,7 @@ function _repositionMaintenanceFlatpickr(fp) {
     const cal = fp.calendarContainer;
     const rect = input.getBoundingClientRect();
     const calHeight = Math.max(380, cal.offsetHeight || 380);
-    const calWidth = Math.max(308, cal.offsetWidth || 308);
+    const calWidth = Math.max(360, cal.offsetWidth || 360);
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 

@@ -17313,11 +17313,11 @@ function _initMaintenanceFlatpickr() {
         time_24hr: true,
         monthSelectorType: 'static',
         disableMobile: true,
-        position: function(calendarContainer, element) {
-            calendarContainer.style.position = 'fixed';
-            calendarContainer.style.left = '50%';
-            calendarContainer.style.transform = 'translateX(-50%)';
-            calendarContainer.style.top = (element.getBoundingClientRect().bottom + 4) + 'px';
+        position: function(fp, inputElement) {
+            fp.calendarContainer.style.position = 'fixed';
+            fp.calendarContainer.style.left = '50%';
+            fp.calendarContainer.style.transform = 'translateX(-50%)';
+            fp.calendarContainer.style.top = (inputElement.getBoundingClientRect().bottom + 4) + 'px';
         }
     });
 }

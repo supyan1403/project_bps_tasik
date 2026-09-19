@@ -805,6 +805,10 @@ body.role-pegawai #btn-admin-login {
 /* ===================== FLATPICKR TEXT SIZE ===================== */
 .flatpickr-calendar {
     padding-bottom: 8px !important;
+    overflow: visible !important;
+}
+.flatpickr-months {
+    overflow: visible !important;
 }
 .flatpickr-month {
     overflow: visible !important;

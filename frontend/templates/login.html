@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Administrator | SIPEDAS — BPS Kab. Tasikmalaya</title>
     <link rel="icon" type="image/png" href="/static/logo_sipedas.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -394,12 +394,11 @@
             text-align: center;
         }
 
-        /* Responsive Mobile & Tablet (Non-scrollable, fit 1 screen, zero push on keyboard) */
+        /* Responsive Mobile & Tablet (Non-scrollable, fit 1 screen) */
         @media (max-width: 900px) {
             html, body {
-                position: fixed;
-                width: 100%;
                 height: 100%;
+                height: 100dvh;
                 overflow: hidden;
                 overscroll-behavior: none;
                 touch-action: pan-y;
@@ -411,14 +410,13 @@
             }
 
             .login-layout {
-                position: fixed;
-                inset: 0;
-                width: 100%;
-                height: 100%;
                 flex-direction: column-reverse;
-                padding: max(16px, env(safe-area-inset-top, 16px)) 16px 16px;
-                justify-content: flex-start;
-                align-items: center;
+                height: 100%;
+                height: 100dvh;
+                max-height: 100dvh;
+                min-height: 0;
+                padding-bottom: 0;
+                justify-content: space-evenly;
                 overflow: hidden;
             }
 
@@ -428,110 +426,109 @@
 
             .showcase-pane {
                 flex: 0 0 auto;
-                padding: 6px 16px 4px;
+                padding: 20px 32px 6px;
                 justify-content: center;
             }
 
             .showcase-glow {
-                width: 160px;
-                height: 160px;
-                filter: blur(30px);
+                width: 260px;
+                height: 260px;
+                filter: blur(40px);
             }
 
             .neon-logo-wrapper {
-                margin-bottom: 6px;
+                margin-bottom: 12px;
             }
 
             .showcase-logo {
-                width: 52px;
-                height: 52px;
+                width: 80px;
+                height: 80px;
             }
 
             .showcase-brand {
-                font-size: 20px;
-                margin-bottom: 2px;
+                font-size: 24px;
+                margin-bottom: 4px;
                 line-height: 1.1;
             }
 
             .showcase-instansi {
-                font-size: 10.5px;
-                letter-spacing: 0.6px;
+                font-size: 11px;
+                letter-spacing: 0.8px;
             }
 
             .showcase-kab {
-                font-size: 10px;
-                margin-bottom: 2px;
+                font-size: 10.5px;
+                margin-bottom: 6px;
             }
 
             .showcase-desc {
-                display: none !important;
+                font-size: 12px;
+                line-height: 1.45;
+                max-width: 320px;
             }
 
             .form-pane {
-                flex: 0 0 auto;
-                width: 100%;
-                max-width: 380px;
-                padding: 4px 16px 12px;
-                justify-content: flex-start;
+                flex: 0 1 auto;
+                padding: 10px 32px 24px;
+                justify-content: center;
                 align-items: center;
             }
 
             .form-inner {
-                width: 100%;
-                max-width: 380px;
+                max-width: 400px;
             }
 
             .form-badge {
-                font-size: 10px;
-                padding: 3px 8px;
-                margin-bottom: 8px;
+                font-size: 10.5px;
+                padding: 4px 10px;
+                margin-bottom: 12px;
             }
 
             .form-title {
-                font-size: 20px;
-                margin-bottom: 2px;
+                font-size: 22px;
+                margin-bottom: 4px;
             }
 
             .form-desc {
-                font-size: 12px;
-                line-height: 1.35;
-                margin-bottom: 12px;
+                font-size: 12.5px;
+                line-height: 1.45;
+                margin-bottom: 16px;
             }
 
             .form-group {
-                margin-bottom: 12px;
+                margin-bottom: 16px;
             }
 
             .form-label {
                 font-size: 11px;
-                margin-bottom: 4px;
+                margin-bottom: 6px;
             }
 
             .form-input {
-                height: 44px;
+                height: 48px;
                 font-size: 14px;
-                border-radius: 10px;
+                border-radius: 12px;
             }
 
             .btn-submit {
-                height: 44px;
+                height: 48px;
                 font-size: 14px;
-                border-radius: 10px;
+                border-radius: 12px;
             }
 
             .alert-error {
-                padding: 8px 12px;
-                font-size: 12px;
-                margin-bottom: 10px;
-                border-radius: 8px;
+                padding: 10px 14px;
+                font-size: 12.5px;
+                margin-bottom: 14px;
+                border-radius: 10px;
             }
 
             .back-link-wrapper {
-                margin-top: 10px;
+                margin-top: 14px;
             }
 
             .back-link {
-                font-size: 12px;
+                font-size: 12.5px;
             }
 
             .footer-text {
@@ -542,57 +539,160 @@
         /* Small Phone / Tight Heights */
         @media (max-width: 425px) {
             .showcase-pane {
-                padding: 4px 12px 2px;
+                padding: 16px 28px 6px;
+            }
+
+            .neon-logo-wrapper {
+                margin-bottom: 10px;
             }
 
             .showcase-logo {
-                width: 46px;
-                height: 46px;
+                width: 72px;
+                height: 72px;
             }
 
             .showcase-brand {
-                font-size: 19px;
+                font-size: 22px;
+            }
+
+            .showcase-desc {
+                font-size: 11.5px;
+                max-width: 290px;
             }
 
             .form-pane {
-                padding: 2px 12px 10px;
+                padding: 8px 28px 20px;
+            }
+
+            .form-badge {
+                font-size: 10px;
+                padding: 3.5px 9px;
+                margin-bottom: 10px;
             }
 
             .form-title {
-                font-size: 19px;
+                font-size: 20px;
+                margin-bottom: 4px;
             }
 
             .form-desc {
-                margin-bottom: 10px;
+                font-size: 12px;
+                margin-bottom: 14px;
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+            }
+
+            .form-input {
+                height: 46px;
+                font-size: 13.5px;
+                padding: 0 42px 0 40px;
+                border-radius: 11px;
+            }
+
+            .input-icon {
+                left: 14px;
+            }
+
+            .toggle-pw-btn {
+                right: 8px;
+                padding: 6px;
+            }
+
+            .btn-submit {
+                height: 46px;
+                font-size: 13.5px;
+                border-radius: 11px;
+            }
+
+            .back-link-wrapper {
+                margin-top: 12px;
+            }
+
+            .back-link {
+                font-size: 12px;
             }
         }
 
         /* Very Small Phone (<= 375px width or tight vertical height) */
         @media (max-width: 375px) {
             .showcase-pane {
-                padding: 2px 8px 2px;
+                padding: 12px 22px 4px;
+            }
+
+            .neon-logo-wrapper {
+                margin-bottom: 8px;
             }
 
             .showcase-logo {
-                width: 42px;
-                height: 42px;
+                width: 62px;
+                height: 62px;
             }
 
             .showcase-brand {
-                font-size: 18px;
+                font-size: 20px;
+            }
+
+            .showcase-instansi {
+                font-size: 10px;
+            }
+
+            .showcase-kab {
+                font-size: 9.5px;
+                margin-bottom: 4px;
+            }
+
+            .showcase-desc {
+                font-size: 11px;
+                line-height: 1.4;
+                max-width: 270px;
             }
 
             .form-pane {
-                padding: 2px 8px 8px;
+                padding: 6px 22px 16px;
+            }
+
+            .form-badge {
+                font-size: 9.5px;
+                padding: 3px 8px;
+                margin-bottom: 8px;
             }
 
             .form-title {
-                font-size: 18px;
+                font-size: 19px;
+                margin-bottom: 3px;
+            }
+
+            .form-desc {
+                font-size: 11.5px;
+                margin-bottom: 12px;
+            }
+
+            .form-input {
+                height: 44px;
+                font-size: 13px;
+                padding: 0 40px 0 38px;
+                border-radius: 10px;
+            }
+
+            .btn-submit {
+                height: 44px;
+                font-size: 13px;
+                border-radius: 10px;
+            }
+
+            .back-link-wrapper {
+                margin-top: 10px;
+            }
+
+            .back-link {
+                font-size: 11.5px;
             }
         }
 
-        /* Fallback for Landscape on Small Devices (< 520px) */
-        @media (orientation: landscape) and (max-height: 520px) {
+        /* Fallback for Landscape or Extreme Small Heights (< 520px) */
+        @media (max-height: 520px) and (max-width: 900px) {
             html, body {
                 height: auto !important;
                 overflow-y: auto !important;
@@ -648,7 +748,7 @@
                                 class="form-input" 
                                 placeholder="Masukkan password admin..." 
                                 required 
-                                autocomplete="current-password"
+                                autofocus
                             >
                             <button type="button" id="toggle-pw" class="toggle-pw-btn" title="Lihat password">
                                 <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19">
@@ -697,6 +797,6 @@
 
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 
-    <script src="/static/login.js?v=20260919_3" defer></script>
+    <script src="/static/login.js?v=20260919_4" defer></script>
 </body>
 </html>

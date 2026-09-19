@@ -71,8 +71,41 @@ html.no-sidebar-transition .sidebar-user-info {
     html.sidebar-collapsed-early body .sidebar {
         width: 68px !important;
         min-width: 68px !important;
+        max-width: 68px !important;
         padding: 1.5rem 12px 1.25rem 12px !important;
         overflow-y: hidden !important;
+        overflow-x: hidden !important;
+    }
+
+    html.sidebar-collapsed-early body .nav-link,
+    html.sidebar-collapsed-early body #btn-admin-login,
+    html.sidebar-collapsed-early body #btn-admin-logout-btn {
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+    }
+
+    html.sidebar-collapsed-early body .bps-brand-text,
+    html.sidebar-collapsed-early body .nav-link-text,
+    html.sidebar-collapsed-early body .sidebar-btn-text,
+    html.sidebar-collapsed-early body .theme-mode-label,
+    html.sidebar-collapsed-early body .submenu-arrow {
+        display: none !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        max-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 }
 
@@ -328,13 +361,16 @@ html.no-sidebar-transition .sidebar-user-info {
 /* Collapsed State (Khusus Desktop >= 992px): Logout button tetap merah dan icon tetap sejajar diam di tempat */
 @media (min-width: 992px) {
     body.sidebar-collapsed #btn-admin-logout-btn {
-        width: 100% !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
         height: 44px !important;
         min-height: 44px !important;
         max-height: 44px !important;
-        padding: 0 10px !important;
-        margin: 0 !important;
-        justify-content: flex-start !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        justify-content: center !important;
+        align-items: center !important;
         background: var(--danger-light) !important;
         border: 1px solid var(--danger-light-bg) !important;
         box-shadow: none !important;
@@ -466,31 +502,35 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     body.sidebar-collapsed .sidebar {
         width: 68px !important;
         min-width: 68px !important;
+        max-width: 68px !important;
         padding: 1.5rem 12px 1.25rem 12px !important;
         overflow-y: hidden !important;
+        overflow-x: hidden !important;
     }
 
     body.sidebar-collapsed .bps-brand-text,
     body.sidebar-collapsed .nav-link-text,
     body.sidebar-collapsed .sidebar-btn-text,
     body.sidebar-collapsed .theme-mode-label {
+        display: none !important;
         opacity: 0 !important;
+        width: 0 !important;
         max-width: 0 !important;
-        margin-left: 10px !important;
-        margin-right: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         pointer-events: none !important;
-        transform: translateX(-4px) !important;
-        transition: opacity 0.14s ease-out, max-width 0.32s cubic-bezier(0.2, 0, 0, 1), transform 0.18s ease-out !important;
+        transform: none !important;
     }
 
     body.sidebar-collapsed .submenu-arrow {
+        display: none !important;
         opacity: 0 !important;
+        width: 0 !important;
         max-width: 0 !important;
-        margin-left: auto !important;
-        margin-right: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         pointer-events: none !important;
-        transform: scale(0.6) !important;
-        transition: opacity 0.12s ease-out, max-width 0.3s cubic-bezier(0.2, 0, 0, 1), transform 0.15s ease-out !important;
+        transform: none !important;
     }
 
     body:not(.sidebar-collapsed) .bps-brand-text,
@@ -544,15 +584,15 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         height: 62px !important;
         min-height: 62px !important;
         max-height: 62px !important;
-        padding: 2px 8px 10px 8px !important;
+        padding: 2px 0 10px 0 !important;
         margin: 0 0 14px 0 !important;
-        justify-content: flex-start !important;
+        justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
     }
 
     body.sidebar-collapsed .sipedas-brand-main {
-        justify-content: flex-start !important;
+        justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
         height: 100% !important;
@@ -560,22 +600,34 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         margin: 0 !important;
     }
 
+    body.sidebar-collapsed .nav-item {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
     body.sidebar-collapsed .nav-link,
     body.sidebar-collapsed #btn-admin-login,
     body.sidebar-collapsed #btn-admin-logout-btn {
-        width: 100% !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
         height: 44px !important;
         min-height: 44px !important;
         max-height: 44px !important;
         border-radius: 10px !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        padding: 0 10px !important;
-        margin: 0 !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
         box-sizing: border-box !important;
     }
 
+    body.sidebar-collapsed .nav-link:hover,
+    body.sidebar-collapsed .subnav-link:hover {
+        transform: none !important;
+    }
 
     body.sidebar-collapsed .bps-brand-logo,
     body.sidebar-collapsed .nav-link i,

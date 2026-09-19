@@ -48,10 +48,10 @@ body.role-pegawai:not(.role-admin) .main-content {
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
     position: relative;
-    contain: layout;
+    contain: layout style;
     will-change: width, min-width;
     transform: translateZ(0);
-    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), min-width 0.35s cubic-bezier(0.2, 0, 0, 1);
+    transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1), min-width 0.22s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Zero-Flicker Transition Freeze during initial load & auth transitions */
@@ -92,6 +92,7 @@ html.no-sidebar-transition .sidebar-user-info {
         justify-content: flex-start !important;
         padding: 0 10px !important;
         margin: 0 !important;
+        overflow: hidden !important;
         box-sizing: border-box !important;
     }
 
@@ -101,11 +102,7 @@ html.no-sidebar-transition .sidebar-user-info {
     html.sidebar-collapsed-early body .theme-mode-label,
     html.sidebar-collapsed-early body .submenu-arrow {
         opacity: 0 !important;
-        width: 0 !important;
-        max-width: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
+        pointer-events: none !important;
     }
 }
 
@@ -175,9 +172,10 @@ html.no-sidebar-transition .sidebar-user-info {
     align-items: center !important;
     justify-content: flex-start !important;
     border-radius: 10px !important;
-    overflow: hidden;
+    overflow: hidden !important;
     margin: 0 !important;
-    transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+    transform: translateZ(0);
+    transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
 }
 
 .nav-link i,
@@ -244,8 +242,9 @@ html.no-sidebar-transition .sidebar-user-info {
     overflow: hidden !important;
     opacity: 1;
     max-width: 200px;
+    margin-left: 10px;
     transform: translateX(0);
-    transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s;
+    transition: opacity 0.15s ease-out, transform 0.16s ease-out;
 }
 
 .submenu-arrow {
@@ -375,7 +374,7 @@ html.no-sidebar-transition .sidebar-user-info {
         border: 1px solid var(--danger-light-bg) !important;
         box-shadow: none !important;
         border-radius: 10px !important;
-        transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, color 0.15s ease !important;
+        transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.15s ease, color 0.15s ease !important;
     }
 
     body.sidebar-collapsed #btn-admin-logout-btn i {
@@ -514,44 +513,29 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
     body.sidebar-collapsed .sidebar-btn-text,
     body.sidebar-collapsed .theme-mode-label {
         opacity: 0 !important;
-        width: 0 !important;
-        max-width: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        white-space: nowrap !important;
         pointer-events: none !important;
-        transform: none !important;
-        transition: opacity 0.15s ease-out, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), margin-left 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
+        transform: translateX(-4px) !important;
+        transition: opacity 0.1s ease-out, transform 0.12s ease-out !important;
     }
 
     body.sidebar-collapsed .submenu-arrow {
         opacity: 0 !important;
-        width: 0 !important;
-        max-width: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
         pointer-events: none !important;
-        transform: none !important;
-        transition: opacity 0.12s ease-out, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), margin 0.35s cubic-bezier(0.2, 0, 0, 1) !important;
+        transition: opacity 0.1s ease-out !important;
     }
 
     body:not(.sidebar-collapsed) .bps-brand-text,
     body:not(.sidebar-collapsed) .nav-link-text,
     body:not(.sidebar-collapsed) .sidebar-btn-text,
     body:not(.sidebar-collapsed) .theme-mode-label {
+        opacity: 1 !important;
         transform: translateX(0) !important;
-        transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), margin-left 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s !important;
+        transition: opacity 0.16s ease-out 0.05s, transform 0.16s ease-out 0.05s !important;
     }
 
     body:not(.sidebar-collapsed) .submenu-arrow {
         opacity: 0.7 !important;
-        max-width: 20px !important;
-        margin-left: auto !important;
-        transform: scale(1) !important;
-        transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1) 0.08s, max-width 0.35s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) 0.06s !important;
+        transition: opacity 0.16s ease-out 0.05s !important;
     }
 
     body.sidebar-collapsed .theme-switch-pill {
@@ -621,7 +605,7 @@ body:not(.sidebar-collapsed) .sidebar-floating-popover {
         padding: 0 10px !important;
         margin: 0 !important;
         box-sizing: border-box !important;
-        transition: width 0.35s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+        transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
     }
 
     body.sidebar-collapsed .nav-link:hover,

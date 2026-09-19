@@ -15,34 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!loginForm || !pwInput) return;
 
-    // Autofocus hanya untuk desktop (layar lebar) agar di mobile keyboard tidak otomatis pop-up
-    if (window.innerWidth >= 900) {
-        pwInput.focus();
-    } else {
-        // Di mobile: cegah auto-scroll window/viewport saat keyboard virtual muncul
-        const resetMobileScroll = () => {
-            if (window.scrollY !== 0 || document.documentElement.scrollTop !== 0 || document.body.scrollTop !== 0) {
-                window.scrollTo(0, 0);
-                document.documentElement.scrollTop = 0;
-                document.body.scrollTop = 0;
-            }
-        };
-
-        pwInput.addEventListener('focus', () => {
-            resetMobileScroll();
-            setTimeout(resetMobileScroll, 10);
-            setTimeout(resetMobileScroll, 50);
-            setTimeout(resetMobileScroll, 150);
-            setTimeout(resetMobileScroll, 300);
-        });
-
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', resetMobileScroll);
-            window.visualViewport.addEventListener('scroll', resetMobileScroll);
-        }
-        window.addEventListener('scroll', resetMobileScroll);
-    }
-
     // Toggle password visibility
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {

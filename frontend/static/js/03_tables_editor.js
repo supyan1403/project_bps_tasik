@@ -1757,7 +1757,7 @@ async function loadDocuments() {
 
         if (doc.status === 'ready') statusBadge = '<span style="background:var(--badge-green-bg, #dcfce7);color:var(--badge-green-text, #15803d);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">✓ Siap</span>';
 
-        else if (doc.status.startsWith('extracting')) statusBadge = '<span style="background:var(--warning-light, #fef3c7);color:var(--warning-dark, #b45309);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">¢³ Ekstraksi...</span>';
+        else if (doc.status.startsWith('extracting')) statusBadge = '<span style="background:var(--warning-light, #fef3c7);color:var(--warning-dark, #b45309);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">⏳ Ekstraksi...</span>';
 
         else if (doc.status.startsWith('error')) statusBadge = `<span style="background:var(--danger-light, #fee2e2);color:var(--danger-dark, #b91c1c);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;" title="${escHtml(doc.status)}">⚠️ Gagal</span>`;
 

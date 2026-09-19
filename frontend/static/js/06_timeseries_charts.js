@@ -3264,7 +3264,7 @@ function formatDocumentSourceHtml(docName, babNum, docYear) {
         cleanName = `Kabupaten Tasikmalaya Dalam Angka ${docYear || ''}`.trim();
     }
     
-    const babInfo = babNum ? ` Â· Bab ${babNum}` : '';
+    const babInfo = babNum ? ` · Bab ${babNum}` : '';
     const fullText = cleanName + babInfo;
     
     // Teks murni yang bersih, elegan, dan profesional
@@ -6527,7 +6527,7 @@ async function addColFromMaster(tableId, tableName) {
 
                     <a href="#" onclick="event.preventDefault(); document.querySelectorAll('.master-checkbox').forEach(cb => cb.checked = true);" style="font-size:0.85rem; color:#4f46e5; font-weight:500;">Pilih Semua</a>
 
-                    &nbsp;Â·&nbsp;
+                    &nbsp;·&nbsp;
 
                     <a href="#" onclick="event.preventDefault(); document.querySelectorAll('.master-checkbox').forEach(cb => cb.checked = false);" style="font-size:0.85rem; color:#4f46e5; font-weight:500;">Hapus Semua</a>
 

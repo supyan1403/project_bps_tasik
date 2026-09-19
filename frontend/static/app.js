@@ -1,4 +1,4 @@
-﻿let __excelDragFiles = [];
+let __excelDragFiles = [];
 
 // Global error handler â€” tangkap unhandled JS errors
 window.addEventListener('error', function(e) {
@@ -17293,6 +17293,125 @@ function switchSistemTab(tab) {
 // ===================== SISTEM: MODE PEMELIHARAAN =====================
 
 let _maintenanceFlatpickr = null;
+let _maintenanceRepositionAttached = false;
+
+function _updateMaintenanceMinDate(fp) {
+    if (!fp) return;
+    const minD = new Date(Date.now() + 3 * 60 * 1000); // minimal 3 menit ke depan
+    fp.set('minDate', minD);
+}
+
+function _repositionMaintenanceFlatpickr(fp) {
+    if (!fp || !fp.calendarContainer || !fp.element) return;
+    const input = fp.element;
+    const cal = fp.calendarContainer;
+    const rect = input.getBoundingClientRect();
+    const calHeight = cal.offsetHeight || 330;
+    const calWidth = cal.offsetWidth || 308;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+    cal.style.position = 'fixed';
+    cal.style.zIndex = '99999';
+
+    // Vertical positioning: cek ruang bawah vs ruang atas
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    if (spaceBelow < calHeight + 10 && spaceAbove > calHeight + 10) {
+        // Tampilkan di atas input
+        cal.style.top = Math.max(8, rect.top - calHeight - 6) + 'px';
+        cal.classList.add('arrowBottom');
+        cal.classList.remove('arrowTop');
+    } else {
+        // Tampilkan di bawah input
+        cal.style.top = (rect.bottom + 6) + 'px';
+        cal.classList.add('arrowTop');
+        cal.classList.remove('arrowBottom');
+    }
+
+    // Horizontal positioning: sejajar dengan input, tapi pastikan dalam viewport
+    if (viewportWidth < 576) {
+        // Layar mobile: tengahkan
+        cal.style.left = '50%';
+        cal.style.transform = 'translateX(-50%)';
+    } else {
+        cal.style.transform = 'none';
+        let left = rect.left;
+        if (left + calWidth > viewportWidth - 16) {
+            left = Math.max(16, viewportWidth - calWidth - 16);
+        }
+        cal.style.left = left + 'px';
+    }
+}
+
+function updateMaintenanceDurationPreview(selectedDates) {
+    const box = document.getElementById('maintenance-estimate-box');
+    const textEl = document.getElementById('maintenance-estimate-text');
+    if (!box || !textEl) return;
+
+    const date = (selectedDates && selectedDates.length) ? selectedDates[0] :
+                 (_maintenanceFlatpickr && _maintenanceFlatpickr.selectedDates && _maintenanceFlatpickr.selectedDates.length ? _maintenanceFlatpickr.selectedDates[0] : null);
+
+    if (!date) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const diffMs = date.getTime() - Date.now();
+    if (diffMs <= 0) {
+        box.style.display = 'flex';
+        box.className = 'alert alert-danger border py-1.5 px-2.5 mb-2 rounded-2 d-flex align-items-center gap-2';
+        textEl.textContent = 'Waktu selesai sudah lewat dari waktu sekarang. Silakan pilih waktu ke depan.';
+        return;
+    }
+
+    const totalMinutes = Math.round(diffMs / (60 * 1000));
+    let durStr = '';
+    if (totalMinutes < 60) {
+        durStr = `${totalMinutes} menit`;
+    } else {
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        durStr = mins > 0 ? `${hours} jam ${mins} menit` : `${hours} jam`;
+    }
+
+    const timeFormatted = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const isToday = (new Date()).toDateString() === date.toDateString();
+    const dayLabel = isToday ? 'Hari ini' : date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    box.style.display = 'flex';
+    box.className = 'alert alert-primary border py-1.5 px-2.5 mb-2 rounded-2 d-flex align-items-center gap-2';
+    textEl.innerHTML = `Durasi pemeliharaan: <strong>~${durStr}</strong> (selesai <strong>${dayLabel} pukul ${timeFormatted} WIB</strong>)`;
+}
+window.updateMaintenanceDurationPreview = updateMaintenanceDurationPreview;
+
+function setMaintenancePreset(preset) {
+    if (!_maintenanceFlatpickr) {
+        _initMaintenanceFlatpickr();
+    }
+    if (!_maintenanceFlatpickr) return;
+
+    const toggle = document.getElementById('maintenance-toggle');
+    const dtGroup = document.getElementById('maintenance-datetime-group');
+    if (toggle && !toggle.checked) {
+        toggle.checked = true;
+        if (dtGroup) dtGroup.style.display = 'block';
+    }
+
+    let targetDate = new Date();
+    if (preset === 'tomorrow_morning') {
+        targetDate.setDate(targetDate.getDate() + 1);
+        targetDate.setHours(8, 0, 0, 0);
+    } else if (typeof preset === 'number') {
+        targetDate = new Date(Date.now() + preset * 60 * 1000);
+    }
+
+    _updateMaintenanceMinDate(_maintenanceFlatpickr);
+    _maintenanceFlatpickr.setDate(targetDate, true);
+    updateMaintenanceDurationPreview([targetDate]);
+}
+window.setMaintenancePreset = setMaintenancePreset;
 
 function _initMaintenanceFlatpickr() {
     if (_maintenanceFlatpickr) return;
@@ -17313,123 +17432,119 @@ function _initMaintenanceFlatpickr() {
         time_24hr: true,
         monthSelectorType: 'static',
         disableMobile: true,
+        onOpen: function(selectedDates, dateStr, instance) {
+            _updateMaintenanceMinDate(instance);
+            _repositionMaintenanceFlatpickr(instance);
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            updateMaintenanceDurationPreview(selectedDates);
+        },
+        onValueUpdate: function(selectedDates, dateStr, instance) {
+            updateMaintenanceDurationPreview(selectedDates);
+        },
         position: function(fp, inputElement) {
-            fp.calendarContainer.style.position = 'fixed';
-            fp.calendarContainer.style.left = '50%';
-            fp.calendarContainer.style.transform = 'translateX(-50%)';
-            fp.calendarContainer.style.top = (inputElement.getBoundingClientRect().bottom + 4) + 'px';
+            _repositionMaintenanceFlatpickr(fp);
         }
     });
+
+    if (!_maintenanceRepositionAttached) {
+        _maintenanceRepositionAttached = true;
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.addEventListener('scroll', function() {
+                if (_maintenanceFlatpickr && _maintenanceFlatpickr.isOpen) {
+                    _repositionMaintenanceFlatpickr(_maintenanceFlatpickr);
+                }
+            }, { passive: true });
+        }
+        window.addEventListener('resize', function() {
+            if (_maintenanceFlatpickr && _maintenanceFlatpickr.isOpen) {
+                _repositionMaintenanceFlatpickr(_maintenanceFlatpickr);
+            }
+        }, { passive: true });
+    }
 }
-
-
 
 let currentMaintenanceMode = '0';
-
 let currentMaintenanceEnd = '';
-
 let _userTogglingMaintenance = false;
 
-
-
 async function loadMaintenanceStatus() {
-
     try {
-
         const res = await fetch(`${API_BASE}/auth/maintenance`, { credentials: 'same-origin' });
-
         if (!res.ok) throw new Error('Gagal memuat status');
-
         const data = await res.json();
-
         currentMaintenanceMode = data.mode || '0';
-
         currentMaintenanceEnd = data.end_time || '';
-
         renderMaintenanceStatus();
-
         if (!window._maintenancePolling) {
-
             window._maintenancePolling = setInterval(loadMaintenanceStatus, 30000);
-
         }
-
     } catch (e) {
-
-        document.getElementById('maintenance-status-badge').className = 'badge bg-danger';
-
-        document.getElementById('maintenance-status-badge').textContent = 'Gagal memuat';
-
+        const badge = document.getElementById('maintenance-status-badge');
+        if (badge) {
+            badge.className = 'badge bg-danger';
+            badge.textContent = 'Gagal memuat';
+        }
     }
-
 }
 
-
-
 function renderMaintenanceStatus() {
-
     const badge = document.getElementById('maintenance-status-badge');
-
     const toggle = document.getElementById('maintenance-toggle');
-
     const dtGroup = document.getElementById('maintenance-datetime-group');
-
     const endInfo = document.getElementById('maintenance-end-info');
-
     const endDisplay = document.getElementById('maintenance-end-display');
-
     const isActive = currentMaintenanceMode === '1';
 
-
-
     if (badge) {
-
         badge.className = isActive ? 'badge bg-success' : 'badge bg-secondary';
-
         badge.textContent = isActive ? 'Aktif' : 'Nonaktif';
-
     }
 
     if (toggle) toggle.checked = isActive;
-
     if (dtGroup && !_userTogglingMaintenance) dtGroup.style.display = isActive ? 'block' : 'none';
-
     if (endInfo) endInfo.style.display = isActive && currentMaintenanceEnd ? 'block' : 'none';
 
     if (endDisplay && currentMaintenanceEnd) {
-
         try {
-
             const d = new Date(currentMaintenanceEnd);
-
             endDisplay.textContent = d.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
-
         } catch (e) {
-
             endDisplay.textContent = currentMaintenanceEnd;
-
         }
-
     }
 
     // Set flatpickr date if maintenance is active and has end time
     if (_maintenanceFlatpickr && isActive && currentMaintenanceEnd) {
         try {
-            _maintenanceFlatpickr.setDate(new Date(currentMaintenanceEnd), true);
+            const endDateObj = new Date(currentMaintenanceEnd);
+            _maintenanceFlatpickr.setDate(endDateObj, true);
+            updateMaintenanceDurationPreview([endDateObj]);
         } catch(e) {}
     }
 
     if (toggle) {
-
         toggle.onchange = function () {
             _userTogglingMaintenance = true;
             dtGroup.style.display = this.checked ? 'block' : 'none';
             if (this.checked && _maintenanceFlatpickr) {
+                _updateMaintenanceMinDate(_maintenanceFlatpickr);
+                const curSel = _maintenanceFlatpickr.selectedDates;
+                if (!curSel || !curSel.length || curSel[0].getTime() <= Date.now() + 2 * 60 * 1000) {
+                    const defDate = new Date(Date.now() + 60 * 60 * 1000);
+                    _maintenanceFlatpickr.setDate(defDate, true);
+                    updateMaintenanceDurationPreview([defDate]);
+                } else {
+                    updateMaintenanceDurationPreview(curSel);
+                }
                 _maintenanceFlatpickr.redraw();
+            } else if (!this.checked) {
+                const box = document.getElementById('maintenance-estimate-box');
+                if (box) box.style.display = 'none';
             }
             _userTogglingMaintenance = false;
         };
-
     }
 
 }

@@ -17306,8 +17306,8 @@ function _repositionMaintenanceFlatpickr(fp) {
     const input = fp.element;
     const cal = fp.calendarContainer;
     const rect = input.getBoundingClientRect();
-    const calHeight = cal.offsetHeight || 330;
-    const calWidth = cal.offsetWidth || 308;
+    const calHeight = Math.max(380, cal.offsetHeight || 380);
+    const calWidth = Math.max(308, cal.offsetWidth || 308);
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 
@@ -17318,9 +17318,11 @@ function _repositionMaintenanceFlatpickr(fp) {
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
 
-    if (spaceBelow < calHeight + 10 && spaceAbove > calHeight + 10) {
-        // Tampilkan di atas input
-        cal.style.top = Math.max(8, rect.top - calHeight - 6) + 'px';
+    // Jika ruang bawah < 395px (tidak cukup untuk seluruh kalender + time picker) dan ruang atas cukup:
+    // Otomatis buka ke ATAS input agar jam & menit tidak terpotong taskbar/layar
+    if (spaceBelow < calHeight + 15 && spaceAbove >= 240) {
+        const targetTop = Math.max(10, rect.top - calHeight - 6);
+        cal.style.top = targetTop + 'px';
         cal.classList.add('arrowBottom');
         cal.classList.remove('arrowTop');
     } else {

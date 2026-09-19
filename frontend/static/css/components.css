@@ -802,6 +802,22 @@ body.role-pegawai #btn-admin-login {
     box-shadow: 0 2px 8px rgba(30, 64, 175, 0.35) !important;
 }
 
+/* ===================== FLATPICKR TEXT SIZE ===================== */
+.flatpickr-current-month {
+    font-size: 0.8rem !important;
+}
+.flatpickr-current-month span.cur-month {
+    font-size: 0.85rem !important;
+}
+.flatpickr-current-month input.cur-year {
+    font-size: 0.85rem !important;
+}
+.flatpickr-prev-month i,
+.flatpickr-next-month i {
+    width: 10px !important;
+    height: 10px !important;
+}
+
 /* ===================== TOGGLE SWITCH ===================== */
 .custom-switch-wrapper {
     display: inline-flex;

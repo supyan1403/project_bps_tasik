@@ -136,14 +136,14 @@
                         </div>
 
                         <!-- Filter Bar Terpadu (Pencarian + Jalur Masuk + Tahun + Urutan + Paginasi) -->
-                        <div class="row g-2 mb-3 align-items-start admin-filter-bar">
-                            <div class="col-12 col-md-4">
-                                <div class="admin-search-box d-flex align-items-center bg-white border overflow-hidden rounded-3">
-                                    <span class="admin-search-icon text-muted px-3"><i class="bi bi-search"></i></span>
+                        <div class="row g-2 mb-3 align-items-center admin-filter-bar">
+                            <div class="col-12 col-md-3 col-lg-3">
+                                <div class="admin-search-box d-flex align-items-center bg-white border overflow-hidden rounded-3 shadow-2xs">
+                                    <span class="admin-search-icon text-muted"><i class="bi bi-search"></i></span>
                                     <input type="text" id="admin-table-search" class="admin-search-input border-0 bg-transparent" placeholder="Cari nama tabel, dokumen, atau tahun..." oninput="onAdminSearchInput()" autocomplete="off">
                                 </div>
                             </div>
-                            <div class="col-12 col-md-3 admin-filter-item">
+                            <div class="col-12 col-md-3 col-lg-3 admin-filter-item">
                                 <select id="admin-filter-source" class="form-select form-select-sm rounded-3 py-1.5 w-100" onchange="onAdminFilterChange()" style="font-size:0.82rem;" title="Filter Jalur Masuk Data">
                                     <option value="all">Semua Jalur Masuk Data</option>
                                     <option value="pdf">Ekstraksi PDF</option>
@@ -151,7 +151,7 @@
                                     <option value="web">Entri Manual Web</option>
                                 </select>
                             </div>
-                            <div class="col-12 col-md-2 admin-filter-item">
+                            <div class="col-12 col-md-2 col-lg-2 admin-filter-item">
                                 <select id="admin-filter-year" class="form-select form-select-sm rounded-3 py-1.5 w-100" onchange="onAdminFilterChange()" style="font-size:0.82rem;" title="Filter Tahun Publikasi">
                                     <option value="">Semua Tahun</option>
                                     <option value="2022">Tahun 2022</option>
@@ -161,7 +161,7 @@
                                     <option value="2026">Tahun 2026</option>
                                 </select>
                             </div>
-                            <div class="col-12 col-md-2 admin-filter-item">
+                            <div class="col-12 col-md-2 col-lg-2 admin-filter-item">
                                 <select id="admin-sort" class="form-select form-select-sm rounded-3 py-1.5 w-100" onchange="onAdminFilterChange()" style="font-size:0.82rem;" title="Urutkan Data">
                                     <option value="id">Urutkan: ID Tabel</option>
                                     <option value="name">Urutkan: Nama Tabel</option>
@@ -169,7 +169,7 @@
                                     <option value="rows">Urutkan: Jml Baris Data</option>
                                 </select>
                             </div>
-                            <div class="col-12 col-md-1 admin-filter-item">
+                            <div class="col-12 col-md-2 col-lg-2 admin-filter-item">
                                 <select id="admin-page-size" class="form-select form-select-sm rounded-3 py-1.5 w-100 px-2" onchange="changeAdminPageSize(this.value)" style="font-size:0.82rem;" title="Jumlah data per halaman">
                                     <option value="10">10 / hlm</option>
                                     <option value="25">25 / hlm</option>

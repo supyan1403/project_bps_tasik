@@ -806,6 +806,8 @@ body.role-pegawai #btn-admin-login {
 .flatpickr-calendar {
     padding-bottom: 8px !important;
     overflow: visible !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
 }
 .flatpickr-months {
     overflow: visible !important;

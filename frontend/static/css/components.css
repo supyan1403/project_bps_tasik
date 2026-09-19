@@ -808,6 +808,8 @@ body.role-pegawai #btn-admin-login {
 }
 .flatpickr-current-month {
     font-size: 0.7rem !important;
+    overflow: visible !important;
+    width: 80% !important;
 }
 .flatpickr-current-month span.cur-month {
     font-size: 0.75rem !important;

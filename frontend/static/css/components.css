@@ -803,6 +803,9 @@ body.role-pegawai #btn-admin-login {
 }
 
 /* ===================== FLATPICKR TEXT SIZE ===================== */
+.flatpickr-calendar {
+    padding-bottom: 8px !important;
+}
 .flatpickr-current-month {
     font-size: 0.7rem !important;
 }

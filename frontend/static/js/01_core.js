@@ -5,9 +5,10 @@ window.addEventListener('error', function(e) {
     const msg = (e.message || (e.error && e.error.message) || '').toString();
     if (
         msg.includes('ResizeObserver') ||
-        msg.includes('Script error.')
+        msg.includes('Script error.') ||
+        (e.lineno === 1 && msg.includes('SyntaxError'))
     ) {
-        return; // Abaikan notifikasi benign browser resize observer & cross-origin script
+        return; // Abaikan notifikasi benign browser resize observer, cross-origin script, atau input devtools/ekstensi
     }
     console.error('[SIPEDAS Error]', e.filename, e.lineno, e.message);
     if (typeof showToast === 'function') {

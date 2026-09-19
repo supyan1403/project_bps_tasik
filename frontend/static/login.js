@@ -15,6 +15,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!loginForm || !pwInput) return;
 
+    // Autofocus hanya untuk desktop (layar lebar) agar di mobile keyboard tidak otomatis pop-up
+    if (window.innerWidth >= 900) {
+        pwInput.focus();
+    } else {
+        // Di mobile: kunci tinggi layar awal ke CSS variable agar saat keyboard virtual muncul,
+        // tata letak tidak terdorong atau menyusut ke atas
+        const lockMobileHeight = () => {
+            const h = window.innerHeight;
+            document.documentElement.style.setProperty('--locked-height', h + 'px');
+        };
+        lockMobileHeight();
+        window.addEventListener('orientationchange', () => {
+            setTimeout(lockMobileHeight, 150);
+        });
+
+        // Cegah browser melakukan auto-scroll window ke atas saat input password difokuskan
+        pwInput.addEventListener('focus', () => {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        });
+    }
+
     // Toggle password visibility
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content">
     <title>Login Administrator | SIPEDAS — BPS Kab. Tasikmalaya</title>
     <link rel="icon" type="image/png" href="/static/logo_sipedas.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -398,7 +398,7 @@
         @media (max-width: 900px) {
             html, body {
                 height: 100%;
-                height: 100dvh;
+                width: 100%;
                 overflow: hidden;
                 overscroll-behavior: none;
                 touch-action: pan-y;
@@ -412,11 +412,12 @@
             .login-layout {
                 flex-direction: column-reverse;
                 height: 100%;
-                height: 100dvh;
-                max-height: 100dvh;
+                height: var(--locked-height, 100vh);
+                max-height: var(--locked-height, 100vh);
                 min-height: 0;
-                padding-bottom: 0;
-                justify-content: space-evenly;
+                padding: max(12px, env(safe-area-inset-top, 12px)) 0 12px;
+                justify-content: center;
+                align-items: center;
                 overflow: hidden;
             }
 
@@ -691,8 +692,8 @@
             }
         }
 
-        /* Fallback for Landscape or Extreme Small Heights (< 520px) */
-        @media (max-height: 520px) and (max-width: 900px) {
+        /* Fallback for Landscape on Small Devices (< 520px) */
+        @media (orientation: landscape) and (max-height: 520px) {
             html, body {
                 height: auto !important;
                 overflow-y: auto !important;
@@ -748,7 +749,7 @@
                                 class="form-input" 
                                 placeholder="Masukkan password admin..." 
                                 required 
-                                autofocus
+                                autocomplete="current-password"
                             >
                             <button type="button" id="toggle-pw" class="toggle-pw-btn" title="Lihat password">
                                 <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19">
@@ -797,6 +798,6 @@
 
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 
-    <script src="/static/login.js?v=20260912_1" defer></script>
+    <script src="/static/login.js?v=20260919_2" defer></script>
 </body>
 </html>

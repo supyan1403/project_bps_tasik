@@ -19,23 +19,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth >= 900) {
         pwInput.focus();
     } else {
-        // Di mobile: kunci tinggi layar awal ke CSS variable agar saat keyboard virtual muncul,
-        // tata letak tidak terdorong atau menyusut ke atas
-        const lockMobileHeight = () => {
-            const h = window.innerHeight;
-            document.documentElement.style.setProperty('--locked-height', h + 'px');
+        // Di mobile: cegah auto-scroll window/viewport saat keyboard virtual muncul
+        const resetMobileScroll = () => {
+            if (window.scrollY !== 0 || document.documentElement.scrollTop !== 0 || document.body.scrollTop !== 0) {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }
         };
-        lockMobileHeight();
-        window.addEventListener('orientationchange', () => {
-            setTimeout(lockMobileHeight, 150);
+
+        pwInput.addEventListener('focus', () => {
+            resetMobileScroll();
+            setTimeout(resetMobileScroll, 10);
+            setTimeout(resetMobileScroll, 50);
+            setTimeout(resetMobileScroll, 150);
+            setTimeout(resetMobileScroll, 300);
         });
 
-        // Cegah browser melakukan auto-scroll window ke atas saat input password difokuskan
-        pwInput.addEventListener('focus', () => {
-            window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
-        });
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', resetMobileScroll);
+            window.visualViewport.addEventListener('scroll', resetMobileScroll);
+        }
+        window.addEventListener('scroll', resetMobileScroll);
     }
 
     // Toggle password visibility

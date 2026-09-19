@@ -394,11 +394,12 @@
             text-align: center;
         }
 
-        /* Responsive Mobile & Tablet (Non-scrollable, fit 1 screen) */
+        /* Responsive Mobile & Tablet (Non-scrollable, fit 1 screen, zero push on keyboard) */
         @media (max-width: 900px) {
             html, body {
-                height: 100%;
+                position: fixed;
                 width: 100%;
+                height: 100%;
                 overflow: hidden;
                 overscroll-behavior: none;
                 touch-action: pan-y;
@@ -410,13 +411,13 @@
             }
 
             .login-layout {
-                flex-direction: column-reverse;
+                position: fixed;
+                inset: 0;
+                width: 100%;
                 height: 100%;
-                height: var(--locked-height, 100vh);
-                max-height: var(--locked-height, 100vh);
-                min-height: 0;
-                padding: max(12px, env(safe-area-inset-top, 12px)) 0 12px;
-                justify-content: center;
+                flex-direction: column-reverse;
+                padding: max(16px, env(safe-area-inset-top, 16px)) 16px 16px;
+                justify-content: flex-start;
                 align-items: center;
                 overflow: hidden;
             }
@@ -427,109 +428,110 @@
 
             .showcase-pane {
                 flex: 0 0 auto;
-                padding: 20px 32px 6px;
+                padding: 6px 16px 4px;
                 justify-content: center;
             }
 
             .showcase-glow {
-                width: 260px;
-                height: 260px;
-                filter: blur(40px);
+                width: 160px;
+                height: 160px;
+                filter: blur(30px);
             }
 
             .neon-logo-wrapper {
-                margin-bottom: 12px;
+                margin-bottom: 6px;
             }
 
             .showcase-logo {
-                width: 80px;
-                height: 80px;
+                width: 52px;
+                height: 52px;
             }
 
             .showcase-brand {
-                font-size: 24px;
-                margin-bottom: 4px;
+                font-size: 20px;
+                margin-bottom: 2px;
                 line-height: 1.1;
             }
 
             .showcase-instansi {
-                font-size: 11px;
-                letter-spacing: 0.8px;
+                font-size: 10.5px;
+                letter-spacing: 0.6px;
             }
 
             .showcase-kab {
-                font-size: 10.5px;
-                margin-bottom: 6px;
+                font-size: 10px;
+                margin-bottom: 2px;
             }
 
             .showcase-desc {
-                font-size: 12px;
-                line-height: 1.45;
-                max-width: 320px;
+                display: none !important;
             }
 
             .form-pane {
-                flex: 0 1 auto;
-                padding: 10px 32px 24px;
-                justify-content: center;
+                flex: 0 0 auto;
+                width: 100%;
+                max-width: 380px;
+                padding: 4px 16px 12px;
+                justify-content: flex-start;
                 align-items: center;
             }
 
             .form-inner {
-                max-width: 400px;
+                width: 100%;
+                max-width: 380px;
             }
 
             .form-badge {
-                font-size: 10.5px;
-                padding: 4px 10px;
-                margin-bottom: 12px;
+                font-size: 10px;
+                padding: 3px 8px;
+                margin-bottom: 8px;
             }
 
             .form-title {
-                font-size: 22px;
-                margin-bottom: 4px;
+                font-size: 20px;
+                margin-bottom: 2px;
             }
 
             .form-desc {
-                font-size: 12.5px;
-                line-height: 1.45;
-                margin-bottom: 16px;
+                font-size: 12px;
+                line-height: 1.35;
+                margin-bottom: 12px;
             }
 
             .form-group {
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
 
             .form-label {
                 font-size: 11px;
-                margin-bottom: 6px;
+                margin-bottom: 4px;
             }
 
             .form-input {
-                height: 48px;
+                height: 44px;
                 font-size: 14px;
-                border-radius: 12px;
-            }
-
-            .btn-submit {
-                height: 48px;
-                font-size: 14px;
-                border-radius: 12px;
-            }
-
-            .alert-error {
-                padding: 10px 14px;
-                font-size: 12.5px;
-                margin-bottom: 14px;
                 border-radius: 10px;
             }
 
+            .btn-submit {
+                height: 44px;
+                font-size: 14px;
+                border-radius: 10px;
+            }
+
+            .alert-error {
+                padding: 8px 12px;
+                font-size: 12px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+            }
+
             .back-link-wrapper {
-                margin-top: 14px;
+                margin-top: 10px;
             }
 
             .back-link {
-                font-size: 12.5px;
+                font-size: 12px;
             }
 
             .footer-text {
@@ -540,155 +542,52 @@
         /* Small Phone / Tight Heights */
         @media (max-width: 425px) {
             .showcase-pane {
-                padding: 16px 28px 6px;
-            }
-
-            .neon-logo-wrapper {
-                margin-bottom: 10px;
+                padding: 4px 12px 2px;
             }
 
             .showcase-logo {
-                width: 72px;
-                height: 72px;
+                width: 46px;
+                height: 46px;
             }
 
             .showcase-brand {
-                font-size: 22px;
-            }
-
-            .showcase-desc {
-                font-size: 11.5px;
-                max-width: 290px;
+                font-size: 19px;
             }
 
             .form-pane {
-                padding: 8px 28px 20px;
-            }
-
-            .form-badge {
-                font-size: 10px;
-                padding: 3.5px 9px;
-                margin-bottom: 10px;
+                padding: 2px 12px 10px;
             }
 
             .form-title {
-                font-size: 20px;
-                margin-bottom: 4px;
+                font-size: 19px;
             }
 
             .form-desc {
-                font-size: 12px;
-                margin-bottom: 14px;
-            }
-
-            .form-group {
-                margin-bottom: 14px;
-            }
-
-            .form-input {
-                height: 46px;
-                font-size: 13.5px;
-                padding: 0 42px 0 40px;
-                border-radius: 11px;
-            }
-
-            .input-icon {
-                left: 14px;
-            }
-
-            .toggle-pw-btn {
-                right: 8px;
-                padding: 6px;
-            }
-
-            .btn-submit {
-                height: 46px;
-                font-size: 13.5px;
-                border-radius: 11px;
-            }
-
-            .back-link-wrapper {
-                margin-top: 12px;
-            }
-
-            .back-link {
-                font-size: 12px;
+                margin-bottom: 10px;
             }
         }
 
         /* Very Small Phone (<= 375px width or tight vertical height) */
         @media (max-width: 375px) {
             .showcase-pane {
-                padding: 12px 22px 4px;
-            }
-
-            .neon-logo-wrapper {
-                margin-bottom: 8px;
+                padding: 2px 8px 2px;
             }
 
             .showcase-logo {
-                width: 62px;
-                height: 62px;
+                width: 42px;
+                height: 42px;
             }
 
             .showcase-brand {
-                font-size: 20px;
-            }
-
-            .showcase-instansi {
-                font-size: 10px;
-            }
-
-            .showcase-kab {
-                font-size: 9.5px;
-                margin-bottom: 4px;
-            }
-
-            .showcase-desc {
-                font-size: 11px;
-                line-height: 1.4;
-                max-width: 270px;
+                font-size: 18px;
             }
 
             .form-pane {
-                padding: 6px 22px 16px;
-            }
-
-            .form-badge {
-                font-size: 9.5px;
-                padding: 3px 8px;
-                margin-bottom: 8px;
+                padding: 2px 8px 8px;
             }
 
             .form-title {
-                font-size: 19px;
-                margin-bottom: 3px;
-            }
-
-            .form-desc {
-                font-size: 11.5px;
-                margin-bottom: 12px;
-            }
-
-            .form-input {
-                height: 44px;
-                font-size: 13px;
-                padding: 0 40px 0 38px;
-                border-radius: 10px;
-            }
-
-            .btn-submit {
-                height: 44px;
-                font-size: 13px;
-                border-radius: 10px;
-            }
-
-            .back-link-wrapper {
-                margin-top: 10px;
-            }
-
-            .back-link {
-                font-size: 11.5px;
+                font-size: 18px;
             }
         }
 
@@ -798,6 +697,6 @@
 
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 
-    <script src="/static/login.js?v=20260919_2" defer></script>
+    <script src="/static/login.js?v=20260919_3" defer></script>
 </body>
 </html>

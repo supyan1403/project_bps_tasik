@@ -357,7 +357,7 @@ function showToast(icon, title, text, timer = 3000) {
 
         </div>
 
-        <button type="button" style="background:none; border:none; color:var(--text-light, #94a3b8); cursor:pointer; padding:0; margin-left:4px; font-size:1.1rem; line-height:1;" onclick="this.parentElement.remove()">Ã—</button>
+        <button type="button" style="background:none; border:none; color:var(--text-light, #94a3b8); cursor:pointer; padding:0; margin-left:4px; font-size:1.1rem; line-height:1;" onclick="this.parentElement.remove()">×</button>
 
     `;
 
@@ -3857,7 +3857,7 @@ async function loadDocuments() {
 
         if (doc.status === 'ready') statusBadge = '<span style="background:var(--badge-green-bg, #dcfce7);color:var(--badge-green-text, #15803d);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">✓ Siap</span>';
 
-        else if (doc.status.startsWith('extracting')) statusBadge = '<span style="background:var(--warning-light, #fef3c7);color:var(--warning-dark, #b45309);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">Â¢Â³ Ekstraksi...</span>';
+        else if (doc.status.startsWith('extracting')) statusBadge = '<span style="background:var(--warning-light, #fef3c7);color:var(--warning-dark, #b45309);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">⏳ Ekstraksi...</span>';
 
         else if (doc.status.startsWith('error')) statusBadge = `<span style="background:var(--danger-light, #fee2e2);color:var(--danger-dark, #b91c1c);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;" title="${escHtml(doc.status)}">⚠️ Gagal</span>`;
 
@@ -8886,13 +8886,13 @@ const UNIVERSAL_UNIT_FAMILIES = {
 
             'ha': { label: 'Ha', btnLabel: 'Hektar (ha)', factor: 1, isInteger: false, maxDecimals: 2 },
 
-            'km2': { label: 'kmÂ²', btnLabel: 'kmÂ²', factor: 0.01, isInteger: false, maxDecimals: 3 },
+            'km2': { label: 'km²', btnLabel: 'km²', factor: 0.01, isInteger: false, maxDecimals: 3 },
 
-            'm2': { label: 'mÂ²', btnLabel: 'mÂ²', factor: 10000, isInteger: true, maxDecimals: 0 }
+            'm2': { label: 'm²', btnLabel: 'm²', factor: 10000, isInteger: true, maxDecimals: 0 }
 
         },
 
-        triggers: ['ha', 'hektar', 'm2', 'mÂ²', 'km2', 'kmÂ²', 'luas', 'wilayah', 'lahan', 'panen', 'tanah', 'sawah', 'hutan']
+        triggers: ['ha', 'hektar', 'm2', 'm²', 'km2', 'km²', 'luas', 'wilayah', 'lahan', 'panen', 'tanah', 'sawah', 'hutan']
 
     },
 
@@ -8908,13 +8908,13 @@ const UNIVERSAL_UNIT_FAMILIES = {
 
             'liter': { label: 'Liter', btnLabel: 'Liter (l)', factor: 1, isInteger: true, maxDecimals: 0 },
 
-            'm3': { label: 'mÂ³', btnLabel: 'Meter Kubik (mÂ³)', factor: 0.001, isInteger: false, maxDecimals: 2 },
+            'm3': { label: 'm³', btnLabel: 'Meter Kubik (m³)', factor: 0.001, isInteger: false, maxDecimals: 2 },
 
             'juta_liter': { label: 'Juta Liter', btnLabel: 'Juta Liter', factor: 0.000001, isInteger: false, maxDecimals: 3 }
 
         },
 
-        triggers: ['liter', 'm3', 'mÂ³', 'debit', 'air bersih', 'air minum', 'bbm', 'solar', 'bensin', 'limbah cair', 'minyak']
+        triggers: ['liter', 'm3', 'm³', 'debit', 'air bersih', 'air minum', 'bbm', 'solar', 'bensin', 'limbah cair', 'minyak']
 
     },
 
@@ -15410,7 +15410,7 @@ function formatDocumentSourceHtml(docName, babNum, docYear) {
         cleanName = `Kabupaten Tasikmalaya Dalam Angka ${docYear || ''}`.trim();
     }
     
-    const babInfo = babNum ? ` Â· Bab ${babNum}` : '';
+    const babInfo = babNum ? ` · Bab ${babNum}` : '';
     const fullText = cleanName + babInfo;
     
     // Teks murni yang bersih, elegan, dan profesional
@@ -16765,7 +16765,7 @@ async function searchGlobalColumnsDirect() {
             const collapseId = `col-group-${idx}`;
             let rowsHtml = '';
             g.matches.forEach(m => {
-                const yearLabel = m.table_year ? ` Â· data ${m.table_year}` : '';
+                const yearLabel = m.table_year ? ` · data ${m.table_year}` : '';
                 const docLabel = m.doc_year ? `<span class="badge bg-light text-secondary">Publikasi ${m.doc_year}</span> ` : '';
                 const tNum = m.table_number || '';
                 rowsHtml += `<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="text-align:left;">
@@ -16836,7 +16836,7 @@ async function searchGlobalRowsDirect() {
                 rowsHtml += `<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="text-align:left;">
                     <div class="small" style="flex:1; min-width:0;">
                         <div style="white-space:normal; word-break:break-word;"><b>${escHtml(m.entity || '')}</b>${valLabel}</div>
-                        <div class="text-muted mt-0.5" style="font-size:0.72rem;">${docLabel}${colInfo ? ' Â· ' + escHtml(colInfo) : ''}</div>
+                        <div class="text-muted mt-0.5" style="font-size:0.72rem;">${docLabel}${colInfo ? ' · ' + escHtml(colInfo) : ''}</div>
                     </div>
                     <button class="btn btn-outline-primary btn-sm flex-shrink-0 ms-2" style="font-size:0.72rem; padding:2px 8px;" onclick="event.stopPropagation(); previewCsv(${g.table_id}, '${(g.table_name||'').replace(/'/g,"\\'")}', '${(m.entity||'').replace(/'/g,"\\'")}')">Buka</button>
                 </div>`;
@@ -18767,7 +18767,7 @@ async function searchGlobalColumns() {
 
             g.matches.forEach(m => {
 
-                const yearLabel = m.table_year ? ` Â· data ${m.table_year}` : '';
+                const yearLabel = m.table_year ? ` · data ${m.table_year}` : '';
 
                 const docLabel = m.doc_year ? `<span class="badge bg-light text-secondary">Publikasi ${m.doc_year}</span> ` : '';
 
@@ -22062,7 +22062,7 @@ async function addColFromMaster(tableId, tableName) {
 
                     <a href="#" onclick="event.preventDefault(); document.querySelectorAll('.master-checkbox').forEach(cb => cb.checked = true);" style="font-size:0.85rem; color:#4f46e5; font-weight:500;">Pilih Semua</a>
 
-                    &nbsp;Â·&nbsp;
+                    &nbsp;·&nbsp;
 
                     <a href="#" onclick="event.preventDefault(); document.querySelectorAll('.master-checkbox').forEach(cb => cb.checked = false);" style="font-size:0.85rem; color:#4f46e5; font-weight:500;">Hapus Semua</a>
 
@@ -22929,7 +22929,7 @@ async function openTableSnippet(tableId) {
 
         if (babEl) babEl.innerHTML = `<i class="bi bi-folder2 me-1"></i> ${data.bab_num ? 'Bab ' + data.bab_num : 'Tabel Publikasi'}`;
 
-        if (sizeEl) sizeEl.innerHTML = `<i class="bi bi-grid-3x3 me-1"></i> ${data.total_rows} Baris Ã— ${data.total_cols} Kolom`;
+        if (sizeEl) sizeEl.innerHTML = `<i class="bi bi-grid-3x3 me-1"></i> ${data.total_rows} Baris × ${data.total_cols} Kolom`;
 
 
 

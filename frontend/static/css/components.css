@@ -1416,11 +1416,19 @@ body.dark-mode .search-type-select-styled:hover {
 }
 
 /* ===================== ADMIN SEARCH BAR (Unified Flex) ===================== */
+.admin-search-box,
+.admin-filter-bar .form-select {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 0.82rem !important;
+    box-sizing: border-box !important;
+}
+
 .admin-search-box {
     display: flex;
     align-items: center;
-    height: 34px !important;
-    border-radius: 8px !important;
     background-color: #ffffff;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }

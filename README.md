@@ -1,8 +1,8 @@
 <div align="center">
 
 <p align="center">
-  <img src="backend/static/logo_bps.png" alt="Logo Badan Pusat Statistik" height="80" style="margin-right: 20px; vertical-align: middle;" />
-  <img src="backend/static/logo_sipedas.png" alt="Logo SIPEDAS" height="80" style="vertical-align: middle;" />
+  <img src="frontend/static/logo_bps.png" alt="Logo Badan Pusat Statistik" height="80" style="margin-right: 20px; vertical-align: middle;" />
+  <img src="frontend/static/logo_sipedas.png" alt="Logo SIPEDAS" height="80" style="vertical-align: middle;" />
 </p>
 
 # SIPEDAS
@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="Database" />
+  <img src="https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite%20%2F%20PostgreSQL-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="Database" />
   <img src="https://img.shields.io/badge/Frontend-Vanilla%20SPA%20%26%20Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Frontend" />
   <img src="https://img.shields.io/badge/Charts-Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js" />
   <img src="https://img.shields.io/badge/Status-Beta%20Preview-F59E0B?style=flat-square" alt="Status" />
@@ -31,7 +31,7 @@
 | Kategori | Modul & Panduan | Deskripsi Ringkas |
 | :--- | :--- | :--- |
 | **Pengenalan** | [Tentang SIPEDAS](#tentang-sipedas) | Latar belakang dan tujuan sistem |
-| **Fitur** | [Fitur Utama](#fitur-fitur-utama) | 8 modul utama sistem |
+| **Fitur** | [Fitur Utama](#fitur-fitur-utama) | 10 modul utama sistem |
 | **Instalasi** | [Panduan Instalasi Lengkap](#panduan-instalasi-lengkap) | Step-by-step dari nol sampai jalan |
 | **API** | [Dokumentasi REST API](#dokumentasi-rest-api) | Endpoint Swagger |
 | **Troubleshooting** | [Panduan Troubleshooting](#panduan-troubleshooting) | Solusi kendala umum |
@@ -132,7 +132,36 @@ pip install -r ../requirements.txt
 
 > **Tanda berhasil**: Prompt terminal akan menampilkan `(venv)` di awal baris.
 
-### Langkah 5: Konfigurasi Database
+### Langkah 5: Buat Berkas `.env`
+
+Berkas `.env` menyimpan kredensial dan konfigurasi sensitif. Berkas ini **tidak akan pernah di-commit** ke Git (sudah masuk `.gitignore`).
+
+**Windows (PowerShell / CMD):**
+```cmd
+copy .env.example .env
+```
+
+**Linux / macOS:**
+```bash
+cp .env.example .env
+```
+
+Lalu buka `.env` dan isi nilainya:
+
+```ini
+# Domain produksi (tanpa https://). Kosongkan untuk mode development
+SIPEDAS_DOMAIN=
+
+# Database MySQL (atau sqlite untuk mode lokal)
+DATABASE_URL=mysql+pymysql://user:password@localhost:3306/bps_tasikmalaya
+
+# Password admin pertama kali - WAJIB diisi untuk production
+SIPEDAS_ADMIN_PASSWORD=
+```
+
+> **Penting**: Jangan pernah menyalin nilai `.env` yang sudah terisi ke file lain, dan jangan commit berkas `.env`.
+
+### Langkah 6: Konfigurasi Database
 
 SIPEDAS mendukung dua mode database. Pilih **salah satu**:
 
@@ -167,7 +196,7 @@ set DATABASE_URL=sqlite:///./bps_dashboard.db
 export DATABASE_URL="sqlite:///./bps_dashboard.db"
 ```
 
-### Langkah 6: Jalankan Server
+### Langkah 7: Jalankan Server
 
 **Cara 1: Menggunakan Start Script (Windows - Direkomendasikan)**
 
@@ -184,13 +213,13 @@ Dari dalam folder `backend/` dengan venv aktif:
 python run_server.py
 ```
 
-### Langkah 7: Akses Aplikasi
+### Langkah 8: Akses Aplikasi
 
 Buka peramban (browser) dan akses:
 
 **http://127.0.0.1:8000**
 
-### Langkah 8: Login Admin
+### Langkah 9: Login Admin
 
 1. Klik tombol **"Login Admin"** di pojok kiri bawah sidebar
 2. Masukkan password admin:
@@ -198,7 +227,7 @@ Buka peramban (browser) dan akses:
    - Setelah login pertama kali, sangat disarankan segera mengganti password melalui menu **Manajemen Database > Ganti Password**.
 3. Klik **"Masuk Sekarang"**
 
-### Langkah 9: Isi Data
+### Langkah 10: Isi Data
 
 Setelah login, Anda memiliki tiga cara untuk mengisi data:
 
@@ -274,19 +303,60 @@ project_bps_tasik/
 ├── requirements.txt            # Daftar dependensi paket Python
 ├── README.md                   # Dokumentasi resmi sistem
 ├── .env.example                # Templat variabel lingkungan (production/keamanan)
+├── .env                        # Konfigurasi lokal (di-gitignore, JANGAN di-commit)
 ├── .gitignore                  # Berkas pengecualian Git
 ├── table_mods.json             # Konfigurasi penggabungan tabel PDF multi-halaman
+├── ruff.toml                   # Konfigurasi linter Python (Ruff)
+├── deploy-502.sh               # Forwarder ke deploy/deploy-502.sh
+├── update-sipedas.sh           # Forwarder ke deploy/update-sipedas.sh
 │
 ├── pipeline/                   # Pipeline inti pemrosesan & ekstraksi dokumen
 │   ├── __init__.py
 │   ├── pdf_table_pipeline.py   # Ekstraktor tabel PDF cerdas (pdfplumber)
+│   ├── hierarchy_normalizer.py # Normalisasi hierarki header multi-level
+│   ├── table_cleaners.py       # Pembersih satuan & angka tabel statistik
 │   ├── pipeline_utils.py       # Utilitas pembersihan teks & header
 │   └── extract_toc.py          # Ekstraktor daftar isi & struktur bab
 │
+├── deploy/                     # Skrip & konfigurasi deployment server
+│   ├── deploy-502.sh           # Deploy halaman error 502 custom
+│   ├── update-sipedas.sh       # Git pull + install dependensi + restart backend + reload nginx
+│   ├── nginx_sipedas_502.conf  # Konfigurasi nginx untuk halaman 502 custom
+│   └── setup_502_nginx.py      # Injektor konfigurasi nginx otomatis
+│
+├── frontend/                   # Aset frontend (dilayani oleh FastAPI, bukan backend/)
+│   ├── static/                 # Aset web statis
+│   │   ├── app.js              # Logika utama SPA
+│   │   ├── auth_role_logic.js  # Logika otentikasi & dialog ganti password
+│   │   ├── login.js            # Logika halaman login
+│   │   ├── js/                 # Modul JS berurutan (01_core ... 08_admin_system)
+│   │   ├── css/                # Modul stylesheet CSS terstruktur
+│   │   │   ├── theme.css       # Design system CSS variables
+│   │   │   ├── base.css        # Base resets
+│   │   │   ├── sidebar.css     # Sidebar navigation
+│   │   │   ├── components.css  # Buttons, badges, modals
+│   │   │   ├── dashboard.css   # Dashboard cards/widgets
+│   │   │   ├── tables.css      # Table styling
+│   │   │   ├── timeseries.css  # Time series wizard & charts
+│   │   │   └── responsive/     # Breakpoint mobile_sm, mobile_lg, tablets
+│   │   ├── logo_bps.png        # Logo resmi BPS
+│   │   └── logo_sipedas.png    # Logo sistem SIPEDAS
+│   │
+│   └── templates/              # Antarmuka template HTML & Error Pages
+│       ├── index.html          # Halaman utama aplikasi SIPEDAS
+│       ├── login.html          # Halaman login admin
+│       ├── maintenance.html    # Halaman interaktif status pemeliharaan
+│       ├── partials/           # Potongan header & sidebar
+│       ├── sections/           # dashboard, tabel, timeseries, admin, sistem, dll.
+│       ├── 404.html            # Halaman kesalahan 404 Not Found
+│       ├── 500.html            # Halaman kesalahan 500 Server Error
+│       └── 502.html            # Halaman kesalahan 502 Bad Gateway
+│
 ├── backups/                    # Direktori penyimpanan file cadangan database (.sql)
+├── Bahan/                      # Berkas PDF publikasi sumber (di-gitignore)
 │
 └── backend/                    # Core backend server (FastAPI)
-    ├── venv/                   # Python Virtual Environment
+    ├── venv/                   # Python Virtual Environment (di-gitignore)
     ├── main.py                 # Titik masuk utama & konfigurasi FastAPI
     ├── database.py             # Konfigurasi koneksi SQLAlchemy ORM
     ├── models.py               # Definisi skema tabel basis data relasional
@@ -304,30 +374,19 @@ project_bps_tasik/
     │   ├── tables.py           # Penelusuran data tabel & live editor
     │   └── timeseries.py       # Analisis deret waktu multi-tahun
     │
-    ├── data/                   # Berkas konfigurasi JSON & kredensial
-    │   ├── auth_credentials.json (auto-generated saat runtime)
-    │   ├── master_columns.json
-    │   └── master_dictionary.json
+    ├── services/               # Logika bisnis yang dipakai bersama
+    │   ├── table_service.py    # Layanan query & pemrosesan tabel
+    │   └── timeseries_service.py # Layanan agregasi deret waktu
     │
-    ├── static/                 # Aset web statis (Frontend)
-    │   ├── app.js              # Logika utama SPA
-    │   ├── auth_role_logic.js  # Logika otentikasi & dialog ganti password
-    │   ├── logo_bps.png        # Logo resmi BPS
-    │   ├── logo_sipedas.png    # Logo sistem SIPEDAS
-    │   └── css/                # Modul stylesheet CSS terstruktur
-    │       ├── theme.css       # Design system CSS variables
-    │       ├── base.css        # Base resets
-    │       ├── sidebar.css     # Sidebar navigation
-    │       ├── components.css  # Buttons, badges, modals
-    │       ├── dashboard.css   # Dashboard cards/widgets
-    │       ├── tables.css      # Table styling
-    │       └── timeseries.css  # Time series wizard & charts
+    ├── tests/                  # Suite pengujian pytest (conftest + per-router)
     │
-    └── templates/              # Antarmuka template HTML & Error Pages
-        ├── index.html          # Halaman utama aplikasi SIPEDAS
-        ├── maintenance.html    # Halaman interaktif status pemeliharaan
-        ├── 404.html            # Halaman kesalahan 404 Not Found
-        └── 500.html            # Halaman kesalahan 500 Server Error
+    └── data/                   # Berkas konfigurasi JSON & kredensial
+        ├── auth_credentials.json (auto-generated saat runtime, di-gitignore)
+        ├── master_columns.json
+        ├── master_dictionary.json
+        ├── dismissed_column_anomalies.json
+        ├── safe_timeseries_anomalies.json
+        └── truncated_fix_changelog.json
 ```
 
 ---
@@ -338,7 +397,7 @@ project_bps_tasik/
 | :--- | :--- | :--- |
 | **Backend** | Python 3.10+ & FastAPI | Performa asinkron tinggi |
 | **Server** | Uvicorn (ASGI) | Server web berkecepatan tinggi |
-| **ORM & Database** | SQLAlchemy 2.0+ | MySQL & SQLite |
+| **ORM & Database** | SQLAlchemy 2.0+ | MySQL, SQLite & PostgreSQL |
 | **Data Processing** | Pandas & OpenPyXL | Manipulasi tabel & spreadsheet |
 | **PDF Extraction** | pdfplumber | Ekstraksi teks berbasis grid |
 | **Frontend** | Vanilla JavaScript SPA | Tanpa build tools |

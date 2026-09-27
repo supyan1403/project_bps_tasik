@@ -12,6 +12,24 @@ __pycache__/
 .continue/
 node_modules/
 
+# Environment / rahasia (JANGAN di-commit!)
+.env
+.env.*
+!.env.example
+
+# Tooling & cache dev
+.opencode/
+.gstack/
+.pytest_cache/
+.ruff_cache/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Data & skrip lokal (jangan di-commit)
+archive/legacy_scripts/
+Bahan/
+
 # Dataset atau output (opsional, jika ukurannya besar)
 *.csv
 *.xlsx

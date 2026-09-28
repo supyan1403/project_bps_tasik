@@ -35,6 +35,8 @@
 | **Instalasi** | [Panduan Instalasi Lengkap](#panduan-instalasi-lengkap) | Step-by-step dari nol sampai jalan |
 | **API** | [Dokumentasi REST API](#dokumentasi-rest-api) | Endpoint Swagger |
 | **Troubleshooting** | [Panduan Troubleshooting](#panduan-troubleshooting) | Solusi kendala umum |
+| **Deployment** | [Deployment di Server VPS](#deployment-di-server-vps) | Alur update manual & halaman error 502 |
+| **Kontribusi** | [Pengujian & Linting](#pengujian--linting) | Menjalankan tes pytest dan Ruff |
 | **Struktur** | [Struktur Direktori](#struktur-direktori-proyek) | Pohon berkas proyek |
 
 ---
@@ -163,7 +165,7 @@ SIPEDAS_ADMIN_PASSWORD=
 
 ### Langkah 6: Konfigurasi Database
 
-SIPEDAS mendukung dua mode database. Pilih **salah satu**:
+SIPEDAS mendukung **tiga** mode database. Pilih **salah satu**:
 
 #### Opsi A: MySQL via XAMPP (Default)
 
@@ -195,6 +197,20 @@ set DATABASE_URL=sqlite:///./bps_dashboard.db
 ```bash
 export DATABASE_URL="sqlite:///./bps_dashboard.db"
 ```
+
+#### Opsi C: PostgreSQL (Server VPS / Supabase)
+
+Untuk lingkungan produksi, isi variabel `DATABASE_URL` di berkas `.env`:
+
+```ini
+# PostgreSQL lokal / server VPS
+DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/bps_tasikmalaya
+
+# Supabase (connection pooler)
+DATABASE_URL=postgresql+psycopg2://user:password@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+```
+
+> `backend/database.py` secara otomatis mengenali awalan `postgres://` dan menggantinya menjadi `postgresql://`, serta menurunkan *pool* ke mode `NullPool` ketika terhubung ke pooler Supabase atau dijalankan di lingkungan serverless.
 
 ### Langkah 7: Jalankan Server
 
@@ -290,6 +306,150 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjal
 | **Ekstraksi PDF tidak membaca angka** | PDF merupakan hasil scan gambar, bukan teks digital | Pastikan menggunakan PDF resmi BPS yang teksnya bisa diseleksi/disalin |
 | **Lupa password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk kembali ke default (`ganti_password_saya`) |
 | **Database tidak terkoneksi** | MySQL belum jalan atau DATABASE_URL salah | Cek apakah XAMPP MySQL sudah running, atau set `DATABASE_URL` untuk SQLite |
+| **Muncul error 502 baru selesai update lalu hilang sendiri** | Backend baru saja di-restart tetapi belum selesai booting | Lihat [penjelasan 502](#halaman-error-502) — jalankan perintah health check sebelum refresh |
+
+---
+
+## Deployment di Server VPS
+
+> **Status deployment saat ini: VPS Ubuntu (aktif).** Berkas `vercel.json` sudah dihapus dari repositori sejak commit `93aad18`, sehingga integrasi Vercel tidak lagi menghasilkan deployment yang valid. Jika badge `vercel / deployment (failure)` masih muncul di GitHub, putuskan integrasinya melalui dasbor Vercel: **Settings → Git → Disconnect**, lalu **Dismiss status** pada commit terkait di GitHub.
+
+### Arsitektur
+
+```text
+Pengunjung
+    │  http (80 / 443)
+    ▼
+  nginx  ──error_page 502──▶  frontend/static/502.html   (halaman bermerek, saat backend mati)
+    │  proxy_pass 127.0.0.1:8000
+    ▼
+  Uvicorn / FastAPI  (backend/main.py)
+    │
+    ▼
+  PostgreSQL (server VPS / Supabase)
+```
+
+Seluruh aplikasi berjalan pada **port 8000** — `backend/run_server.py`, `backend/main.py`, dan konfigurasi proxy nginx harus selalu memakai port yang sama.
+
+### Langkah update manual
+
+Jalankan berurutan di server, dari direktori clone repositori (misal `/var/www/sipedas`):
+
+```bash
+# 1. Tarik kode terbaru
+cd /var/www/sipedas
+git pull origin main
+
+# 2. Perbarui dependensi Python (dengan venv aktif)
+pip install -r requirements.txt
+
+# 3. Restart backend
+sudo systemctl restart sipedas
+
+# 4. TUNGGU backend siap sebelum refresh browser  <-- WAJIB
+for i in $(seq 1 30); do
+  curl -sf -o /dev/null http://127.0.0.1:8000/docs && echo "Backend siap (${i}s)" && break
+  sleep 1
+done
+
+# 5. Validasi & reload konfigurasi nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+> **Langkah 4 adalah kunci.** Tanpa menunggu backend siap, halaman yang dibuka di jendela 3–8 detik setelah restart akan menampilkan error 502. Perintah di atas berhenti segera begitu backend menjawab, sehingga tidak perlu lagi refresh dua kali.
+
+> **Catatan penting:** jika `git pull` menolak dengan pesan *divergent histories*, artinya riwayat Git di server belum disamakan setelah repositori di-rewrite. Jalankan sekali saja:
+> ```bash
+> git fetch origin && git reset --hard origin/main
+> ```
+> Perintah ini **tidak menghapus** berkas yang tidak di-track Git, seperti `.env`, `venv/`, `backups/`, dan `backend/data/auth_credentials.json`.
+
+---
+
+## Halaman Error 502
+
+**502 Bad Gateway** berarti *reverse proxy* (nginx) menerima respons tidak sah dari upstream — pada praktiknya hampir selalu karena **proses backend sedang mati atau belum siap**. Halaman ini dirancang agar pengunjung tetap melihat halaman bermerek SIPEDAS, bukan halaman error default nginx yang polos.
+
+### Dua jalur render yang berbeda
+
+| Jalur | Kapan aktif | Berkas | Status |
+| :--- | :--- | :--- | :--- |
+| **nginx** | Backend **mati total**, nginx tidak punya upstream untuk di-proxy | `frontend/static/502.html` | **Aktif** — blok `error_page` sudah terpasang di config nginx server |
+| **FastAPI** | Backend hidup tetapi ada response berstatus 502 | `frontend/templates/502.html` | Tidak aktif — tidak ada kode yang membangkitkan status 502 (`backend/main.py:244`) |
+
+Kedua berkas berisi konten identik, tetapi wajib berupa dua salinan terpisah karena jalurnya berbeda: nginx membacanya sebagai **file statis**, sementara FastAPI membacanya sebagai **template Jinja2**.
+
+Pratinjau tampilan halaman (tanpa mematikan backend) tersedia di endpoint:
+
+```
+GET http://127.0.0.1:8000/502
+```
+
+### Konfigurasi nginx (referensi)
+
+Simpan catatan berikut untuk keperluan instalasi ulang server atau pembuatan virtual host baru:
+
+```nginx
+server {
+    server_name sipedas.kyronix.my.id;
+
+    # Path menuju frontend/static di clone repositori Anda
+    set $sipedas_static_root /var/www/sipedas/frontend/static;
+
+    error_page 502 503 504 /502.html;
+
+    location = /502.html {
+        root $sipedas_static_root;
+        internal;
+    }
+
+    # Aset statis tetap terlayani saat upstream mati
+    location /static/ {
+        alias $sipedas_static_root/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+}
+```
+
+**Cara memasang:**
+
+1. Salin blok di atas ke file situs Anda, misal `sudo nano /etc/nginx/sites-available/sipedas.kyronix.my.id`
+2. Uji sintaks: `sudo nginx -t`
+3. Terapkan: `sudo systemctl reload nginx`
+4. Uji dengan mematikan backend sementara — kunjungi situs, halaman bermerek SIPEDAS seharusnya muncul
+5. Nyalakan kembali backend dan ulangi langkah [health check](#langkah-update-manual)
+
+---
+
+## Pengujian & Linting
+
+Konfigurasi linter tersimpan di `ruff.toml` di root repositori.
+
+```bash
+# Linting backend (wajib bersih)
+ruff check backend
+
+# Seluruh suite tes (47 tes, dijalankan dari dalam backend/)
+cd backend
+pytest
+```
+
+> File `backend/tests/conftest.py` menyetel `DATABASE_URL=sqlite:///test_sipedas.db` secara otomatis, sehingga tes **tidak menyentuh database produksi**.
+
+> `ruff check pipeline` saat ini masih melaporkan temuan lama (±190) yang belum diperbaiki — temuan tersebut bersifat warisan dan tidak memengaruhi backend maupun pengujian.
 
 ---
 
@@ -307,8 +467,6 @@ project_bps_tasik/
 ├── .gitignore                  # Berkas pengecualian Git
 ├── table_mods.json             # Konfigurasi penggabungan tabel PDF multi-halaman
 ├── ruff.toml                   # Konfigurasi linter Python (Ruff)
-├── deploy-502.sh               # Forwarder ke deploy/deploy-502.sh
-├── update-sipedas.sh           # Forwarder ke deploy/update-sipedas.sh
 │
 ├── pipeline/                   # Pipeline inti pemrosesan & ekstraksi dokumen
 │   ├── __init__.py
@@ -317,12 +475,6 @@ project_bps_tasik/
 │   ├── table_cleaners.py       # Pembersih satuan & angka tabel statistik
 │   ├── pipeline_utils.py       # Utilitas pembersihan teks & header
 │   └── extract_toc.py          # Ekstraktor daftar isi & struktur bab
-│
-├── deploy/                     # Skrip & konfigurasi deployment server
-│   ├── deploy-502.sh           # Deploy halaman error 502 custom
-│   ├── update-sipedas.sh       # Git pull + install dependensi + restart backend + reload nginx
-│   ├── nginx_sipedas_502.conf  # Konfigurasi nginx untuk halaman 502 custom
-│   └── setup_502_nginx.py      # Injektor konfigurasi nginx otomatis
 │
 ├── frontend/                   # Aset frontend (dilayani oleh FastAPI, bukan backend/)
 │   ├── static/                 # Aset web statis
@@ -339,8 +491,12 @@ project_bps_tasik/
 │   │   │   ├── tables.css      # Table styling
 │   │   │   ├── timeseries.css  # Time series wizard & charts
 │   │   │   └── responsive/     # Breakpoint mobile_sm, mobile_lg, tablets
+│   │   ├── style.css           # Gaya global halaman & CSS vars tambahan
+│   │   ├── 502.html            # Halaman error statis untuk nginx (lihat Deployment)
 │   │   ├── logo_bps.png        # Logo resmi BPS
-│   │   └── logo_sipedas.png    # Logo sistem SIPEDAS
+│   │   ├── logo_bps.svg        # Logo BPS versi vektor
+│   │   ├── logo_sipedas.png    # Logo sistem SIPEDAS
+│   │   └── logo_sipedas.svg    # Logo SIPEDAS versi vektor
 │   │
 │   └── templates/              # Antarmuka template HTML & Error Pages
 │       ├── index.html          # Halaman utama aplikasi SIPEDAS
@@ -350,7 +506,7 @@ project_bps_tasik/
 │       ├── sections/           # dashboard, tabel, timeseries, admin, sistem, dll.
 │       ├── 404.html            # Halaman kesalahan 404 Not Found
 │       ├── 500.html            # Halaman kesalahan 500 Server Error
-│       └── 502.html            # Halaman kesalahan 502 Bad Gateway
+│       └── 502.html            # Salinan template 502 untuk jalur FastAPI
 │
 ├── backups/                    # Direktori penyimpanan file cadangan database (.sql)
 ├── Bahan/                      # Berkas PDF publikasi sumber (di-gitignore)

@@ -70,3 +70,12 @@ class SystemConfig(Base):
     key = Column(String(100), primary_key=True)
     value = Column(String(500), nullable=False, default="")
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+class LoginAttempt(Base):
+    """Percobaan login admin per IP — dipakai rate limiter anti brute-force."""
+    __tablename__ = "login_attempts"
+
+    ip = Column(String(45), primary_key=True)  # IPv4 (15) / IPv6 (45)
+    failed_count = Column(Integer, nullable=False, default=0)
+    last_failed_at = Column(DateTime, nullable=False, default=_utcnow)
+    lock_until = Column(DateTime, nullable=True)

@@ -1,5 +1,9 @@
 """Test auth endpoints."""
+from datetime import timedelta
+
 import pytest
+from models import LoginAttempt
+from routers.auth import LOCKOUT_DURATION_SECONDS, _now
 from tests.conftest import client, db, admin_client
 
 
@@ -52,3 +56,43 @@ class TestMaintenance:
         data = resp.json()
         assert "mode" in data
         assert data["mode"] in ("0", "1")
+
+
+class TestLockoutPersistence:
+    """Sifat rate limiter yang kini disimpan di database (bukan dict in-memory)."""
+
+    def test_lockout_tersimpan_di_database(self, client, db):
+        """5x gagal menghasilkan baris login_attempts dengan lock_until terisi."""
+        for _ in range(5):
+            client.post("/api/auth/login", json={"password": "wrong"})
+
+        row = db.query(LoginAttempt).filter(LoginAttempt.failed_count >= 5).first()
+        assert row is not None, "Percobaan gagal harus tercatat di tabel login_attempts"
+        assert row.lock_until is not None
+
+        resp = client.post("/api/auth/login", json={"password": "wrong"})
+        assert resp.status_code == 429
+
+    def test_hitungan_reset_setelah_diam_5_menit(self, client, db):
+        """Setelah 5 menit tanpa kegagalan, hitungan direset -> kembali boleh coba."""
+        for _ in range(5):
+            client.post("/api/auth/login", json={"password": "wrong"})
+
+        row = db.query(LoginAttempt).filter(LoginAttempt.failed_count >= 5).first()
+        assert row is not None
+        row.last_failed_at = _now() - timedelta(seconds=LOCKOUT_DURATION_SECONDS + 60)
+        db.commit()
+
+        resp = client.post("/api/auth/login", json={"password": "wrong"})
+        assert resp.status_code == 401
+        assert "4" in resp.json()["detail"]  # sisa percobaan kembali penuh-1
+
+    def test_login_sukses_menghapus_catatan(self, client, db):
+        """Login berhasil membersihkan baris percobaan milik IP tersebut."""
+        for _ in range(3):
+            client.post("/api/auth/login", json={"password": "wrong"})
+        assert db.query(LoginAttempt).count() >= 1
+
+        resp = client.post("/api/auth/login", json={"password": "test_password_123"})
+        assert resp.status_code == 200
+        assert db.query(LoginAttempt).count() == 0

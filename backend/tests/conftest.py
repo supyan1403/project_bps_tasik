@@ -25,10 +25,15 @@ if os.path.exists(_AUTH_CREDS):
 
 @pytest.fixture(autouse=True)
 def setup_db():
-    """Buat tabel fresh sebelum setiap test, reset lockout state."""
-    from routers.auth import _login_attempts
-    _login_attempts.clear()
+    """Buat tabel fresh sebelum setiap test, reset state lockout."""
     Base.metadata.create_all(bind=engine)
+    from models import LoginAttempt
+    _s = SessionLocal()
+    try:
+        _s.query(LoginAttempt).delete()
+        _s.commit()
+    finally:
+        _s.close()
     yield
     Base.metadata.drop_all(bind=engine)
 

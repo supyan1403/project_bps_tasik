@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import secrets
-import time
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -26,17 +25,45 @@ _AUTH_CONFIG_FILE = os.path.join(_CONFIG_DIR, "auth_credentials.json")
 
 SESSION_MAX_AGE_HOURS = 8
 
-# Brute-force tracking: {ip_address: {"failed_count": int, "lock_until": float}}
-_login_attempts = {}
 MAX_FAILED_ATTEMPTS = 5
 LOCKOUT_DURATION_SECONDS = 300  # 5 menit
+ATTEMPT_PRUNE_AFTER_HOURS = 24
+
+def _now() -> datetime:
+    """Waktu sekarang sebagai UTC naive (kompatibel kolom DateTime SQLAlchemy)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 def _get_client_ip(request: Request) -> str:
-    """Ambil IP asli dari X-Forwarded-For (reverse proxy) atau direct connection."""
+    """Ambil IP asli dari header yang DITIMPA proxy, bukan yang dikirim klien."""
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip and real_ip.strip():
+        # nginx: proxy_set_header X-Real-IP $remote_addr -> ditimpa, tak bisa dipalsukan
+        return real_ip.strip()
     forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    if forwarded and forwarded.strip():
+        # $proxy_add_x_forwarded_for MENG-APPEND, jadi hop terakhir = ip asli
+        return forwarded.split(",")[-1].strip()
     return request.client.host if request.client else "unknown"
+
+def _get_login_attempt(db: Session, ip: str) -> models.LoginAttempt | None:
+    """Ambil catatan percobaan login per IP; reset hitungan bila sudah diam tanpa kegagalan."""
+    attempt = db.query(models.LoginAttempt).filter(models.LoginAttempt.ip == ip).first()
+    if attempt is None:
+        return None
+    now = _now()
+    if attempt.last_failed_at and (now - attempt.last_failed_at) > timedelta(seconds=LOCKOUT_DURATION_SECONDS):
+        # "5 kali berturut-turut" -> hitungan direset kalau sudah lewat jendela lockout
+        attempt.failed_count = 0
+        attempt.lock_until = None
+        attempt.last_failed_at = now
+        db.commit()
+    return attempt
+
+def _prune_login_attempts(db: Session, now: datetime) -> None:
+    """Buang catatan percobaan lama. Lock maksimal 5 menit, jadi lewat 24 jam aman dihapus."""
+    db.query(models.LoginAttempt).filter(
+        models.LoginAttempt.last_failed_at < now - timedelta(hours=ATTEMPT_PRUNE_AFTER_HOURS)
+    ).delete(synchronize_session=False)
 
 def _hash_password(plain_password: str, salt: bytes | None = None) -> tuple[str, str]:
     """Mengenkripsi password menggunakan PBKDF2-HMAC-SHA256 dengan random salt 16-byte."""
@@ -128,12 +155,13 @@ def log_activity(db: Session, action: str, target: str = "", detail: dict | None
 def auth_login(payload: dict, request: Request, response: Response, db: Session = Depends(get_db)):
     """Proses login admin dengan rate limiting."""
     client_ip = _get_client_ip(request)
-    now_ts = time.time()
+    now = _now()
+    _prune_login_attempts(db, now)
 
     # 1. Periksa Lockout Rate Limiter
-    attempt_info = _login_attempts.get(client_ip, {"failed_count": 0, "lock_until": 0})
-    if attempt_info["lock_until"] > now_ts:
-        remaining_sec = int(attempt_info["lock_until"] - now_ts)
+    attempt = _get_login_attempt(db, client_ip)
+    if attempt and attempt.lock_until and attempt.lock_until > now:
+        remaining_sec = int((attempt.lock_until - now).total_seconds())
         raise HTTPException(
             status_code=429,
             detail=f"Terlalu banyak percobaan login yang gagal. Akun dikunci sementara. Coba lagi dalam {remaining_sec} detik."
@@ -144,20 +172,26 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
 
     # 2. Verifikasi Password Hashing
     if not _verify_password(password, stored_hash, stored_salt):
-        attempt_info["failed_count"] += 1
-        if attempt_info["failed_count"] >= MAX_FAILED_ATTEMPTS:
-            attempt_info["lock_until"] = now_ts + LOCKOUT_DURATION_SECONDS
-            _login_attempts[client_ip] = attempt_info
+        if attempt is None:
+            attempt = models.LoginAttempt(ip=client_ip, failed_count=0, last_failed_at=now)
+            db.add(attempt)
+        attempt.failed_count = (attempt.failed_count or 0) + 1
+        attempt.last_failed_at = now
+        if attempt.failed_count >= MAX_FAILED_ATTEMPTS:
+            attempt.lock_until = now + timedelta(seconds=LOCKOUT_DURATION_SECONDS)
+            db.commit()
             raise HTTPException(
                 status_code=429,
-                detail=f"Password salah 5 kali berturut-turut. Akses dikunci selama {LOCKOUT_DURATION_SECONDS // 60} menit demi keamanan."
+                detail=f"Password salah {MAX_FAILED_ATTEMPTS} kali berturut-turut. Akses dikunci selama {LOCKOUT_DURATION_SECONDS // 60} menit demi keamanan."
             )
-        _login_attempts[client_ip] = attempt_info
-        sisa = MAX_FAILED_ATTEMPTS - attempt_info["failed_count"]
+        sisa = MAX_FAILED_ATTEMPTS - attempt.failed_count
+        db.commit()
         raise HTTPException(status_code=401, detail=f"Password salah! Sisa percobaan: {sisa} kali.")
 
     # 3. Login Sukses: Reset Rate Limiter & Buat Sesi di database
-    _login_attempts.pop(client_ip, None)
+    if attempt is not None:
+        db.delete(attempt)
+        db.commit()
     _clean_expired_sessions(db)
     sid = create_session("admin", db)
     response.set_cookie(

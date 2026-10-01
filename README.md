@@ -312,7 +312,7 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjal
 
 ## Deployment di Server VPS
 
-> **Status deployment saat ini: VPS Ubuntu (aktif).** Berkas `vercel.json` sudah dihapus dari repositori sejak commit `93aad18`, sehingga integrasi Vercel tidak lagi menghasilkan deployment yang valid. Jika badge `vercel / deployment (failure)` masih muncul di GitHub, putuskan integrasinya melalui dasbor Vercel: **Settings → Git → Disconnect**, lalu **Dismiss status** pada commit terkait di GitHub.
+> **Status deployment saat ini: VPS Ubuntu (aktif), diperbarui manual melalui `git pull` + `systemctl restart`.** Integrasi Vercel sudah diputus sepenuhnya: project dihapus dari dasbor Vercel, GitHub App di-uninstall dari repositories, dan `vercel.json` tidak lagi ada di repositori (sejak commit `93aad18`). Daftar deployment lama masih tersimpan di **Insights → Deployments** — sisa catatan yang tidak memengaruhi apa pun dan boleh diabaikan.
 
 ### Arsitektur
 

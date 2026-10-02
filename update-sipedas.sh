@@ -91,12 +91,11 @@ if ! git -C "$PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 if [ "${UPDATE_SIPEDAS_REEXEC:-0}" = "1" ]; then
-    STEP=2   # tahap 1 (git pull) sudah selesai sebelum menjalankan ulang
+    STEP=2   # tahap 1 (git pull) sudah selesai; banner sudah dicetak sebelum exec
 else
     STEP=1
+    hdr
 fi
-
-hdr
 
 # -----------------------------------------------------------------------------
 # TAHAP 1 - git pull, lalu jalankan ulang diri sendiri bila file berubah

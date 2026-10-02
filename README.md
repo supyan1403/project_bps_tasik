@@ -309,7 +309,7 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan, **hanya di lingkun
 | **Ekstraksi PDF tidak membaca angka** | PDF merupakan hasil scan gambar, bukan teks digital | Pastikan menggunakan PDF resmi BPS yang teksnya bisa diseleksi/disalin |
 | **Lupa password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk kembali ke default (`ganti_password_saya`) |
 | **Database tidak terkoneksi** | MySQL belum jalan atau DATABASE_URL salah | Cek apakah XAMPP MySQL sudah running, atau set `DATABASE_URL` untuk SQLite |
-| **Muncul error 502 baru selesai update lalu hilang sendiri** | Backend baru saja di-restart tetapi belum selesai booting | Lihat [penjelasan 502](#halaman-error-502) — jalankan perintah health check sebelum refresh |
+| **Muncul error 502 baru selesai update lalu hilang sendiri** | Backend baru saja di-restart tetapi belum selesai booting | Lihat [penjelasan 502](#halaman-error-502) — jalankan [`update-sipedas`](#langkah-update-manual) yang menunggu `/health` sampai siap, baru refresh |
 
 ---
 
@@ -336,36 +336,40 @@ Seluruh aplikasi berjalan pada **port 8000** — `backend/run_server.py`, `backe
 
 ### Langkah update manual
 
-Jalankan berurutan di server, dari direktori clone repositori (misal `/var/www/sipedas`):
+Satu perintah di server:
 
 ```bash
-# 1. Tarik kode terbaru
-cd /var/www/sipedas
-git pull origin main
-
-# 2. Perbarui dependensi Python (dengan venv aktif)
-pip install -r requirements.txt
-
-# 3. Restart backend
-sudo systemctl restart sipedas
-
-# 4. TUNGGU backend siap sebelum refresh browser  <-- WAJIB
-for i in $(seq 1 30); do
-  curl -sf -o /dev/null http://127.0.0.1:8000/health && echo "Backend siap (${i}s)" && break
-  sleep 1
-done
-
-# 5. Validasi & reload konfigurasi nginx
-sudo nginx -t && sudo systemctl reload nginx
+update-sipedas
 ```
 
-> **Langkah 4 adalah kunci.** Tanpa menunggu backend siap, halaman yang dibuka di jendela 3–8 detik setelah restart akan menampilkan error 502. Perintah di atas berhenti segera begitu backend menjawab, sehingga tidak perlu lagi refresh dua kali.
+Sumbernya ada di [`update-sipedas.sh`](./update-sipedas.sh) (ikut ter-version-control). Urutan yang dijalankan:
 
-> **Catatan penting:** jika `git pull` menolak dengan pesan *divergent histories*, artinya riwayat Git di server belum disamakan setelah repositori di-rewrite. Jalankan sekali saja:
+| # | Langkah | Bila gagal |
+| :-- | :--- | :--- |
+| 1 | `git pull origin main`, lalu menjalankan ulang dirinya sendiri bila file script ikut berubah | exit 1 + petunjuk memperbaiki *divergent histories* |
+| 2 | `venv/bin/pip install -r requirements.txt` — **hanya bila `requirements.txt` berubah** pada pull ini | exit 1 |
+| 3 | `systemctl restart sipedas` | exit 1 + `journalctl -u sipedas -n 30` |
+| 4 | Tunggu `GET :8000/health` sampai 30 detik | exit 1 + `journalctl -u sipedas -n 30` |
+| 5 | `nginx -t` lalu `systemctl reload nginx` | peringatan — konfigurasi lama tetap berjalan |
+| 6 | Cek blok `error_page 502` masih ada di vhost | peringatan merah |
+| 7 | Verifikasi publik: `/health` 200, `/login` 200, `/docs` 404 | exit 1 |
+
+Keluaran berwarna dan **kode keluar ≠ 0 bila ada langkah gagal**, sehingga aman dipakai dari skrip lain.
+
+> **Langkah 4 adalah kunci.** Tanpa menunggu backend siap, halaman yang dibuka di jendela 3–8 detik setelah restart akan menampilkan error 502. Script berhenti segera begitu backend menjawab, sehingga tidak perlu lagi refresh dua kali.
+
+> **Membuat ulang wrapper** (hanya perlu bila server di-rebuild — wrapper sendiri tidak ikut di-version-control, karena `git pull` dilakukan oleh script):
+> ```bash
+> ln -sfn /var/www/sipedas/update-sipedas.sh /usr/local/bin/update-sipedas
+> ```
+
+> **Catatan penting:** jika tahap 1 menolak dengan pesan *divergent histories*, artinya riwayat Git di server belum disamakan setelah repositori di-rewrite. Jalankan sekali saja:
 > ```bash
 > git fetch origin && git reset --hard origin/main
 > ```
 > Perintah ini **tidak menghapus** berkas yang tidak di-track Git, seperti `.env`, `venv/`, `backups/`, dan `backend/data/auth_credentials.json`.
+>
+> Kemungkinan lain: pesan *your local changes would be overwritten*. Itu biasanya karena mode berkas di server berbeda dari repo — buang dulu dengan `git checkout -- <nama-berkas>` lalu ulangi `update-sipedas`.
 
 ---
 
@@ -500,6 +504,7 @@ project_bps_tasik/
 │
 ├── start.bat                   # Skrip otomatis runner server (Normal & Maintenance Mode)
 ├── start_maintenance.bat       # Skrip cepat aktifasi mode pemeliharaan
+├── update-sipedas.sh           # Skrip deploy satu perintah untuk server (lihat Deployment)
 ├── requirements.txt            # Daftar dependensi paket Python
 ├── README.md                   # Dokumentasi resmi sistem
 ├── .env.example                # Templat variabel lingkungan (production/keamanan)

@@ -64,7 +64,18 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Gagal mereset status ekstraksi: {_e}")
     yield
 
-app = FastAPI(title="BPS Extraction Dashboard API", lifespan=lifespan)
+# Konsisten dengan database.py & auth.py: SIPEDAS_DOMAIN terisi = produksi.
+_PROD_DOMAIN = os.environ.get("SIPEDAS_DOMAIN", "")
+_IS_PRODUCTION = bool(_PROD_DOMAIN)
+
+app = FastAPI(
+    title="BPS Extraction Dashboard API",
+    lifespan=lifespan,
+    # Skema API lengkap hanya untuk pengembangan lokal; di produksi 404.
+    docs_url=None if _IS_PRODUCTION else "/docs",
+    redoc_url=None if _IS_PRODUCTION else "/redoc",
+    openapi_url=None if _IS_PRODUCTION else "/openapi.json",
+)
 
 def reset_stuck_extractions():
     """Reset status ekstraksi yang terhenti menjadi ready."""
@@ -78,7 +89,6 @@ def reset_stuck_extractions():
     except SQLAlchemyError as e:
         print(f"Gagal me-reset status ekstraksi terhenti: {e}")
 
-_PROD_DOMAIN = os.environ.get("SIPEDAS_DOMAIN", "")
 if _PROD_DOMAIN:
     _CORS_ORIGINS = [f"https://{_PROD_DOMAIN}", f"http://{_PROD_DOMAIN}"]
 else:
@@ -101,6 +111,21 @@ async def add_cache_control_header(request: Request, call_next):
     response = await call_next(request)
     if request.url.path.startswith("/static/"):
         response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
+    return response
+
+# Keamanan: hardening header di setiap respons.
+# HSTS hanya di produksi (browser mengabaikannya di HTTP lokal).
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Tambahkan security header pembela clickjacking & MIME-sniffing."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if _IS_PRODUCTION:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
     return response
 
 # =====================================================================

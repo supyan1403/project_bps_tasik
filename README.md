@@ -431,6 +431,15 @@ server {
         proxy_pass http://127.0.0.1:8000;
     }
 
+    # Ganti password juga memverifikasi password lama tetapi tidak punya
+    # lockout di aplikasi — pakai zona yang sama agar IP yang sudah terkunci
+    # di /login ikut terbatasi di sini.
+    location = /api/auth/change-password {
+        limit_req zone=sipedas_login burst=10 nodelay;
+        limit_req zone=sipedas_api burst=60 nodelay;
+        proxy_pass http://127.0.0.1:8000;
+    }
+
     # Seluruh API: 30 req/detik, burst 60
     location /api/ {
         limit_req zone=sipedas_api burst=60 nodelay;

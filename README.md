@@ -62,7 +62,8 @@ Publikasi data statistik berkala resmi, seperti buku **Kabupaten Dalam Angka (DD
 - **Pemisahan Peran & Keamanan Berlapis (Role-Based Access Control)**:
   - **Mode Publik / Pegawai**: Akses cepat pencarian indikator, penelusuran tabel, dan grafik deret waktu tanpa menu sensitif.
   - **Mode Administrator**: Kontrol penuh pengelolaan basis data, impor, koreksi kolom, hingga backup sistem.
-  - Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak 16-byte, serta proteksi pembatasan percobaan gagal (*Anti-Brute Force Lockout* 5 menit).
+  - Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak 16-byte, serta proteksi pembatasan percobaan gagal (*Anti-Brute Force Lockout* 5 menit) yang **tersimpan di database** sehingga tetap berlaku walau backend di-restart.
+  - Pembatasan laju di nginx (`limit_req`) sebagai lapis kedua: `5 r/menit` untuk endpoint login dan `30 r/detik` untuk seluruh `/api/`, keduanya membalas `429`.
 - **Mode Pemeliharaan (Maintenance Mode) & Sistem**: Kontrol status pemeliharaan sistem dengan countdown timer otomatis, pelacakan log aktivitas admin, dan pembersihan berkas cache/sampah langsung dari antarmuka atau `start.bat`.
 - **Ekstraksi PDF Cerdas**: Ekstraksi otomatis nomor tabel, judul publikasi, satuan unit, dan multi-level header menggunakan integrasi pdfplumber & pypdf.
 - **Sinkronisasi & Parser Excel**: Dukungan impor berkas lembar kerja spreadsheet Excel (`.xlsx` / `.xls`) langsung ke dalam basis data relasional.
@@ -275,7 +276,9 @@ Setelah login, Anda memiliki tiga cara untuk mengisi data:
 
 ## Dokumentasi REST API
 
-FastAPI menyediakan dokumentasi API interaktif secara bawaan. Saat server berjalan:
+FastAPI menyediakan dokumentasi API interaktif secara bawaan, **hanya di lingkungan pengembangan**.
+
+> Saat `SIPEDAS_DOMAIN` terisi (mode produksi), `/docs`, `/redoc`, dan `/openapi.json` sengaja dibuat membalas `404` agar skema seluruh endpoint tidak terbaca publik. Untuk health check gunakan [`GET /health`](#langkah-update-manual).
 
 - **Swagger UI Interaktif**: `http://127.0.0.1:8000/docs`
 - **ReDoc Dokumentasi**: `http://127.0.0.1:8000/redoc`
@@ -348,7 +351,7 @@ sudo systemctl restart sipedas
 
 # 4. TUNGGU backend siap sebelum refresh browser  <-- WAJIB
 for i in $(seq 1 30); do
-  curl -sf -o /dev/null http://127.0.0.1:8000/docs && echo "Backend siap (${i}s)" && break
+  curl -sf -o /dev/null http://127.0.0.1:8000/health && echo "Backend siap (${i}s)" && break
   sleep 1
 done
 
@@ -390,6 +393,15 @@ GET http://127.0.0.1:8000/502
 Simpan catatan berikut untuk keperluan instalasi ulang server atau pembuatan virtual host baru:
 
 ```nginx
+# --- Letakkan di context http, mis. /etc/nginx/conf.d/00-rate-limit.conf ---
+# Zona harus di http context; pindahkan ke vhost hanya bila Anda siap
+# menulis ulangnya setiap kali `certbot renew` me-regenerasi file situs.
+limit_req_zone $binary_remote_addr zone=sipedas_login:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=sipedas_api:10m rate=30r/s;
+limit_req_status 429;
+limit_req_log_level warn;
+
+# --- Vhost situs ---
 server {
     server_name sipedas.kyronix.my.id;
 
@@ -403,6 +415,28 @@ server {
         internal;
     }
 
+    # Header proxy ditarik ke level server supaya diwarisi SEMUA location.
+    # Bila hanya ditulis di location /, location baru yang tidak menulis ulang
+    # baris ini akan meneruskan X-Forwarded-For milik klien tanpa ditimpa —
+    # itulah celah yang dulu dipakai untuk melewati rate limit login.
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Lapis 2 anti brute-force: 5 req/menit, burst 10
+    location = /api/auth/login {
+        limit_req zone=sipedas_login burst=10 nodelay;
+        limit_req zone=sipedas_api burst=60 nodelay;
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    # Seluruh API: 30 req/detik, burst 60
+    location /api/ {
+        limit_req zone=sipedas_api burst=60 nodelay;
+        proxy_pass http://127.0.0.1:8000;
+    }
+
     # Aset statis tetap terlayani saat upstream mati
     location /static/ {
         alias $sipedas_static_root/;
@@ -412,10 +446,6 @@ server {
 
     location / {
         proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
 
         proxy_connect_timeout 5s;
         proxy_read_timeout 60s;
@@ -426,11 +456,12 @@ server {
 
 **Cara memasang:**
 
-1. Salin blok di atas ke file situs Anda, misal `sudo nano /etc/nginx/sites-available/sipedas.kyronix.my.id`
-2. Uji sintaks: `sudo nginx -t`
-3. Terapkan: `sudo systemctl reload nginx`
-4. Uji dengan mematikan backend sementara — kunjungi situs, halaman bermerek SIPEDAS seharusnya muncul
-5. Nyalakan kembali backend dan ulangi langkah [health check](#langkah-update-manual)
+1. Simpan blok zona rate limit ke `/etc/nginx/conf.d/00-rate-limit.conf`, lalu salin blok `server` ke file situs Anda, misal `sudo nano /etc/nginx/sites-available/sipedas.kyronix.my.id`
+2. Pastikan tidak ada salinan config lama yang masih ter-link di `sites-enabled/` — jalankan `sudo nginx -t` dan perhatikan apakah muncul peringatan `conflicting server name`
+3. Uji sintaks: `sudo nginx -t`
+4. Terapkan: `sudo systemctl reload nginx`
+5. Uji dengan mematikan backend sementara — kunjungi situs, halaman bermerek SIPEDAS seharusnya muncul
+6. Nyalakan kembali backend dan ulangi langkah [health check](#langkah-update-manual)
 
 ---
 

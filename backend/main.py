@@ -362,6 +362,15 @@ def get_robots_txt():
     content = "User-agent: *\nDisallow: /api/\nAllow: /\n"
     return Response(content=content, media_type="text/plain")
 
+@app.get("/health", include_in_schema=False)
+def health_check():
+    """Health check ringan untuk deploy & monitoring.
+
+    Tidak menyentuh database sehingga selalu cepat dipanggil saat
+    menunggu backend siap setelah `systemctl restart sipedas`.
+    """
+    return {"status": "ok"}
+
 @app.get("/502", include_in_schema=False)
 def preview_502_page(request: Request):
     """Endpoint untuk pengujian/pratinjau tampilan 502 Bad Gateway (status 200 agar tidak di-intercept Nginx default)."""

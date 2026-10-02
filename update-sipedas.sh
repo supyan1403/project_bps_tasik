@@ -33,11 +33,11 @@ PUBLIC_BASE="https://sipedas.kyronix.my.id"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
 NGINX_AVAILABLE="/etc/nginx/sites-available"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+NC=$'\033[0m'
 
 TOTAL_STEPS=7
 WARN_COUNT=0
@@ -106,8 +106,15 @@ if [ "$STEP" -eq 1 ]; then
 
     OLD_HEAD="$(git -C "$PROJECT_DIR" rev-parse HEAD)"
 
-    if ! git -C "$PROJECT_DIR" pull origin main; then
+    if PULL_OUT="$(git -C "$PROJECT_DIR" pull origin main 2>&1)"; then
+        if [ -n "$PULL_OUT" ]; then
+            printf '%s\n' "$PULL_OUT" | sed 's/^/         /'
+        fi
+    else
         err "git pull gagal."
+        if [ -n "$PULL_OUT" ]; then
+            printf '%s\n' "$PULL_OUT" | sed 's/^/         /'
+        fi
         printf '         Kalau pesannya "divergent histories", jalankan sekali:\n'
         printf '           cd %s && git fetch origin && git reset --hard origin/main\n' "$PROJECT_DIR"
         printf '         (tidak menghapus .env, venv/, backups/, auth_credentials.json)\n'

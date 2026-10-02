@@ -354,15 +354,16 @@ Sumbernya ada di [`update-sipedas.sh`](./update-sipedas.sh) (ikut ter-version-co
 | :-- | :--- | :--- |
 | 1 | `git pull origin main`, lalu menjalankan ulang dirinya sendiri bila file script ikut berubah | exit 1 + petunjuk memperbaiki *divergent histories* |
 | 2 | `venv/bin/pip install -r requirements.txt` — **hanya bila `requirements.txt` berubah** pada pull ini | exit 1 |
-| 3 | `systemctl restart sipedas` | exit 1 + `journalctl -u sipedas -n 30` |
-| 4 | Tunggu `GET :8000/health` sampai 30 detik | exit 1 + `journalctl -u sipedas -n 30` |
-| 5 | `nginx -t` lalu `systemctl reload nginx` | peringatan — konfigurasi lama tetap berjalan |
-| 6 | Cek blok `error_page 502` masih ada di vhost | peringatan merah |
-| 7 | Verifikasi publik: `/health` 200, `/login` 200, `/docs` 404 | exit 1 |
+| 3 | `python build_app.py` — regenerasi modul `js/0*.js` dari `app.js` | exit 1 |
+| 4 | `systemctl restart sipedas` | exit 1 + `journalctl -u sipedas -n 30` |
+| 5 | Tunggu `GET :8000/health` sampai 30 detik | exit 1 + `journalctl -u sipedas -n 30` |
+| 6 | `nginx -t` lalu `systemctl reload nginx` | peringatan — konfigurasi lama tetap berjalan |
+| 7 | Cek blok `error_page 502` masih ada di vhost | peringatan merah |
+| 8 | Verifikasi publik: `/health` 200, `/login` 200, `/docs` 404 | exit 1 |
 
 Keluaran berwarna dan **kode keluar ≠ 0 bila ada langkah gagal**, sehingga aman dipakai dari skrip lain.
 
-> **Langkah 4 adalah kunci.** Tanpa menunggu backend siap, halaman yang dibuka di jendela 3–8 detik setelah restart akan menampilkan error 502. Script berhenti segera begitu backend menjawab, sehingga tidak perlu lagi refresh dua kali.
+> **Langkah 5 adalah kunci.** Tanpa menunggu backend siap, halaman yang dibuka di jendela 3–8 detik setelah restart akan menampilkan error 502. Script berhenti segera begitu backend menjawab, sehingga tidak perlu lagi refresh dua kali.
 
 > **Membuat ulang wrapper** (hanya perlu bila server di-rebuild — wrapper sendiri tidak ikut di-version-control, karena `git pull` dilakukan oleh script):
 > ```bash
@@ -492,12 +493,28 @@ Konfigurasi linter tersimpan di `ruff.toml` di root repositori.
 # Linting backend (wajib bersih)
 ruff check backend
 
-# Seluruh suite tes (47 tes, dijalankan dari dalam backend/)
+# Seluruh suite tes (jalankan dari dalam backend/)
 cd backend
 pytest
 ```
 
 > File `backend/tests/conftest.py` menyetel `DATABASE_URL=sqlite:///test_sipedas.db` secara otomatis, sehingga tes **tidak menyentuh database produksi**.
+
+### Sinkronisasi `app.js` dengan modul `js/`
+
+`index.html` hanya memuat `frontend/static/app.js`, tetapi repo juga menyimpan isi berkas itu
+yang dipecah menjadi 8 modul `frontend/static/js/0*.js` agar mudah dibaca.
+`app.js` adalah **sumber kebenaran** (berkas yang benar-benar disajikan); `js/` adalah turunannya.
+Keduanya harus identik byte-per-byte — ditegakkan oleh tes `test_app_js_sinkron`.
+
+```bash
+python build_app.py           # regenerasi modul js/ dari app.js (bawaan)
+python build_app.py --build   # arah kebalikan: bangun app.js dari modul js/
+python build_app.py --check    # verifikasi saja, exit 1 bila tidak sinkron
+```
+
+Jika Anda mengedit `app.js`, jalankan `python build_app.py` setelahnya.
+Jika Anda memilih mengedit `js/0*.js`, jalankan `python build_app.py --build`.
 
 > `ruff check pipeline` saat ini masih melaporkan temuan lama (±190) yang belum diperbaiki — temuan tersebut bersifat warisan dan tidak memengaruhi backend maupun pengujian.
 
@@ -511,6 +528,7 @@ project_bps_tasik/
 ├── start.bat                   # Skrip otomatis runner server (Normal & Maintenance Mode)
 ├── start_maintenance.bat       # Skrip cepat aktifasi mode pemeliharaan
 ├── update-sipedas.sh           # Skrip deploy satu perintah untuk server (lihat Deployment)
+├── build_app.py                # Sinkronisasi app.js dengan modul js/0*.js
 ├── requirements.txt            # Daftar dependensi paket Python
 ├── README.md                   # Dokumentasi resmi sistem
 ├── .env.example                # Templat variabel lingkungan (production/keamanan)
@@ -532,7 +550,7 @@ project_bps_tasik/
 │   │   ├── app.js              # Logika utama SPA
 │   │   ├── auth_role_logic.js  # Logika otentikasi & dialog ganti password
 │   │   ├── login.js            # Logika halaman login
-│   │   ├── js/                 # Modul JS berurutan (01_core ... 08_admin_system)
+│   │   ├── js/                 # Pecahan app.js per modul (turunan, hasil build_app.py)
 │   │   ├── css/                # Modul stylesheet CSS terstruktur
 │   │   │   ├── theme.css       # Design system CSS variables
 │   │   │   ├── base.css        # Base resets

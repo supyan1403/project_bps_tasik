@@ -1439,7 +1439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 const names = files.map(f => f.name).join(', ');
 
-                txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁 ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
+                txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁Ÿ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
 
             }
 
@@ -1473,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         const names = files.map(f => f.name).join(', ');
 
-                        txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁 ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
+                        txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁Ÿ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
 
                     }
 

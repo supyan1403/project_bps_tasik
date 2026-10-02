@@ -1,3 +1,1518 @@
+// ==========================================
+
+// TIME SERIES LOGIC
+
+// ==========================================
+
+
+
+let currentTimeSeriesData = null;
+
+let tsTooltipEnabled = true;
+
+let tsGrowthBadgeEnabled = true;
+
+window.tsGrowthBadgeEnabled = true;
+
+let tsShowSources = false;
+
+let lastTimeSeriesSearchParams = null;
+
+let currentMatchedTables = []; // Simpan daftar tabel yang cocok untuk dipilih user
+
+let currentSelectedTableIdx = 0;
+
+
+
+// Helper parsing angka Indonesia ke float
+
+function parseIndoNumberToFloat(valStr) {
+
+    if (!valStr) return null;
+
+    let s = String(valStr).trim().replace(/\s/g, '');
+
+    if (!s || s === '-' || s === '...') return null;
+
+    s = s.replace(/[^\d,\.-]/g, '');
+
+    if (!s) return null;
+
+    
+
+    if (s.includes('.') && s.includes(',')) {
+
+        if (s.indexOf('.') < s.indexOf(',')) {
+
+            s = s.replace(/\./g, '').replace(',', '.');
+
+        } else {
+
+            s = s.replace(/,/g, '').replace('.', '.');
+
+        }
+
+    } else if (s.includes(',')) {
+
+        s = s.replace(',', '.');
+
+    } else if (s.includes('.')) {
+
+        if (s.split('.').length - 1 > 1) {
+
+            const parts = s.split('.');
+
+            if (parts[parts.length - 1].length <= 2 && parts.slice(0, -1).every(p => p.length <= 3)) {
+
+                s = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+
+            } else {
+
+                s = s.replace(/\./g, '');
+
+            }
+
+        } else {
+
+            const parts = s.split('.');
+
+            if (parts.length === 2 && parts[1].length === 3 && parts[0] !== '0') {
+
+                s = s.replace(/\./g, '');
+
+            }
+
+        }
+
+    }
+
+    const f = parseFloat(s);
+
+    return isNaN(f) ? null : f;
+
+}
+
+
+
+let tsActiveUnitVKMap = {};
+
+function getActiveUnitForVK(vk) {
+    return tsActiveUnitVKMap[vk] || null;
+}
+
+function getUnitConfigForVK(vk) {
+    if (!currentTimeSeriesData || !vk) return null;
+    const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+    const fk = detectUnitFamily(vkUnit, vk, '');
+    const family = fk ? UNIVERSAL_UNIT_FAMILIES[fk] : null;
+    if (!family) return null;
+    const activeKey = getActiveUnitForVK(vk);
+    return (activeKey && family.units[activeKey]) ? family.units[activeKey] : null;
+}
+
+
+
+// ==========================================
+
+// UNIVERSAL UNIT CONVERTER ENGINE (SIPEDAS)
+
+// ==========================================
+
+
+
+const UNIVERSAL_UNIT_FAMILIES = {
+
+    // 1. Berat & Hasil Produksi (Base: ton)
+
+    weight: {
+
+        baseUnit: 'ton',
+
+        displayName: 'Berat / Massa',
+
+        units: {
+
+            'ton': { label: 'Ton', btnLabel: 'Ton', factor: 1, isInteger: false, maxDecimals: 2 },
+
+            'kuintal': { label: 'Kuintal', btnLabel: 'Kuintal (kw)', factor: 10, isInteger: false, maxDecimals: 2 },
+
+            'kg': { label: 'Kg', btnLabel: 'Kilogram (kg)', factor: 1000, isInteger: true, maxDecimals: 0 },
+
+            'gram': { label: 'Gram', btnLabel: 'Gram (g)', factor: 1000000, isInteger: true, maxDecimals: 0 }
+
+        },
+
+        triggers: ['ton', 'kg', 'kilogram', 'kuintal', 'kw', 'gram', 'daging', 'ternak', 'produksi', 'padi', 'palawija', 'ikan', 'sampah', 'kedelai', 'jagung', 'sayuran', 'buah', 'hasil perkebunan']
+
+    },
+
+    // 2. Kependudukan & Sosial (Base: jiwa / orang)
+
+    population: {
+
+        baseUnit: 'jiwa',
+
+        displayName: 'Populasi / Jiwa',
+
+        units: {
+
+            'jiwa': { label: 'Jiwa', btnLabel: 'Jiwa / Orang', factor: 1, isInteger: true, maxDecimals: 0 },
+
+            'juta_jiwa': { label: 'Juta Jiwa', btnLabel: 'Juta Jiwa', factor: 0.000001, isInteger: false, maxDecimals: 3 }
+
+        },
+
+        triggers: ['jiwa', 'orang', 'penduduk', 'miskin', 'murid', 'siswa', 'guru', 'dokter', 'pasien', 'pekerja', 'angkatan kerja', 'pengangguran', 'peserta', 'santri', 'balita', 'lansia']
+
+    },
+
+    // 3. Keuangan & Ekonomi (Base: rupiah)
+
+    currency: {
+
+        baseUnit: 'rupiah',
+
+        displayName: 'Nilai Keuangan (Rupiah)',
+
+        units: {
+
+            'rupiah': { label: 'Rp', btnLabel: 'Rupiah (Rp)', factor: 1, isInteger: true, maxDecimals: 0 },
+
+            'juta_rp': { label: 'Juta Rp', btnLabel: 'Juta Rupiah', factor: 0.000001, isInteger: false, maxDecimals: 2 },
+
+            'miliar_rp': { label: 'Miliar Rp', btnLabel: 'Miliar Rupiah', factor: 0.000000001, isInteger: false, maxDecimals: 2 },
+
+            'triliun_rp': { label: 'Triliun Rp', btnLabel: 'Triliun Rupiah', factor: 0.000000000001, isInteger: false, maxDecimals: 2 }
+
+        },
+
+        triggers: ['rupiah', 'rp', 'pendapatan', 'belanja', 'pdrb', 'anggaran', 'nilai produksi', 'upah', 'gaji', 'modal', 'omset', 'investasi', 'penerimaan']
+
+    },
+
+    // 4. Luas Wilayah & Lahan (Base: ha)
+
+    area: {
+
+        baseUnit: 'ha',
+
+        displayName: 'Luas Lahan / Wilayah',
+
+        units: {
+
+            'ha': { label: 'Ha', btnLabel: 'Hektar (ha)', factor: 1, isInteger: false, maxDecimals: 2 },
+
+            'km2': { label: 'km²', btnLabel: 'km²', factor: 0.01, isInteger: false, maxDecimals: 3 },
+
+            'm2': { label: 'm²', btnLabel: 'm²', factor: 10000, isInteger: true, maxDecimals: 0 }
+
+        },
+
+        triggers: ['ha', 'hektar', 'm2', 'm²', 'km2', 'km²', 'luas', 'wilayah', 'lahan', 'panen', 'tanah', 'sawah', 'hutan']
+
+    },
+
+    // 5. Volume & Cairan (Base: liter)
+
+    volume: {
+
+        baseUnit: 'liter',
+
+        displayName: 'Volume / Debit',
+
+        units: {
+
+            'liter': { label: 'Liter', btnLabel: 'Liter (l)', factor: 1, isInteger: true, maxDecimals: 0 },
+
+            'm3': { label: 'm³', btnLabel: 'Meter Kubik (m³)', factor: 0.001, isInteger: false, maxDecimals: 2 },
+
+            'juta_liter': { label: 'Juta Liter', btnLabel: 'Juta Liter', factor: 0.000001, isInteger: false, maxDecimals: 3 }
+
+        },
+
+        triggers: ['liter', 'm3', 'm³', 'debit', 'air bersih', 'air minum', 'bbm', 'solar', 'bensin', 'limbah cair', 'minyak']
+
+    },
+
+    // 6. Jarak & Panjang (Base: km)
+
+    distance: {
+
+        baseUnit: 'km',
+
+        displayName: 'Panjang / Jarak',
+
+        units: {
+
+            'km': { label: 'Km', btnLabel: 'Kilometer (km)', factor: 1, isInteger: false, maxDecimals: 2 },
+
+            'meter': { label: 'Meter', btnLabel: 'Meter (m)', factor: 1000, isInteger: true, maxDecimals: 0 }
+
+        },
+
+        triggers: ['km', 'meter', 'm', 'panjang jalan', 'jarak']
+
+    },
+
+    // 7. Cacah Unit / Ekor / Pohon (Base: unit)
+    count: {
+        baseUnit: 'unit',
+        displayName: 'Jumlah Kuantitas / Unit',
+        units: {
+            'unit': { label: 'Unit', btnLabel: 'Unit', factor: 1, isInteger: true, maxDecimals: 0 },
+            'ribu_unit': { label: 'Ribu Unit', btnLabel: 'Ribu Unit', factor: 0.001, isInteger: false, maxDecimals: 2 },
+            'juta_unit': { label: 'Juta Unit', btnLabel: 'Juta Unit', factor: 0.000001, isInteger: false, maxDecimals: 3 }
+        },
+        triggers: ['ekor', 'pohon', 'unit', 'buah', 'batang', 'kendaraan', 'populasi ternak']
+    }
+
+};
+
+
+
+function detectUnitFamily(unitStr, indicatorName, tableName) {
+
+    const combined = `${unitStr || ''} ${indicatorName || ''}`.toLowerCase();
+
+    
+
+    // Satuan tetap (non-konversi)
+
+    if (combined.includes('%') || combined.includes('persen') || combined.includes('ipm') || combined.includes('indeks') || combined.includes('rasio') || combined.includes('/km')) {
+
+        return null;
+
+    }
+
+    
+
+    for (const [familyKey, family] of Object.entries(UNIVERSAL_UNIT_FAMILIES)) {
+
+        for (const trigger of family.triggers) {
+
+            const regex = new RegExp(`\\b${trigger}\\b`, 'i');
+
+            if (regex.test(combined)) {
+
+                return familyKey;
+
+            }
+
+        }
+
+    }
+
+    return null;
+
+}
+
+
+
+function formatWithUnitScale(numVal, unitConfig) {
+
+    if (numVal === null || numVal === undefined || isNaN(numVal)) return '-';
+
+    if (!unitConfig) return numVal.toLocaleString('id-ID');
+
+    
+
+    const scaled = numVal * (unitConfig.factor != null ? unitConfig.factor : 1);
+
+    if (unitConfig.isInteger && scaled === Math.round(scaled)) {
+
+        return Math.round(scaled).toLocaleString('id-ID');
+
+    }
+
+    const dec = unitConfig.maxDecimals != null ? unitConfig.maxDecimals : 2;
+
+    return scaled.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: dec });
+
+}
+
+
+
+function renderUnitConverterBar(checkedVKs) {
+    const container = document.getElementById('ts-unit-converter-container');
+    const btnGroup = document.getElementById('ts-unit-btn-group');
+    if (!container || !btnGroup) return;
+
+    const chartUnitWrapper = document.getElementById('ts-chart-unit-wrapper');
+    const chartBtnGroup = document.getElementById('ts-chart-unit-btn-group');
+    const noConversionInfo = document.getElementById('ts-chart-unit-no-conversion');
+
+    if (!currentTimeSeriesData || !checkedVKs || checkedVKs.length === 0) {
+        container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
+        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
+        return;
+    }
+
+    const convertibleVKs = [];
+    for (const vk of checkedVKs) {
+        const unit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+        const fk = detectUnitFamily(unit, vk, '');
+        if (fk && UNIVERSAL_UNIT_FAMILIES[fk]) {
+            if (!tsActiveUnitVKMap[vk] || !UNIVERSAL_UNIT_FAMILIES[fk].units[tsActiveUnitVKMap[vk]]) {
+                tsActiveUnitVKMap[vk] = UNIVERSAL_UNIT_FAMILIES[fk].baseUnit;
+            }
+            convertibleVKs.push({ vk, familyKey: fk });
+        }
+    }
+
+    if (convertibleVKs.length === 0) {
+        container.style.setProperty('display', 'none', 'important');
+        if (chartUnitWrapper) chartUnitWrapper.style.setProperty('display', 'none', 'important');
+        if (noConversionInfo) noConversionInfo.style.setProperty('display', 'flex', 'important');
+        return;
+    }
+
+    if (noConversionInfo) noConversionInfo.style.setProperty('display', 'none', 'important');
+
+    let html = '';
+    convertibleVKs.forEach(function(cvk, idx) {
+        const vk = cvk.vk;
+        const family = UNIVERSAL_UNIT_FAMILIES[cvk.familyKey];
+        const activeUnitKey = tsActiveUnitVKMap[vk] || family.baseUnit;
+        const vkUnit = (currentTimeSeriesData.vkUnits && currentTimeSeriesData.vkUnits[vk]) || '';
+        const groupName = 'ts-unit-radio-' + idx;
+
+        const combinedInfo = `${vkUnit} ${vk}`.toLowerCase();
+        const isEkor = /\b(ekor|ternak|populasi ternak|unggas|sapi|kambing|domba|ayam|itik|kerbau|kuda|babi)\b/i.test(combinedInfo);
+        const isPohon = /\b(pohon|batang)\b/i.test(combinedInfo);
+
+        let chipsHtml = '';
+        for (const [unitKey, unitCfg] of Object.entries(family.units)) {
+            const isActive = (unitKey === activeUnitKey);
+            let displayLabel = unitCfg.btnLabel || unitCfg.label;
+
+            if (cvk.familyKey === 'count') {
+                if (isEkor) {
+                    if (unitKey === 'unit') displayLabel = 'Ekor';
+                    else if (unitKey === 'ribu_unit') displayLabel = 'Ribu Ekor';
+                    else if (unitKey === 'juta_unit') displayLabel = 'Juta Ekor';
+                } else if (isPohon) {
+                    if (unitKey === 'unit') displayLabel = 'Pohon / Batang';
+                    else if (unitKey === 'ribu_unit') displayLabel = 'Ribu Batang';
+                    else if (unitKey === 'juta_unit') displayLabel = 'Juta Batang';
+                } else {
+                    if (unitKey === 'unit') {
+                        displayLabel = (vkUnit && vkUnit.trim() && !['unit/ekor', 'satuan', 'unit'].includes(vkUnit.trim().toLowerCase()) && vkUnit.trim().length <= 12)
+                            ? vkUnit.trim() : 'Unit';
+                    } else if (unitKey === 'ribu_unit') {
+                        displayLabel = 'Ribu Unit';
+                    } else if (unitKey === 'juta_unit') {
+                        displayLabel = 'Juta Unit';
+                    }
+                }
+            }
+
+            chipsHtml += `<label class="ts-variant-chip${isActive ? ' active' : ''}" onclick="switchTimeSeriesUnit('${vk}','${unitKey}')">
+                <input type="radio" name="${groupName}" value="${unitKey}" ${isActive ? 'checked' : ''}>
+                <span>${typeof escHtml === 'function' ? escHtml(displayLabel) : displayLabel}</span>
+            </label>`;
+        }
+
+        if (idx > 0) {
+            html += '</div><div class="ts-unit-vk-row">';
+        } else {
+            html += '<div class="ts-unit-vk-row">';
+        }
+
+        if (convertibleVKs.length > 1) {
+            html += `<span class="ts-unit-vk-label" title="${typeof escHtml === 'function' ? escHtml(vk) : vk}">${typeof escHtml === 'function' ? escHtml(vk) : vk}</span>`;
+        }
+
+        html += `<div class="ts-unit-vk-chips">${chipsHtml}</div></div>`;
+    });
+
+    btnGroup.innerHTML = html;
+    if (chartBtnGroup) chartBtnGroup.innerHTML = html;
+
+    container.style.removeProperty('display');
+    container.style.display = 'flex';
+    if (chartUnitWrapper) {
+        chartUnitWrapper.style.removeProperty('display');
+        chartUnitWrapper.style.display = 'flex';
+    }
+}
+
+function switchTimeSeriesUnit(vk, targetUnitKey) {
+    tsActiveUnitVKMap[vk] = targetUnitKey;
+
+    if (typeof tsRenderCallback === 'function') {
+        tsRenderCallback();
+    }
+}
+
+
+
+// Deteksi kesalahan format penulisan angka pada sel (koma vs titik, spasi, karakter rusak)
+
+function checkClientCellFormatAnomaly(rawVal, prevRawVal = null) {
+
+    const s = String(rawVal || '').trim();
+
+    if (!s || ['-', '...', '–', '—', ''].includes(s)) return null;
+
+
+
+    const C3 = /^[1-9]\d{0,2},\d{3}$/;  // comma-3: x,xxx (bukan 0,xxx yang jelas desimal)
+
+    const P3 = /^\d{1,3}\.\d{3}$/;      // period-3: x.xxx
+
+    const PD = /^\d+\.\d{1,2}$/;        // period-desimal: x.xx / x.x
+
+    const CD = /^\d+,\d{1,2}$/;         // comma-desimal: x,xx / x,x
+
+
+
+    // 1. Karakter Rusak / Tanda Tanya
+
+    if (s.includes('?') || s.includes('..') || s.includes(',,')) {
+
+        return `Karakter/simbol rusak pada angka (${s})`;
+
+    }
+
+    // 2. Spasi Pemisah Ribuan (OCR Glitch e.g. '3 125')
+
+    if (/^\d{1,3}\s+\d{3}/.test(s)) {
+
+        return `Spasi pemisah ribuan janggal (${s})`;
+
+    }
+
+    const p = prevRawVal ? String(prevRawVal || '').trim() : '';
+
+    const pValid = !!p && !['-', '...', '–', '—', ''].includes(p);
+
+
+
+    // 3. Inkonsistensi format antar tahun (sinyal utama)
+
+    //    Koma-3 valid sebagai desimal (mis. produksi perikanan '5,385' ton) maupun
+
+    //    ribuan sesuai PDF; hanya anomali bila tidak konsisten dengan tahun lalu.
+
+    if (pValid) {
+
+        if (P3.test(p) && C3.test(s)) {
+
+            return `Inkonsistensi format: tahun sebelumnya memakai titik ribuan (${p}), tahun ini koma (${s})`;
+
+        }
+
+        if (C3.test(p) && P3.test(s)) {
+
+            return `Inkonsistensi format: tahun sebelumnya memakai koma (${p}), tahun ini titik ribuan (${s})`;
+
+        }
+
+        if (CD.test(p) && PD.test(s)) {
+
+            return `Inkonsistensi format: tahun sebelumnya memakai koma desimal (${p}), tahun ini titik (${s})`;
+
+        }
+
+    }
+
+    // 4. Titik 1-2 Digit Desimal (Format US e.g. '34.50' atau '12.5')
+
+    if (PD.test(s)) {
+
+        return `Format salah: menggunakan titik desimal (${s}) alih-alih koma desimal`;
+
+    }
+
+    return null;
+
+}
+
+
+
+// Deteksi anomali format data deret waktu di sisi klien
+
+function detectClientTimeSeriesAnomalies(tablesData) {
+
+    if (!tablesData || tablesData.length === 0) return [];
+
+    const entitySeries = {};
+
+    tablesData.forEach(t => {
+
+        const yr = t.year;
+
+        if (!yr) return;
+
+        (t.data || []).forEach(row => {
+
+            const ent = (row.entitas || '').trim();
+
+            if (!ent) return;
+
+            if (!entitySeries[ent]) entitySeries[ent] = {};
+
+            Object.entries(row.nilai || {}).forEach(([vk, valStr]) => {
+
+                if (!entitySeries[ent][vk]) entitySeries[ent][vk] = {};
+
+                entitySeries[ent][vk][yr] = String(valStr || '').trim();
+
+            });
+
+        });
+
+    });
+
+
+
+    const anomalies = [];
+
+    Object.keys(entitySeries).forEach(ent => {
+
+        Object.keys(entitySeries[ent]).forEach(vk => {
+
+            const yrMap = entitySeries[ent][vk];
+
+            const sortedYears = Object.keys(yrMap).map(Number).sort((a, b) => a - b);
+
+            if (sortedYears.length < 2) return;
+
+
+
+            for (let i = 1; i < sortedYears.length; i++) {
+
+                const prevYr = sortedYears[i - 1];
+
+                const currYr = sortedYears[i];
+
+                if (currYr - prevYr > 3) continue;
+
+
+
+                const prevRaw = yrMap[prevYr];
+
+                const currRaw = yrMap[currYr];
+
+
+
+                const err = checkClientCellFormatAnomaly(currRaw, prevRaw);
+
+                if (err) {
+
+                    anomalies.push({
+
+                        entitas: ent,
+
+                        indicator: vk,
+
+                        year: currYr,
+
+                        prev_year: prevYr,
+
+                        val: currRaw,
+
+                        prev_val: prevRaw,
+
+                        type: 'format',
+
+                        message: `${err}.`
+
+                    });
+
+                }
+
+
+
+                // Deteksi lonjakan/perubahan skala drastis antar tahun berurutan
+
+                // (mis. 2.385.149,27 -> 643,37). Bukan error ekstraksi; biasanya
+
+                // sumber data BPS mengubah satuan/unit atau merevisi angka antar edisi.
+
+                const pnum = parseIndoNumberToFloat(prevRaw);
+
+                const cnum = parseIndoNumberToFloat(currRaw);
+
+                if (pnum !== null && cnum !== null && pnum !== 0 && cnum !== 0) {
+
+                    const ratio = cnum / pnum;
+
+                    if (Math.abs(ratio) > 100 || Math.abs(ratio) < 0.01) {
+
+                        const scaleDesc = ratio > 1 ? `naik ${Math.round(ratio)}x` : `turun ke 1/${Math.round(1 / ratio)}-nya`;
+
+                        anomalies.push({
+
+                            entitas: ent,
+
+                            indicator: vk,
+
+                            year: currYr,
+
+                            prev_year: prevYr,
+
+                            val: currRaw,
+
+                            prev_val: prevRaw,
+
+                            type: 'scale',
+
+                            message: `${scaleDesc} drastis antara ${prevYr} (${prevRaw}) dan ${currYr} (${currRaw}) - kemungkinan unit/satuan berubah atau data sumber direvisi.`
+
+                        });
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    });
+
+    return anomalies;
+
+}
+
+
+
+// Normalisasi nama entitas: perbaiki kesalahan ekstraksi OCR yang umum
+
+function normalizeEntityName(name) {
+
+    if (!name) return "";
+
+    let n = name.trim();
+
+    // Bersihkan encoding artifacts: ?, ??, ??? → hapus
+
+    n = n.replace(/\?{1,}/g, '');
+
+    // Samakan en-dash, em-dash, minus ke hyphen biasa
+
+    n = n.replace(/[\u2012-\u2015\u2212]/g, '-');
+
+    // Hilangkan karakter berulang berlebihan (Karangnungggal -> Karangnunggal)
+
+    n = n.replace(/([^I\d\s])\1{2,}/g, '$1$1');
+
+    // Sisipkan spasi jika prefix menempel pada nama: "KabupatenBogor" → "Kabupaten Bogor"
+
+    n = n.replace(/^(Kabupaten|Kota|Kab\.?|Kota)\s*([A-Z])/i, function(m, prefix, first) {
+
+        return prefix + ' ' + first;
+
+    });
+
+    // Koreksi case: CIkalong -> Cikalong
+
+    n = n.replace(/\b([A-Z])([A-Z])([a-z])/g, (m, a, b, c) => a + b.toLowerCase() + c);
+
+    // Normalisasi nama ringkasan -> Kabupaten Tasikmalaya
+
+    const c = n.toLowerCase();
+
+    const summaryMap = {
+
+        'total': 1, 'jumlah': 1, 'subtotal': 1, 'grand total': 1, 'grandtotal': 1,
+
+        'keseluruhan': 1, 'seluruh': 1, 'rata-rata': 1, 'rata rata': 1, 'average': 1,
+
+        'tasikmalaya': 1, 'kab. tasikmalaya': 1, 'kab tasikmalaya': 1,
+
+        'kab upaten': 1, 'kabupaten': 1
+
+    };
+
+    if (summaryMap[c]) return 'Kabupaten Tasikmalaya';
+
+    // Kecamatan: buang spasi, cek apakah cocok dengan nama kecamatan resmi
+
+    var noSpace = c.replace(/[\s\.]/g, '');
+
+    var kecamatanSet = {
+
+        'kadipaten':1, 'pagerageung':1, 'ciawi':1, 'sukaresik':1, 'cisayong':1,
+
+        'sukahening':1, 'rajapolah':1, 'jamanis':1, 'cikatomas':1, 'pancatengah':1,
+
+        'karangnunggal':1, 'cipatujah':1, 'cikalong':1, 'culamega':1,
+
+        'bantarkalong':1, 'bojongasih':1, 'parungponteng':1, 'karangjaya':1,
+
+        'cineam':1, 'manonjaya':1, 'gunungtanjung':1, 'salopa':1, 'jatiwaras':1,
+
+        'sukaraja':1, 'tanjungjaya':1, 'sukarame':1, 'singaparna':1,
+
+        'mangunreja':1, 'leuwisari':1, 'padakembang':1, 'sariwangi':1,
+
+        'cigalontang':1, 'taraju':1, 'bojonggambir':1, 'sodonghilir':1,
+
+        'puspahiang':1, 'salawu':1, 'cibalong':1, 'sukaratu':1
+
+    };
+
+    if (kecamatanSet[noSpace]) return noSpace.charAt(0).toUpperCase() + noSpace.slice(1);
+
+    // Kabupaten/Kota tanpa prefix → tambahkan prefix
+
+    var kabKotaMap = {
+
+        'bandung': 'Kabupaten Bandung', 'bandung barat': 'Kabupaten Bandung Barat',
+
+        'banjar': 'Kota Banjar', 'bekasi': 'Kabupaten Bekasi', 'bogor': 'Kabupaten Bogor',
+
+        'ciamis': 'Kabupaten Ciamis', 'cianjur': 'Kabupaten Cianjur', 'cimahi': 'Kota Cimahi',
+
+        'cirebon': 'Kabupaten Cirebon', 'depok': 'Kota Depok', 'garut': 'Kabupaten Garut',
+
+        'indramayu': 'Kabupaten Indramayu', 'karawang': 'Kabupaten Karawang',
+
+        'kuningan': 'Kabupaten Kuningan', 'majalengka': 'Kabupaten Majalengka',
+
+        'pangandaran': 'Kabupaten Pangandaran', 'purwakarta': 'Kabupaten Purwakarta',
+
+        'subang': 'Kabupaten Subang', 'sukabumi': 'Kabupaten Sukabumi',
+
+        'sumedang': 'Kabupaten Sumedang', 'tasikmalaya': 'Kabupaten Tasikmalaya',
+
+    };
+
+    if (kabKotaMap[c]) return kabKotaMap[c];
+
+    return n;
+
+}
+
+
+
+// Cek apakah dua nama entitas dianggap sama setelah normalisasi
+
+function isSameEntity(name1, name2) {
+
+    const n1 = normalizeEntityName(name1).toLowerCase();
+
+    const n2 = normalizeEntityName(name2).toLowerCase();
+
+    return n1 === n2;
+
+}
+
+
+
+// Fungsi untuk mencari canonical name dari entity map
+
+function getCanonicalName(entityMap, rawName) {
+
+    const existing = Object.keys(entityMap);
+
+    for (const ent of existing) {
+
+        if (isSameEntity(ent, rawName)) return ent;
+
+    }
+
+    return normalizeEntityName(rawName);
+
+}
+
+
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+
+
+
+
+
+
+let tsIndicatorsList = [];
+
+let tsCheckedIndicators = new Set(); // Simpan indikator yang sudah dicentang
+
+let tsBabCollapsed = {}; // State ciutkan per bab: { "13": true, ... }
+
+
+
+async function initTimeSeriesWizard() {
+
+    const kolomDiv = document.getElementById('ts-wizard-kolom-checkboxes');
+
+    if (!kolomDiv) return;
+
+    
+
+    // Stale-While-Revalidate: render immediately from localStorage cache if available
+    const cachedIndicators = localStorage.getItem('sipedas_indicators_cache');
+    let hasRenderedFromCache = false;
+    if (cachedIndicators) {
+        try {
+            const parsed = JSON.parse(cachedIndicators);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                tsIndicatorsList = parsed;
+                renderTSIndicatorsCheckboxes(tsIndicatorsList);
+                hasRenderedFromCache = true;
+            }
+        } catch (e) {
+            console.warn("Gagal parse cache indikator:", e);
+        }
+    }
+
+    if (!hasRenderedFromCache) {
+        kolomDiv.innerHTML = '<div style="padding:4px;color:#94a3b8;font-size:0.85rem;"><i>Memuat master kolom...</i></div>';
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/timeseries/indicator-years`);
+        const data = await res.json();
+        const freshList = data.indicators || [];
+        freshList.sort((a, b) => {
+            const oa = Array.isArray(a.order) ? a.order : [9999, 9999];
+            const ob = Array.isArray(b.order) ? b.order : [9999, 9999];
+            return (oa[0] - ob[0]) || (oa[1] - ob[1]) || (a.name || '').localeCompare(b.name || '');
+        });
+
+        // Always update localStorage cache
+        try {
+            localStorage.setItem('sipedas_indicators_cache', JSON.stringify(freshList));
+        } catch (e) {}
+
+        // If list changed or wasn't rendered yet, update DOM
+        if (!hasRenderedFromCache || JSON.stringify(freshList) !== cachedIndicators) {
+            tsIndicatorsList = freshList;
+            renderTSIndicatorsCheckboxes(tsIndicatorsList);
+        }
+    } catch (err) {
+        console.error("Gagal inisialisasi wizard:", err);
+        if (!hasRenderedFromCache) {
+            kolomDiv.innerHTML = '<span class="text-danger" style="font-size:0.75rem;">Gagal memuat master kolom</span>';
+        }
+    }
+
+
+
+    if (lastTimeSeriesSearchParams) {
+
+        const resultsContent = document.getElementById('ts-results-content');
+
+        if (resultsContent && resultsContent.style.display !== 'none') {
+
+            searchTimeSeries(null);
+
+        }
+
+    }
+
+}
+
+
+
+function _createIndicatorCheckbox(ind, isPinned) {
+
+    const label = document.createElement('label');
+
+    label.className = isPinned ? 'ts-indicator-label ts-indicator-pinned ts-indicator-pill' : 'ts-indicator-label ts-indicator-pill';
+
+    label.style.cssText = 'display:flex; align-items:center; gap:6px; cursor:pointer; padding:3px 6px; margin:0; border-radius:4px; font-size:0.82rem; line-height:1.3;';
+
+    
+
+    const cb = document.createElement('input');
+
+    cb.type = 'checkbox';
+
+    cb.value = ind.name;
+
+    cb.className = 'ts-kolom-checkbox';
+
+    cb.style.cssText = 'width:15px; height:15px; flex-shrink:0; margin:0; cursor:pointer;';
+
+    cb.checked = tsCheckedIndicators.has(ind.name);
+
+    cb.onchange = function() {
+
+        if (this.checked) {
+
+            tsCheckedIndicators.add(this.value);
+
+        } else {
+
+            tsCheckedIndicators.delete(this.value);
+
+        }
+
+        // Re-render untuk update pinned section
+
+        const searchInput = document.getElementById('ts-wizard-search');
+
+        const q = searchInput ? searchInput.value : '';
+
+        filterTSIndicators(q);
+
+        onKolomCheckboxChanged();
+
+    };
+
+    
+
+    const span = document.createElement('span');
+
+    span.textContent = ind.name;
+
+    span.style.cssText = 'flex:1; word-break:break-word;';
+
+    
+
+    label.appendChild(cb);
+
+    label.appendChild(span);
+
+    return label;
+
+}
+
+
+
+function renderTSIndicatorsCheckboxes(filteredList) {
+
+    const kolomDiv = document.getElementById('ts-wizard-kolom-checkboxes');
+
+    if (!kolomDiv) return;
+
+    
+
+    kolomDiv.innerHTML = '';
+
+    
+
+    const sortByOrder = (a, b) => {
+
+        const oa = Array.isArray(a.order) ? a.order : [9999, 9999];
+
+        const ob = Array.isArray(b.order) ? b.order : [9999, 9999];
+
+        return (oa[0] - ob[0]) || (oa[1] - ob[1]) || (a.name || '').localeCompare(b.name || '');
+
+    };
+
+    
+
+    // 1. Selalu ambil checkedItems dari master list lengkap tsIndicatorsList agar tetap berada di atas saat pencarian!
+
+    const checkedItems = (tsIndicatorsList || []).filter(ind => tsCheckedIndicators.has(ind.name)).sort(sortByOrder);
+
+    
+
+    // 2. Unselected items disaring dari filteredList (atau tsIndicatorsList jika tidak ada query)
+
+    const currentList = (filteredList !== undefined) ? filteredList : tsIndicatorsList;
+
+    const unselectedItems = (currentList || []).filter(ind => !tsCheckedIndicators.has(ind.name)).sort(sortByOrder);
+
+    
+
+    if (checkedItems.length === 0 && unselectedItems.length === 0) {
+
+        kolomDiv.innerHTML = '<span class="text-muted" style="font-size:0.75rem; padding:4px;">Tidak ada indikator cocok</span>';
+
+        return;
+
+    }
+
+    
+
+    // 1. Bagian "Terpilih" (global, di atas)
+
+    if (checkedItems.length > 0) {
+
+        const hdr = document.createElement('div');
+
+        hdr.className = 'ts-terpilih-header';
+
+        hdr.textContent = `Terpilih (${checkedItems.length})`;
+
+        kolomDiv.appendChild(hdr);
+
+        checkedItems.forEach(ind => kolomDiv.appendChild(_createIndicatorCheckbox(ind, true)));
+
+    }
+
+    
+
+    // 2. Grup per bab untuk yang belum dicentang
+
+    if (unselectedItems.length > 0) {
+
+        const groups = {};
+
+        unselectedItems.forEach(ind => {
+
+            const bab = (ind.bab_num != null) ? ind.bab_num : 'lainnya';
+
+            if (!groups[bab]) groups[bab] = [];
+
+            groups[bab].push(ind);
+
+        });
+
+        const babKeys = Object.keys(groups).sort((a, b) => {
+
+            if (a === 'lainnya') return 1;
+
+            if (b === 'lainnya') return -1;
+
+            return Number(a) - Number(b);
+
+        });
+
+        // Saat mencari, paksa semua grup terbuka agar hasil kelihatan
+
+        const searchEl = document.getElementById('ts-wizard-search');
+
+        const isSearching = searchEl && searchEl.value.trim() !== '';
+
+        babKeys.forEach(bab => {
+
+            const collapsed = (!isSearching && tsBabCollapsed[bab] === true);
+
+            const hdr = document.createElement('div');
+
+            hdr.className = 'ts-bab-group-header';
+
+            hdr.style.cursor = 'pointer';
+
+            const titleSpan = document.createElement('span');
+
+            const firstInd = groups[bab][0];
+
+            const babLabel = (bab === 'lainnya')
+
+                ? 'Lainnya'
+
+                : ((firstInd && firstInd.bab_name) ? firstInd.bab_name : String(bab));
+
+            titleSpan.textContent = babLabel;
+
+            const chev = document.createElement('i');
+
+            chev.className = collapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+
+            hdr.appendChild(titleSpan);
+
+            hdr.appendChild(chev);
+
+            kolomDiv.appendChild(hdr);
+
+
+
+            const body = document.createElement('div');
+
+            body.className = 'ts-bab-group-body' + (collapsed ? ' ts-bab-group-body-collapsed' : '');
+
+            groups[bab].forEach(ind => body.appendChild(_createIndicatorCheckbox(ind, false)));
+
+            kolomDiv.appendChild(body);
+
+
+
+            hdr.onclick = () => {
+
+                const nowCollapsed = body.classList.toggle('ts-bab-group-body-collapsed');
+
+                tsBabCollapsed[bab] = nowCollapsed;
+
+                chev.className = nowCollapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+
+            };
+
+        });
+
+    }
+
+}
+
+
+
+function filterTSIndicators(query) {
+
+    const q = (query || '').toLowerCase().trim();
+
+    if (!q) {
+
+        renderTSIndicatorsCheckboxes(tsIndicatorsList);
+
+        return;
+
+    }
+
+    const filtered = tsIndicatorsList.filter(ind => ind.name.toLowerCase().includes(q));
+
+    renderTSIndicatorsCheckboxes(filtered);
+
+}
+
+
+
+function filterTSYears(query) {
+
+    const q = (query || '').trim().toLowerCase();
+
+    const labels = document.querySelectorAll('#ts-wizard-tahun-checkboxes label');
+
+    labels.forEach(label => {
+
+        const span = label.querySelector('span');
+
+        const yearText = span ? span.textContent.trim().toLowerCase() : '';
+
+        label.style.display = (q === '' || yearText.includes(q)) ? '' : 'none';
+
+    });
+
+}
+
+
+
+function onKolomCheckboxChanged() {
+
+    const tahunDiv = document.getElementById('ts-wizard-tahun-checkboxes');
+
+    const submitBtn = document.getElementById('btn-ts-wizard-tampilkan');
+
+    const selectAllBtn = document.getElementById('btn-ts-toggle-all-years');
+
+    
+
+    tahunDiv.innerHTML = '';
+
+    submitBtn.disabled = true;
+
+    if (selectAllBtn) selectAllBtn.style.display = 'none';
+
+    
+
+    if (tsCheckedIndicators.size === 0) {
+
+        tahunDiv.innerHTML = '<span class="text-muted" style="font-size:0.75rem;">Pilih indikator terlebih dahulu</span>';
+
+        return;
+
+    }
+
+    
+
+    const allYears = new Set();
+
+    tsCheckedIndicators.forEach(indName => {
+
+        const matched = tsIndicatorsList.find(ind => ind.name === indName);
+
+        if (matched && matched.years) {
+
+            matched.years.forEach(yr => allYears.add(yr));
+
+        }
+
+    });
+
+    
+
+    const sortedYears = Array.from(allYears).sort((a, b) => a - b);
+
+    if (sortedYears.length === 0) {
+
+        tahunDiv.innerHTML = '<span class="text-danger" style="font-size:0.75rem;">Tahun data tidak tersedia</span>';
+
+        return;
+
+    }
+
+
+
+    if (selectAllBtn) {
+
+        selectAllBtn.style.display = 'inline-block';
+
+        selectAllBtn.textContent = 'Pilih Semua';
+
+        selectAllBtn.classList.remove('btn-primary');
+
+        selectAllBtn.classList.add('btn-outline-primary');
+
+    }
+
+    
+
+    sortedYears.forEach(yr => {
+
+        const label = document.createElement('label');
+
+        label.className = 'ts-year-chip';
+
+        
+
+        const cb = document.createElement('input');
+
+        cb.type = 'checkbox';
+
+        cb.value = yr;
+
+        cb.className = 'ts-year-checkbox';
+
+        cb.style.cssText = 'width:15px; height:15px; cursor:pointer; accent-color:#4f46e5; margin:0;';
+
+        cb.onchange = onTahunCheckboxChanged;
+
+        
+
+        const span = document.createElement('span');
+
+        span.textContent = yr;
+
+        
+
+        label.appendChild(cb);
+
+        label.appendChild(span);
+
+        tahunDiv.appendChild(label);
+
+    });
+
+}
+
+
+
+function onTahunCheckboxChanged() {
+
+    const all = document.querySelectorAll('.ts-year-checkbox');
+
+    const checked = document.querySelectorAll('.ts-year-checkbox:checked');
+
+    const submitBtn = document.getElementById('btn-ts-wizard-tampilkan');
+
+    if (submitBtn) submitBtn.disabled = (checked.length === 0);
+
+    
+
+    all.forEach(cb => {
+
+        const parent = cb.closest('.ts-year-chip');
+
+        if (parent) {
+
+            if (cb.checked) parent.classList.add('active');
+
+            else parent.classList.remove('active');
+
+        }
+
+    });
+
+
+
+    const selectAllBtn = document.getElementById('btn-ts-toggle-all-years');
+
+    if (selectAllBtn && all.length > 0) {
+
+        if (checked.length === all.length) {
+
+            selectAllBtn.textContent = 'Batal Pilih';
+
+            selectAllBtn.classList.remove('btn-outline-primary');
+
+            selectAllBtn.classList.add('btn-primary');
+
+        } else {
+
+            selectAllBtn.textContent = 'Pilih Semua';
+
+            selectAllBtn.classList.add('btn-outline-primary');
+
+            selectAllBtn.classList.remove('btn-primary');
+
+        }
+
+    }
+
+}
+
+
+
+function toggleSelectAllYearsBtn() {
+
+    const all = document.querySelectorAll('.ts-year-checkbox');
+
+    const checked = document.querySelectorAll('.ts-year-checkbox:checked');
+
+    const shouldCheck = checked.length < all.length;
+
+    all.forEach(cb => { cb.checked = shouldCheck; });
+
+    onTahunCheckboxChanged();
+
+}
+
+
+
+function toggleYearPicker() {
+
+    const body = document.getElementById('ts-wizard-tahun-checkboxes');
+
+    const chev = document.getElementById('year-picker-chevron');
+
+    if (!body) return;
+
+    const collapsed = body.classList.toggle('ts-year-picker-collapsed');
+
+    if (chev) chev.className = collapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+
+}
+
+
+
+function resetWizard() {
+
+    tsCheckedIndicators.clear();
+
+    const searchInput = document.getElementById('ts-wizard-search');
+
+    if (searchInput) searchInput.value = '';
+
+    const yearSearch = document.getElementById('ts-year-search');
+
+    if (yearSearch) yearSearch.value = '';
+
+    renderTSIndicatorsCheckboxes(tsIndicatorsList);
+
+    onKolomCheckboxChanged();
+
+
+
+    // Sembunyikan dan bersihkan hasil + grafik
+
+    const resultsLoading = document.getElementById('ts-results-loading');
+
+    if (resultsLoading) resultsLoading.style.display = 'none';
+
+    const resultsContent = document.getElementById('ts-results-content');
+
+    if (resultsContent) resultsContent.style.display = 'none';
+
+    const summaryContainer = document.getElementById('ts-quick-summary-container');
+
+    if (summaryContainer) summaryContainer.style.display = 'none';
+
+    const dataControlCard = document.getElementById('ts-data-control-card');
+    if (dataControlCard) dataControlCard.style.display = 'none';
+
+    const chartControlCard = document.getElementById('ts-chart-control-card');
+    if (chartControlCard) chartControlCard.style.display = 'none';
+
+    toggleTimeSeriesInsights(false);
+
+    
+
+    ['ts-chart-container', 'ts-chart-container-2', 'ts-chart-container-3'].forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if (el) el.style.display = 'none';
+
+    });
+
+
+
+    // Destroy active charts
+
+    [timeSeriesChartInstance, timeSeriesChart2Instance, timeSeriesChart3Instance, timeSeriesChartYAxisInstance].forEach(inst => {
+
+        if (inst) {
+
+            try { inst.destroy(); } catch(e) {}
+
+        }
+
+    });
+
+    timeSeriesChartInstance = null;
+
+    timeSeriesChart2Instance = null;
+
+    timeSeriesChart3Instance = null;
+
+    timeSeriesChartYAxisInstance = null;
+
+    currentTimeSeriesData = null;
+
+    currentMatchedTables = null;
+
+}
+
+
+
+async function showTimeSeriesFromWizard() {
+
+    const checkedKols = document.querySelectorAll('.ts-kolom-checkbox:checked');
+
+    const selectedIndicators = Array.from(checkedKols).map(cb => cb.value);
+
+    const checkedCbs = document.querySelectorAll('.ts-year-checkbox:checked');
+
+    const selectedYears = Array.from(checkedCbs).map(cb => Number(cb.value));
+
+    
+
+    if (selectedIndicators.length === 0 || selectedYears.length === 0) return;
+
+    
+
+    document.getElementById('ts-results-loading').style.display = 'block';
+
+    document.getElementById('ts-results-content').style.display = 'none';
+
+    tsForceRecreateChart = true;
+
+    
+
+    try {
+
+        const res = await fetch(`${API_BASE}/timeseries/data-by-indicators?indicators=${encodeURIComponent(selectedIndicators.join(','))}&years=${encodeURIComponent(selectedYears.join(','))}`);
+
+        const data = await res.json();
+
+        
+
+        document.getElementById('ts-results-loading').style.display = 'none';
+
+        
+
+        if (!data.data || data.data.length === 0) {
+
+            showToast('info', 'Info', 'Tidak ada data untuk pilihan ini.');
+
+            return;
+
+        }
+
+        
+
+        currentMatchedTables = data.data;
+
+        renderTimeSeriesTable(data.data, selectedIndicators.join(', '));
+
+        
+
+    } catch (err) {
+
+        document.getElementById('ts-results-loading').style.display = 'none';
+
+        showToast('error', 'Error', 'Gagal memuat data: ' + err.message);
+
+    }
 
 }
 
@@ -194,7 +1709,7 @@ function showTablePicker(tablesData, keyword) {
 
         <p style="margin-bottom: 0.75rem; font-weight: 600; color: #0369a1;">
 
-            ” Ditemukan <strong>${groupKeys.length}</strong> varian/tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
+            🔍  Ditemukan <strong>${groupKeys.length}</strong> varian/tabel yang sesuai dengan kata kunci "<strong>${keyword}</strong>".
 
             <br><span style="font-weight: 400; font-size: 0.9rem;">Silakan pilih tabel spesifik yang ingin ditampilkan dalam analisis deret waktu:</span>
 
@@ -908,7 +2423,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
             <div style="display:flex; align-items:flex-start; gap:10px;">
 
-                <span style="font-size:1.25rem; line-height:1;">⚠️</span>
+                <span style="font-size:1.25rem; line-height:1;">⚠️</span>
 
                 <div style="flex-grow:1;">
 
@@ -1379,7 +2894,7 @@ function renderTimeSeriesTable(tablesData, keyword, isSubTypeChange = false) {
 
                     if (isAdmin && anom && val !== '-' && val !== '...') {
 
-                        cellDisplay = `<span title="${escHtml(anom.message)}" style="cursor:help; font-size:0.8rem; margin-right:3px;">⚠️</span><span style="font-weight:600; color:#b45309; background:#fef3c7; padding:1px 4px; border-radius:4px;" title="${escHtml(anom.message)}">${val}</span>`;
+                        cellDisplay = `<span title="${escHtml(anom.message)}" style="cursor:help; font-size:0.8rem; margin-right:3px;">⚠️</span><span style="font-weight:600; color:#b45309; background:#fef3c7; padding:1px 4px; border-radius:4px;" title="${escHtml(anom.message)}">${val}</span>`;
 
                     }
 

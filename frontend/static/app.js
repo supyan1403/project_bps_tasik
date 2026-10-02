@@ -1439,7 +1439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 const names = files.map(f => f.name).join(', ');
 
-                txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">ðŸ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
+                txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁Ÿ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
 
             }
 
@@ -1473,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         const names = files.map(f => f.name).join(', ');
 
-                        txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">ðŸ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
+                        txt.innerHTML = `<i class="bi bi-collection text-success" style="font-size:1.6rem;"></i><br><strong class="text-dark">📁Ÿ“ ${files.length} File Excel Dipilih</strong><div class="text-muted small mt-1 text-truncate" style="max-width:320px;" title="${escHtml(names)}">${escHtml(names)}</div>`;
 
                     }
 
@@ -3577,7 +3577,7 @@ function renderTrendChartMode(mode, animate = true) {
 
                             const idx = ctx.dataIndex;
 
-                            if (idx === 0) return ` ðŸ“ Basis Awal Terbit (Tahun ${window.cachedTrendChartData.labels[0]})`;
+                            if (idx === 0) return ` 📍Ÿ“ Basis Awal Terbit (Tahun ${window.cachedTrendChartData.labels[0]})`;
 
                             const prev = dataset.data[idx - 1];
 
@@ -18905,7 +18905,7 @@ async function showTablesUsingColumn(columnName) {
 
         Swal.fire({
 
-            title: `ðŸ“Š Penggunaan: "${columnName}"`,
+            title: `📊Ÿ“Š Penggunaan: "${columnName}"`,
 
             html: html,
 
@@ -22470,7 +22470,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                         <button type="button" title="Salin nilai master ini ke semua kolom yang mengandung '${escHtml(kw)}'" style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:7px 10px; cursor:pointer; font-size:0.78rem; color:#1d4ed8; font-weight:600; display:flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" onclick="copyMasterToSimilar(${i}, '${kw.replace(/'/g, "\\'")}')" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#eff6ff'">
 
-                            <span>ðŸ“‹ Salin Sejenis</span>
+                            <span>📋Ÿ“‹ Salin Sejenis</span>
 
                         </button>
 
@@ -22478,7 +22478,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
                         <button type="button" title="Salin nilai master baris ini ke semua kolom yang tercentang" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:7px 10px; cursor:pointer; font-size:0.78rem; color:var(--text-secondary, #475569); font-weight:500; display:flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" onclick="copyMasterToChecked(${i})" onmouseenter="this.style.background=cssVar('--border') || '#e2e8f0'" onmouseleave="this.style.background=cssVar('--bg-hover') || '#f1f5f9'">
 
-                            <span>ðŸ“‘ Ke Tercentang</span>
+                            <span>📑Ÿ“‘ Ke Tercentang</span>
 
                         </button>
 
@@ -22508,7 +22508,7 @@ async function renameHeadersToMaster(tableId, tableName) {
 
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; padding:8px 12px; background:#fff; border:1px dashed #cbd5e1; border-radius:8px;">
 
-                <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary, #475569);">ðŸŽ¯ Pilih Cepat Kolom:</span>
+                <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary, #475569);">🎯ŸŽ¯ Pilih Cepat Kolom:</span>
 
                 ${uniqueKeywords.map(kw => `
 
@@ -24457,7 +24457,7 @@ async function submitCreateTable() {
 
         Swal.fire({
 
-            title: 'ðŸŽ‰ Tabel Berhasil Dibuat!',
+            title: '🎉ŸŽ‰ Tabel Berhasil Dibuat!',
 
             html: `<div class="text-start small text-muted">
 
@@ -24477,7 +24477,7 @@ async function submitCreateTable() {
 
             cancelButtonColor: cssVar('--text-secondary') || '#64748b',
 
-            confirmButtonText: 'ðŸ“ Buka di Editor Spreadsheet',
+            confirmButtonText: '📁Ÿ“ Buka di Editor Spreadsheet',
 
             cancelButtonText: 'Tetap di Data Tabel'
 

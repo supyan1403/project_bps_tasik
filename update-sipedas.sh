@@ -11,11 +11,12 @@
 # Alur:
 #   1. git pull
 #   2. dependensi  (HANYA bila requirements.txt berubah di pull ini)
-#   3. restart backend
-#   4. tunggu GET /health sampai backend benar-benar siap
-#   5. validasi + reload nginx
-#   6. cek blok halaman 502 masih ada
-#   7. verifikasi lewat domain publik
+#   3. regenerasi modul js/0*.js dari app.js  (build_app.py)
+#   4. restart backend
+#   5. tunggu GET /health sampai backend benar-benar siap
+#   6. validasi + reload nginx
+#   7. cek blok halaman 502 masih ada
+#   8. verifikasi lewat domain publik
 #
 # Catatan: git pull dilakukan DI SINI (bukan di wrapper) lalu script
 # menjalankan ulang dirinya sendiri, agar tidak pernah mengeksekusi
@@ -39,7 +40,7 @@ YELLOW=$'\033[1;33m'
 BLUE=$'\033[0;34m'
 NC=$'\033[0m'
 
-TOTAL_STEPS=7
+TOTAL_STEPS=8
 WARN_COUNT=0
 FAIL_COUNT=0
 
@@ -102,6 +103,11 @@ fi
 # -----------------------------------------------------------------------------
 if [ "$STEP" -eq 1 ]; then
     step "Tarik kode terbaru dari GitHub"
+
+    # js/0*.js adalah turunan dari app.js (TAHAP 3). Bila build sebelumnya sudah
+    # mengubahnya, buang dulu supaya git pull tidak menolak dengan pesan
+    # "local changes would be overwritten by merge".
+    git -C "$PROJECT_DIR" checkout -- frontend/static/js 2>/dev/null || true
 
     OLD_HEAD="$(git -C "$PROJECT_DIR" rev-parse HEAD)"
 
@@ -166,7 +172,20 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# TAHAP 3 - restart backend
+# TAHAP 3 - regenerasi modul js/0*.js dari app.js
+# -----------------------------------------------------------------------------
+step "Regenerasi modul js/0*.js dari app.js"
+
+if "$VENV_DIR/bin/python" "$PROJECT_DIR/build_app.py"; then
+    ok "Modul js/ sinkron dengan app.js."
+else
+    err "build_app.py gagal - app.js tidak bisa dipecah menjadi modul js/."
+    printf '         Jalankan manual: %s/bin/python %s/build_app.py\n' "$VENV_DIR" "$PROJECT_DIR"
+    exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# TAHAP 4 - restart backend
 # -----------------------------------------------------------------------------
 step "Restart backend ($SERVICE_NAME)"
 
@@ -180,7 +199,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# TAHAP 4 - tunggu backend benar-benar siap (WAJIB, cegah halaman 502)
+# TAHAP 5 - tunggu backend benar-benar siap (WAJIB, cegah halaman 502)
 # -----------------------------------------------------------------------------
 step "Tunggu backend siap (maks ${HEALTH_TIMEOUT}s)"
 
@@ -202,7 +221,7 @@ if [ "$READY" -ne 1 ]; then
 fi
 
 # -----------------------------------------------------------------------------
-# TAHAP 5 - validasi + reload nginx
+# TAHAP 6 - validasi + reload nginx
 # -----------------------------------------------------------------------------
 step "Validasi dan reload konfigurasi nginx"
 
@@ -219,7 +238,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# TAHAP 6 - pastikan blok halaman 502 tidak hilang
+# TAHAP 7 - pastikan blok halaman 502 tidak hilang
 # -----------------------------------------------------------------------------
 step "Cek blok halaman 502 di konfigurasi nginx"
 
@@ -249,7 +268,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# TAHAP 7 - verifikasi lewat domain publik
+# TAHAP 8 - verifikasi lewat domain publik
 # -----------------------------------------------------------------------------
 step "Verifikasi lewat domain publik"
 

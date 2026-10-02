@@ -81,16 +81,41 @@ def _verify_password(plain_password: str, stored_hash_hex: str, stored_salt_hex:
     except (ValueError, TypeError):
         return False
 
-def _get_or_create_admin_credentials():
-    """Mengambil kredensial hash admin atau inisialisasi default terenkripsi."""
+DEFAULT_ADMIN_USERNAME = "admin"
+
+def _resolve_username() -> str:
+    """Username admin: dari env SIPEDAS_ADMIN_USERNAME, fallback ke 'admin'."""
+    username = (os.environ.get("SIPEDAS_ADMIN_USERNAME") or "").strip()
+    return username or DEFAULT_ADMIN_USERNAME
+
+def _write_credentials(data: dict) -> None:
+    with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+def _get_or_create_admin_credentials() -> tuple[str, str, str]:
+    """Mengambil (username, password_hash, salt) admin; inisialisasi bila belum ada.
+
+    File kredensial yang dibuat sebelum fitur username belum punya kunci
+    `username` — nilai default ditulis balik agar bisa diedit manual.
+    """
     if os.path.exists(_AUTH_CONFIG_FILE):
+        data = None
         try:
             with open(_AUTH_CONFIG_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                if "password_hash" in data and "salt" in data:
-                    return data["password_hash"], data["salt"]
-        except (OSError, json.JSONDecodeError, KeyError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Gagal membaca file kredensial admin: {e}")
+
+        if isinstance(data, dict) and "password_hash" in data and "salt" in data:
+            username = str(data.get("username") or "").strip()
+            if not username:
+                username = _resolve_username()
+                try:
+                    data["username"] = username
+                    _write_credentials(data)
+                except (OSError, TypeError) as e:
+                    logger.warning(f"Gagal melengkapi username di file kredensial: {e}")
+            return username, str(data["password_hash"]), str(data["salt"])
 
     # Wajib set env var SIPEDAS_ADMIN_PASSWORD di production
     default_plain = os.environ.get("SIPEDAS_ADMIN_PASSWORD")
@@ -101,16 +126,33 @@ def _get_or_create_admin_credentials():
         )
     p_hash, salt = _hash_password(default_plain)
     try:
-        with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
-            json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now(timezone.utc).isoformat()}, f, indent=2)
+        _write_credentials({
+            "username": _resolve_username(),
+            "password_hash": p_hash,
+            "salt": salt,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        })
     except (OSError, TypeError) as e:
         print(f"Warning: Failed to save auth credentials: {e}")
-    return p_hash, salt
+    return _resolve_username(), p_hash, salt
 
 def _update_admin_password(new_plain_password: str):
     p_hash, salt = _hash_password(new_plain_password)
-    with open(_AUTH_CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump({"password_hash": p_hash, "salt": salt, "updated_at": datetime.now(timezone.utc).isoformat()}, f, indent=2)
+    data: dict = {}
+    if os.path.exists(_AUTH_CONFIG_FILE):
+        try:
+            with open(_AUTH_CONFIG_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    data = loaded
+        except (OSError, json.JSONDecodeError):
+            data = {}
+    # Pertahankan username yang sudah ada agar login tidak terkunci keluar.
+    data["username"] = str(data.get("username") or "").strip() or _resolve_username()
+    data["password_hash"] = p_hash
+    data["salt"] = salt
+    data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    _write_credentials(data)
 
 def _clean_expired_sessions(db: Session):
     """Hapus sesi pengguna yang sudah kedaluwarsa."""
@@ -167,11 +209,19 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
             detail=f"Terlalu banyak percobaan login yang gagal. Akun dikunci sementara. Coba lagi dalam {remaining_sec} detik."
         )
 
+    username = str(payload.get("username", "")).strip()
     password = str(payload.get("password", "")).strip()
-    stored_hash, stored_salt = _get_or_create_admin_credentials()
+    stored_username, stored_hash, stored_salt = _get_or_create_admin_credentials()
 
-    # 2. Verifikasi Password Hashing
-    if not _verify_password(password, stored_hash, stored_salt):
+    # 2. Verifikasi username DAN password.
+    #    Keduanya dihitung sebelum dievaluasi (tanpa short-circuit) supaya waktu
+    #    respons sama walau username salah — mencegah user enumeration lewat timing.
+    username_ok = bool(username) and secrets.compare_digest(
+        username.encode("utf-8"), stored_username.encode("utf-8")
+    )
+    password_ok = _verify_password(password, stored_hash, stored_salt)
+
+    if not (username_ok and password_ok):
         if attempt is None:
             attempt = models.LoginAttempt(ip=client_ip, failed_count=0, last_failed_at=now)
             db.add(attempt)
@@ -182,11 +232,11 @@ def auth_login(payload: dict, request: Request, response: Response, db: Session 
             db.commit()
             raise HTTPException(
                 status_code=429,
-                detail=f"Password salah {MAX_FAILED_ATTEMPTS} kali berturut-turut. Akses dikunci selama {LOCKOUT_DURATION_SECONDS // 60} menit demi keamanan."
+                detail=f"Login gagal {MAX_FAILED_ATTEMPTS} kali berturut-turut. Akses dikunci selama {LOCKOUT_DURATION_SECONDS // 60} menit demi keamanan."
             )
         sisa = MAX_FAILED_ATTEMPTS - attempt.failed_count
         db.commit()
-        raise HTTPException(status_code=401, detail=f"Password salah! Sisa percobaan: {sisa} kali.")
+        raise HTTPException(status_code=401, detail=f"Username atau password salah! Sisa percobaan: {sisa} kali.")
 
     # 3. Login Sukses: Reset Rate Limiter & Buat Sesi di database
     if attempt is not None:
@@ -244,7 +294,7 @@ def change_password(payload: dict, db: Session = Depends(get_db), admin: dict = 
     if len(new_password) < 6:
         raise HTTPException(status_code=400, detail="Password baru minimal harus 6 karakter!")
 
-    stored_hash, stored_salt = _get_or_create_admin_credentials()
+    _, stored_hash, stored_salt = _get_or_create_admin_credentials()
     if not _verify_password(old_password, stored_hash, stored_salt):
         raise HTTPException(status_code=401, detail="Password lama Anda salah!")
 

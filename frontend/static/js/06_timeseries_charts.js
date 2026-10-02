@@ -2564,6 +2564,22 @@ async function adminLogin() {
 
                 <!-- Input Box Terpadu -->
 
+                <div style="text-align: left; margin-bottom: 14px;">
+
+                    <label style="display: block; font-size: 0.78rem; font-weight: 600; color: ${isDark ? cssVar('--border') || '#e2e8f0' : cssVar('--text-tertiary') || '#334155'}; margin-bottom: 6px;">
+
+                        Username <span style="color: #ef4444;">*</span>
+
+                    </label>
+
+                    <div class="sipedas-login-input-group">
+
+                        <input type="text" id="swal-login-username" class="sipedas-login-input" placeholder="Masukkan username..." autocomplete="username">
+
+                    </div>
+
+                </div>
+
                 <div style="text-align: left; margin-bottom: 6px;">
 
                     <label style="display: block; font-size: 0.78rem; font-weight: 600; color: ${isDark ? cssVar('--border') || '#e2e8f0' : cssVar('--text-tertiary') || '#334155'}; margin-bottom: 6px;">
@@ -2618,27 +2634,41 @@ async function adminLogin() {
 
         didOpen: () => {
 
-            const inp = document.getElementById('swal-login-password');
+            const first = document.getElementById('swal-login-username');
 
-            if (inp) {
+            const second = document.getElementById('swal-login-password');
 
-                inp.focus();
+            if (first) first.focus();
 
-                inp.addEventListener('keydown', (e) => {
+            [first, second].forEach((el) => {
+
+                if (el) el.addEventListener('keydown', (e) => {
 
                     if (e.key === 'Enter') Swal.clickConfirm();
 
                 });
 
-            }
+            });
 
         },
 
         preConfirm: async () => {
 
+            const userInp = document.getElementById('swal-login-username');
+
             const pwInp = document.getElementById('swal-login-password');
 
+            const username = userInp ? userInp.value.trim() : '';
+
             const pw = pwInp ? pwInp.value.trim() : '';
+
+            if (!username) {
+
+                Swal.showValidationMessage('Silakan masukkan username terlebih dahulu.');
+
+                return false;
+
+            }
 
             if (!pw) {
 
@@ -2658,7 +2688,7 @@ async function adminLogin() {
 
                     credentials: 'same-origin',
 
-                    body: JSON.stringify({ password: pw })
+                    body: JSON.stringify({ username: username, password: pw })
 
                 });
 
@@ -2666,7 +2696,7 @@ async function adminLogin() {
 
                     const err = await res.json().catch(() => ({}));
 
-                    Swal.showValidationMessage(err.detail || 'Password salah!');
+                    Swal.showValidationMessage(err.detail || 'Username atau password salah!');
 
                     return false;
 

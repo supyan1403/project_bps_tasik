@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const userInput = document.getElementById('admin-username');
     const pwInput = document.getElementById('admin-password');
     const toggleBtn = document.getElementById('toggle-pw');
     const loginForm = document.getElementById('login-form');
@@ -13,16 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const alertError = document.getElementById('alert-error');
     const errorText = document.getElementById('error-text');
 
-    if (!loginForm || !pwInput) return;
+    if (!loginForm || !pwInput || !userInput) return;
 
     // Desktop autofocus only (avoid opening keyboard automatically on mobile)
     if (window.innerWidth >= 900) {
-        pwInput.focus();
+        userInput.focus();
     }
 
     // Keep mobile viewport stable when keyboard appears
     if (window.innerWidth < 900) {
-        pwInput.addEventListener('focus', () => {
+        userInput.addEventListener('focus', () => {
             setTimeout(() => {
                 window.scrollTo(0, 0);
                 if (document.body) document.body.scrollTop = 0;
@@ -55,7 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (alertError) alertError.style.display = 'none';
 
+        const username = userInput.value.trim();
         const password = pwInput.value.trim();
+        if (!username) {
+            if (errorText) errorText.textContent = 'Silakan masukkan username terlebih dahulu.';
+            if (alertError) alertError.style.display = 'flex';
+            userInput.focus();
+            return;
+        }
         if (!password) {
             if (errorText) errorText.textContent = 'Silakan masukkan password terlebih dahulu.';
             if (alertError) alertError.style.display = 'flex';
@@ -72,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
-                body: JSON.stringify({ password: password })
+                body: JSON.stringify({ username: username, password: password })
             });
 
             if (res.ok) {
@@ -84,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 400);
             } else {
                 const err = await res.json().catch(() => ({}));
-                if (errorText) errorText.textContent = err.detail || 'Password salah atau gagal terhubung ke server.';
+                if (errorText) errorText.textContent = err.detail || 'Username atau password salah atau gagal terhubung ke server.';
                 if (alertError) alertError.style.display = 'flex';
                 pwInput.focus();
                 pwInput.select();

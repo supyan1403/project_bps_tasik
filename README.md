@@ -62,6 +62,7 @@ Publikasi data statistik berkala resmi, seperti buku **Kabupaten Dalam Angka (DD
 - **Pemisahan Peran & Keamanan Berlapis (Role-Based Access Control)**:
   - **Mode Publik / Pegawai**: Akses cepat pencarian indikator, penelusuran tabel, dan grafik deret waktu tanpa menu sensitif.
   - **Mode Administrator**: Kontrol penuh pengelolaan basis data, impor, koreksi kolom, hingga backup sistem.
+  - Login memverifikasi **kombinasi username dan password**; pesan kegagalan selalu seragam (*"Username atau password salah"*) sehingga tidak membocorkan username mana yang benar.
   - Enkripsi password menggunakan algoritma PBKDF2-HMAC-SHA256 dengan Salt acak 16-byte, serta proteksi pembatasan percobaan gagal (*Anti-Brute Force Lockout* 5 menit) yang **tersimpan di database** sehingga tetap berlaku walau backend di-restart.
   - Pembatasan laju di nginx (`limit_req`) sebagai lapis kedua: `5 r/menit` untuk endpoint login dan `30 r/detik` untuk seluruh `/api/`, keduanya membalas `429`.
 - **Mode Pemeliharaan (Maintenance Mode) & Sistem**: Kontrol status pemeliharaan sistem dengan countdown timer otomatis, pelacakan log aktivitas admin, dan pembersihan berkas cache/sampah langsung dari antarmuka atau `start.bat`.
@@ -158,6 +159,9 @@ SIPEDAS_DOMAIN=
 # Database MySQL (atau sqlite untuk mode lokal)
 DATABASE_URL=mysql+pymysql://user:password@localhost:3306/bps_tasikmalaya
 
+# Username admin untuk login (opsional - jika kosong otomatis memakai `admin`)
+SIPEDAS_ADMIN_USERNAME=
+
 # Password admin pertama kali - WAJIB diisi untuk production
 SIPEDAS_ADMIN_PASSWORD=
 ```
@@ -239,10 +243,12 @@ Buka peramban (browser) dan akses:
 ### Langkah 9: Login Admin
 
 1. Klik tombol **"Login Admin"** di pojok kiri bawah sidebar
-2. Masukkan password admin:
+2. Masukkan username admin:
+   - **Username Default**: `admin` (atau sesuai nilai variabel lingkungan `SIPEDAS_ADMIN_USERNAME` pada `.env`).
+3. Masukkan password admin:
    - **Password Default Awal**: `ganti_password_saya` (atau sesuai nilai variabel lingkungan `SIPEDAS_ADMIN_PASSWORD` pada `.env`).
    - Setelah login pertama kali, sangat disarankan segera mengganti password melalui menu **Manajemen Database > Ganti Password**.
-3. Klik **"Masuk Sekarang"**
+4. Klik **"Masuk Sekarang"**
 
 ### Langkah 10: Isi Data
 
@@ -307,7 +313,7 @@ FastAPI menyediakan dokumentasi API interaktif secara bawaan, **hanya di lingkun
 | **Error: Can't connect to MySQL server (10061)** | Layanan MySQL di XAMPP belum menyala | Buka XAMPP Control Panel, klik **Start** pada modul **MySQL**, atau gunakan [Mode SQLite](#opsi-b-sqlite-tanpa-xampp) |
 | **ModuleNotFoundError: No module named 'xxx'** | Dependensi belum terinstal | Jalankan ulang `pip install -r requirements.txt` di dalam venv |
 | **Ekstraksi PDF tidak membaca angka** | PDF merupakan hasil scan gambar, bukan teks digital | Pastikan menggunakan PDF resmi BPS yang teksnya bisa diseleksi/disalin |
-| **Lupa password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk kembali ke default (`ganti_password_saya`) |
+| **Lupa username / password admin** | Belum mengatur ulang kredensial | Hapus file `backend/data/auth_credentials.json` lalu restart server untuk kembali ke default (username `admin`, password `ganti_password_saya`) |
 | **Database tidak terkoneksi** | MySQL belum jalan atau DATABASE_URL salah | Cek apakah XAMPP MySQL sudah running, atau set `DATABASE_URL` untuk SQLite |
 | **Muncul error 502 baru selesai update lalu hilang sendiri** | Backend baru saja di-restart tetapi belum selesai booting | Lihat [penjelasan 502](#halaman-error-502) — jalankan [`update-sipedas`](#langkah-update-manual) yang menunggu `/health` sampai siap, baru refresh |
 

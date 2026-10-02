@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 # Force SQLite for testing before importing database module
 os.environ["DATABASE_URL"] = "sqlite:///test_sipedas.db"
 os.environ.setdefault("SIPEDAS_ADMIN_PASSWORD", "test_password_123")
+os.environ.setdefault("SIPEDAS_ADMIN_USERNAME", "admin")
 
 from database import Base, engine, SessionLocal
 from main import app
@@ -57,7 +58,7 @@ def db():
 @pytest.fixture
 def admin_token(client):
     """Login sebagai admin dan return session cookie value."""
-    resp = client.post("/api/auth/login", json={"password": "test_password_123"})
+    resp = client.post("/api/auth/login", json={"username": "admin", "password": "test_password_123"})
     if resp.status_code == 200:
         return client.cookies.get("sipedas_session")
     return None

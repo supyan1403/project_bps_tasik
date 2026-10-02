@@ -732,7 +732,7 @@
                     Portal Administrator
                 </div>
                 <h1 class="form-title">Masuk Admin</h1>
-                <p class="form-desc">Masukkan password Anda untuk mengelola seluruh data dan fitur SIPEDAS.</p>
+                <p class="form-desc">Masukkan username dan password Anda untuk mengelola seluruh data dan fitur SIPEDAS.</p>
 
                 <div id="alert-error" class="alert-error">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -740,10 +740,30 @@
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <span id="error-text">Password salah.</span>
+                    <span id="error-text">Username atau password salah.</span>
                 </div>
 
                 <form id="login-form" autocomplete="off">
+                    <div class="form-group">
+                        <label for="admin-username" class="form-label">Username</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                id="admin-username"
+                                class="form-input"
+                                placeholder="Masukkan username..."
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="admin-password" class="form-label">Password Admin</label>
                         <div class="input-wrapper">
@@ -808,6 +828,6 @@
 
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 
-    <script src="/static/login.js?v=20260920_1" defer></script>
+    <script src="/static/login.js?v=20261002_1" defer></script>
 </body>
 </html>

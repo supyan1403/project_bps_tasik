@@ -105,9 +105,15 @@ def test_root_chips_fokus_deret_waktu(client):
     html = client.get("/").text
     assert "Tren Lintas Tahun" in html
     assert "Grafik Garis &amp; Batang" in html
-    assert "Ekspor PDF &middot; CSV &middot; Excel" in html
+    assert "Ekspor CSV &middot; Excel" in html
     assert "Publikasi Statistik" not in html
     assert "Data Tabel" not in html
+
+
+def test_root_tidak_menyebut_pdf(client):
+    """Konten landing tidak lagi menyebut PDF sama sekali."""
+    html = client.get("/").text
+    assert "PDF" not in html
 
 
 def test_root_tidak_menyebut_menu_admin(client):

@@ -401,14 +401,14 @@
             padding: 0 clamp(20px, 5vw, 40px);
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 12px;
+            gap: 16px;
         }
 
         .stat {
             background: rgba(255, 255, 255, 0.76);
             border: 1px solid rgba(203, 213, 225, 0.85);
             border-radius: 16px;
-            padding: 18px 14px;
+            padding: 24px 18px;
             text-align: center;
             box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
         }
@@ -418,16 +418,17 @@
             font-weight: 900;
             color: #1d4ed8;
             letter-spacing: -0.8px;
-            line-height: 1.15;
+            line-height: 1.2;
         }
 
         .stat-label {
-            margin-top: 6px;
-            font-size: 11px;
+            margin-top: 9px;
+            font-size: 11.5px;
             font-weight: 700;
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: 0.6px;
+            line-height: 1.4;
         }
 
         .section {
@@ -751,7 +752,8 @@
             .btn { width: 100%; min-width: 0; max-width: 340px; }
             .hero-chips { gap: 8px; }
             .chip { padding: 7px 12px; font-size: 11.5px; }
-            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .stat { padding: 20px 16px; }
             .grid-3, .grid-2 { grid-template-columns: 1fr; }
             .section { padding-top: clamp(36px, 6vh, 56px); }
             .card { padding: 20px; }
@@ -940,7 +942,7 @@
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Ekspor PDF &middot; CSV &middot; Excel
+                Ekspor CSV &middot; Excel
             </span>
         </div>
 
@@ -973,10 +975,10 @@
     <section class="section" id="tentang">
         <div class="section-head">
             <span class="eyebrow">Tentang SIPEDAS</span>
-            <h2 class="section-title">Dari buku PDF statis menjadi basis data yang bisa ditelusuri</h2>
+            <h2 class="section-title">Dari dokumen statis menjadi basis data yang bisa ditelusuri</h2>
             <p class="section-lead">
                 SIPEDAS mengubah publikasi statistik resmi yang selama ini berupa dokumen
-                PDF berukuran besar menjadi satu basis data relasional — sehingga setiap
+                berukuran besar menjadi satu basis data relasional — sehingga setiap
                 angka bisa langsung dicari, dibandingkan antartahun, dan dianalisis.
             </p>
         </div>
@@ -1014,7 +1016,7 @@
                     </svg>
                 </span>
                 <h3>Siap Digambar &amp; Diekspor</h3>
-                <p>Setiap angka langsung bisa diubah menjadi grafik garis atau batang, lalu diekspor ke PDF, PNG, CSV, maupun Excel.</p>
+                <p>Setiap angka langsung bisa diubah menjadi grafik garis atau batang, lalu diekspor ke PNG, CSV, maupun Excel.</p>
             </article>
         </div>
 
@@ -1091,7 +1093,7 @@
                         </svg>
                     </span>
                     <h3>Ekspor Laporan</h3>
-                    <p>Unduh grafik dan tabel dalam format PDF, PNG, CSV, maupun Excel.</p>
+                    <p>Unduh grafik dan tabel dalam format PNG, CSV, maupun Excel.</p>
                 </article>
             </div>
 
@@ -1216,7 +1218,7 @@
                 </div>
                 <p class="footer-about">
                     Sistem Integrasi, Pencarian, dan Analisis Data Statistik &mdash;
-                    mengubah publikasi PDF menjadi basis data yang bisa ditelusuri
+                    mengubah publikasi resmi menjadi basis data yang bisa ditelusuri
                     dan dianalisis lintas tahun.
                 </p>
             </div>

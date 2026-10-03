@@ -47,3 +47,36 @@ def test_admin_login_di_lock_ke_app(admin_client):
     assert resp.history, "harus melewati redirect"
     assert resp.history[0].status_code == 303
     assert resp.url.path == "/app"
+
+
+def test_root_menanam_cookie_pernah_melihat(client):
+    """Kunjungan pertama ke / menanam cookie penanda landing sudah dilihat."""
+    resp = client.get("/")
+    cookie = resp.headers.get("Set-Cookie", "")
+    assert "sipedas_landing_seen=" in cookie
+    assert "Max-Age=" in cookie
+    assert "HttpOnly" in cookie
+
+
+def test_root_redirect_ke_app_setelah_cookie_ada(client):
+    """/ langsung mengarah ke /app begitu cookie landing terpasang."""
+    client.cookies.set("sipedas_landing_seen", "1")
+    resp = client.get("/")
+    assert resp.history, "harus melewati redirect"
+    assert resp.history[0].status_code == 302
+    assert resp.url.path == "/app"
+
+
+def test_root_paksa_landing_dengan_query(client):
+    """/?landing=1 tetap menyajikan landing walau cookie sudah ada."""
+    client.cookies.set("sipedas_landing_seen", "1")
+    resp = client.get("/?landing=1")
+    assert resp.status_code == 200
+    assert "Cari &amp; Analisis Data" in resp.text
+
+
+def test_root_paksa_landing_menyegarkan_cookie(client):
+    """/?landing=1 memperbarui cookie penanda agar siklusnya dimulai ulang."""
+    client.cookies.set("sipedas_landing_seen", "1")
+    resp = client.get("/?landing=1")
+    assert "sipedas_landing_seen=" in resp.headers.get("Set-Cookie", "")

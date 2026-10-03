@@ -315,11 +315,15 @@ except OSError as _e:
     logger.warning(f"Gagal membuat direktori penyimpanan: {_e}")
 
 LANDING_COOKIE = "sipedas_landing_seen"
-LANDING_COOKIE_MAX_AGE = 60 * 60 * 24 * 400  # ~permanen; browser memotong cookie di ~400 hari
 
 @app.get("/")
 def read_root(request: Request):
-    """Halaman landing — tampil sekali per browser, sisanya redirect ke /app."""
+    """Halaman landing — tampil sekali per sesi browser, sisanya redirect ke /app.
+
+    Cookie sengaja dibuat *session cookie* (tanpa Max-Age/Expires) supaya
+    hilang begitu browser ditutup, sehingga landing tampil lagi pada sesi
+    berikutnya. Untuk memaksa landing kapan pun pakai `/?landing=1`.
+    """
     force_landing = request.query_params.get("landing") == "1"
 
     if not force_landing and request.cookies.get(LANDING_COOKIE):
@@ -334,7 +338,6 @@ def read_root(request: Request):
     response.set_cookie(
         key=LANDING_COOKIE,
         value="1",
-        max_age=LANDING_COOKIE_MAX_AGE,
         path="/",
         httponly=True,
         samesite="lax",

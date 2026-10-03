@@ -50,12 +50,18 @@ def test_admin_login_di_lock_ke_app(admin_client):
 
 
 def test_root_menanam_cookie_pernah_melihat(client):
-    """Kunjungan pertama ke / menanam cookie penanda landing sudah dilihat."""
+    """Kunjungan pertama ke / menanam cookie penanda landing sudah dilihat.
+
+    Cookie harus berupa *session cookie* (tanpa Max-Age/Expires) supaya
+    hilang saat browser ditutup dan landing tampil lagi di sesi berikutnya.
+    """
     resp = client.get("/")
     cookie = resp.headers.get("Set-Cookie", "")
     assert "sipedas_landing_seen=" in cookie
-    assert "Max-Age=" in cookie
     assert "HttpOnly" in cookie
+    assert "Path=/" in cookie
+    assert "Max-Age=" not in cookie
+    assert "Expires=" not in cookie
 
 
 def test_root_redirect_ke_app_setelah_cookie_ada(client):

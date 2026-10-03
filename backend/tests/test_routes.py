@@ -2,20 +2,20 @@
 
 
 def test_root_menyajikan_landing_page(client):
-    """/ harus berisi landing page (hero + dua tombol), bukan dashboard."""
+    """/ harus berisi landing page (hero + tombol akses), bukan dashboard."""
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "Masuk Dashboard" in resp.text
-    assert "Login Admin" in resp.text
+    assert "Cari &amp; Analisis Data" in resp.text
     assert "data-initial-sidebar-collapsed" not in resp.text
     assert "page-section" not in resp.text
 
 
-def test_root_memberi_dua_pintu_akses(client):
-    """Landing page harus menautkan /app (dashboard) dan /login (admin)."""
+def test_root_hanya_mempunyai_satu_pintu(client):
+    """Landing hanya menautkan /app; /login sengaja tidak dipublikasikan."""
     html = client.get("/").text
     assert 'href="/app"' in html
-    assert 'href="/login"' in html
+    assert 'href="/login"' not in html
+    assert "Login Admin" not in html
 
 
 def test_root_tidak_diacache(client):

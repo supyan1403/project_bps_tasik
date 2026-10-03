@@ -17,8 +17,14 @@ window.addEventListener('error', function(e) {
 });
 window.addEventListener('unhandledrejection', function(e) {
     console.error('[SIPEDAS Unhandled Promise]', e.reason);
-    if (typeof showToast === 'function') {
-        showToast('error', 'Kesalahan Jaringan', 'Gagal terhubung ke server. Periksa koneksi internet Anda.');
+    if (typeof showToast !== 'function') return;
+    const _reason = String((e && e.reason && (e.reason.message || e.reason)) || '');
+    if (navigator.onLine === false) {
+        showToast('error', 'Kesalahan Jaringan', 'Koneksi internet terputus. Periksa jaringan Anda lalu muat ulang halaman.');
+    } else if (/\b401\b|unauthorized|silakan login/i.test(_reason)) {
+        showToast('warning', 'Sesi Berakhir', 'Sesi Anda telah berakhir. Silakan login kembali.');
+    } else {
+        showToast('error', 'Terjadi Kesalahan', 'Terjadi kesalahan tak terduga. Muat ulang halaman bila masalah berlanjut.');
     }
 });
 
@@ -1246,11 +1252,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     // Sesi admin sudah habis atau tidak valid -> bersihkan cache dan kembali ke publik
                     try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
                     document.cookie = "sipedas_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+                    if (typeof showToast === 'function') {
+                        showToast('warning', 'Sesi Berakhir', 'Sesi admin Anda telah berakhir. Silakan login kembali untuk mengakses fitur admin.', 5000);
+                    }
                     if (currentTab === 'dashboard' || currentTab === 'pdf' || currentTab === 'excel' || currentTab === 'admin' || currentTab === 'sistem') {
                         navigate('timeseries', document.getElementById('nav-timeseries'));
                     }
                 }
             }
+        }).catch(err => {
+            console.error('[SIPEDAS] Gagal memvalidasi sesi:', err);
         });
     }
 

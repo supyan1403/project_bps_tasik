@@ -23,13 +23,13 @@ OUT_FILE = ROOT / "frontend" / "static" / "app.js"
 
 MODULES = [
     ("01_core.js", 1),
-    ("02_navigation.js", 1575),
-    ("03_import_excel.js", 3969),
-    ("04_tables_editor.js", 5496),
-    ("05_timeseries_wizard.js", 8686),
-    ("06_timeseries_charts.js", 12148),
-    ("07_master_anomalies.js", 16132),
-    ("08_admin_system.js", 17324),
+    ("02_navigation.js", 1586),
+    ("03_import_excel.js", 3980),
+    ("04_tables_editor.js", 5507),
+    ("05_timeseries_wizard.js", 8697),
+    ("06_timeseries_charts.js", 12159),
+    ("07_master_anomalies.js", 16143),
+    ("08_admin_system.js", 17335),
 ]
 
 

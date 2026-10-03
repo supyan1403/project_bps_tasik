@@ -45,7 +45,9 @@
         }
 
         /* =========================================================
-           NEON BACKGROUND — murni biru / cyan / indigo (tanpa hijau)
+           LATAR MOTIF GRAFIK — meniru pola welcome-banner:
+           gelombang tren gradien, garis panduan putus-putus,
+           bidang area, dan titik data. Tanpa neon / glow blur.
            ========================================================= */
         .glow-field {
             position: absolute;
@@ -62,53 +64,17 @@
             z-index: 0;
         }
 
-        .glow {
-            position: absolute;
-            border-radius: 50%;
-            will-change: transform, opacity;
-        }
+        .glow { position: absolute; }
 
-        .glow-cyan {
-            top: -16%;
-            left: -10%;
-            width: min(620px, 78vw);
-            height: min(620px, 78vw);
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.62) 0%, rgba(56, 189, 248, 0.24) 42%, transparent 70%);
-            filter: blur(72px);
-            animation: driftA 13s ease-in-out infinite alternate;
-        }
-
-        .glow-blue {
-            bottom: -18%;
-            right: -10%;
-            width: min(660px, 82vw);
-            height: min(660px, 82vw);
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.55) 0%, rgba(37, 99, 235, 0.22) 44%, transparent 72%);
-            filter: blur(76px);
-            animation: driftB 15s ease-in-out infinite alternate;
-        }
-
-        .glow-center {
-            top: 50%;
-            left: 50%;
-            width: min(760px, 92vw);
-            height: min(420px, 58vw);
-            background: radial-gradient(ellipse, rgba(99, 102, 241, 0.34) 0%, rgba(59, 130, 246, 0.16) 48%, transparent 74%);
-            filter: blur(86px);
-            transform: translate(-50%, -50%);
-            animation: breathe 17s ease-in-out infinite alternate;
-        }
-
-        /* ---------- Line-chart background ----------
-           Garis tren acak tapi deterministik, stroke sangat tipis dan
-           opasiti rendah agar tidak mengganggu keterbacaan konten. */
+        /* ---------- Gelombang tren (satu-satunya dekorasi latar) ----------
+           Opasiti rendah agar tidak mengganggu keterbacaan konten. */
         .glow-lines {
             inset: 0;
             width: auto;
             height: auto;
             border-radius: 0;
             background: transparent;
-            animation: lineBreathe 18s ease-in-out infinite alternate;
+            opacity: 0.6;
         }
 
         .glow-lines svg {
@@ -128,36 +94,36 @@
             animation: drawIn 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         }
 
-        .ln-a { stroke: url(#gA); stroke-width: 1.5;   opacity: 0.22; animation-delay: 0.10s; }
-        .ln-b { stroke: url(#gB); stroke-width: 1.25;  opacity: 0.15; animation-delay: 0.35s; }
-        .ln-c { stroke: url(#gC); stroke-width: 1;     opacity: 0.10; animation-delay: 0.60s; }
+        .ln-a { stroke: url(#gA); stroke-width: 2.5; animation-delay: 0.10s; }
+        .ln-b { stroke: url(#gB); stroke-width: 2;   animation-delay: 0.35s; }
+
+        .ln-guide line { stroke: #94a3b8; stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.5; }
+
+        .ln-dash {
+            fill: none;
+            vector-effect: non-scaling-stroke;
+            stroke: #64748b;
+            stroke-width: 1.8;
+            stroke-dasharray: 5 6;
+            opacity: 0.5;
+        }
+
+        .ln-area { fill: url(#gArea); }
 
         .ln-dots circle {
-            fill: #2563eb;
-            opacity: 0.26;
+            opacity: 1;
             transform-box: fill-box;
             transform-origin: center;
             animation: dotIn 0.8s ease-out 2.4s backwards;
         }
 
+        .ln-dots .halo { fill: #2563eb; fill-opacity: 0.18; }
+        .ln-dots .core { fill: #ffffff; stroke: #2563eb; stroke-width: 4; }
+        .ln-dots .halo.is-amber { fill: #f59e0b; fill-opacity: 0.2; }
+        .ln-dots .core.is-amber { stroke: #f59e0b; }
+
         @keyframes drawIn { to { stroke-dashoffset: 0; } }
         @keyframes dotIn  { from { opacity: 0; transform: scale(0.2); } }
-        @keyframes lineBreathe { from { opacity: 0.8; } to { opacity: 1; } }
-
-        @keyframes driftA {
-            from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
-            to   { transform: translate3d(38px, 30px, 0) scale(1.07); opacity: 1; }
-        }
-
-        @keyframes driftB {
-            from { transform: translate3d(0, 0, 0) scale(1.05); opacity: 1; }
-            to   { transform: translate3d(-42px, -26px, 0) scale(1); opacity: 0.88; }
-        }
-
-        @keyframes breathe {
-            from { opacity: 0.7; }
-            to   { opacity: 1; }
-        }
 
         /* ---------- Top Bar ---------- */
         .site-header {
@@ -792,16 +758,14 @@
         }
 
         /* ---------- Kinerja perangkat bergerak ----------
-           Di layar kecil latar dibekukan dan seluruh loop animasi dimatikan.
+           Di layar kecil seluruh animasi latar dimatikan agar tidak
+           memaksa paint ulang tiap frame saat halaman dimuat.
            Penyebab utama jank di HP:
-           - backdrop-filter pada .hero-badge/.chip harus mengambil ulang lalu
-             meng-blur latar yang tiap frame berubah (glow + SVG sedang jalan)
+           - backdrop-filter pada .hero-badge/.chip harus mengambil ulang
+             lalu meng-blur latar yang sedang berubah (SVG motif berjalan)
            - btnGlow menganimasikan box-shadow → memaksa paint ulang tiap frame
-           - lineBreathe meng-opacity-kan SVG selebar layar → rasterisasi ulang
            - drawIn menghitung ulang stroke tiap frame saat muat halaman */
         @media (max-width: 760px) {
-            .glow { will-change: auto; }
-            .glow-cyan, .glow-blue, .glow-center, .glow-lines { animation: none; }
             .ln, .ln-dots circle {
                 stroke-dasharray: none;
                 stroke-dashoffset: 0;
@@ -816,67 +780,71 @@
 
         @media (prefers-reduced-motion: reduce) {
             .hero, .btn-primary { animation: none; }
-            .glow { animation: none !important; }
-            .glow-cyan { transform: none; opacity: 0.9; }
-            .glow-blue { transform: none; opacity: 0.9; }
-            .glow-center { transform: translate(-50%, -50%); opacity: 0.85; }
             /* Tanpa aturan ini, animation:none meninggalkan stroke-dashoffset:1000
                dan seluruh garis lenyap pada mode reduced-motion. */
             .ln { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; animation: none !important; }
-            .ln-dots circle { animation: none !important; opacity: 0.26; }
-            .glow-lines { opacity: 1; }
+            .ln-dots circle { animation: none !important; }
             .btn, .btn:hover { transition: none; transform: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Neon Background -->
+    <!-- Motif gelombang tren (gaya welcome-banner) -->
     <div class="glow-field" aria-hidden="true">
-        <div class="glow glow-cyan"></div>
-        <div class="glow glow-blue"></div>
-        <div class="glow glow-center"></div>
         <div class="glow glow-lines">
             <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
                 <defs>
                     <linearGradient id="gA" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#38bdf8"></stop>
-                        <stop offset="45%" stop-color="#2563eb"></stop>
-                        <stop offset="100%" stop-color="#6366f1"></stop>
+                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"></stop>
+                        <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.8"></stop>
+                        <stop offset="62%" stop-color="#2563eb"></stop>
+                        <stop offset="100%" stop-color="#1d4ed8"></stop>
                     </linearGradient>
                     <linearGradient id="gB" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#22d3ee"></stop>
-                        <stop offset="50%" stop-color="#38bdf8"></stop>
-                        <stop offset="100%" stop-color="#2563eb"></stop>
+                        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0"></stop>
+                        <stop offset="45%" stop-color="#f59e0b" stop-opacity="0.35"></stop>
+                        <stop offset="100%" stop-color="#fbbf24"></stop>
                     </linearGradient>
-                    <linearGradient id="gC" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#6366f1"></stop>
-                        <stop offset="55%" stop-color="#2563eb"></stop>
-                        <stop offset="100%" stop-color="#38bdf8"></stop>
+                    <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"></stop>
+                        <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"></stop>
                     </linearGradient>
                 </defs>
 
-                <!-- Ombak halus -->
-                <path class="ln ln-c" pathLength="1000"
-                      d="M0,600 L120,575 L240,615 L360,570 L480,625 L600,585 L720,635 L840,595 L960,645 L1080,605 L1200,655 L1320,620 L1440,640"></path>
+                <!-- Garis panduan -->
+                <g class="ln-guide">
+                    <line x1="300" y1="250" x2="1440" y2="250"></line>
+                    <line x1="180" y1="430" x2="1440" y2="430"></line>
+                    <line x1="60" y1="610" x2="1440" y2="610"></line>
+                </g>
 
-                <!-- Fluktuasi tajam -->
+                <!-- Bidang area di bawah gelombang utama -->
+                <path class="ln-area"
+                      d="M0,850 C240,860 420,780 640,755 C860,730 1060,620 1440,470 L1440,900 L0,900 Z"></path>
+
+                <!-- Baseline sekunder (putus-putus) -->
+                <path class="ln-dash"
+                      d="M0,880 C260,885 460,845 700,820 C940,795 1160,720 1440,630"></path>
+
+                <!-- Aksen gelombang (amber) -->
                 <path class="ln ln-b" pathLength="1000"
-                      d="M0,430 L80,470 L160,360 L240,520 L320,300 L400,470 L480,250 L560,430 L640,200 L720,400 L800,180 L880,390 L960,230 L1040,440 L1120,260 L1200,410 L1280,300 L1360,470 L1440,330"></path>
+                      d="M0,740 C300,748 520,640 780,620 C1040,600 1240,500 1440,400"></path>
 
-                <!-- Tren naik -->
+                <!-- Gelombang utama -->
                 <path class="ln ln-a" pathLength="1000"
-                      d="M0,760 L96,735 L192,758 L288,700 L384,722 L480,660 L576,684 L672,618 L768,642 L864,572 L960,598 L1056,520 L1152,548 L1248,472 L1344,498 L1440,430"></path>
+                      d="M0,850 C240,860 420,780 640,755 C860,730 1060,620 1440,470"></path>
 
+                <!-- Titik data -->
                 <g class="ln-dots">
-                    <circle cx="480" cy="660" r="3.5"></circle>
-                    <circle cx="864" cy="572" r="3.5"></circle>
-                    <circle cx="1248" cy="472" r="3.5"></circle>
-                    <circle cx="480" cy="250" r="3.5"></circle>
-                    <circle cx="800" cy="180" r="3.5"></circle>
-                    <circle cx="1120" cy="260" r="3.5"></circle>
-                    <circle cx="600" cy="585" r="3.5"></circle>
-                    <circle cx="1080" cy="605" r="3.5"></circle>
+                    <circle class="halo" cx="640" cy="755" r="18"></circle>
+                    <circle class="core" cx="640" cy="755" r="7"></circle>
+                    <circle class="halo" cx="980" cy="659" r="16"></circle>
+                    <circle class="core" cx="980" cy="659" r="6"></circle>
+                    <circle class="halo" cx="1280" cy="535" r="14"></circle>
+                    <circle class="core" cx="1280" cy="535" r="5.5"></circle>
+                    <circle class="halo is-amber" cx="780" cy="620" r="15"></circle>
+                    <circle class="core is-amber" cx="780" cy="620" r="6"></circle>
                 </g>
             </svg>
         </div>

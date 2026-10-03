@@ -116,6 +116,15 @@ def test_root_tidak_menyebut_pdf(client):
     assert "PDF" not in html
 
 
+def test_root_memuat_skrip_motif_menyambung(client):
+    """Skrip yang memanjangkan motif sepanjang halaman ikut terkirim."""
+    html = client.get("/").text
+    assert ".glow-field.is-full" in html
+    assert "ResizeObserver" in html
+    assert "pathLength" in html
+    assert "ln-f" in html
+
+
 def test_root_tidak_menyebut_menu_admin(client):
     """Landing tidak boleh menjelaskan fitur yang hanya bisa dibuka admin."""
     html = client.get("/").text

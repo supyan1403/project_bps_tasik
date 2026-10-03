@@ -64,6 +64,23 @@
             z-index: 0;
         }
 
+        /* Skrip motif memanjangkan field ini setinggi dokumen agar garis
+           menyambung dari hero sampai footer. Tanpa skrip, motif tetap
+           berhenti di satu layar seperti sediakala. */
+        .glow-field.is-full {
+            bottom: 0;
+            height: auto;
+        }
+
+        /* Rebuild akibat perubahan ukuran layar tidak mengulang animasi. */
+        .glow-field.is-static .ln {
+            stroke-dasharray: none;
+            stroke-dashoffset: 0;
+            animation: none;
+        }
+
+        .glow-field.is-static .ln-dots circle { animation: none; }
+
         .glow { position: absolute; }
 
         /* ---------- Gelombang tren (satu-satunya dekorasi latar) ----------
@@ -96,6 +113,10 @@
 
         .ln-a { stroke: url(#gA); stroke-width: 2.5; animation-delay: 0.10s; }
         .ln-b { stroke: url(#gB); stroke-width: 2;   animation-delay: 0.35s; }
+        .ln-c { stroke: #38bdf8; stroke-width: 1.6;  animation-delay: 0.55s; }
+        .ln-d { stroke: #1d4ed8; stroke-width: 1.8;  animation-delay: 0.75s; }
+        .ln-e { stroke: #fbbf24; stroke-width: 1.5;  animation-delay: 0.95s; }
+        .ln-f { stroke: #6366f1; stroke-width: 1.5;  animation-delay: 1.15s; }
 
         .ln-dots circle {
             opacity: 1;
@@ -108,6 +129,10 @@
         .ln-dots .core { fill: #ffffff; stroke: #2563eb; stroke-width: 4; }
         .ln-dots .halo.is-amber { fill: #f59e0b; fill-opacity: 0.2; }
         .ln-dots .core.is-amber { stroke: #f59e0b; }
+        .ln-dots .halo.is-sky { fill: #38bdf8; fill-opacity: 0.2; }
+        .ln-dots .core.is-sky { stroke: #38bdf8; }
+        .ln-dots .halo.is-indigo { fill: #6366f1; fill-opacity: 0.2; }
+        .ln-dots .core.is-indigo { stroke: #6366f1; }
 
         @keyframes drawIn { to { stroke-dashoffset: 0; } }
         @keyframes dotIn  { from { opacity: 0; transform: scale(0.2); } }
@@ -1171,6 +1196,230 @@
             &copy; 2026 SIPEDAS &mdash; Badan Pusat Statistik Kabupaten Tasikmalaya
         </div>
     </footer>
+
+    <!-- Motif menyambung: field dipanjangkan setinggi dokumen lalu enam
+         kurva digambar dengan viewBox 1:1 piksel supaya tidak melar dan
+         titik data tetap bundar. Bila skrip gagal jalan, SVG statis di
+         atas tetap berlaku (motif berhenti di satu layar). -->
+    <script>
+    (function () {
+        var field = document.querySelector('.glow-field');
+        if (!field) return;
+        var svg = field.querySelector('svg');
+        if (!svg) return;
+
+        /* Geometri kurva dihitung dari LEBAR jendela, bukan tinggi halaman,
+           supaya kemiringannya tetap landai di ukuran berapa pun. Tiap kurva
+           menanjak 0,34 x lebar dengan gelombang 0,11 x lebar; jumlahnya
+           disesuaikan agar rentangnya bertumpuk dari atas sampai bawah
+           halaman sehingga tidak ada section yang kosong. Titik masuk dan
+           keluar sengaja di luar tepi (-0,03 .. 1,03) supaya ujungnya tidak
+           tampak terpotong di tengah halaman. */
+        var SHADE = ['', ' is-amber', ' is-sky', '', ' is-amber', ' is-indigo'];
+
+        function curves(w, h) {
+            var travel = 0.34 * w;
+            var amp = 0.11 * w;
+            var step = travel + amp;
+            var count = Math.ceil((h - travel) / step) + 1;
+            if (count < 4) count = 4;
+            if (count > 16) count = 16;
+            var list = [];
+            for (var i = 0; i < count; i++) {
+                list.push({
+                    cls: 'ln-' + 'abcdef'.charAt(i % 6),
+                    slot: i,
+                    base: -amp + i * step,
+                    travel: travel,
+                    amp: amp,
+                    cycles: 2.2,
+                    phase: (i * 1.37) % 6.283185307,
+                    tone: SHADE[i % 6]
+                });
+            }
+            return list;
+        }
+        /* Calon titik data disebar di sepanjang kurva; yang menabrak teks
+           atau kartu disembunyikan saat perhitungan tata letak. */
+        var NODE_AT = [0.14, 0.30, 0.46, 0.62, 0.78];
+        var NODE_MAX = 2;
+        /* Elemen yang tidak boleh ditindih titik data. */
+        var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.section-note,.chip,.btn,.card,'
+            + '.chart-card,.steps,.eyebrow,.footer-h,.footer-bottom,.footer-about,'
+            + '.contact,.footer-list,.hero-badge,.brand,.instansi,.cta-card,.site-header';
+
+        var NS = 'http://www.w3.org/2000/svg';
+        var STEPS = 14;
+        var paths = [];
+        var dots = [];
+
+        function point(cfg, t, w) {
+            return [
+                (-0.03 + t * 1.06) * w,
+                cfg.base + cfg.travel * t
+                    + cfg.amp * Math.sin(t * cfg.cycles * 6.283185307 + cfg.phase)
+            ];
+        }
+
+        /* Catmull-Rom diubah ke kubik agar gelombang halus tanpa sudut. */
+        function pathData(cfg, w) {
+            var pts = [], i, t;
+            for (i = 0; i <= STEPS; i++) {
+                t = i / STEPS;
+                pts.push(point(cfg, t, w));
+            }
+            var d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+            for (i = 0; i < pts.length - 1; i++) {
+                var a = pts[i - 1] || pts[i];
+                var b = pts[i];
+                var c = pts[i + 1];
+                var e = pts[i + 2] || pts[i + 1];
+                d += 'C' + (b[0] + (c[0] - a[0]) / 6).toFixed(1) + ',' + (b[1] + (c[1] - a[1]) / 6).toFixed(1)
+                    + ' ' + (c[0] - (e[0] - b[0]) / 6).toFixed(1) + ',' + (c[1] - (e[1] - b[1]) / 6).toFixed(1)
+                    + ' ' + c[0].toFixed(1) + ',' + c[1].toFixed(1);
+            }
+            return d;
+        }
+
+        function structure(list) {
+            var defs = svg.querySelector('defs');
+            while (svg.firstChild) svg.removeChild(svg.firstChild);
+            if (defs) svg.appendChild(defs);
+
+            paths = [];
+            dots = [];
+            var group = document.createElementNS(NS, 'g');
+            group.setAttribute('class', 'ln-dots');
+            svg.appendChild(group);
+
+            list.forEach(function (cfg) {
+                var path = document.createElementNS(NS, 'path');
+                path.setAttribute('class', 'ln ' + cfg.cls);
+                path.setAttribute('pathLength', '1000');
+                svg.appendChild(path);
+                paths.push({ el: path, cfg: cfg });
+                NODE_AT.forEach(function (at) {
+                    /* Geser posisi calon titik tiap kurva agar tidak berjajar
+                       vertikal pada satu sumbu x yang sama. */
+                    var t = at + cfg.slot * 0.13;
+                    if (t > 0.92) t -= 0.84;
+                    var halo = document.createElementNS(NS, 'circle');
+                    halo.setAttribute('class', 'halo' + cfg.tone);
+                    halo.setAttribute('r', 16);
+                    var core = document.createElementNS(NS, 'circle');
+                    core.setAttribute('class', 'core' + cfg.tone);
+                    core.setAttribute('r', 6.5);
+                    group.appendChild(halo);
+                    group.appendChild(core);
+                    dots.push({ halo: halo, core: core, cfg: cfg, t: t });
+                });
+            });
+        }
+
+        /* Kotak isi halaman (dalam koordinat halaman) — titik data tidak
+           boleh menempel di atasnya supaya tidak dianggap bagian konten. */
+        function blockers() {
+            var els = document.querySelectorAll(BLOCKS);
+            var out = [];
+            for (var i = 0; i < els.length; i++) {
+                var r = els[i].getBoundingClientRect();
+                if (r.width < 1 || r.height < 1) continue;
+                out.push([
+                    r.left - 22,
+                    r.top + window.scrollY - 22,
+                    r.right + 22,
+                    r.bottom + window.scrollY + 22
+                ]);
+            }
+            return out;
+        }
+
+        function layout(w, h) {
+            paths.forEach(function (item) {
+                item.el.setAttribute('d', pathData(item.cfg, w));
+            });
+
+            var blocks = blockers();
+            var used = {};
+            dots.forEach(function (item) {
+                var p = point(item.cfg, item.t, w);
+                item.halo.setAttribute('cx', p[0].toFixed(1));
+                item.halo.setAttribute('cy', p[1].toFixed(1));
+                item.core.setAttribute('cx', p[0].toFixed(1));
+                item.core.setAttribute('cy', p[1].toFixed(1));
+
+                var seen = used[item.cfg.cls] || 0;
+                var free = seen < NODE_MAX && p[1] > 0 && p[1] < h;
+                for (var i = 0; free && i < blocks.length; i++) {
+                    var b = blocks[i];
+                    if (p[0] > b[0] && p[0] < b[2] && p[1] > b[1] && p[1] < b[3]) free = false;
+                }
+                used[item.cfg.cls] = free ? seen + 1 : seen;
+                var vis = free ? '' : 'none';
+                item.halo.setAttribute('display', vis);
+                item.core.setAttribute('display', vis);
+            });
+        }
+
+        /* Motif penuh halaman hanya untuk jendela lebar. Di layar sempit
+           halaman terlalu tinggi dibanding lebarnya sehingga kurva yang
+           menyebar penuh akan berdiri tegak dan menabrak teks — di sana
+           motif statis satu layar (bawaan template) dipertahankan. */
+        var narrow = window.matchMedia('(max-width: 760px)');
+        var resting = svg.innerHTML;
+        var built = false;
+        var lastW = 0;
+        var lastH = 0;
+
+        function render() {
+            var w = field.clientWidth;
+            var h = field.clientHeight;
+            if (!w || !h) return;
+            if (!built || w !== lastW || h !== lastH) {
+                if (built) field.classList.add('is-static');
+                structure(curves(w, h));
+                svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+                svg.setAttribute('preserveAspectRatio', 'none');
+                built = true;
+                lastW = w;
+                lastH = h;
+            }
+            layout(w, h);
+        }
+
+        function apply() {
+            if (narrow.matches) {
+                if (!built) return;
+                field.classList.remove('is-full', 'is-static');
+                svg.innerHTML = resting;
+                svg.setAttribute('viewBox', '0 0 1440 900');
+                svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+                built = false;
+                lastW = 0;
+                lastH = 0;
+                return;
+            }
+            field.classList.add('is-full');
+            render();
+        }
+
+        apply();
+
+        /* Jaring pengaman: bila animasi coret tidak ikut berjalan (tab
+           latensi, dsb.), garis tetap dipastikan tampil penuh. */
+        window.setTimeout(function () { field.classList.add('is-static'); }, 4200);
+
+        var timer = null;
+        function schedule() {
+            if (timer) window.clearTimeout(timer);
+            timer = window.setTimeout(apply, 160);
+        }
+        window.addEventListener('resize', schedule);
+        window.addEventListener('load', schedule);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+        if (window.ResizeObserver) new window.ResizeObserver(schedule).observe(document.body);
+    })();
+    </script>
 
 </body>
 </html>

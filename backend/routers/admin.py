@@ -50,8 +50,8 @@ def backup_database() -> str:
     db_backend = url.get_backend_name().lower()
     db_name = url.database or "sipedas"
 
-    ts = datetime.now(ZoneInfo("Asia/Jakarta")).strftime("%Y%m%d_%H%M%S")
-    backup_name = f"bps_{db_name}_{ts}.sql"
+    ts = datetime.now(ZoneInfo("Asia/Jakarta")).strftime("%Y-%m-%d_%H-%M-%S")
+    backup_name = f"sipedas-backup_{ts}.sql"
     backup_path = os.path.join(BACKUP_DIR, backup_name)
 
     # 1. Jika MySQL lokal, coba mysqldump jika tersedia

@@ -314,7 +314,8 @@ try:
 except OSError as _e:
     logger.warning(f"Gagal membuat direktori penyimpanan: {_e}")
 
-LANDING_COOKIE = "sipedas_landing_seen"
+LANDING_COOKIE = "sipedas_landing_seen_v2"
+LEGACY_LANDING_COOKIE = "sipedas_landing_seen"
 
 @app.get("/")
 def read_root(request: Request):
@@ -323,6 +324,10 @@ def read_root(request: Request):
     Cookie sengaja dibuat *session cookie* (tanpa Max-Age/Expires) supaya
     hilang begitu browser ditutup, sehingga landing tampil lagi pada sesi
     berikutnya. Untuk memaksa landing kapan pun pakai `/?landing=1`.
+
+    Nama cookie sengaja dinaikkan versinya: nama lama pernah dipasang
+    sebagai cookie permanen (400 hari) sehingga terus melempar pengunjung
+    lama ke /app. Cookie lama otomatis ikut dihapus di bawah.
     """
     force_landing = request.query_params.get("landing") == "1"
 
@@ -338,6 +343,17 @@ def read_root(request: Request):
     response.set_cookie(
         key=LANDING_COOKIE,
         value="1",
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=bool(os.environ.get("SIPEDAS_DOMAIN")),
+    )
+    # Cookie lama (permanen, 400 hari) ikut dibuang di sini. Ditulis sesudah
+    # cookie v2 agar pembaca yang hanya mengambil Set-Cookie pertama tetap
+    # melihat cookie penanda. secure/httponly disamakan dengan cookie lama
+    # supaya browser menganggapnya pengganti yang sah.
+    response.delete_cookie(
+        LEGACY_LANDING_COOKIE,
         path="/",
         httponly=True,
         samesite="lax",

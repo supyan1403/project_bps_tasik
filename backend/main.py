@@ -314,25 +314,25 @@ try:
 except OSError as _e:
     logger.warning(f"Gagal membuat direktori penyimpanan: {_e}")
 
-LANDING_COOKIE = "sipedas_landing_seen_v2"
-LEGACY_LANDING_COOKIE = "sipedas_landing_seen"
-
 @app.get("/")
-def read_root(request: Request):
-    """Halaman landing — tampil sekali per sesi browser, sisanya redirect ke /app.
+def read_root(request: Request, db: Session = Depends(get_db)):
+    """Halaman landing — wajib untuk semua pengunjung, kecuali admin yang sudah login.
 
-    Cookie sengaja dibuat *session cookie* (tanpa Max-Age/Expires) supaya
-    hilang begitu browser ditutup, sehingga landing tampil lagi pada sesi
-    berikutnya. Untuk memaksa landing kapan pun pakai `/?landing=1`.
-
-    Nama cookie sengaja dinaikkan versinya: nama lama pernah dipasang
-    sebagai cookie permanen (400 hari) sehingga terus melempar pengunjung
-    lama ke /app. Cookie lama otomatis ikut dihapus di bawah.
+    Tidak ada cookie penanda sama sekali: `/` selalu menyajikan landing sehingga
+    perilakunya deterministik di perangkat mana pun. Admin dengan sesi valid
+    (`sipedas_session`) langsung diarahkan ke `/app`; `/?landing=1` tetap
+    memaksa landing bahkan untuk admin.
     """
     force_landing = request.query_params.get("landing") == "1"
 
-    if not force_landing and request.cookies.get(LANDING_COOKIE):
-        return RedirectResponse(url="/app", status_code=302)
+    if not force_landing:
+        session_id = request.cookies.get("sipedas_session")
+        if session_id:
+            sess = db.query(models.UserSession).filter(
+                models.UserSession.id == session_id
+            ).first()
+            if sess and sess.role == "admin":
+                return RedirectResponse(url="/app", status_code=302)
 
     response = templates.TemplateResponse(
         request=request,
@@ -340,25 +340,6 @@ def read_root(request: Request):
         context={}
     )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
-    response.set_cookie(
-        key=LANDING_COOKIE,
-        value="1",
-        path="/",
-        httponly=True,
-        samesite="lax",
-        secure=bool(os.environ.get("SIPEDAS_DOMAIN")),
-    )
-    # Cookie lama (permanen, 400 hari) ikut dibuang di sini. Ditulis sesudah
-    # cookie v2 agar pembaca yang hanya mengambil Set-Cookie pertama tetap
-    # melihat cookie penanda. secure/httponly disamakan dengan cookie lama
-    # supaya browser menganggapnya pengganti yang sah.
-    response.delete_cookie(
-        LEGACY_LANDING_COOKIE,
-        path="/",
-        httponly=True,
-        samesite="lax",
-        secure=bool(os.environ.get("SIPEDAS_DOMAIN")),
-    )
     return response
 
 @app.get("/app")

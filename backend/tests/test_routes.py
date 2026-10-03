@@ -49,73 +49,42 @@ def test_admin_login_di_lock_ke_app(admin_client):
     assert resp.url.path == "/app"
 
 
-def _set_cookie(resp, name):
-    """Ambil satu header Set-Cookie tertentu dari respons.
-
-    `httpx` menggabungkan seluruh header duplikat dengan ", " ketika dibaca
-    lewat `.get()`, sehingga `Max-Age=0` dari cookie lain bisa ikut terbaca.
-    Setiap cookie karena itu harus diambil dari `get_list`.
-    """
-    prefix = name + "="
-    for raw in resp.headers.get_list("set-cookie"):
-        if raw.startswith(prefix):
-            return raw
-    return ""
-
-
-def test_root_menanam_cookie_pernah_melihat(client):
-    """Kunjungan pertama ke / menanam cookie penanda landing sudah dilihat.
-
-    Cookie harus berupa *session cookie* (tanpa Max-Age/Expires) supaya
-    hilang saat browser ditutup dan landing tampil lagi di sesi berikutnya.
-    """
-    resp = client.get("/")
-    cookie = _set_cookie(resp, "sipedas_landing_seen_v2")
-    assert cookie, f"cookie v2 tidak ditemukan: {resp.headers.get_list('set-cookie')}"
-    assert "HttpOnly" in cookie
-    assert "Path=/" in cookie
-    assert "Max-Age=" not in cookie
-    assert "Expires=" not in cookie
-
-
-def test_root_redirect_ke_app_setelah_cookie_ada(client):
-    """/ langsung mengarah ke /app begitu cookie landing terpasang."""
-    client.cookies.set("sipedas_landing_seen_v2", "1")
-    resp = client.get("/")
+def test_root_admin_login_langsung_ke_app(admin_client):
+    """Admin yang sudah login membuka / langsung diarahkan ke dashboard."""
+    resp = admin_client.get("/")
     assert resp.history, "harus melewati redirect"
     assert resp.history[0].status_code == 302
     assert resp.url.path == "/app"
 
 
-def test_root_paksa_landing_dengan_query(client):
-    """/?landing=1 tetap menyajikan landing walau cookie sudah ada."""
-    client.cookies.set("sipedas_landing_seen_v2", "1")
-    resp = client.get("/?landing=1")
+def test_root_sesi_tidak_valid_tetap_landing(client):
+    """Cookie sipedas_session yang tidak terdaftar tidak mengalihkan ke /app."""
+    client.cookies.set("sipedas_session", "bogus-session")
+    resp = client.get("/")
     assert resp.status_code == 200
+    assert not resp.history, "sesi tidak valid harus tetap di landing"
     assert "Cari &amp; Analisis Data" in resp.text
 
 
-def test_root_paksa_landing_menyegarkan_cookie(client):
-    """/?landing=1 memperbarui cookie penanda agar siklusnya dimulai ulang."""
+def test_root_cookie_landing_lama_diabaikan(client):
+    """Cookie penanda versi lama maupun v2 tidak memicu redirect apa pun."""
     client.cookies.set("sipedas_landing_seen_v2", "1")
-    resp = client.get("/?landing=1")
-    assert _set_cookie(resp, "sipedas_landing_seen_v2")
-
-
-def test_root_mengabaikan_cookie_lama(client):
-    """Cookie permanen versi lama tidak lagi memicu redirect ke /app."""
     client.cookies.set("sipedas_landing_seen", "1")
     resp = client.get("/")
-    assert not resp.history, "cookie lama tidak boleh memicu redirect"
     assert resp.status_code == 200
+    assert not resp.history, "cookie penanda lama tidak boleh berpengaruh"
     assert "Cari &amp; Analisis Data" in resp.text
-    assert _set_cookie(resp, "sipedas_landing_seen_v2")
 
 
-def test_root_menghapus_cookie_lama(client):
-    """Cookie permanen versi lama ikut dihapus saat landing disajikan."""
-    client.cookies.set("sipedas_landing_seen", "1")
+def test_root_tidak_menanam_cookie_penanda(client):
+    """/ tidak lagi menanam cookie penanda apa pun."""
     resp = client.get("/")
-    legacy = _set_cookie(resp, "sipedas_landing_seen")
-    assert legacy, f"cookie lama tidak dihapus: {resp.headers.get_list('set-cookie')}"
-    assert "Max-Age=0" in legacy
+    assert resp.headers.get_list("set-cookie") == []
+
+
+def test_root_paksa_landing_walau_admin(admin_client):
+    """Admin yang sudah login tetap bisa memaksa landing lewat /?landing=1."""
+    resp = admin_client.get("/?landing=1")
+    assert resp.status_code == 200
+    assert not resp.history, "?landing=1 harus memaksa landing, bukan redirect"
+    assert "Cari &amp; Analisis Data" in resp.text

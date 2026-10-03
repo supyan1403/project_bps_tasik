@@ -46,8 +46,9 @@
 
         /* =========================================================
            LATAR MOTIF GRAFIK — meniru pola welcome-banner:
-           gelombang tren gradien, garis panduan putus-putus,
-           bidang area, dan titik data. Tanpa neon / glow blur.
+           gelombang tren gradien, bidang area, dan titik data.
+           Garis dibuat tebal, blur halus, dan mengalir (lihat skrip
+           di dasar berkas) agar latar terasa hidup tanpa menutupi teks.
            ========================================================= */
         .glow-field {
             position: absolute;
@@ -84,14 +85,15 @@
         .glow { position: absolute; }
 
         /* ---------- Gelombang tren (satu-satunya dekorasi latar) ----------
-           Opasiti rendah agar tidak mengganggu keterbacaan konten. */
+           Opasiti dinaikkan dan garis diberi blur tipis agar terasa lembut;
+           tetap berada di bawah konten sehingga teks tetap terbaca. */
         .glow-lines {
             inset: 0;
             width: auto;
             height: auto;
             border-radius: 0;
             background: transparent;
-            opacity: 0.6;
+            opacity: 0.78;
         }
 
         .glow-lines svg {
@@ -99,6 +101,7 @@
             width: 100%;
             height: 100%;
             overflow: visible;
+            filter: blur(1.4px);
         }
 
         .ln {
@@ -111,12 +114,12 @@
             animation: drawIn 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         }
 
-        .ln-a { stroke: url(#gA); stroke-width: 2.5; animation-delay: 0.10s; }
-        .ln-b { stroke: url(#gB); stroke-width: 2;   animation-delay: 0.35s; }
-        .ln-c { stroke: #38bdf8; stroke-width: 1.6;  animation-delay: 0.55s; }
-        .ln-d { stroke: #1d4ed8; stroke-width: 1.8;  animation-delay: 0.75s; }
-        .ln-e { stroke: #fbbf24; stroke-width: 1.5;  animation-delay: 0.95s; }
-        .ln-f { stroke: #6366f1; stroke-width: 1.5;  animation-delay: 1.15s; }
+        .ln-a { stroke: url(#gA); stroke-width: 4.5; animation-delay: 0.10s; }
+        .ln-b { stroke: url(#gB); stroke-width: 4;   animation-delay: 0.35s; }
+        .ln-c { stroke: #38bdf8; stroke-width: 3.2;  animation-delay: 0.55s; }
+        .ln-d { stroke: #1d4ed8; stroke-width: 3.4;  animation-delay: 0.75s; }
+        .ln-e { stroke: #fbbf24; stroke-width: 3;    animation-delay: 0.95s; }
+        .ln-f { stroke: #6366f1; stroke-width: 3;    animation-delay: 1.15s; }
 
         .ln-dots circle {
             opacity: 1;
@@ -125,13 +128,13 @@
             animation: dotIn 0.8s ease-out 2.4s backwards;
         }
 
-        .ln-dots .halo { fill: #2563eb; fill-opacity: 0.18; }
-        .ln-dots .core { fill: #ffffff; stroke: #2563eb; stroke-width: 4; }
-        .ln-dots .halo.is-amber { fill: #f59e0b; fill-opacity: 0.2; }
+        .ln-dots .halo { fill: #2563eb; fill-opacity: 0.24; }
+        .ln-dots .core { fill: #ffffff; stroke: #2563eb; stroke-width: 5; }
+        .ln-dots .halo.is-amber { fill: #f59e0b; fill-opacity: 0.26; }
         .ln-dots .core.is-amber { stroke: #f59e0b; }
-        .ln-dots .halo.is-sky { fill: #38bdf8; fill-opacity: 0.2; }
+        .ln-dots .halo.is-sky { fill: #38bdf8; fill-opacity: 0.26; }
         .ln-dots .core.is-sky { stroke: #38bdf8; }
-        .ln-dots .halo.is-indigo { fill: #6366f1; fill-opacity: 0.2; }
+        .ln-dots .halo.is-indigo { fill: #6366f1; fill-opacity: 0.26; }
         .ln-dots .core.is-indigo { stroke: #6366f1; }
 
         @keyframes drawIn { to { stroke-dashoffset: 0; } }
@@ -1216,6 +1219,19 @@
            keluar sengaja di luar tepi (-0,03 .. 1,03) supaya ujungnya tidak
            tampak terpotong di tengah halaman. */
         var SHADE = ['', ' is-amber', ' is-sky', '', ' is-amber', ' is-indigo'];
+        var TAU = 6.283185307;
+        /* Tiap kurva dibuat berbeda bentuk: frekuensi gelombang, tinggi,
+           harmonik kedua (belokan tak simetris), arah arus, dan lama
+           satu putaran. Enam kurva pertama memakai enam pola berbeda,
+           berikutnya berputar ulang sehingga motif tidak sekadar salinan. */
+        var SHAPE = [
+            { cycles: 1.6, mul: 1.00, h2: 0.35, dir: 1, loop: 26 },
+            { cycles: 2.5, mul: 0.72, h2: 0.00, dir: -1, loop: 21 },
+            { cycles: 3.3, mul: 1.15, h2: 0.48, dir: 1, loop: 31 },
+            { cycles: 2.0, mul: 0.86, h2: 0.22, dir: -1, loop: 18 },
+            { cycles: 2.9, mul: 1.24, h2: 0.42, dir: 1, loop: 24 },
+            { cycles: 1.3, mul: 0.64, h2: 0.12, dir: -1, loop: 16 }
+        ];
 
         function curves(w, h) {
             var travel = 0.34 * w;
@@ -1226,22 +1242,29 @@
             if (count > 16) count = 16;
             var list = [];
             for (var i = 0; i < count; i++) {
+                var s = SHAPE[i % 6];
+                var ph = (i * 1.37) % TAU;
                 list.push({
                     cls: 'ln-' + 'abcdef'.charAt(i % 6),
                     slot: i,
                     base: -amp + i * step,
                     travel: travel,
-                    amp: amp,
-                    cycles: 2.2,
-                    phase: (i * 1.37) % 6.283185307,
+                    amp: amp * s.mul,
+                    amp2: amp * s.h2,
+                    cycles: s.cycles,
+                    cycles2: s.cycles * 1.73 + 0.4,
+                    phase0: ph,
+                    phase: ph,
+                    dir: s.dir,
+                    loop: s.loop,
                     tone: SHADE[i % 6]
                 });
             }
             return list;
         }
         /* Calon titik data disebar di sepanjang kurva; yang menabrak teks
-           atau kartu disembunyikan saat perhitungan tata letak. */
-        var NODE_AT = [0.14, 0.30, 0.46, 0.62, 0.78];
+            atau kartu disembunyikan saat perhitungan tata letak. */
+        var NODE_AT = [0.08, 0.14, 0.30, 0.46, 0.62, 0.78, 0.90];
         var NODE_MAX = 2;
         /* Elemen yang tidak boleh ditindih titik data. */
         var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.section-note,.chip,.btn,.card,'
@@ -1249,15 +1272,17 @@
             + '.contact,.footer-list,.hero-badge,.brand,.instansi,.cta-card,.site-header';
 
         var NS = 'http://www.w3.org/2000/svg';
-        var STEPS = 14;
+        var STEPS = 24;
         var paths = [];
         var dots = [];
 
         function point(cfg, t, w) {
+            var ph = cfg.phase;
             return [
                 (-0.03 + t * 1.06) * w,
                 cfg.base + cfg.travel * t
-                    + cfg.amp * Math.sin(t * cfg.cycles * 6.283185307 + cfg.phase)
+                    + cfg.amp * Math.sin(t * cfg.cycles * TAU + ph)
+                    + cfg.amp2 * Math.sin(t * cfg.cycles2 * TAU + ph * 2)
             ];
         }
 
@@ -1305,10 +1330,10 @@
                     if (t > 0.92) t -= 0.84;
                     var halo = document.createElementNS(NS, 'circle');
                     halo.setAttribute('class', 'halo' + cfg.tone);
-                    halo.setAttribute('r', 16);
+                    halo.setAttribute('r', 18);
                     var core = document.createElementNS(NS, 'circle');
                     core.setAttribute('class', 'core' + cfg.tone);
-                    core.setAttribute('r', 6.5);
+                    core.setAttribute('r', 7.5);
                     group.appendChild(halo);
                     group.appendChild(core);
                     dots.push({ halo: halo, core: core, cfg: cfg, t: t });
@@ -1334,6 +1359,69 @@
             return out;
         }
 
+        function hit(blocks, x, y) {
+            for (var i = 0; i < blocks.length; i++) {
+                var b = blocks[i];
+                if (x > b[0] && x < b[2] && y > b[1] && y < b[3]) return true;
+            }
+            return false;
+        }
+
+        /* Rentang-y yang diblokir konten pada satu kolom x. Dipanen sekali
+           saat tata letak dihitung, lalu dipakai ulang tiap frame arus
+           supaya titik data bisa menyingkir ketika mengalir di atas teks. */
+        function blockedSpans(blocks, x) {
+            var out = [];
+            for (var i = 0; i < blocks.length; i++) {
+                var b = blocks[i];
+                if (x > b[0] - 26 && x < b[2] + 26) out.push([b[1], b[3]]);
+            }
+            return out;
+        }
+
+        function spanHit(spans, y) {
+            for (var i = 0; i < spans.length; i++) {
+                if (y > spans[i][0] && y < spans[i][1]) return true;
+            }
+            return false;
+        }
+
+        function place(item, p) {
+            var x = p[0].toFixed(1);
+            var y = p[1].toFixed(1);
+            item.halo.setAttribute('cx', x);
+            item.halo.setAttribute('cy', y);
+            item.core.setAttribute('cx', x);
+            item.core.setAttribute('cy', y);
+        }
+
+        function show(item, on) {
+            var v = on ? '' : 'none';
+            item.halo.setAttribute('display', v);
+            item.core.setAttribute('display', v);
+        }
+
+        /* Dua titik yang terlalu berdempetan dianggap ganda; titik yang
+           lebih dulu di urutan tetap dan pasangannya disisihkan sementara. */
+        function dedupHide() {
+            var hide = {};
+            var act = [];
+            var k;
+            for (k = 0; k < dots.length; k++) {
+                if (dots[k].ok && dots[k].free) act.push(k);
+            }
+            for (k = 0; k < act.length; k++) {
+                for (var j = k + 1; j < act.length; j++) {
+                    var a = dots[act[k]];
+                    var b = dots[act[j]];
+                    var dx = a.px - b.px;
+                    var dy = a.py - b.py;
+                    if (dx * dx + dy * dy < 2304) hide[act[j]] = true;
+                }
+            }
+            return hide;
+        }
+
         function layout(w, h) {
             paths.forEach(function (item) {
                 item.el.setAttribute('d', pathData(item.cfg, w));
@@ -1343,21 +1431,27 @@
             var used = {};
             dots.forEach(function (item) {
                 var p = point(item.cfg, item.t, w);
-                item.halo.setAttribute('cx', p[0].toFixed(1));
-                item.halo.setAttribute('cy', p[1].toFixed(1));
-                item.core.setAttribute('cx', p[0].toFixed(1));
-                item.core.setAttribute('cy', p[1].toFixed(1));
+                place(item, p);
+                item.px = p[0];
+                item.py = p[1];
 
                 var seen = used[item.cfg.cls] || 0;
-                var free = seen < NODE_MAX && p[1] > 0 && p[1] < h;
-                for (var i = 0; free && i < blocks.length; i++) {
-                    var b = blocks[i];
-                    if (p[0] > b[0] && p[0] < b[2] && p[1] > b[1] && p[1] < b[3]) free = false;
-                }
+                var free = seen < NODE_MAX && p[1] > 14 && p[1] < h - 14
+                    && !hit(blocks, p[0], p[1]);
                 used[item.cfg.cls] = free ? seen + 1 : seen;
-                var vis = free ? '' : 'none';
-                item.halo.setAttribute('display', vis);
-                item.core.setAttribute('display', vis);
+                /* Titik yang sudah gugur sejak awal tidak akan muncul lagi
+                   saat arus berjalan; sisanya dipantau tiap frame. */
+                item.ok = free;
+                item.free = free;
+                item.on = false;
+                item.pending = 0;
+                item.spans = free ? blockedSpans(blocks, p[0]) : [];
+            });
+            var hid = dedupHide();
+            dots.forEach(function (item, idx) {
+                if (!item.ok) { show(item, false); return; }
+                item.on = item.free && !hid[idx];
+                show(item, item.on);
             });
         }
 
@@ -1389,6 +1483,7 @@
 
         function apply() {
             if (narrow.matches) {
+                stopFlow();
                 if (!built) return;
                 field.classList.remove('is-full', 'is-static');
                 svg.innerHTML = resting;
@@ -1401,6 +1496,88 @@
             }
             field.classList.add('is-full');
             render();
+            if (flowReady) startFlow();
+        }
+
+        /* ---------- Arus motif ----------
+           Fase tiap kurva dimajukan terus-menerus sehingga gelombang
+           berjalan seperti air dan kembali persis ke bentuk semula pada
+           akhir putaran. Tiap kurva memakai arah dan lama putaran yang
+           berbeda supaya motif tidak bergerak seragam. Titik data ikut
+           mengalir, lalu menyingkir sendiri bila melewati teks/kartu. */
+        var motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var flowReady = false;
+        var flowDead = false;
+        var rafId = 0;
+        var flowStart = 0;
+        var lastTick = 0;
+        var slowRun = 0;
+
+        function flowStep(now) {
+            rafId = window.requestAnimationFrame(flowStep);
+            if (document.hidden) { lastTick = now; slowRun = 0; return; }
+            var gap = now - lastTick;
+            if (gap < 40) return;
+            lastTick = now;
+            /* Pengawas kinerja: bila tersendat terus-menerus, motif dihentikan
+               dan dibiarkan statis agar halaman tetap lancar. */
+            if (gap > 120) { slowRun += 1; } else { slowRun = 0; }
+            if (slowRun > 40) { stopFlow(); flowDead = true; return; }
+
+            var w = lastW;
+            var h = lastH;
+            if (!w || !h) return;
+            var secs = (now - flowStart) / 1000;
+            var i, item, d, p, free;
+            for (i = 0; i < paths.length; i++) {
+                item = paths[i];
+                item.cfg.phase = item.cfg.phase0
+                    + item.cfg.dir * (secs / item.cfg.loop) * TAU;
+                item.el.setAttribute('d', pathData(item.cfg, w));
+            }
+            for (i = 0; i < dots.length; i++) {
+                d = dots[i];
+                if (!d.ok) continue;
+                p = point(d.cfg, d.t, w);
+                d.px = p[0];
+                d.py = p[1];
+                free = p[1] > 14 && p[1] < h - 14 && !spanHit(d.spans, p[1]);
+                d.free = free;
+                place(d, p);
+            }
+            var hid = dedupHide();
+            for (i = 0; i < dots.length; i++) {
+                d = dots[i];
+                if (!d.ok) continue;
+                var want = d.free && !hid[i];
+                if (want && !d.on) {
+                    if (!d.pending) d.pending = now;
+                    if (now - d.pending > 260) { d.on = true; show(d, true); }
+                } else if (!want && d.on) {
+                    d.on = false;
+                    d.pending = 0;
+                    show(d, false);
+                } else if (!want) {
+                    d.pending = 0;
+                } else {
+                    d.pending = 0;
+                }
+            }
+        }
+
+        function startFlow() {
+            if (rafId || flowDead || !motionOK || narrow.matches || !built) return;
+            flowStart = window.performance ? performance.now() : Date.now();
+            lastTick = flowStart;
+            slowRun = 0;
+            rafId = window.requestAnimationFrame(flowStep);
+        }
+
+        function stopFlow() {
+            if (rafId) {
+                window.cancelAnimationFrame(rafId);
+                rafId = 0;
+            }
         }
 
         apply();
@@ -1408,6 +1585,9 @@
         /* Jaring pengaman: bila animasi coret tidak ikut berjalan (tab
            latensi, dsb.), garis tetap dipastikan tampil penuh. */
         window.setTimeout(function () { field.classList.add('is-static'); }, 4200);
+
+        /* Arus dinyalakan setelah garis selesai menggambar diri. */
+        window.setTimeout(function () { flowReady = true; startFlow(); }, 3400);
 
         var timer = null;
         function schedule() {

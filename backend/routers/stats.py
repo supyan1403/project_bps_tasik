@@ -22,13 +22,96 @@ _OVERVIEW_CACHE_TIME = 0
 _STATS_TTL = 3600  # 1 hour
 _CHART_CACHE_LOCK = threading.Lock()
 
+_LANDING_CACHE = None
+_LANDING_CACHE_TIME = 0
+_LANDING_TTL = 60  # landing dirender pada setiap kunjungan, jadi singkat
+
 def invalidate_chart_cache():
     global _CHART_CACHE, _CHART_CACHE_TIME, _OVERVIEW_CACHE, _OVERVIEW_CACHE_TIME
+    global _LANDING_CACHE, _LANDING_CACHE_TIME
     with _CHART_CACHE_LOCK:
         _CHART_CACHE = None
         _CHART_CACHE_TIME = 0
         _OVERVIEW_CACHE = None
         _OVERVIEW_CACHE_TIME = 0
+        _LANDING_CACHE = None
+        _LANDING_CACHE_TIME = 0
+
+
+def _format_id(n: int) -> str:
+    """Format angka gaya Indonesia (titik sebagai pemisah ribuan)."""
+    return f"{n:,}".replace(",", ".")
+
+
+def _year_range_label(years: list) -> str | None:
+    clean = sorted({int(y) for y in years if y})
+    if not clean:
+        return None
+    if len(clean) == 1:
+        return str(clean[0])
+    return f"{clean[0]}–{clean[-1]}"
+
+
+def landing_overview(db: Session) -> dict | None:
+    """Ringkasan singkat untuk halaman landing.
+
+    Sengaja murah: hanya COUNT dan rentang tahun publikasi — tidak pernah
+    menjalankan poin data besar seperti ``get_dashboard_stats``. Hasilnya
+    di-cache 60 detik, dan setiap kegagalan mengembalikan ``None`` tanpa
+    di-cache agar landing tetap tampil walau database sedang bermasalah.
+    """
+    global _LANDING_CACHE, _LANDING_CACHE_TIME
+    now = time.time()
+    with _CHART_CACHE_LOCK:
+        if _LANDING_CACHE is not None and (now - _LANDING_CACHE_TIME) < _LANDING_TTL:
+            return _LANDING_CACHE
+
+    try:
+        year_range = None
+        docs = tables = rows = None
+
+        # Jalur cepat: payload yang sudah dihitung dashboard.
+        try:
+            cached = db.execute(
+                text("SELECT payload FROM dashboard_cache WHERE cache_key = 'stats_overview'")
+            ).fetchone()
+        except SQLAlchemyError:
+            cached = None
+
+        if cached and cached[0]:
+            payload = cached[0]
+            docs = payload.get("total_docs")
+            tables = payload.get("total_tables")
+            rows = payload.get("total_rows")
+            raw_range = payload.get("year_range")
+            if isinstance(raw_range, str) and "-" in raw_range:
+                year_range = _year_range_label(raw_range.split("-"))
+            elif raw_range:
+                year_range = str(raw_range)
+        else:
+            docs = db.query(models.Document).count()
+            tables = db.query(models.ExtractedTable).count()
+            rows = db.query(models.TableRow).count()
+            years = [y for (y,) in db.query(models.Document.year).all()]
+            year_range = _year_range_label(years)
+
+        if docs is None or tables is None or rows is None:
+            return None
+
+        data = {
+            "year_range": year_range,
+            "docs": _format_id(int(docs)),
+            "tables": _format_id(int(tables)),
+            "rows": _format_id(int(rows)),
+        }
+    except (SQLAlchemyError, AttributeError, TypeError, ValueError):
+        logger.debug("Gagal menyusun landing_overview", exc_info=True)
+        return None
+
+    with _CHART_CACHE_LOCK:
+        _LANDING_CACHE = data
+        _LANDING_CACHE_TIME = now
+    return data
 
 @router.get("")
 def get_dashboard_stats(response: Response, db: Session = Depends(get_db)):

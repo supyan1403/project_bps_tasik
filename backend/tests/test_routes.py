@@ -88,3 +88,62 @@ def test_root_paksa_landing_walau_admin(admin_client):
     assert resp.status_code == 200
     assert not resp.history, "?landing=1 harus memaksa landing, bukan redirect"
     assert "Cari &amp; Analisis Data" in resp.text
+
+
+def test_root_menampilkan_section_lengkap(client):
+    """Landing kini memuat section Tentang, Analisis Deret Waktu, dan CTA akhir."""
+    html = client.get("/").text
+    assert 'id="tentang"' in html
+    assert 'id="deret-waktu"' in html
+    assert "Eksplorasi Deret Waktu" in html
+    assert "Pilih Indikator Master" in html
+    assert "Siap melihat tren data" in html
+
+
+def test_root_chips_fokus_deret_waktu(client):
+    """Chips hero hanya memuat kemampuan role pegawai, bukan halaman admin."""
+    html = client.get("/").text
+    assert "Tren Lintas Tahun" in html
+    assert "Grafik Garis &amp; Batang" in html
+    assert "Ekspor PDF &middot; CSV &middot; Excel" in html
+    assert "Publikasi Statistik" not in html
+    assert "Data Tabel" not in html
+
+
+def test_root_tidak_menyebut_menu_admin(client):
+    """Landing tidak boleh menjelaskan fitur yang hanya bisa dibuka admin."""
+    html = client.get("/").text
+    for frasa in (
+        "Manajemen Database",
+        "Ekstraksi PDF",
+        "Import Excel",
+        "Mode Pemeliharaan",
+        "Anomali Header",
+        "Backup Database",
+    ):
+        assert frasa not in html, frasa
+
+
+def test_root_menulis_badan_pusat_statistik_penuh(client):
+    """Singkatan BPS tidak lagi dipakai di halaman landing."""
+    html = client.get("/").text
+    assert "BPS" not in html
+    assert "Badan Pusat Statistik Kabupaten Tasikmalaya" in html
+    assert "bps3206@bps.go.id" in html
+
+
+def test_root_menampilkan_alamat_dan_kontak(client):
+    """Alamat resmi ikut tampil di footer lengkap."""
+    html = client.get("/").text
+    assert "Jalan Raya Timur km 4 Cintaraja Singaparna Tasikmalaya 46417" in html
+    assert "(0265) 549281" in html
+    assert "(0265) 549253" in html
+
+
+def test_root_statistik_di_render_dari_database(client):
+    """Baris ringkasan angka disusun dari database, bukan teks mati."""
+    html = client.get("/").text
+    assert "Rentang Tahun Data" in html
+    assert "Publikasi Resmi" in html
+    assert "Tabel Statistik" in html
+    assert "Baris Data" in html

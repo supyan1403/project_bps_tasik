@@ -337,7 +337,7 @@ def read_root(request: Request, db: Session = Depends(get_db)):
     response = templates.TemplateResponse(
         request=request,
         name="landing.html",
-        context={}
+        context={"stats": landing_overview(db)}
     )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
@@ -427,6 +427,7 @@ from routers.auth import router as auth_router
 from routers.documents import router as documents_router
 from routers.import_excel import router as import_excel_router
 from routers.master_data import router as master_data_router
+from routers.stats import landing_overview
 from routers.stats import router as stats_router
 from routers.tables import router as tables_router
 from routers.timeseries import router as timeseries_router

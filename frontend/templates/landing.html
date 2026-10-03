@@ -81,25 +81,50 @@
             animation: breathe 17s ease-in-out infinite alternate;
         }
 
-        .glow-ring {
-            top: 50%;
-            left: 50%;
-            width: min(680px, 112vw);
-            height: min(680px, 112vw);
-            transform: translate(-50%, -50%);
+        /* ---------- Line-chart background ----------
+           Garis tren acak tapi deterministik, stroke sangat tipis dan
+           opasiti rendah agar tidak mengganggu keterbacaan konten. */
+        .glow-lines {
+            inset: 0;
+            width: auto;
+            height: auto;
+            border-radius: 0;
             background: transparent;
-            border-radius: 50%;
-            filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.45));
-            animation: ringSway 26s ease-in-out infinite alternate,
-                       ringGlow 21s ease-in-out infinite alternate;
+            animation: lineBreathe 18s ease-in-out infinite alternate;
         }
 
-        .glow-ring svg {
+        .glow-lines svg {
             display: block;
             width: 100%;
             height: 100%;
             overflow: visible;
         }
+
+        .ln {
+            fill: none;
+            vector-effect: non-scaling-stroke;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawIn 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        .ln-a { stroke: url(#gA); stroke-width: 1.5;   opacity: 0.22; animation-delay: 0.10s; }
+        .ln-b { stroke: url(#gB); stroke-width: 1.25;  opacity: 0.15; animation-delay: 0.35s; }
+        .ln-c { stroke: url(#gC); stroke-width: 1;     opacity: 0.10; animation-delay: 0.60s; }
+
+        .ln-dots circle {
+            fill: #2563eb;
+            opacity: 0.26;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: dotIn 0.8s ease-out 2.4s backwards;
+        }
+
+        @keyframes drawIn { to { stroke-dashoffset: 0; } }
+        @keyframes dotIn  { from { opacity: 0; transform: scale(0.2); } }
+        @keyframes lineBreathe { from { opacity: 0.8; } to { opacity: 1; } }
 
         @keyframes driftA {
             from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
@@ -113,16 +138,6 @@
 
         @keyframes breathe {
             from { opacity: 0.7; }
-            to   { opacity: 1; }
-        }
-
-        @keyframes ringSway {
-            from { transform: translate(-50%, -50%) rotate(-16deg); }
-            to   { transform: translate(-50%, -50%) rotate(16deg); }
-        }
-
-        @keyframes ringGlow {
-            from { opacity: 0.65; }
             to   { opacity: 1; }
         }
 
@@ -377,24 +392,6 @@
             .hero-chips { gap: 8px; }
             .chip { padding: 7px 12px; font-size: 11.5px; }
             .footer-text { bottom: 14px; font-size: 11px; padding: 0 16px; }
-            /* Busur samping dipaksa keluar dari blok teks (112vw), lalu
-               dibiarkan memudar tepat di batas layar supaya tidak terpotong
-               garis kasar. Ramp dibuat lebar karena mask ikut berputar
-               mengikuti ringSway (±16°). */
-            .glow-ring {
-                width: 112vw;
-                height: 112vw;
-                -webkit-mask-image: linear-gradient(to right,
-                    transparent 0 6%, #000 16%, #000 80%, transparent 92% 100%);
-                mask-image: linear-gradient(to right,
-                    transparent 0 6%, #000 16%, #000 80%, transparent 92% 100%);
-                -webkit-mask-size: 100vw 100%;
-                mask-size: 100vw 100%;
-                -webkit-mask-position: 6vw 0;
-                mask-position: 6vw 0;
-                -webkit-mask-repeat: no-repeat;
-                mask-repeat: no-repeat;
-            }
         }
 
         @media (max-width: 420px) {
@@ -408,7 +405,12 @@
             .glow { animation: none !important; }
             .glow-cyan { transform: none; opacity: 0.9; }
             .glow-blue { transform: none; opacity: 0.9; }
-            .glow-center, .glow-ring { transform: translate(-50%, -50%); opacity: 0.85; }
+            .glow-center { transform: translate(-50%, -50%); opacity: 0.85; }
+            /* Tanpa aturan ini, animation:none meninggalkan stroke-dashoffset:1000
+               dan seluruh garis lenyap pada mode reduced-motion. */
+            .ln { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; animation: none !important; }
+            .ln-dots circle { animation: none !important; opacity: 0.26; }
+            .glow-lines { opacity: 1; }
             .btn, .btn:hover { transition: none; transform: none; }
         }
     </style>
@@ -420,18 +422,48 @@
         <div class="glow glow-cyan"></div>
         <div class="glow glow-blue"></div>
         <div class="glow glow-center"></div>
-        <div class="glow glow-ring" aria-hidden="true">
-            <svg viewBox="0 0 800 800" focusable="false">
+        <div class="glow glow-lines">
+            <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
                 <defs>
-                    <linearGradient id="ringStroke" x1="0.22" y1="0.05" x2="0.78" y2="0.95">
-                        <stop offset="0%" stop-color="#6366f1" stop-opacity="0"></stop>
-                        <stop offset="30%" stop-color="#2563eb" stop-opacity="0.18"></stop>
-                        <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.55"></stop>
-                        <stop offset="85%" stop-color="#22d3ee" stop-opacity="0.9"></stop>
-                        <stop offset="100%" stop-color="#22d3ee" stop-opacity="1"></stop>
+                    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#38bdf8"></stop>
+                        <stop offset="45%" stop-color="#2563eb"></stop>
+                        <stop offset="100%" stop-color="#6366f1"></stop>
+                    </linearGradient>
+                    <linearGradient id="gB" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#22d3ee"></stop>
+                        <stop offset="50%" stop-color="#38bdf8"></stop>
+                        <stop offset="100%" stop-color="#2563eb"></stop>
+                    </linearGradient>
+                    <linearGradient id="gC" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#6366f1"></stop>
+                        <stop offset="55%" stop-color="#2563eb"></stop>
+                        <stop offset="100%" stop-color="#38bdf8"></stop>
                     </linearGradient>
                 </defs>
-                <circle cx="400" cy="400" r="378" fill="none" stroke="url(#ringStroke)" stroke-width="3"></circle>
+
+                <!-- Ombak halus -->
+                <path class="ln ln-c" pathLength="1000"
+                      d="M0,600 L120,575 L240,615 L360,570 L480,625 L600,585 L720,635 L840,595 L960,645 L1080,605 L1200,655 L1320,620 L1440,640"></path>
+
+                <!-- Fluktuasi tajam -->
+                <path class="ln ln-b" pathLength="1000"
+                      d="M0,430 L80,470 L160,360 L240,520 L320,300 L400,470 L480,250 L560,430 L640,200 L720,400 L800,180 L880,390 L960,230 L1040,440 L1120,260 L1200,410 L1280,300 L1360,470 L1440,330"></path>
+
+                <!-- Tren naik -->
+                <path class="ln ln-a" pathLength="1000"
+                      d="M0,760 L96,735 L192,758 L288,700 L384,722 L480,660 L576,684 L672,618 L768,642 L864,572 L960,598 L1056,520 L1152,548 L1248,472 L1344,498 L1440,430"></path>
+
+                <g class="ln-dots">
+                    <circle cx="480" cy="660" r="3.5"></circle>
+                    <circle cx="864" cy="572" r="3.5"></circle>
+                    <circle cx="1248" cy="472" r="3.5"></circle>
+                    <circle cx="480" cy="250" r="3.5"></circle>
+                    <circle cx="800" cy="180" r="3.5"></circle>
+                    <circle cx="1120" cy="260" r="3.5"></circle>
+                    <circle cx="600" cy="585" r="3.5"></circle>
+                    <circle cx="1080" cy="605" r="3.5"></circle>
+                </g>
             </svg>
         </div>
     </div>

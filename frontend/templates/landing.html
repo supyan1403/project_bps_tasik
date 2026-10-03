@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIPEDAS — Sistem Integrasi, Pencarian, dan Analisis Data Statistik | Badan Pusat Statistik Kabupaten Tasikmalaya</title>
     <meta name="description" content="SIPEDAS - Sistem Integrasi, Pencarian, dan Analisis Data Statistik untuk Badan Pusat Statistik Kabupaten Tasikmalaya">
-    <link rel="icon" type="image/png" href="/static/logo_sipedas.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link rel="icon" type="image/svg+xml" href="/static/logo_sipedas.svg">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -101,8 +102,18 @@
             width: 100%;
             height: 100%;
             overflow: visible;
-            filter: blur(1.4px);
         }
+
+        /* Halo lembut — efek "blur" dibuat lewat garis lebar transparan di bawah
+           inti supaya tidak membebani GPU dengan filter yang mengharuskan
+           menghitung ulang permukaan besar tiap frame. */
+        .ln-halo { opacity: 0.18; stroke-linejoin: round; }
+        .ln-halo.ln-a { stroke-width: 14; }
+        .ln-halo.ln-b { stroke-width: 12; }
+        .ln-halo.ln-c { stroke-width: 10; }
+        .ln-halo.ln-d { stroke-width: 11; }
+        .ln-halo.ln-e { stroke-width: 9; }
+        .ln-halo.ln-f { stroke-width: 9; }
 
         .ln {
             fill: none;
@@ -786,6 +797,7 @@
                 stroke-dashoffset: 0;
                 animation: none;
             }
+            .ln-halo { opacity: 0.14; }
             .btn-primary { animation: none; }
             .hero-badge, .chip {
                 -webkit-backdrop-filter: none;
@@ -822,10 +834,14 @@
                 </defs>
 
                 <!-- Aksen gelombang (amber) -->
+                <path class="ln ln-b ln-halo" pathLength="1000" aria-hidden="true"
+                      d="M0,740 C300,748 520,640 780,620 C1040,600 1240,500 1440,400"></path>
                 <path class="ln ln-b" pathLength="1000"
                       d="M0,740 C300,748 520,640 780,620 C1040,600 1240,500 1440,400"></path>
 
                 <!-- Gelombang utama -->
+                <path class="ln ln-a ln-halo" pathLength="1000" aria-hidden="true"
+                      d="M0,850 C240,860 420,780 640,755 C860,730 1060,620 1440,470"></path>
                 <path class="ln ln-a" pathLength="1000"
                       d="M0,850 C240,860 420,780 640,755 C860,730 1060,620 1440,470"></path>
 
@@ -847,7 +863,7 @@
     <!-- Top Bar -->
     <header class="site-header">
         <span class="brand">
-            <img src="/static/logo_sipedas.png" alt="" class="brand-logo">
+            <img src="/static/logo_sipedas.svg" alt="" class="brand-logo">
             <span class="brand-name">SIPEDAS</span>
         </span>
         <div class="instansi">
@@ -1163,7 +1179,7 @@
         <div class="footer-inner">
             <div>
                 <div class="footer-brand">
-                    <img src="/static/logo_sipedas.png" alt="">
+                    <img src="/static/logo_sipedas.svg" alt="">
                     <span class="footer-name">SIPEDAS</span>
                 </div>
                 <p class="footer-about">
@@ -1233,13 +1249,13 @@
             { cycles: 1.3, mul: 0.64, h2: 0.12, dir: -1, loop: 16 }
         ];
 
-        function curves(w, h) {
+        function curves(w, h, maxCount) {
             var travel = 0.34 * w;
             var amp = 0.11 * w;
             var step = travel + amp;
             var count = Math.ceil((h - travel) / step) + 1;
             if (count < 4) count = 4;
-            if (count > 16) count = 16;
+            if (count > (maxCount || 16)) count = maxCount || 16;
             var list = [];
             for (var i = 0; i < count; i++) {
                 var s = SHAPE[i % 6];
@@ -1318,25 +1334,34 @@
             svg.appendChild(group);
 
             list.forEach(function (cfg) {
-                var path = document.createElementNS(NS, 'path');
-                path.setAttribute('class', 'ln ' + cfg.cls);
-                path.setAttribute('pathLength', '1000');
-                svg.appendChild(path);
-                paths.push({ el: path, cfg: cfg });
+                /* Tiap kurva dibuat dua lapis: halo lebar transparan di belakang
+                   untuk memberi kesan lembut, lalu inti di depannya. */
+                var halo = document.createElementNS(NS, 'path');
+                halo.setAttribute('class', 'ln ' + cfg.cls + ' ln-halo');
+                halo.setAttribute('pathLength', '1000');
+                svg.appendChild(halo);
+                paths.push({ el: halo, cfg: cfg, isHalo: true });
+
+                var core = document.createElementNS(NS, 'path');
+                core.setAttribute('class', 'ln ' + cfg.cls);
+                core.setAttribute('pathLength', '1000');
+                svg.appendChild(core);
+                paths.push({ el: core, cfg: cfg, isHalo: false });
+
                 NODE_AT.forEach(function (at) {
                     /* Geser posisi calon titik tiap kurva agar tidak berjajar
                        vertikal pada satu sumbu x yang sama. */
                     var t = at + cfg.slot * 0.13;
                     if (t > 0.92) t -= 0.84;
-                    var halo = document.createElementNS(NS, 'circle');
-                    halo.setAttribute('class', 'halo' + cfg.tone);
-                    halo.setAttribute('r', 18);
-                    var core = document.createElementNS(NS, 'circle');
-                    core.setAttribute('class', 'core' + cfg.tone);
-                    core.setAttribute('r', 7.5);
-                    group.appendChild(halo);
-                    group.appendChild(core);
-                    dots.push({ halo: halo, core: core, cfg: cfg, t: t });
+                    var haloC = document.createElementNS(NS, 'circle');
+                    haloC.setAttribute('class', 'halo' + cfg.tone);
+                    haloC.setAttribute('r', 18);
+                    var coreC = document.createElementNS(NS, 'circle');
+                    coreC.setAttribute('class', 'core' + cfg.tone);
+                    coreC.setAttribute('r', 7.5);
+                    group.appendChild(haloC);
+                    group.appendChild(coreC);
+                    dots.push({ halo: haloC, core: coreC, cfg: cfg, t: t });
                 });
             });
         }
@@ -1455,28 +1480,29 @@
             });
         }
 
-        /* Motif penuh halaman hanya untuk jendela lebar. Di layar sempit
-           halaman terlalu tinggi dibanding lebarnya sehingga kurva yang
-           menyebar penuh akan berdiri tegak dan menabrak teks — di sana
-           motif statis satu layar (bawaan template) dipertahankan. */
+        /* Di layar lebar motif full-page; di layar sempit tetap full-page
+           tapi dengan jumlah kurva dibatasi (~8) dan frame-rate diturunkan
+           agar tidak membebani perangkat bergerak. */
         var narrow = window.matchMedia('(max-width: 760px)');
         var resting = svg.innerHTML;
         var built = false;
         var lastW = 0;
         var lastH = 0;
+        var prevNarrow = false;
 
         function render() {
             var w = field.clientWidth;
             var h = field.clientHeight;
             if (!w || !h) return;
-            if (!built || w !== lastW || h !== lastH) {
+            if (!built || w !== lastW || h !== lastH || prevNarrow !== narrow.matches) {
                 if (built) field.classList.add('is-static');
-                structure(curves(w, h));
+                structure(curves(w, h, narrow.matches ? 8 : 16));
                 svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
                 svg.setAttribute('preserveAspectRatio', 'none');
                 built = true;
                 lastW = w;
                 lastH = h;
+                prevNarrow = narrow.matches;
             }
             layout(w, h);
         }
@@ -1484,14 +1510,10 @@
         function apply() {
             if (narrow.matches) {
                 stopFlow();
-                if (!built) return;
-                field.classList.remove('is-full', 'is-static');
-                svg.innerHTML = resting;
-                svg.setAttribute('viewBox', '0 0 1440 900');
-                svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-                built = false;
-                lastW = 0;
-                lastH = 0;
+                field.classList.remove('is-static');
+                field.classList.add('is-full');
+                render();
+                if (flowReady) startFlow();
                 return;
             }
             field.classList.add('is-full');
@@ -1516,10 +1538,13 @@
         function flowStep(now) {
             rafId = window.requestAnimationFrame(flowStep);
             if (document.hidden) { lastTick = now; slowRun = 0; return; }
+            /* Batasi refresh di HP agar ringan; desktop berjalan secukupnya
+               sesuai kecepatan refresh layar tanpa dipaksa turun. */
+            var GAP = narrow.matches ? 66 : 0;
             var gap = now - lastTick;
-            if (gap < 40) return;
+            if (GAP && gap < GAP) return;
             lastTick = now;
-            /* Pengawas kinerja: bila tersendat terus-menerus, motif dihentikan
+            /* Pengawas kinerja: bila frame lambat terus-menerus, motif dihentikan
                dan dibiarkan statis agar halaman tetap lancar. */
             if (gap > 120) { slowRun += 1; } else { slowRun = 0; }
             if (slowRun > 40) { stopFlow(); flowDead = true; return; }
@@ -1566,7 +1591,7 @@
         }
 
         function startFlow() {
-            if (rafId || flowDead || !motionOK || narrow.matches || !built) return;
+            if (rafId || flowDead || !motionOK || !built) return;
             flowStart = window.performance ? performance.now() : Date.now();
             lastTick = flowStart;
             slowRun = 0;

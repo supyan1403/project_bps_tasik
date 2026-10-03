@@ -124,7 +124,7 @@ def test_root_memuat_skrip_motif_menyambung(client):
     assert "pathLength" in html
     assert "ln-f" in html
     assert "requestAnimationFrame" in html
-    assert "filter: blur(" in html
+    assert "ln-halo" in html
 
 
 def test_root_tidak_menyebut_menu_admin(client):

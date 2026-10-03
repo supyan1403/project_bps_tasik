@@ -53,9 +53,51 @@
             padding: 48px 64px;
             position: relative;
             z-index: 2;
+            overflow: hidden;
+        }
+
+        /* Background ambient neon glow */
+        .form-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.40) 0%, rgba(16, 185, 129, 0.24) 52%, transparent 74%);
+            filter: blur(55px);
+            pointer-events: none;
+            z-index: 0;
+            animation: formGlowPulse 6s ease-in-out infinite alternate;
+        }
+
+        .form-glow-accent {
+            position: absolute;
+            top: -10%;
+            left: -8%;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.36) 0%, rgba(56, 189, 248, 0.20) 55%, transparent 76%);
+            filter: blur(52px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes formGlowPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.97);
+                opacity: 0.82;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 1;
+            }
         }
 
         .form-inner {
+            position: relative;
+            z-index: 1;
             width: 100%;
             max-width: 440px;
             display: flex;
@@ -438,6 +480,20 @@
                 filter: blur(40px);
             }
 
+            .form-glow {
+                width: 340px;
+                height: 340px;
+                filter: blur(48px);
+            }
+
+            .form-glow-accent {
+                top: 4%;
+                left: -14%;
+                width: 220px;
+                height: 220px;
+                filter: blur(45px);
+            }
+
             .neon-logo-wrapper {
                 margin-bottom: 8px;
             }
@@ -716,6 +772,14 @@
                 padding-bottom: 24px !important;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .form-glow {
+                animation: none;
+                transform: translate(-50%, -50%);
+                opacity: 0.85;
+            }
+        }
     </style>
 </head>
 <body>
@@ -723,6 +787,8 @@
     <div class="login-layout">
         <!-- Left Side: Login Form (Full Half) -->
         <div class="form-pane">
+            <div class="form-glow"></div>
+            <div class="form-glow-accent"></div>
             <div class="form-inner">
                 <div class="form-badge">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">

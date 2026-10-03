@@ -1133,7 +1133,7 @@ window.fetch = async function(...args) {
         try {
             const text = await clone.text();
             if ((text.includes('pemeliharaan') || text.includes('maintenance') || text.includes('sedang dalam')) && window.currentUserRole !== 'admin') {
-                window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                window.location.href = '/app?_force_maintenance=1&_t=' + Date.now();
                 return res;
             }
         } catch(e) {}
@@ -1193,7 +1193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const _urlParams = new URLSearchParams(window.location.search);
     const _isPostMaintenance = _urlParams.has('_public');
     if (_isPostMaintenance) {
-        history.replaceState(null, '', '/');
+        history.replaceState(null, '', '/app');
         currentUserRole = 'pegawai';
         window.currentUserRole = 'pegawai';
         try { localStorage.removeItem('sipedas_user_role'); } catch(e) {}
@@ -1269,13 +1269,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (window.location.pathname === '/login') {
         if (currentUserRole === 'admin') {
             // Sudah admin, redirect ke root
-            window.location.href = '/';
+            window.location.href = '/app';
         } else {
             // Belum login, trigger modal login setelah DOM siap
             setTimeout(() => {
                 adminLogin().then(() => {
                     if (window.location.pathname === '/login') {
-                        history.replaceState(null, '', '/');
+                        history.replaceState(null, '', '/app');
                     }
                 });
             }, 300);
@@ -1316,11 +1316,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (evt.mode === '1') {
                     // Maintenance ON → force maintenance view (skip admin bypass)
                     if (window.currentUserRole !== 'admin') {
-                        window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                        window.location.href = '/app?_force_maintenance=1&_t=' + Date.now();
                     }
                 } else {
                     // Maintenance OFF → normal reload with cache bust
-                    window.location.href = '/?_t=' + Date.now();
+                    window.location.href = '/app?_t=' + Date.now();
                 }
             } catch(err) {}
         }
@@ -1336,7 +1336,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.mode === '1' && window.currentUserRole !== 'admin') {
-                        window.location.href = '/?_force_maintenance=1&_t=' + Date.now();
+                        window.location.href = '/app?_force_maintenance=1&_t=' + Date.now();
                     }
                 }
             } catch(e) {}

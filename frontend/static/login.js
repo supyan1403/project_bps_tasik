@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'login', ts: Date.now() })); } catch(e) {}
                 if (btnText) btnText.textContent = 'Login berhasil! Mengalihkan...';
                 setTimeout(() => {
-                    window.location.href = '/?_t=' + Date.now();
+                    window.location.href = '/app?_t=' + Date.now();
                 }, 400);
             } else {
                 const err = await res.json().catch(() => ({}));

@@ -315,8 +315,19 @@ except OSError as _e:
     logger.warning(f"Gagal membuat direktori penyimpanan: {_e}")
 
 @app.get("/")
-def read_root(request: Request, db: Session = Depends(get_db)):
-    """Halaman utama dashboard berdasarkan role pengguna."""
+def read_root(request: Request):
+    """Halaman landing publik (hero + tombol akses) sebelum masuk aplikasi."""
+    response = templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+        context={}
+    )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    return response
+
+@app.get("/app")
+def read_app(request: Request, db: Session = Depends(get_db)):
+    """Dashboard aplikasi SIPEDAS berdasarkan role pengguna (tanpa login untuk pegawai)."""
     role = "pegawai"
     session_id = request.cookies.get("sipedas_session")
     if session_id:
@@ -339,7 +350,7 @@ def login_page(request: Request, db: Session = Depends(get_db)):
     if session_id:
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
         if sess and sess.role == "admin":
-            return RedirectResponse(url="/", status_code=303)
+            return RedirectResponse(url="/app", status_code=303)
     response = templates.TemplateResponse(
         request=request,
         name="login.html",

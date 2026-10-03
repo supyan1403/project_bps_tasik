@@ -2728,7 +2728,7 @@ async function adminLogin() {
         try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'login', ts: Date.now() })); } catch(e) {}
 
         if (window.location.pathname === '/login') {
-            window.location.href = '/?_t=' + Date.now();
+            window.location.href = '/app?_t=' + Date.now();
             return;
         }
 
@@ -2798,7 +2798,7 @@ function adminLogout() {
             // Cross-tab sync: notify other tabs about logout
             try { localStorage.setItem('sipedas_auth_event', JSON.stringify({ type: 'logout', ts: Date.now() })); } catch(e) {}
 
-            window.location.href = '/?_public=1&_t=' + Date.now();
+            window.location.href = '/app?_public=1&_t=' + Date.now();
         }
 
     });

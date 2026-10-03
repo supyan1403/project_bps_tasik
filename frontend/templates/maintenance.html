@@ -142,7 +142,7 @@
         if (e.key === 'sipedas_maintenance_event' && e.newValue) {
             try {
                 localStorage.removeItem('sipedas_maintenance_event');
-                window.location.href = '/?_t=' + Date.now();
+                window.location.href = '/app?_t=' + Date.now();
             } catch(err) {}
         }
     });
@@ -166,7 +166,7 @@
             var diff = endTime - Date.now();
             if (diff <= 0) {
                 cdEl.outerHTML = '<div class="countdown-done">Pemeliharaan selesai. Memuat ulang halaman...</div>';
-                setTimeout(function() { window.location.href = '/?_public=1&_t=' + Date.now(); }, 2000);
+                setTimeout(function() { window.location.href = '/app?_public=1&_t=' + Date.now(); }, 2000);
                 return;
             }
             var sec = Math.floor(diff / 1000);

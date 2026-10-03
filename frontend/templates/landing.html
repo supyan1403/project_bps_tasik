@@ -97,8 +97,6 @@
         .ln-a { stroke: url(#gA); stroke-width: 2.5; animation-delay: 0.10s; }
         .ln-b { stroke: url(#gB); stroke-width: 2;   animation-delay: 0.35s; }
 
-        .ln-area { fill: url(#gArea); }
-
         .ln-dots circle {
             opacity: 1;
             transform-box: fill-box;
@@ -785,25 +783,15 @@
             <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
                 <defs>
                     <linearGradient id="gA" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"></stop>
-                        <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.8"></stop>
-                        <stop offset="62%" stop-color="#2563eb"></stop>
+                        <stop offset="0%" stop-color="#38bdf8"></stop>
+                        <stop offset="55%" stop-color="#2563eb"></stop>
                         <stop offset="100%" stop-color="#1d4ed8"></stop>
                     </linearGradient>
                     <linearGradient id="gB" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0"></stop>
-                        <stop offset="45%" stop-color="#f59e0b" stop-opacity="0.35"></stop>
+                        <stop offset="0%" stop-color="#f59e0b"></stop>
                         <stop offset="100%" stop-color="#fbbf24"></stop>
                     </linearGradient>
-                    <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"></stop>
-                        <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"></stop>
-                    </linearGradient>
                 </defs>
-
-                <!-- Bidang area di bawah gelombang utama -->
-                <path class="ln-area"
-                      d="M0,850 C240,860 420,780 640,755 C860,730 1060,620 1440,470 L1440,900 L0,900 Z"></path>
 
                 <!-- Aksen gelombang (amber) -->
                 <path class="ln ln-b" pathLength="1000"
@@ -1050,13 +1038,6 @@
                         <span class="chart-unit">% penduduk</span>
                     </div>
                     <svg viewBox="0 0 520 214" preserveAspectRatio="xMidYMid meet" focusable="false">
-                        <defs>
-                            <linearGradient id="areaA" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.20"></stop>
-                                <stop offset="100%" stop-color="#2563eb" stop-opacity="0"></stop>
-                            </linearGradient>
-                        </defs>
-
                         <g stroke="#e2e8f0" stroke-width="1">
                             <line x1="44" y1="30" x2="504" y2="30"></line>
                             <line x1="44" y1="70" x2="504" y2="70"></line>
@@ -1065,7 +1046,8 @@
                             <line x1="44" y1="190" x2="504" y2="190"></line>
                         </g>
 
-                        <path d="M64,160 L176,132 L288,148 L400,100 L496,66 L496,190 L64,190 Z" fill="url(#areaA)"></path>
+                        <path d="M64,160 L176,132 L288,148 L400,100 L496,66 L496,190 L64,190 Z"
+                              fill="#2563eb" fill-opacity="0.1"></path>
 
                         <path d="M64,160 L176,132 L288,148 L400,100 L496,66"
                               fill="none" stroke="#2563eb" stroke-width="3"
@@ -1095,13 +1077,6 @@
                         <span class="chart-unit">% angkatan kerja</span>
                     </div>
                     <svg viewBox="0 0 520 214" preserveAspectRatio="xMidYMid meet" focusable="false">
-                        <defs>
-                            <linearGradient id="areaB" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.20"></stop>
-                                <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"></stop>
-                            </linearGradient>
-                        </defs>
-
                         <g stroke="#e2e8f0" stroke-width="1">
                             <line x1="44" y1="30" x2="504" y2="30"></line>
                             <line x1="44" y1="70" x2="504" y2="70"></line>
@@ -1110,7 +1085,8 @@
                             <line x1="44" y1="190" x2="504" y2="190"></line>
                         </g>
 
-                        <path d="M64,120 L176,150 L288,96 L400,134 L496,88 L496,190 L64,190 Z" fill="url(#areaB)"></path>
+                        <path d="M64,120 L176,150 L288,96 L400,134 L496,88 L496,190 L64,190 Z"
+                              fill="#0ea5e9" fill-opacity="0.1"></path>
 
                         <path d="M64,120 L176,150 L288,96 L400,134 L496,88"
                               fill="none" stroke="#0ea5e9" stroke-width="3"

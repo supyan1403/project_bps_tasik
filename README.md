@@ -203,19 +203,16 @@ set DATABASE_URL=sqlite:///./bps_dashboard.db
 export DATABASE_URL="sqlite:///./bps_dashboard.db"
 ```
 
-#### Opsi C: PostgreSQL (Server VPS / Supabase)
+#### Opsi C: PostgreSQL (Server VPS)
 
 Untuk lingkungan produksi, isi variabel `DATABASE_URL` di berkas `.env`:
 
 ```ini
 # PostgreSQL lokal / server VPS
 DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/bps_tasikmalaya
-
-# Supabase (connection pooler)
-DATABASE_URL=postgresql+psycopg2://user:password@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
 ```
 
-> `backend/database.py` secara otomatis mengenali awalan `postgres://` dan menggantinya menjadi `postgresql://`, serta menurunkan *pool* ke mode `NullPool` ketika terhubung ke pooler Supabase atau dijalankan di lingkungan serverless.
+> `backend/database.py` secara otomatis mengenali awalan `postgres://` dan menggantinya menjadi `postgresql://`, serta menurunkan *pool* ke mode `NullPool` ketika dijalankan di lingkungan serverless.
 
 ### Langkah 7: Jalankan Server
 
@@ -335,7 +332,7 @@ Pengunjung
   Uvicorn / FastAPI  (backend/main.py)
     │
     ▼
-  PostgreSQL (server VPS / Supabase)
+  PostgreSQL (server VPS)
 ```
 
 Seluruh aplikasi berjalan pada **port 8000** — `backend/run_server.py`, `backend/main.py`, dan konfigurasi proxy nginx harus selalu memakai port yang sama.

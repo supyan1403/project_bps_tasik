@@ -421,6 +421,29 @@
             .chip svg { display: none; }
         }
 
+        /* ---------- Kinerja perangkat bergerak ----------
+           Di layar kecil latar dibekukan dan seluruh loop animasi dimatikan.
+           Penyebab utama jank di HP:
+           - backdrop-filter pada .hero-badge/.chip harus mengambil ulang lalu
+             meng-blur latar yang tiap frame berubah (glow + SVG sedang jalan)
+           - btnGlow menganimasikan box-shadow → memaksa paint ulang tiap frame
+           - lineBreathe meng-opacity-kan SVG selebar layar → rasterisasi ulang
+           - drawIn menghitung ulang stroke tiap frame saat muat halaman */
+        @media (max-width: 760px) {
+            .glow { will-change: auto; }
+            .glow-cyan, .glow-blue, .glow-center, .glow-lines { animation: none; }
+            .ln, .ln-dots circle {
+                stroke-dasharray: none;
+                stroke-dashoffset: 0;
+                animation: none;
+            }
+            .btn-primary { animation: none; }
+            .hero-badge, .chip {
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .hero, .btn-primary { animation: none; }
             .glow { animation: none !important; }

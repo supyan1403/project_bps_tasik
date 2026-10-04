@@ -239,8 +239,8 @@
             align-items: center;
             gap: 7px;
             padding: 6px 15px;
-            background: rgba(255, 255, 255, 0.78);
-            border: 1px solid rgba(37, 99, 235, 0.30);
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(37, 99, 235, 0.28);
             color: #1d4ed8;
             border-radius: 9999px;
             font-size: 11.5px;
@@ -248,10 +248,7 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             margin-bottom: 26px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 0 22px rgba(37, 99, 235, 0.24),
-                        0 0 44px rgba(56, 189, 248, 0.18);
+            box-shadow: 0 1px 6px rgba(15, 23, 42, 0.07);
         }
 
         .hero-title {
@@ -352,15 +349,13 @@
             align-items: center;
             gap: 7px;
             padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid rgba(203, 213, 225, 0.9);
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(203, 213, 225, 0.95);
             border-radius: 9999px;
             font-size: 12.5px;
             font-weight: 600;
             color: #334155;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 1px 6px rgba(15, 23, 42, 0.07);
             transition: all 0.2s ease;
         }
 
@@ -799,10 +794,6 @@
             }
             .ln-halo { opacity: 0.14; }
             .btn-primary { animation: none; }
-            .hero-badge, .chip {
-                -webkit-backdrop-filter: none;
-                backdrop-filter: none;
-            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1538,9 +1529,10 @@
         function flowStep(now) {
             rafId = window.requestAnimationFrame(flowStep);
             if (document.hidden) { lastTick = now; slowRun = 0; return; }
-            /* Batasi refresh di HP agar ringan; desktop berjalan secukupnya
-               sesuai kecepatan refresh layar tanpa dipaksa turun. */
-            var GAP = narrow.matches ? 66 : 0;
+            /* Batasi refresh di HP (~15fps) agar ringan; desktop cap 30fps
+               cukup untuk gelombang yang bergerak lambat (periode 16–31 detik)
+               tanpa membebani GPU & baterai. */
+            var GAP = narrow.matches ? 66 : 33;
             var gap = now - lastTick;
             if (GAP && gap < GAP) return;
             lastTick = now;

@@ -1241,16 +1241,50 @@
         ];
 
         function curves(w, h, maxCount, isNarrow) {
-            /* Rumus gelombang sama persis untuk desktop dan HP —
-               hanya batas jumlah (maxCount) yang berbeda supaya
-               kepadatan sesuai lebar layar, tapi rasio & gerakan identik. */
+            /* Desain & animasi identik di semua perangkat: travel, amp,
+               frekuensi, dan fase dihitung dari LEBAR agar kemiringan
+               landai & gerakannya sama. Hanya penyebaran vertikal yang
+               disesuaikan supaya mencapai bagian bawah halaman. */
             var travel = 0.34 * w;
             var amp = 0.11 * w;
+            var list = [];
+
+            if (isNarrow) {
+                /* HP: desain gelombang (lebar, frekuensi, fase) sama persis
+                   dengan desktop. Jarak vertikal dihitung dari TINGGI halaman
+                   supaya N kurva terdistribusi merata dari hero sampai footer. */
+                var step = travel + amp;
+                var count = Math.ceil((h - travel) / step) + 1;
+                if (count < 4) count = 4;
+                if (count > 6) count = 6;
+                var vertStep = (h - travel) / (count - 1);
+                for (var i = 0; i < count; i++) {
+                    var s = SHAPE[i % 6];
+                    var ph = (i * 1.37) % TAU;
+                    list.push({
+                        cls: 'ln-' + 'abcdef'.charAt(i % 6),
+                        slot: i,
+                        base: -amp + i * vertStep,
+                        travel: travel,
+                        amp: amp * s.mul,
+                        amp2: amp * s.h2,
+                        cycles: s.cycles,
+                        cycles2: s.cycles * 1.73 + 0.4,
+                        phase0: ph,
+                        phase: ph,
+                        dir: s.dir,
+                        loop: s.loop,
+                        tone: SHADE[i % 6]
+                    });
+                }
+                return list;
+            }
+
+            /* Desktop: sebar otomatis sesuai tinggi halaman sampai cap 16. */
             var step = travel + amp;
             var count = Math.ceil((h - travel) / step) + 1;
             if (count < 4) count = 4;
             if (count > (maxCount || 16)) count = maxCount || 16;
-            var list = [];
             for (var i = 0; i < count; i++) {
                 var s = SHAPE[i % 6];
                 var ph = (i * 1.37) % TAU;

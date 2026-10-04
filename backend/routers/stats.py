@@ -11,6 +11,42 @@ from sqlalchemy import func, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+try:
+    from pipeline import parse_indonesian_number
+except ImportError:
+    def parse_indonesian_number(val_str):
+        """Fallback parser: comma=decimal, dot=thousands separator."""
+        if not val_str:
+            return None
+        s = str(val_str).strip()
+        if not s or s in ('-', '...', '', 'nan', 'none', 'null'):
+            return None
+        # Indonesian format: "1.358.429" (dot=thousands) or "10,84" (comma=decimal)
+        # If contains both dots and commas, assume dot=thousands and comma=decimal
+        if '.' in s and ',' in s:
+            if s.index(',') > s.index('.'):
+                # thousands dots first: "1.358,42" → strip dots, replace comma
+                s = s.replace('.', '').replace(',', '.')
+            else:
+                # decimal comma last: "1,35" → keep as is but convert comma to dot
+                s = s.replace(',', '.')
+        elif ',' in s:
+            # Could be decimal comma or thousands separator — heuristic: max 2 digits after comma
+            parts = s.split(',')
+            if len(parts[1]) <= 2:
+                s = s.replace(',', '.')
+            else:
+                s = s.replace(',', '')
+        elif '.' in s:
+            # Could be thousands separator — check: "1.358" has 3 digits after dot, likely thousands
+            parts = s.split('.')
+            if len(parts[-1]) == 3 and len(parts) > 1:
+                s = s.replace('.', '')
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/stats", tags=["Dashboard Stats"])
@@ -26,9 +62,14 @@ _LANDING_CACHE = None
 _LANDING_CACHE_TIME = 0
 _LANDING_TTL = 60  # landing dirender pada setiap kunjungan, jadi singkat
 
+_KPI_CACHE = None
+_KPI_CACHE_TIME = 0
+_KPI_TTL = 300  # discovery lebih berat → cache 5 menit
+
 def invalidate_chart_cache():
     global _CHART_CACHE, _CHART_CACHE_TIME, _OVERVIEW_CACHE, _OVERVIEW_CACHE_TIME
     global _LANDING_CACHE, _LANDING_CACHE_TIME
+    global _KPI_CACHE, _KPI_CACHE_TIME
     with _CHART_CACHE_LOCK:
         _CHART_CACHE = None
         _CHART_CACHE_TIME = 0
@@ -36,6 +77,8 @@ def invalidate_chart_cache():
         _OVERVIEW_CACHE_TIME = 0
         _LANDING_CACHE = None
         _LANDING_CACHE_TIME = 0
+        _KPI_CACHE = None
+        _KPI_CACHE_TIME = 0
 
 
 def _format_id(n: int) -> str:
@@ -464,3 +507,219 @@ def get_chart_stats(response: Response, db: Session = Depends(get_db)):
         _CHART_CACHE_TIME = time.time()
 
     return res_chart
+
+
+def _extract_unit_from_name(table_name):
+    """Ambil satuan dari tanda kurung di nama tabel, contoh: (jiwa), (%)."""
+    if not table_name:
+        return ""
+    for m in re.findall(r'\(([^)]+)\)', table_name):
+        ml = m.strip().lower()
+        if len(ml) > 2 and not ml.startswith('hal'):
+            # Hindari singkatan yang bukan satuan
+            _SKIP = {'apk', 'apm', 'asn', 'iumk', 'tpak', 'tpt', 'ra',
+                     'mi', 'ma', 'mts', 'sd', 'smp', 'sma', 'smk', 'tk'}
+            if ml not in _SKIP:
+                return m.strip()
+    return ""
+
+
+def _spark_svg(points, color):
+    """Buat string SVG polyline + area untuk sparkline mini (140×40px)."""
+    if not points:
+        return ''
+    n = len(points)
+    ys_vals = [p['value'] for p in points]
+    mn, mx = min(ys_vals), max(ys_vals)
+    if mn == mx:
+        mn, mx = mn - 1, mx + 1
+    pts = []
+    for i, p in enumerate(points):
+        x = (i / (n - 1)) * 140 if n > 1 else 70
+        y = 38 - ((p['value'] - mn) / (mx - mn)) * 36
+        pts.append(f'{x:.1f},{y:.1f}')
+    pts_str = ' '.join(pts)
+    area_pts = pts_str + ' 140,40 0,40'
+    last = pts[-1].split(',')
+    return (
+        f'<svg viewBox="0 0 140 40" preserveAspectRatio="none" '
+        f'class="kpi-spark-svg" aria-hidden="true">'
+        f'<polygon points="{area_pts}" fill="{color}" fill-opacity="0.12"/>'
+        f'<polyline points="{pts_str}" fill="none" stroke="{color}" '
+        f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+        f'<circle cx="{last[0]}" cy="{last[1]}" '
+        f'r="3.5" fill="{color}"/>'
+        f'</svg>'
+    )
+
+
+def discover_kpi(db: Session) -> dict | None:
+    """Auto-discover KPI indikator dari semua tabel di database.
+
+    Mengembalikan top 15 indikator paling lengkap & terbaru, atau None bila
+    tidak ada data yang valid. Cache 5 menit agar query berat tidak tiap request.
+    """
+    global _KPI_CACHE, _KPI_CACHE_TIME
+    now = time.time()
+    with _CHART_CACHE_LOCK:
+        if _KPI_CACHE is not None and (now - _KPI_CACHE_TIME) < _KPI_TTL:
+            return _KPI_CACHE
+
+    try:
+        tables = db.query(models.ExtractedTable).all()
+        rows_by_tbl = defaultdict(list)
+        for r in db.query(models.TableRow.table_id, models.TableRow.data).all():
+            rows_by_tbl[r.table_id].append(r.data or {})
+
+        candidates = []
+        YEARS_MIN, YEARS_MAX = 1980, 2100
+
+        def _parse_year(y):
+            try:
+                yy = int(y)
+                return yy if YEARS_MIN <= yy <= YEARS_MAX else None
+            except (ValueError, TypeError):
+                return None
+
+        def _parse_val(raw):
+            if raw is None:
+                return None
+            s = str(raw).strip()
+            if not s or s in ('-', '...', 'nan', 'none', 'null', ''):
+                return None
+            return parse_indonesian_number(s)
+
+        for t in tables:
+            headers = t.headers or []
+            years_arr = t.years or []
+            if len(headers) < 2:
+                continue
+
+            tname = (t.table_name or '').strip()
+            unit = _extract_unit_from_name(tname)
+
+            # Cari baris "Kabupaten Tasikmalaya"
+            label_col = headers[0]
+            target_row = None
+            for d in rows_by_tbl.get(t.id, []):
+                lab = str(d.get(label_col, '')).strip()
+                if lab == 'Kabupaten Tasikmalaya':
+                    target_row = d
+                    break
+            if target_row is None:
+                continue
+
+            # Tahun valid (skip index 0 yang "-")
+            year_vals = []
+            for y in years_arr[1:] if len(years_arr) > 1 else []:
+                py = _parse_year(y)
+                if py is not None:
+                    year_vals.append(py)
+
+            # Kelompokkan kolom menurut keluarga (strip .N suffix)
+            families = defaultdict(list)
+            for i, h in enumerate(headers):
+                if i == 0:
+                    continue
+                base = re.split(r'\.\d+$', h)[0]
+                families[base].append(i)
+
+            for fam_name, col_idxs in families.items():
+                pts = {}
+                for ci in col_idxs:
+                    yr = year_vals[ci - 1] if ci - 1 < len(year_vals) else None
+                    if yr is None:
+                        continue
+                    raw = target_row.get(headers[ci])
+                    val = _parse_val(raw)
+                    if val is None or not isinstance(val, (int, float)):
+                        continue
+                    pts[yr] = float(val)
+
+                if len(pts) < 3:
+                    continue
+
+                # Judul: gunakan nama keluarga; bersihkan trailing info
+                title = fam_name
+                title = re.sub(r'\s+di\s+(Kabupaten|Provinsi).*', '', title, flags=re.IGNORECASE).strip()
+                title = re.sub(r'\s+\(.*\)\s*$', '', title).strip()
+                if not title or len(title) < 2:
+                    core = tname.split(' - ', 1)[1] if ' - ' in tname else tname
+                    title = re.sub(r'\s+\(\d{4}–\d{4}.*', '', core).strip()
+
+                max_yr = max(pts.keys())
+                candidates.append({
+                    'title': title,
+                    'unit': unit,
+                    'points': pts,
+                    'max_year': max_yr,
+                    'point_count': len(pts),
+                })
+
+        if not candidates:
+            return None
+
+        # Urutkan: max tahun terbesar dulu, lalu jumlah titik terbesar, lalu abjad
+        candidates.sort(key=lambda c: (-c['max_year'], -c['point_count'], c['title']))
+        top = candidates[:15]
+
+        all_years = set()
+        items = []
+        COLORS = [
+            '#2563eb', '#f59e0b', '#38bdf8', '#1d4ed8', '#10b981',
+            '#6366f1', '#f43f5e', '#14b8a6', '#a855f7', '#eab308',
+            '#ec4899', '#0ea5e9', '#84cc16', '#f97316', '#64748b'
+        ]
+        for idx, c in enumerate(top):
+            ys = sorted(c['points'].keys())
+            latest_yr = ys[-1]
+            prev_yr = ys[-2] if len(ys) >= 2 else None
+            latest_val = c['points'][latest_yr]
+            prev_val = c['points'][prev_yr] if prev_yr else None
+            delta = latest_val - prev_val if prev_val is not None else None
+
+            def _fmt(v):
+                if v is None:
+                    return '—'
+                if abs(v) >= 10000:
+                    return f"{round(v):,}".replace(',', '.')
+                return f"{v:.2f}".replace('.', ',')
+
+            latest_txt = _fmt(latest_val)
+            if c['unit']:
+                latest_txt += f" {c['unit']}"
+
+            delta_txt = ''
+            if delta is not None:
+                ds = _fmt(abs(delta))
+                arrow = '▼' if delta < 0 else '▲'
+                delta_txt = f'{arrow} {ds} poin thn ke thn'
+
+            spark = [{'year': y, 'value': c['points'][y]} for y in ys[-5:]]
+            all_years.update(ys)
+            items.append({
+                'judul': c['title'],
+                'unit': c['unit'],
+                'latest': latest_txt,
+                'tahun': str(latest_yr),
+                'delta_teks': delta_txt,
+                'spark': spark,
+                'warna': COLORS[idx % len(COLORS)],
+                'spark_svg': _spark_svg(spark, COLORS[idx % len(COLORS)]),
+            })
+
+        result = {
+            'items': items,
+            'total': len(items),
+            'sumber': 'Badan Pusat Statistik Kabupaten Tasikmalaya',
+            'periode': f'{min(all_years)}–{max(all_years)}',
+        }
+
+        with _CHART_CACHE_LOCK:
+            _KPI_CACHE = result
+            _KPI_CACHE_TIME = now
+        return result
+
+    except (SQLAlchemyError, AttributeError, TypeError, ValueError):
+        logger.debug("Gagal discover_kpi", exc_info=True)
+        return None

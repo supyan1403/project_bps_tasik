@@ -1241,45 +1241,16 @@
         ];
 
         function curves(w, h, maxCount, isNarrow) {
+            /* Rumus gelombang sama persis untuk desktop dan HP —
+               hanya batas jumlah (maxCount) yang berbeda supaya
+               kepadatan sesuai lebar layar, tapi rasio & gerakan identik. */
             var travel = 0.34 * w;
             var amp = 0.11 * w;
-            var list = [];
-            if (isNarrow) {
-                /* Di HP halaman sangat tinggi dibanding lebar. Gunakan jarak
-                   berbasis TINGGI agar gelombang terdistribusi merata dari
-                   hero sampai footer, tidak menumpuk di bagian atas.
-                   Amplitudo lebih besar supaya gelombang tetap terasa
-                   lengkung (tidak hanya bergeser datar). */
-                var count = Math.max(4, Math.min(6, Math.round(h / 1000)));
-                var step = (h - travel) / (count - 1);
-                var amp = 0.30 * w;
-                for (var i = 0; i < count; i++) {
-                    var s = SHAPE[i % 6];
-                    var ph = (i * 1.37) % TAU;
-                    list.push({
-                        cls: 'ln-' + 'abcdef'.charAt(i % 6),
-                        slot: i,
-                        base: -amp + i * step,
-                        travel: travel,
-                        amp: amp * s.mul,
-                        amp2: amp * s.h2,
-                        cycles: s.cycles,
-                        cycles2: s.cycles * 1.73 + 0.4,
-                        phase0: ph,
-                        phase: ph,
-                        dir: s.dir,
-                        loop: s.loop,
-                        tone: SHADE[i % 6]
-                    });
-                }
-                return list;
-            }
-            /* Desktop: jarak berbasis lebar supaya kemiringan landai;
-               jumlah disesuaikan sesuai tinggi halaman sampai cap. */
             var step = travel + amp;
             var count = Math.ceil((h - travel) / step) + 1;
             if (count < 4) count = 4;
             if (count > (maxCount || 16)) count = maxCount || 16;
+            var list = [];
             for (var i = 0; i < count; i++) {
                 var s = SHAPE[i % 6];
                 var ph = (i * 1.37) % TAU;

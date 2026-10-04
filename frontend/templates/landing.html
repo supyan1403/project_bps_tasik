@@ -1247,9 +1247,12 @@
             if (isNarrow) {
                 /* Di HP halaman sangat tinggi dibanding lebar. Gunakan jarak
                    berbasis TINGGI agar gelombang terdistribusi merata dari
-                   hero sampai footer, tidak menumpuk di bagian atas. */
+                   hero sampai footer, tidak menumpuk di bagian atas.
+                   Amplitudo lebih besar supaya gelombang tetap terasa
+                   lengkung (tidak hanya bergeser datar). */
                 var count = Math.max(4, Math.min(6, Math.round(h / 1000)));
                 var step = (h - travel) / (count - 1);
+                var amp = 0.30 * w;
                 for (var i = 0; i < count; i++) {
                     var s = SHAPE[i % 6];
                     var ph = (i * 1.37) % TAU;

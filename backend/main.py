@@ -4,6 +4,7 @@ import sys
 import threading
 import time
 from contextlib import asynccontextmanager
+from urllib.parse import urlsplit
 
 logger = logging.getLogger(__name__)
 
@@ -368,10 +369,21 @@ def login_page(request: Request, db: Session = Depends(get_db)):
         sess = db.query(models.UserSession).filter(models.UserSession.id == session_id).first()
         if sess and sess.role == "admin":
             return RedirectResponse(url="/app", status_code=303)
+
+    # Tautan "Kembali" mengikuti halaman asal: dari "/" kembali ke "/",
+    # dari "/app" kembali ke "/app". Referrer kosong atau lintas origin
+    # (bookmark, tab baru, tautan luar) memakai default "/app".
+    back_href = "/app"
+    referer = request.headers.get("referer") or ""
+    if referer:
+        parts = urlsplit(referer)
+        if parts.netloc == request.url.netloc and parts.path in ("/", "/app"):
+            back_href = parts.path + (f"?{parts.query}" if parts.query else "")
+
     response = templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={}
+        context={"back_href": back_href}
     )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response

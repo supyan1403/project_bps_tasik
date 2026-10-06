@@ -41,6 +41,29 @@ def test_login_page_masih_tersedia(client):
     assert "Login Administrator" in resp.text
 
 
+def test_login_back_link_mengikuti_halaman_asal(client):
+    """Tautan kembali di /login menyesuaikan halaman asal pengunjung."""
+    # Dari landing -> kembali ke landing
+    resp = client.get("/login", headers={"Referer": "http://testserver/"})
+    assert 'href="/" class="back-link"' in resp.text
+
+    # Dari landing dengan query -> query ikut terbawa
+    resp = client.get("/login", headers={"Referer": "http://testserver/?landing=1"})
+    assert 'href="/?landing=1" class="back-link"' in resp.text
+
+    # Dari dashboard -> kembali ke dashboard
+    resp = client.get("/login", headers={"Referer": "http://testserver/app"})
+    assert 'href="/app" class="back-link"' in resp.text
+
+    # Tanpa referrer (bookmark/tab baru) -> default /app
+    resp = client.get("/login")
+    assert 'href="/app" class="back-link"' in resp.text
+
+    # Referrer lintas origin -> abaikan, tetap default /app
+    resp = client.get("/login", headers={"Referer": "https://contoh.example/"})
+    assert 'href="/app" class="back-link"' in resp.text
+
+
 def test_admin_login_di_lock_ke_app(admin_client):
     """Admin yang sudah login dan membuka /login langsung diarahkan ke /app."""
     resp = admin_client.get("/login")

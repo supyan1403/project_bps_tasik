@@ -40,7 +40,7 @@ class TableRow(Base):
     __tablename__ = "table_rows"
 
     id = Column(Integer, primary_key=True, index=True)
-    table_id = Column(Integer, ForeignKey("extracted_tables.id"))
+    table_id = Column(Integer, ForeignKey("extracted_tables.id"), index=True)
     data = Column(JSON) # Stores dict of column_name: value natively in DB
     is_anomaly = Column(Boolean, default=False)
     sort_order = Column(Integer, index=True) # Urutan tampil (menunjang insert di posisi tertentu)

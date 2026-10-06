@@ -50,6 +50,37 @@ try:
 except SQLAlchemyError as e:
     print(f"[migrate] Peringatan: gagal memigrasi kolom database: {e}")
 
+# ===== MIGRASI INDEX (idempoten) =====
+def migrate_db_indexes():
+    """Buat index yang dideklarasikan di model namun belum ada di DB lama.
+
+    create_all hanya membuat tabel yang belum ada; index tambahan pada tabel
+    lama (kolom bertanda index=True, termasuk FK table_rows.table_id yang
+    sebelumnya tanpa index sehingga pembacaan baris selalu sequential scan)."""
+    # Buang koneksi pool lama lebih dulu: koneksi yang menyimpan bayangan skema
+    # pra-DDL bisa menolak CREATE INDEX dengan galat "sudah ada" meski file DB
+    # sebenarnya belum punya index tersebut.
+    engine.dispose()
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    with engine.begin() as conn:
+        for table in models.Base.metadata.sorted_tables:
+            if table.name not in existing_tables:
+                continue
+            existing_idx = {ix["name"] for ix in inspector.get_indexes(table.name)}
+            for index in table.indexes:
+                if not index.name or index.name in existing_idx:
+                    continue
+                cols = ", ".join(c.name for c in index.columns)
+                conn.execute(text(f"CREATE INDEX {index.name} ON {table.name} ({cols})"))
+                print(f"[migrate] Index dibuat: {index.name} ON {table.name}({cols})")
+
+try:
+    migrate_db_indexes()
+    print("[migrate] Index database diverifikasi/ditambahkan.")
+except SQLAlchemyError as e:
+    print(f"[migrate] Peringatan: gagal membuat index database: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle startup dan shutdown aplikasi."""

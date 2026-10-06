@@ -226,7 +226,8 @@ def get_activity_logs(page: int = 1, limit: int = 20, db: Session = Depends(get_
             ],
             "total": total,
             "page": page,
-            "limit": limit
+            "limit": limit,
+            "pages": max(1, -(-total // limit)) if limit > 0 else 1
         }
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))

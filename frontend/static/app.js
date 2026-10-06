@@ -17710,7 +17710,7 @@ async function loadActivityLogs(page) {
 
         const total = data.total || 0;
 
-        const pages = data.pages || 1;
+        const pages = data.pages || Math.max(1, Math.ceil(total / (data.limit || sistemLogsLimit)));
 
 
 

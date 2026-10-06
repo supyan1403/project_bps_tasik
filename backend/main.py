@@ -63,17 +63,24 @@ def migrate_db_indexes():
     engine.dispose()
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
-    with engine.begin() as conn:
-        for table in models.Base.metadata.sorted_tables:
-            if table.name not in existing_tables:
+    # IF NOT EXISTS mencegah balapan dua worker uvicorn saat startup: worker
+    # kedua cukup no-op, bukan galat "sudah ada" atau deadlock lintas transaksi.
+    if_not = "IF NOT EXISTS " if engine.dialect.name in ("postgresql", "sqlite") else ""
+    for table in models.Base.metadata.sorted_tables:
+        if table.name not in existing_tables:
+            continue
+        existing_idx = {ix["name"] for ix in inspector.get_indexes(table.name)}
+        for index in table.indexes:
+            if not index.name or index.name in existing_idx:
                 continue
-            existing_idx = {ix["name"] for ix in inspector.get_indexes(table.name)}
-            for index in table.indexes:
-                if not index.name or index.name in existing_idx:
-                    continue
-                cols = ", ".join(c.name for c in index.columns)
-                conn.execute(text(f"CREATE INDEX {index.name} ON {table.name} ({cols})"))
+            cols = ", ".join(c.name for c in index.columns)
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(f"CREATE INDEX {if_not}{index.name} ON {table.name} ({cols})"))
                 print(f"[migrate] Index dibuat: {index.name} ON {table.name}({cols})")
+            except SQLAlchemyError as e:
+                # Kemungkinan besar worker lain baru saja membuat index yang sama.
+                print(f"[migrate] Lewati {index.name}: {e}")
 
 try:
     migrate_db_indexes()

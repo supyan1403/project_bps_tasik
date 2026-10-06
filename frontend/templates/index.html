@@ -27,6 +27,10 @@
     <script>
         (function() {
             try {
+                // Catat halaman terakhir tab ini (dibaca tombol kembali di /login;
+                // mengetik URL di address bar tidak mengirim header Referer)
+                sessionStorage.setItem('sipedas_prev', location.pathname + location.search);
+
                 // Bekukan transisi sementara saat initial paint agar tidak ada kejapan animasi
                 document.documentElement.classList.add('no-sidebar-transition');
 

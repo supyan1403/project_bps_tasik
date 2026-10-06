@@ -829,5 +829,19 @@
     <div class="footer-text">SIPEDAS — BPS Kabupaten Tasikmalaya</div>
 
     <script src="/static/login.js?v=20261002_1" defer></script>
+    <script>
+        /* Halaman terakhir tab ini menentukan tujuan tombol kembali.
+           Mengetik /login di address bar tidak mengirim Referer, jadi
+           sessionStorage dipakai; bila kosong tetap memakai hasil server. */
+        (function () {
+            try {
+                var link = document.querySelector('.back-link');
+                var prev = sessionStorage.getItem('sipedas_prev');
+                if (!link || !prev) return;
+                var path = prev.split('?')[0];
+                if (path === '/' || path === '/app') link.setAttribute('href', prev);
+            } catch (e) {}
+        })();
+    </script>
 </body>
 </html>

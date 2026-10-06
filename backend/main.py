@@ -377,8 +377,10 @@ def login_page(request: Request, db: Session = Depends(get_db)):
     referer = request.headers.get("referer") or ""
     if referer:
         parts = urlsplit(referer)
-        if parts.netloc == request.url.netloc and parts.path in ("/", "/app"):
-            back_href = parts.path + (f"?{parts.query}" if parts.query else "")
+        # Referer tanpa path ("origin-only") dianggap halaman "/".
+        ref_path = parts.path or "/"
+        if parts.netloc == request.url.netloc and ref_path in ("/", "/app"):
+            back_href = ref_path + (f"?{parts.query}" if parts.query else "")
 
     response = templates.TemplateResponse(
         request=request,

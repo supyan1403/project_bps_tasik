@@ -59,9 +59,25 @@ def test_login_back_link_mengikuti_halaman_asal(client):
     resp = client.get("/login")
     assert 'href="/app" class="back-link"' in resp.text
 
+    # Referrer origin-only (tanpa slash) dianggap halaman "/"
+    resp = client.get("/login", headers={"Referer": "http://testserver"})
+    assert 'href="/" class="back-link"' in resp.text
+
     # Referrer lintas origin -> abaikan, tetap default /app
     resp = client.get("/login", headers={"Referer": "https://contoh.example/"})
     assert 'href="/app" class="back-link"' in resp.text
+
+
+def test_login_back_link_pakai_session_storage(client):
+    """Tombol kembali /login membaca halaman terakhir tab (mengetik URL tanpa Referer)."""
+    # Landing dan /app mencatat halaman terakhir pada tab
+    assert "sipedas_prev" in client.get("/").text
+    assert "sipedas_prev" in client.get("/app").text
+
+    # /login membacanya; tanpa Referer pun tujuan bisa ditentukan oleh tab
+    login = client.get("/login").text
+    assert "sipedas_prev" in login
+    assert "querySelector('.back-link')" in login
 
 
 def test_admin_login_di_lock_ke_app(admin_client):

@@ -960,6 +960,12 @@
         </div>
     </footer>
 
+    <!-- Catat halaman terakhir pada tab ini: tombol kembali di /login
+         membacanya karena mengetik URL tidak mengirim header Referer. -->
+    <script>
+    try { sessionStorage.setItem('sipedas_prev', location.pathname + location.search); } catch (e) {}
+    </script>
+
     <!-- Motif menyambung: field dipanjangkan setinggi dokumen lalu enam
          kurva digambar dengan viewBox 1:1 piksel supaya tidak melar dan
          titik data tetap bundar. Bila skrip gagal jalan, SVG statis di

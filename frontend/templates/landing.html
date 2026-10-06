@@ -464,20 +464,6 @@
             line-height: 1.7;
         }
 
-        .section-note {
-            max-width: 820px;
-            margin-top: clamp(22px, 3vh, 32px);
-            padding: 20px 22px;
-            background: rgba(37, 99, 235, 0.06);
-            border: 1px solid rgba(37, 99, 235, 0.18);
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.7;
-            color: #334155;
-        }
-
-        .section-note strong { color: #1d4ed8; }
-
         .grid { display: grid; gap: 16px; }
         .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -709,7 +695,6 @@
             .grid-3, .grid-2 { grid-template-columns: 1fr; }
             .section { padding-top: clamp(36px, 6vh, 56px); }
             .card { padding: 20px; }
-            .section-note { padding: 18px 18px; }
             .footer-inner { grid-template-columns: 1fr; gap: 24px; }
             .site-footer { padding: 26px 20px 20px; }
         }
@@ -953,12 +938,6 @@
                 <p>Setiap angka langsung bisa diubah menjadi grafik garis atau batang, lalu diekspor ke PNG, CSV, maupun Excel.</p>
             </article>
         </div>
-
-        <p class="section-note">
-            Setiap tabel mempertahankan nomor tabel, judul bab, satuan, dan nama kolom
-            aslinya dari publikasi, sehingga angka yang tampil tetap terbaca persis
-            seperti pada sumbernya.
-        </p>
     </section>
 
     <!-- Analisis Deret Waktu -->
@@ -1192,7 +1171,7 @@
         var NODE_AT = [0.08, 0.14, 0.30, 0.46, 0.62, 0.78, 0.90];
         var NODE_MAX = 2;
         /* Elemen yang tidak boleh ditindih titik data. */
-        var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.section-note,.chip,.btn,.card,'
+        var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.chip,.btn,.card,'
             + '.steps,.eyebrow,.footer-h,.footer-bottom,.footer-about,'
             + '.contact,.footer-list,.hero-badge,.brand,.instansi,.cta-card,.site-header';
 

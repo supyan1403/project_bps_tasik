@@ -1176,9 +1176,9 @@
                 </article>
             </div>
 
-            {% if kpi and kpi.items %}
+            {% if kpi and kpi.indicators %}
             <div class="kpi-live" data-total="{{ kpi.total }}" data-sumber="{{ kpi.sumber }}" data-periode="{{ kpi.periode }}">
-                {% for item in kpi.items %}
+                {% for item in kpi.indicators %}
                 <div class="kpi-panel" data-index="{{ loop.index0 }}">
                     <div class="kpi-head">
                         <span class="kpi-title">{{ item.judul }}</span>

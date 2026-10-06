@@ -709,7 +709,7 @@ def discover_kpi(db: Session) -> dict | None:
             })
 
         result = {
-            'items': items,
+            'indicators': items,
             'total': len(items),
             'sumber': 'Badan Pusat Statistik Kabupaten Tasikmalaya',
             'periode': f'{min(all_years)}–{max(all_years)}',

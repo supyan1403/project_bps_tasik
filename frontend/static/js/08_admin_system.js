@@ -346,7 +346,33 @@ let sistemLogsPage = 1;
 
 const sistemLogsLimit = 20;
 
-
+/* Detail log dibaca manusiawi (tanpa kurung/kutip JSON mentah).
+   Nilai aslinya tetap tersedia lewat atribut title untuk debug. */
+function formatLogDetail(l) {
+    const d = l.detail;
+    if (!d) return '-';
+    if (typeof d === 'string') return d;
+    const stamp = v => new Date(v).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    const out = [];
+    if (l.action === 'backup' && typeof d.size === 'number') out.push('Ukuran ' + (d.size / 1048576).toFixed(1) + ' MB');
+    if (d.restored_from) out.push('dari ' + d.restored_from);
+    if (d.rows != null) out.push(d.rows + ' baris');
+    if (d.total_tables != null) out.push(d.total_tables + ' tabel');
+    if (d.total_rows != null) out.push(d.total_rows + ' baris');
+    if (d.loaded != null) out.push(d.loaded + ' baris dimuat');
+    if (d.table_id != null) out.push('tabel #' + d.table_id);
+    if (d.doc_id != null) out.push('dokumen #' + d.doc_id);
+    if (d.year != null) out.push('tahun ' + d.year);
+    if (d.errors) out.push(d.errors + ' galat');
+    if (d.reason) out.push(d.reason);
+    if ('end_time' in d) out.push(d.end_time ? 'sampai ' + stamp(d.end_time) : 'tanpa jadwal');
+    if (out.length) return out.join(' • ');
+    const generic = Object.keys(d)
+        .filter(k => k !== 'mode')
+        .map(k => k.replace(/_/g, ' ') + ': ' + (typeof d[k] === 'object' ? JSON.stringify(d[k]) : d[k]))
+        .join('; ');
+    return generic || '-';
+}
 
 async function loadActivityLogs(page) {
 
@@ -381,35 +407,22 @@ async function loadActivityLogs(page) {
 
 
         const actionLabels = {
-
             backup: '<i class="bi bi-shield-check-fill text-success"></i> Backup',
-
             restore: '<i class="bi bi-clock-history text-warning"></i> Restore',
-
             delete_table: '<i class="bi bi-trash-fill text-danger"></i> Hapus Tabel',
-
+            create_table: '<i class="bi bi-plus-square-fill text-success"></i> Buat Tabel',
+            save_table: '<i class="bi bi-pencil-square text-primary"></i> Simpan Tabel',
+            edit_row: '<i class="bi bi-pencil text-primary"></i> Ubah Baris',
+            delete_row: '<i class="bi bi-x-octagon-fill text-danger"></i> Hapus Baris',
+            upload: '<i class="bi bi-upload text-primary"></i> Unggah Publikasi',
+            import_excel: '<i class="bi bi-file-earmark-excel-fill text-success"></i> Import Excel',
+            reload_all: '<i class="bi bi-arrow-clockwise text-info"></i> Muat Ulang Semua',
+            reload_chapter: '<i class="bi bi-arrow-clockwise text-info"></i> Muat Ulang Bab',
+            safe_anomaly: '<i class="bi bi-check-circle-fill text-success"></i> Tandai Aman',
+            safe_all_anomaly: '<i class="bi bi-check-circle-fill text-success"></i> Tandai Semua Aman',
             fix_names: '<i class="bi bi-pencil-fill text-primary"></i> Fix Nama',
-
             change_admin_password: '<i class="bi bi-key-fill text-info"></i> Ganti Password',
-
             toggle_maintenance: '<i class="bi bi-tools text-warning"></i> Maintenance'
-
-        };
-
-        const actionColors = {
-
-            backup: '#16a34a',
-
-            restore: '#d97706',
-
-            delete_table: '#dc2626',
-
-            fix_names: '#2563eb',
-
-            change_admin_password: '#0284c7',
-
-            toggle_maintenance: '#d97706'
-
         };
 
 
@@ -426,7 +439,9 @@ async function loadActivityLogs(page) {
 
                 const ts = new Date(l.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
-                const detail = l.detail ? JSON.stringify(l.detail) : '-';
+                const detail = formatLogDetail(l);
+
+                const rawDetail = l.detail ? JSON.stringify(l.detail) : '-';
 
                 return `<tr>
 
@@ -436,7 +451,7 @@ async function loadActivityLogs(page) {
 
                     <td class="small">${escHtml(l.target || '-')}</td>
 
-                    <td class="small text-muted" style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escHtml(detail)}">${escHtml(detail)}</td>
+                    <td class="small text-muted" style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escHtml(rawDetail)}">${escHtml(detail)}</td>
 
                 </tr>`;
 

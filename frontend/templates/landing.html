@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIPEDAS — Sistem Integrasi, Pencarian, dan Analisis Data Statistik | Badan Pusat Statistik Kabupaten Tasikmalaya</title>
+    <title>SIPEDAS - Sistem Integrasi, Pencarian, dan Analisis Data Statistik | Badan Pusat Statistik Kabupaten Tasikmalaya</title>
     <meta name="description" content="SIPEDAS - Sistem Integrasi, Pencarian, dan Analisis Data Statistik untuk Badan Pusat Statistik Kabupaten Tasikmalaya">
         <link rel="icon" type="image/svg+xml" href="/static/logo_sipedas.svg">
         <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -334,46 +334,6 @@
 
         .btn-primary:active { transform: translateY(0); }
 
-        /* ---------- Chips isi aplikasi ---------- */
-        .hero-chips {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 24px;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.94);
-            border: 1px solid rgba(203, 213, 225, 0.95);
-            border-radius: 9999px;
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #334155;
-            box-shadow: 0 1px 6px rgba(15, 23, 42, 0.07);
-            transition: all 0.2s ease;
-        }
-
-        .chip svg { color: #2563eb; flex-shrink: 0; }
-
-        .chip:hover {
-            border-color: rgba(37, 99, 235, 0.45);
-            color: #1d4ed8;
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.22);
-        }
-
-        .hero-note {
-            margin-top: 20px;
-            font-size: 12.5px;
-            color: #64748b;
-            font-weight: 500;
-        }
-
         /* =========================================================
            SECTION DI BAWAH HERO — kartu polos tanpa backdrop-filter,
            tanpa filter blur, dan tanpa animasi loop agar tidak
@@ -465,7 +425,6 @@
         }
 
         .grid { display: grid; gap: 16px; }
-        .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
@@ -621,8 +580,6 @@
             letter-spacing: -0.4px;
         }
 
-        .footer-about { font-size: 13px; line-height: 1.7; color: #475569; }
-
         .footer-h {
             font-size: 11.5px;
             font-weight: 800;
@@ -679,11 +636,9 @@
             .hero-title { letter-spacing: -1px; }
             .hero-desc { margin-bottom: 30px; }
             .btn { width: 100%; min-width: 0; max-width: 340px; }
-            .hero-chips { gap: 8px; }
-            .chip { padding: 7px 12px; font-size: 11.5px; }
             .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
             .stat { padding: 20px 16px; }
-            .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
             .section { padding-top: clamp(36px, 6vh, 56px); }
             .card { padding: 20px; }
             .footer-inner { grid-template-columns: 1fr; gap: 24px; }
@@ -703,27 +658,19 @@
             .hero-sub { font-size: clamp(14px, 2vw, 17px); margin-bottom: 6px; }
             .hero-desc { font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
             .btn { height: 46px; font-size: 15px; }
-            .hero-chips { margin-top: 12px; }
-            .hero-note { margin-top: 10px; font-size: 11.5px; }
         }
 
         @media (max-width: 420px) {
             .instansi { padding-left: 10px; }
             .instansi-1 { font-size: 10px; letter-spacing: 0.3px; }
             .instansi-2 { font-size: 9px; letter-spacing: 0.2px; }
-            /* Tiga chip butuh ~434px sedangkan ruang di 390px hanya 350px.
-               Ikon dibuang (menambah ~60px) dan padding dirapatkan supaya
-               muat satu baris; di bawah ~360px tetap terbungkus dua baris. */
-            .hero-chips { gap: 6px; }
-            .chip { gap: 0; padding: 6px 9px; font-size: 11px; white-space: nowrap; }
-            .chip svg { display: none; }
         }
 
         /* ---------- Kinerja perangkat bergerak ----------
            Di layar kecil seluruh animasi latar dimatikan agar tidak
            memaksa paint ulang tiap frame saat halaman dimuat.
            Penyebab utama jank di HP:
-           - backdrop-filter pada .hero-badge/.chip harus mengambil ulang
+           - backdrop-filter pada .hero-badge harus mengambil ulang
              lalu meng-blur latar yang sedang berubah (SVG motif berjalan)
            - btnGlow menganimasikan box-shadow → memaksa paint ulang tiap frame
            - drawIn menghitung ulang stroke tiap frame saat muat halaman */
@@ -829,41 +776,13 @@
             </svg>
             Cari &amp; Analisis Data
         </a>
-
-        <div class="hero-chips">
-            <span class="chip">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="3 17 9 11 13 15 21 7"></polyline>
-                    <polyline points="15 7 21 7 21 13"></polyline>
-                </svg>
-                Tren Lintas Tahun
-            </span>
-            <span class="chip">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                Grafik Garis &amp; Batang
-            </span>
-            <span class="chip">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Ekspor CSV &middot; Excel
-            </span>
-        </div>
-
-        <p class="hero-note">Data terbuka untuk seluruh pegawai Badan Pusat Statistik Kabupaten Tasikmalaya.</p>
     </main>
 
     {% if stats %}
     <!-- Ringkasan data (di-render dari database) -->
     <div class="stats" aria-label="Ringkasan data SIPEDAS">
         <div class="stat">
-            <div class="stat-value">{{ stats.year_range or "—" }}</div>
+            <div class="stat-value">{{ stats.year_range or "-" }}</div>
             <div class="stat-label">Rentang Tahun Data</div>
         </div>
         <div class="stat">
@@ -888,12 +807,12 @@
             <h2 class="section-title">Dari dokumen statis menjadi basis data yang bisa ditelusuri</h2>
             <p class="section-lead">
                 SIPEDAS mengubah publikasi statistik resmi yang selama ini berupa dokumen
-                berukuran besar menjadi satu basis data relasional — sehingga setiap
+                berukuran besar menjadi satu basis data relasional - sehingga setiap
                 angka bisa langsung dicari, dibandingkan antartahun, dan dianalisis.
             </p>
         </div>
 
-        <div class="grid grid-3">
+        <div class="grid grid-2">
             <article class="card">
                 <span class="card-icon">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -915,18 +834,6 @@
                 </span>
                 <h3>Pencarian Indikator Instan</h3>
                 <p>Temukan indikator tertentu dalam hitungan detik, tanpa membuka ratusan halaman dokumen satu per satu.</p>
-            </article>
-
-            <article class="card">
-                <span class="card-icon">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                </span>
-                <h3>Siap Digambar &amp; Diekspor</h3>
-                <p>Setiap angka langsung bisa diubah menjadi grafik garis atau batang, lalu diekspor ke PNG, CSV, maupun Excel.</p>
             </article>
         </div>
     </section>
@@ -1021,11 +928,6 @@
                     <img src="/static/logo_sipedas.svg" alt="">
                     <span class="footer-name">SIPEDAS</span>
                 </div>
-                <p class="footer-about">
-                    Sistem Integrasi, Pencarian, dan Analisis Data Statistik &mdash;
-                    mengubah publikasi resmi menjadi basis data yang bisa ditelusuri
-                    dan dianalisis lintas tahun.
-                </p>
             </div>
 
             <div>
@@ -1051,7 +953,7 @@
         </div>
 
         <div class="footer-bottom">
-            &copy; 2026 SIPEDAS &mdash; Badan Pusat Statistik Kabupaten Tasikmalaya
+            &copy; 2026 SIPEDAS - Badan Pusat Statistik Kabupaten Tasikmalaya
         </div>
     </footer>
 
@@ -1159,8 +1061,8 @@
         var NODE_AT = [0.08, 0.14, 0.30, 0.46, 0.62, 0.78, 0.90];
         var NODE_MAX = 2;
         /* Elemen yang tidak boleh ditindih titik data. */
-        var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.chip,.btn,.card,'
-            + '.steps,.eyebrow,.footer-h,.footer-bottom,.footer-about,'
+        var BLOCKS = 'h1,h2,h3,p,li,address,.stat,.btn,.card,'
+            + '.steps,.eyebrow,.footer-h,.footer-bottom,'
             + '.contact,.footer-list,.hero-badge,.brand,.instansi,.cta-card,.site-header';
 
         var NS = 'http://www.w3.org/2000/svg';

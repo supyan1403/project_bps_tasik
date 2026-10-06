@@ -100,12 +100,14 @@ def test_root_menampilkan_section_lengkap(client):
     assert "Siap melihat tren data" in html
 
 
-def test_root_chips_fokus_deret_waktu(client):
-    """Chips hero hanya memuat kemampuan role pegawai, bukan halaman admin."""
+def test_root_fokus_kemampuan_deret_waktu(client):
+    """Landing hanya menonjolkan kemampuan role pegawai, bukan halaman admin."""
     html = client.get("/").text
+    assert "hero-chips" not in html
     assert "Tren Lintas Tahun" in html
     assert "Grafik Garis &amp; Batang" in html
-    assert "Ekspor CSV &middot; Excel" in html
+    assert "Ekspor Laporan" in html
+    assert "PNG, CSV, maupun Excel" in html
     assert "Publikasi Statistik" not in html
     assert "Data Tabel" not in html
 

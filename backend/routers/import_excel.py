@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/import", tags=["Excel Import"])
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
+# Di Vercel filesystem read-only kecuali /tmp — pakai /tmp agar tidak OSError
+if os.environ.get("VERCEL"):
+    _BPS_DATA_ROOT = "/tmp/BPS_Data"
+else:
+    _BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
 UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
 try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)

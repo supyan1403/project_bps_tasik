@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sipedas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?isi POSTGRES_PASSWORD di .env}
+      POSTGRES_DB: sipedas_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sipedas -d sipedas_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      SIPEDAS_DOMAIN: sipedas.kyronix.my.id
+      SIPEDAS_ADMIN_PASSWORD: ${SIPEDAS_ADMIN_PASSWORD:-}
+      DATABASE_URL: postgresql+psycopg2://sipedas:${POSTGRES_PASSWORD:?isi POSTGRES_PASSWORD di .env}@db:5432/sipedas_db
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backups:/app/backups
+      - ./bps_data:/root/BPS_Data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  proxy:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/${NGINX_CONF:-sipedas.conf}:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/static:/srv/frontend/static:ro
+      - certdata:/etc/letsencrypt
+      - certbot_data:/var/www/certbot
+    depends_on:
+      - web
+
+  certbot:
+    image: certbot/certbot
+    profiles: ["certbot"]
+    volumes:
+      - certdata:/etc/letsencrypt
+      - certbot_data:/var/www/certbot
+
+volumes:
+  pgdata:
+  certdata:
+  certbot_data:

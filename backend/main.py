@@ -338,13 +338,20 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 # CSV hasil ekstraksi dan PDF upload disimpan di luar folder project
 # agar tidak mengotori direktori kode sumber.
 # Lokasi: ~/BPS_Data/ (Linux/Mac) atau C:\Users\[user]\BPS_Data\ (Windows)
+# Di Vercel filesystem read-only kecuali /tmp — pakai /tmp agar tidak OSError.
 # =====================================================================
-_BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
+if os.environ.get("VERCEL"):
+    _BPS_DATA_ROOT = "/tmp/BPS_Data"
+else:
+    _BPS_DATA_ROOT = os.path.join(os.path.expanduser("~"), "BPS_Data")
 UPLOAD_DIR = os.path.join(_BPS_DATA_ROOT, "uploads")
 EXTRACT_DIR = os.path.join(_BPS_DATA_ROOT, "hasil_ekstraksi_web")
 
 # Backup database .sql disimpan di folder backups/ dalam project (di luar hasil_ekstraksi_web)
-BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
+if os.environ.get("VERCEL"):
+    BACKUP_DIR = "/tmp/backups"
+else:
+    BACKUP_DIR = os.path.abspath(os.path.join(_BASE_DIR, "..", "backups"))
 
 try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)

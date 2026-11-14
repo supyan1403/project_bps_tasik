@@ -38,6 +38,7 @@ Bahan/
 # Folder data lokal
 backend/uploads/
 uploads/
+/bps_data/
 hasil_ekstraksi_web/
 
 # Kredensial auth (jangan di-commit!)

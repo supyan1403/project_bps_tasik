@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 # Configuration paths
-_CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+# Di Vercel filesystem read-only kecuali /tmp — auth file harus di /tmp
+if os.environ.get("VERCEL"):
+    _CONFIG_DIR = "/tmp/sipedas_data"
+else:
+    _CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 try:
     os.makedirs(_CONFIG_DIR, exist_ok=True)
 except OSError as e:
